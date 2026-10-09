@@ -1,0 +1,191 @@
+{
+  "version": "0.1.0",
+  "currency": "CLP",
+  "status": "REFERENCE VALUES TO VERIFY. Rates are realistic order-of-magnitude figures for a Chilean exporting SME in 2026, not quotes. Lenders are fictional. See docs/financial-catalog.md for the sources to check each number against.",
+  "market": {
+    "uf_clp": 41131,
+    "clp_rate_annual": 0.045,
+    "cny_rate_annual": 0.015,
+    "stamp_tax_monthly": 0.00066,
+    "stamp_tax_cap": 0.008,
+    "uf_date": "2026-10-09",
+    "clp_rate_reference": "BCCh monetary policy rate (TPM) 4.50%, held at the September 2026 meeting"
+  },
+  "lenders": [
+    {
+      "id": "bank-andino",
+      "name": "Banco Andino (fictional)",
+      "credit_line_clp": 260000000
+    },
+    {
+      "id": "bank-pacifico",
+      "name": "Banco del Pacífico Sur (fictional)",
+      "credit_line_clp": 220000000
+    },
+    {
+      "id": "fintech-cordillera",
+      "name": "Cordillera Factoring (fictional fintech)",
+      "credit_line_clp": 150000000
+    }
+  ],
+  "products": [
+    {
+      "id": "FACT-BANK",
+      "name": "Export factoring, non-recourse",
+      "kind": "factoring",
+      "lender_id": "bank-andino",
+      "rate_monthly": 0.0135,
+      "advance_rate": 0.85,
+      "fee_pct": 0.0025,
+      "fee_fixed_clp": 60000,
+      "min_days_charged": 15,
+      "lead_days": 2,
+      "min_amount_clp": 10000000,
+      "currencies": [
+        "USD",
+        "CNY"
+      ],
+      "stamp_tax": false,
+      "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor.",
+      "rate_reference": "CMF interest-rate statistics; bank factoring rates for exporters"
+    },
+    {
+      "id": "FACT-FINTECH",
+      "name": "Fintech factoring (fast onboarding)",
+      "kind": "factoring",
+      "lender_id": "fintech-cordillera",
+      "rate_monthly": 0.0185,
+      "advance_rate": 0.9,
+      "fee_pct": 0.005,
+      "fee_fixed_clp": 0,
+      "min_days_charged": 15,
+      "lead_days": 1,
+      "min_amount_clp": 3000000,
+      "currencies": [
+        "USD",
+        "CNY",
+        "CLP"
+      ],
+      "stamp_tax": false,
+      "requirements": "Online onboarding; funds in 24 h.",
+      "rate_reference": "Public rate cards of Chilean factoring fintechs"
+    },
+    {
+      "id": "LC-DISC",
+      "name": "Letter of credit discounting",
+      "kind": "lc_discount",
+      "lender_id": "bank-andino",
+      "rate_monthly": 0.0085,
+      "advance_rate": 0.95,
+      "fee_pct": 0.002,
+      "fee_fixed_clp": 120000,
+      "min_days_charged": 15,
+      "lead_days": 2,
+      "min_amount_clp": 10000000,
+      "currencies": [
+        "USD"
+      ],
+      "stamp_tax": false,
+      "requirements": "Only receivables backed by a confirmed documentary letter of credit.",
+      "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted)"
+    },
+    {
+      "id": "CONF-BANK",
+      "name": "Confirming (supplier payment extension)",
+      "kind": "confirming",
+      "lender_id": "bank-pacifico",
+      "rate_monthly": 0.011,
+      "fee_pct": 0.0015,
+      "fee_fixed_clp": 0,
+      "term_days": 60,
+      "lead_days": 0,
+      "min_amount_clp": 5000000,
+      "currencies": [
+        "CLP"
+      ],
+      "stamp_tax": true,
+      "requirements": "Supplier enrolled in the bank's confirming program.",
+      "rate_reference": "Bank confirming programs (CMF statistics)"
+    },
+    {
+      "id": "WC-BANK",
+      "name": "Working capital loan (default bank credit)",
+      "kind": "loan",
+      "lender_id": "bank-andino",
+      "rate_annual": 0.132,
+      "fee_pct": 0.005,
+      "fee_fixed_clp": 150000,
+      "term_days": 180,
+      "lead_days": 5,
+      "min_amount_clp": 20000000,
+      "max_amount_clp": 400000000,
+      "collateral_pct": 0.5,
+      "currencies": [
+        "CLP"
+      ],
+      "stamp_tax": true,
+      "default": true,
+      "requirements": "Two years of financial statements; collateral or personal guarantee.",
+      "rate_reference": "CMF / BCCh commercial loan rates for SMEs; TMC cap"
+    },
+    {
+      "id": "FOGAPE",
+      "name": "FOGAPE-guaranteed working capital loan",
+      "kind": "loan",
+      "lender_id": "bank-pacifico",
+      "rate_annual": 0.102,
+      "guarantee_fee_annual": 0.013,
+      "fee_pct": 0.003,
+      "fee_fixed_clp": 100000,
+      "term_days": 365,
+      "lead_days": 12,
+      "min_amount_clp": 20000000,
+      "max_amount_clp": 250000000,
+      "collateral_pct": 0.2,
+      "max_annual_sales_uf": 100000,
+      "currencies": [
+        "CLP"
+      ],
+      "stamp_tax": true,
+      "requirements": "Net annual sales up to 100,000 UF (medium firms 25,001-100,000 UF get 50% guarantee coverage); financing up to 15,000 UF; no protests or overdue debts.",
+      "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator) and bidding results",
+      "guarantee_coverage": 0.5,
+      "max_amount_uf": 15000
+    },
+    {
+      "id": "OVERDRAFT",
+      "name": "Credit line / overdraft",
+      "kind": "loan",
+      "lender_id": "bank-andino",
+      "rate_monthly": 0.021,
+      "fee_pct": 0.0,
+      "fee_fixed_clp": 0,
+      "term_days": 30,
+      "lead_days": 0,
+      "min_amount_clp": 0,
+      "max_amount_clp": 60000000,
+      "collateral_pct": 0.0,
+      "currencies": [
+        "CLP"
+      ],
+      "stamp_tax": true,
+      "requirements": "Pre-approved line on the current account.",
+      "rate_reference": "CMF statistics, credit lines on current accounts",
+      "stamp_tax_flat": 0.00332,
+      "stamp_tax_note": "Credits on sight / without maturity pay a flat 0.332% (DL 3.475 art. 1 no. 3)"
+    },
+    {
+      "id": "FWD-CNY",
+      "name": "CNY forward (sell CNY, cash-settled)",
+      "kind": "forward",
+      "lender_id": "bank-pacifico",
+      "spread_pct": 0.0035,
+      "max_tenor_days": 180,
+      "currencies": [
+        "CNY"
+      ],
+      "requirements": "FX framework agreement (contrato marco) with the bank; notional up to the hedged receivable.",
+      "rate_reference": "Covered interest parity CLP vs CNY + bank spread"
+    }
+  ]
+}

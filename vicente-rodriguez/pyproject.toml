@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanfeng-quant"
+version = "0.1.0"
+description = "NanFeng quant engine: synthetic SME data, cash Monte Carlo, financing MILP, NanFeng-Bench"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0",
+  "scipy>=1.11",
+  "pandas>=2.1",
+  "ortools>=9.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools]
+packages = ["nanfeng_quant"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

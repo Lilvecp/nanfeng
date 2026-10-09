@@ -1,0 +1,239 @@
+{
+ "optimal": {
+  "status": "optimal",
+  "total_cost_clp": 1255853,
+  "actions": [
+   {
+    "lever": "FACT-BANK:INV-2026-121:d19",
+    "product_id": "FACT-BANK",
+    "product": "Export factoring, non-recourse",
+    "kind": "factoring",
+    "lender": "Banco Andino (fictional)",
+    "date": "2026-12-30",
+    "day": 19,
+    "cost_clp": 422539,
+    "receivable_id": "INV-2026-121",
+    "fraction": 0.2344,
+    "proceeds_clp": 23981162,
+    "days_charged": 23,
+    "summary": "Factor 23% of INV-2026-121 with Export factoring, non-recourse"
+   },
+   {
+    "lever": "FACT-BANK:INV-2026-112:d19",
+    "product_id": "FACT-BANK",
+    "product": "Export factoring, non-recourse",
+    "kind": "factoring",
+    "lender": "Banco Andino (fictional)",
+    "date": "2026-12-30",
+    "day": 19,
+    "cost_clp": 833314,
+    "receivable_id": "INV-2026-112",
+    "fraction": 0.566,
+    "proceeds_clp": 49422352,
+    "days_charged": 24,
+    "summary": "Factor 57% of INV-2026-112 with Export factoring, non-recourse"
+   }
+  ],
+  "confidence_target": 0.9,
+  "buffer_clp": 25000000,
+  "in_sample_coverage": 0.945,
+  "out_of_sample_coverage": 0.9154,
+  "n_scenarios": 200,
+  "solve_seconds": 3.838,
+  "solver": "CBC",
+  "best_bound_clp": 1255853,
+  "method": "exact chance-constrained MILP",
+  "exact_status": "optimal",
+  "heuristic_cost_clp": 1483792,
+  "lower_bound_clp": 1255853,
+  "optimality_gap": 0.0,
+  "in_sample_alpha": 0.06,
+  "attempts": 1
+ },
+ "default": {
+  "status": "optimal",
+  "total_cost_clp": 5253798,
+  "actions": [
+   {
+    "lever": "WC-BANK:d19",
+    "product_id": "WC-BANK",
+    "product": "Working capital loan (default bank credit)",
+    "kind": "loan",
+    "lender": "Banco Andino (fictional)",
+    "date": "2026-12-30",
+    "day": 19,
+    "cost_clp": 5034992,
+    "amount_clp": 65963588,
+    "term_days": 180,
+    "maturity": null,
+    "summary": "Draw CLP 65,963,588 from Working capital loan (default bank credit)"
+   },
+   {
+    "lever": "WC-BANK:d40",
+    "product_id": "WC-BANK",
+    "product": "Working capital loan (default bank credit)",
+    "kind": "loan",
+    "lender": "Banco Andino (fictional)",
+    "date": "2027-01-20",
+    "day": 40,
+    "cost_clp": 218806,
+    "amount_clp": 2954604,
+    "term_days": 180,
+    "maturity": null,
+    "summary": "Draw CLP 2,954,604 from Working capital loan (default bank credit)"
+   }
+  ],
+  "confidence_target": 0.9,
+  "buffer_clp": 25000000,
+  "in_sample_coverage": 0.945,
+  "out_of_sample_coverage": 0.9282,
+  "n_scenarios": 200,
+  "solve_seconds": 0.117,
+  "solver": "CBC",
+  "best_bound_clp": 5253798,
+  "method": "exact chance-constrained MILP",
+  "exact_status": "optimal",
+  "heuristic_cost_clp": 5253798,
+  "lower_bound_clp": 5253798,
+  "optimality_gap": 0.0,
+  "in_sample_alpha": 0.06,
+  "attempts": 1
+ },
+ "default_product": "WC-BANK",
+ "savings_clp": 3997945,
+ "savings_pct": 0.761,
+ "forecast": {
+  "company_id": "huerto-austral",
+  "as_of": "2026-12-11",
+  "horizon_days": 90,
+  "n_paths": 10000,
+  "seed": 7,
+  "prob_negative_cash_horizon": 0.8248,
+  "prob_below_buffer_horizon": 0.9903,
+  "crunch_day": 19,
+  "crunch_date": "2026-12-30",
+  "prob_negative_by_crunch_day": 0.8129,
+  "first_negative_day_median": 19.0,
+  "min_cash_p10": -36331455.01319024,
+  "min_cash_p50": -14896154.397726938,
+  "ending_cash": {
+   "p10": 449634476.9145854,
+   "p50": 654660274.63168,
+   "p90": 985121423.5943258
+  },
+  "headline": "81% probability of negative cash in 19 days (2026-12-30)"
+ },
+ "explanation": [
+  {
+   "product_id": "FACT-BANK",
+   "name": "Export factoring, non-recourse",
+   "selected": true,
+   "quote_for_need": {
+    "amount_clp": 55790282.752884075,
+    "cost_clp": 1375994.316700383,
+    "eac": 0.25611834708455583,
+    "term_days": 39
+   },
+   "reason": "Factor 23% of INV-2026-121 with Export factoring, non-recourse; Factor 57% of INV-2026-112 with Export factoring, non-recourse",
+   "without_it": "cost rises by CLP 335,890",
+   "extra_cost_without_clp": 335890
+  },
+  {
+   "product_id": "FACT-FINTECH",
+   "name": "Fintech factoring (fast onboarding)",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": 55790282.75288408,
+    "cost_clp": 1800786.3488569807,
+    "eac": 0.34623792779285845,
+    "term_days": 39
+   },
+   "alone_cost_clp": 1591743,
+   "reason": "on its own it costs CLP 1,591,743, CLP 335,890 more than the chosen mix"
+  },
+  {
+   "product_id": "LC-DISC",
+   "name": "Letter of credit discounting",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": null,
+    "cost_clp": null,
+    "eac": null,
+    "term_days": null
+   },
+   "reason": "every eligible invoice is collected before the need date"
+  },
+  {
+   "product_id": "CONF-BANK",
+   "name": "Confirming (supplier payment extension)",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": 70000000,
+    "cost_clp": 1737400.0000000002,
+    "eac": 0.16084130684531006,
+    "term_days": 60
+   },
+   "alone_cost_clp": 1700017,
+   "reason": "on its own it costs CLP 1,700,017, CLP 444,164 more than the chosen mix"
+  },
+  {
+   "product_id": "WC-BANK",
+   "name": "Working capital loan (default bank credit)",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": 55790282.752884075,
+    "cost_clp": 4281599.065543994,
+    "eac": 0.1617625364734494,
+    "term_days": 180
+   },
+   "alone_cost_clp": 5253798,
+   "reason": "on its own it costs CLP 5,253,798, CLP 3,997,945 more than the chosen mix (minimum term 180 days: interest runs long after the gap closes)"
+  },
+  {
+   "product_id": "FOGAPE",
+   "name": "FOGAPE-guaranteed working capital loan",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": 55790282.752884075,
+    "cost_clp": 7129575.626863394,
+    "eac": 0.12779242683610215,
+    "term_days": 365
+   },
+   "alone_cost_clp": 8801604,
+   "reason": "on its own it costs CLP 8,801,604, CLP 7,545,751 more than the chosen mix (minimum term 365 days: interest runs long after the gap closes)"
+  },
+  {
+   "product_id": "OVERDRAFT",
+   "name": "Credit line / overdraft",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": 55790282.752884075,
+    "cost_clp": 1356819.6765501408,
+    "eac": 0.33957521935413815,
+    "term_days": 30
+   },
+   "reason": "on its own it cannot keep cash above the buffer in the target share of scenarios (credit limit, lead time or repayment date); its 30-day repayment lands on a later cash low"
+  },
+  {
+   "product_id": "FWD-CNY",
+   "name": "CNY forward (sell CNY, cash-settled)",
+   "selected": false,
+   "quote_for_need": {
+    "amount_clp": null,
+    "cost_clp": null,
+    "eac": null,
+    "term_days": null
+   },
+   "reason": "a hedge brings no cash; at this confidence level the CNY downside it removes is small next to the late-payment gap, so its spread is not worth paying"
+  }
+ ],
+ "latency_ms": 6935,
+ "source": {
+  "tool": "optimize_plan",
+  "engine": "nanfeng_quant 0.1.0",
+  "deterministic": true,
+  "method": "scenario chance-constrained MILP (OR-Tools)",
+  "seed": 7,
+  "n_paths": 10000
+ }
+}

@@ -1,0 +1,146 @@
+{
+ "amount_clp": 55790283,
+ "need_date": "2026-12-30",
+ "need_days": 30,
+ "quotes": [
+  {
+   "product_id": "OVERDRAFT",
+   "name": "Credit line / overdraft",
+   "kind": "loan",
+   "lender": "Banco Andino (fictional)",
+   "requirements": "Pre-approved line on the current account.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "CMF statistics, credit lines on current accounts",
+   "amount_clp": 55790282.752884075,
+   "cost_clp": 1356819.6765501408,
+   "term_days": 30,
+   "eac": 0.33957521935413815,
+   "covers_need": true,
+   "note": ""
+  },
+  {
+   "product_id": "FACT-BANK",
+   "name": "Export factoring, non-recourse",
+   "kind": "factoring",
+   "lender": "Banco Andino (fictional)",
+   "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "CMF interest-rate statistics; bank factoring rates for exporters",
+   "amount_clp": 55790282.752884075,
+   "cost_clp": 1375994.316700383,
+   "term_days": 39,
+   "eac": 0.25611834708455583,
+   "covers_need": true,
+   "invoices": [
+    {
+     "receivable_id": "INV-2026-118",
+     "fraction": 0.3706,
+     "days": 39
+    }
+   ]
+  },
+  {
+   "product_id": "CONF-BANK",
+   "name": "Confirming (supplier payment extension)",
+   "kind": "confirming",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "requirements": "Supplier enrolled in the bank's confirming program.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "Bank confirming programs (CMF statistics)",
+   "amount_clp": 70000000,
+   "cost_clp": 1737400.0000000002,
+   "term_days": 60,
+   "eac": 0.16084130684531006,
+   "covers_need": true,
+   "payables": [
+    "P-10",
+    "P-12"
+   ]
+  },
+  {
+   "product_id": "FACT-FINTECH",
+   "name": "Fintech factoring (fast onboarding)",
+   "kind": "factoring",
+   "lender": "Cordillera Factoring (fictional fintech)",
+   "requirements": "Online onboarding; funds in 24 h.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "Public rate cards of Chilean factoring fintechs",
+   "amount_clp": 55790282.75288408,
+   "cost_clp": 1800786.3488569807,
+   "term_days": 39,
+   "eac": 0.34623792779285845,
+   "covers_need": true,
+   "invoices": [
+    {
+     "receivable_id": "INV-2026-118",
+     "fraction": 0.35,
+     "days": 39
+    }
+   ]
+  },
+  {
+   "product_id": "WC-BANK",
+   "name": "Working capital loan (default bank credit)",
+   "kind": "loan",
+   "lender": "Banco Andino (fictional)",
+   "requirements": "Two years of financial statements; collateral or personal guarantee.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "CMF / BCCh commercial loan rates for SMEs; TMC cap",
+   "amount_clp": 55790282.752884075,
+   "cost_clp": 4281599.065543994,
+   "term_days": 180,
+   "eac": 0.1617625364734494,
+   "covers_need": true,
+   "note": "cost of the full contract term"
+  },
+  {
+   "product_id": "FOGAPE",
+   "name": "FOGAPE-guaranteed working capital loan",
+   "kind": "loan",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "requirements": "Net annual sales up to 100,000 UF (medium firms 25,001-100,000 UF get 50% guarantee coverage); financing up to 15,000 UF; no protests or overdue debts.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator) and bidding results",
+   "amount_clp": 55790282.752884075,
+   "cost_clp": 7129575.626863394,
+   "term_days": 365,
+   "eac": 0.12779242683610215,
+   "covers_need": true,
+   "note": "cost of the full contract term"
+  },
+  {
+   "product_id": "FWD-CNY",
+   "name": "CNY forward (sell CNY, cash-settled)",
+   "kind": "forward",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "requirements": "FX framework agreement (contrato marco) with the bank; notional up to the hedged receivable.",
+   "eligible": true,
+   "reason": "hedge: no cash, reduces CNY downside",
+   "rate_reference": "Covered interest parity CLP vs CNY + bank spread",
+   "cost_clp": null
+  },
+  {
+   "product_id": "LC-DISC",
+   "name": "Letter of credit discounting",
+   "kind": "lc_discount",
+   "lender": "Banco Andino (fictional)",
+   "requirements": "Only receivables backed by a confirmed documentary letter of credit.",
+   "eligible": false,
+   "reason": "every eligible invoice is collected before the need date",
+   "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted)"
+  }
+ ],
+ "catalog_status": "REFERENCE VALUES TO VERIFY. Rates are realistic order-of-magnitude figures for a Chilean exporting SME in 2026, not quotes. Lenders are fictional. See docs/financial-catalog.md for the sources to check each number against.",
+ "source": {
+  "tool": "financing_quote",
+  "engine": "nanfeng_quant 0.1.0",
+  "deterministic": true,
+  "catalog_version": "0.1.0"
+ }
+}
