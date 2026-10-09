@@ -1,0 +1,10 @@
+# Secrets (never commit API keys)
+.env
+.env.*
+!.env.example
+
+# Original battle plan page (Spanish, kept local; English projection lives in plan/)
+NanFeng Battle Plan.html
+
+# Local Claude Code settings
+.claude/settings.local.json
