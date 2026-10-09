@@ -18,6 +18,8 @@ class Product:
     raw: dict[str, Any]
 
     def __getattr__(self, key: str) -> Any:
+        if key == "raw" or key.startswith("__"):  # keeps copy/deepcopy/pickle from recursing
+            raise AttributeError(key)
         try:
             return self.raw[key]
         except KeyError:

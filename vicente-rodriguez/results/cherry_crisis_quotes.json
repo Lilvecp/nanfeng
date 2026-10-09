@@ -1,5 +1,5 @@
 {
- "amount_clp": 55790283,
+ "amount_clp": 54845328,
  "need_date": "2026-12-30",
  "need_days": 30,
  "quotes": [
@@ -12,8 +12,8 @@
    "eligible": true,
    "reason": "eligible",
    "rate_reference": "CMF statistics, credit lines on current accounts",
-   "amount_clp": 55790282.752884075,
-   "cost_clp": 1356819.6765501408,
+   "amount_clp": 54845328.175027706,
+   "cost_clp": 1333838.3812166739,
    "term_days": 30,
    "eac": 0.33957521935413815,
    "covers_need": true,
@@ -28,18 +28,34 @@
    "eligible": true,
    "reason": "eligible",
    "rate_reference": "CMF interest-rate statistics; bank factoring rates for exporters",
-   "amount_clp": 55790282.752884075,
-   "cost_clp": 1375994.316700383,
+   "amount_clp": 54845328.175027706,
+   "cost_clp": 1353704.5057756535,
    "term_days": 39,
-   "eac": 0.25611834708455583,
+   "eac": 0.25633095247664484,
    "covers_need": true,
    "invoices": [
     {
      "receivable_id": "INV-2026-118",
-     "fraction": 0.3706,
+     "fraction": 0.3644,
      "days": 39
     }
    ]
+  },
+  {
+   "product_id": "PAE-USD",
+   "name": "Pre-export loan in USD (PAE)",
+   "kind": "loan",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "requirements": "Export contract or shipping documents; repaid in USD with the export proceeds.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "Term SOFR + bank spread for exporters (bank trade-finance price lists)",
+   "amount_clp": 54845328.175027706,
+   "cost_clp": 1510667.1568763875,
+   "term_days": 120,
+   "eac": 0.0861583414922793,
+   "covers_need": true,
+   "note": "cost of the full contract term"
   },
   {
    "product_id": "CONF-BANK",
@@ -69,15 +85,15 @@
    "eligible": true,
    "reason": "eligible",
    "rate_reference": "Public rate cards of Chilean factoring fintechs",
-   "amount_clp": 55790282.75288408,
-   "cost_clp": 1800786.3488569807,
+   "amount_clp": 54845328.175027706,
+   "cost_clp": 1770285.3149828387,
    "term_days": 39,
    "eac": 0.34623792779285845,
    "covers_need": true,
    "invoices": [
     {
      "receivable_id": "INV-2026-118",
-     "fraction": 0.35,
+     "fraction": 0.3441,
      "days": 39
     }
    ]
@@ -91,10 +107,10 @@
    "eligible": true,
    "reason": "eligible",
    "rate_reference": "CMF / BCCh commercial loan rates for SMEs; TMC cap",
-   "amount_clp": 55790282.752884075,
-   "cost_clp": 4281599.065543994,
+   "amount_clp": 54845328.175027706,
+   "cost_clp": 4211619.612882929,
    "term_days": 180,
-   "eac": 0.1617625364734494,
+   "eac": 0.1618638899486744,
    "covers_need": true,
    "note": "cost of the full contract term"
   },
@@ -107,10 +123,10 @@
    "eligible": true,
    "reason": "eligible",
    "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator) and bidding results",
-   "amount_clp": 55790282.752884075,
-   "cost_clp": 7129575.626863394,
+   "amount_clp": 54845328.175027706,
+   "cost_clp": 7010511.350053491,
    "term_days": 365,
-   "eac": 0.12779242683610215,
+   "eac": 0.12782330935610187,
    "covers_need": true,
    "note": "cost of the full contract term"
   },

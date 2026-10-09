@@ -57,7 +57,7 @@ def test_before_notice_is_healthier(cherry):
 
 def test_deterministic_matches_independent_ledger(cherry):
     det = make_deterministic(cherry)
-    res = simulate(det, 50, seed=1, overrides={"freeze_fx": True})
+    res = simulate(det, 50, seed=1, overrides={"freeze_fx": True}, param_uncertainty=0.0)
     assert np.max(np.abs(res.cash - ledger_cash(det)[None, :])) < 1.0
 
 
@@ -81,7 +81,7 @@ def test_effective_annual_cost():
 
 def test_loan_lever_flows(cherry, cherry_res, catalog):
     p = catalog.product("OVERDRAFT")
-    lv = Lever("t", p, "loan", 10, 1e6, catalog.loan_unit_cost(p), "CLP")
+    lv = Lever("t", p, "loan", 10, 1e6, catalog.loan_unit_cost(p), "CLP", meta={"clp_per_unit": 1.0, "currency": "CLP"})
     f = lever_flows(lv, cherry, catalog, cherry_res, np.arange(5))
     assert f[0, 10] == pytest.approx(1 - catalog.loan_upfront(p))
     assert f[0].sum() == pytest.approx(-catalog.loan_unit_cost(p))
@@ -124,3 +124,29 @@ def test_tool_call_returns_json():
     assert out["summary"]["company_id"] == "huerto-austral"
     assert len(out["fan_chart"]["p50"]) == 91
     assert out["source"]["tool"] == "forecast_run"
+
+
+# ---- iteration 2: parameter uncertainty, USD loans, action cap ---------------
+
+def test_zero_param_uncertainty_is_deterministic_given_parameters(cherry):
+    a = simulate(cherry, 300, seed=5, param_uncertainty=0.0).cash
+    b = simulate(cherry, 300, seed=5, param_uncertainty=0.35).cash
+    assert not np.array_equal(a, b)
+    assert np.array_equal(a, simulate(cherry, 300, seed=5, param_uncertainty=0.0).cash)
+
+
+def test_usd_loan_lever_converts_at_simulated_fx(cherry, cherry_res, catalog):
+    p = catalog.product("PAE-USD")
+    lv = Lever("t", p, "loan", 5, 1e5, catalog.loan_unit_cost(p), "USD", meta={"clp_per_unit": 1.0, "currency": "USD"})
+    f = lever_flows(lv, cherry, catalog, cherry_res, np.arange(3))
+    fx = cherry_res.fx.clp_per_usd[:3]
+    assert f[:, 5] == pytest.approx((1 - catalog.loan_upfront(p)) * fx[:, 5])
+    m = 5 + p.term_days
+    if m <= cherry.horizon_days:
+        assert f[:, m] == pytest.approx(-(1 + catalog.loan_interest(p)) * fx[:, m])
+
+
+def test_action_cap_is_respected(cherry_res, catalog):
+    from nanfeng_quant.optimizer import optimize
+    plan = optimize(cherry_res, catalog, max_actions=1, exact_time_limit_s=10.0, max_retries=0)
+    assert plan.total_cost_clp is None or len(plan.actions) <= 1

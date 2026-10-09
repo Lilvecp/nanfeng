@@ -68,6 +68,78 @@
   ]
  },
  "cash": {
+  "forecast_param_uncertainty": 0.35,
+  "well_specified": {
+   "n_companies": 20,
+   "truth_paths_per_company": 25,
+   "table": [
+    {
+     "day": 30,
+     "crps_mclp": 21.82,
+     "mae_point_mclp": 33.97,
+     "crps_skill_vs_point": 0.3576,
+     "relative_crps": 0.0691,
+     "coverage_p10_p90": 0.856
+    },
+    {
+     "day": 60,
+     "crps_mclp": 35.5,
+     "mae_point_mclp": 56.16,
+     "crps_skill_vs_point": 0.3678,
+     "relative_crps": 0.0651,
+     "coverage_p10_p90": 0.856
+    },
+    {
+     "day": 90,
+     "crps_mclp": 59.22,
+     "mae_point_mclp": 88.88,
+     "crps_skill_vs_point": 0.3337,
+     "relative_crps": 0.0649,
+     "coverage_p10_p90": 0.826
+    }
+   ],
+   "breach_event_rate": 0.258,
+   "brier_breach": 0.07,
+   "brier_climatology": 0.1914,
+   "brier_skill": 0.6342
+  },
+  "misspecified": {
+   "n_companies": 20,
+   "truth_paths_per_company": 25,
+   "table": [
+    {
+     "day": 30,
+     "crps_mclp": 28.25,
+     "mae_point_mclp": 46.46,
+     "crps_skill_vs_point": 0.392,
+     "relative_crps": 0.0927,
+     "coverage_p10_p90": 0.726
+    },
+    {
+     "day": 60,
+     "crps_mclp": 44.76,
+     "mae_point_mclp": 75.32,
+     "crps_skill_vs_point": 0.4057,
+     "relative_crps": 0.0857,
+     "coverage_p10_p90": 0.752
+    },
+    {
+     "day": 90,
+     "crps_mclp": 69.76,
+     "mae_point_mclp": 111.22,
+     "crps_skill_vs_point": 0.3728,
+     "relative_crps": 0.0789,
+     "coverage_p10_p90": 0.738
+    }
+   ],
+   "breach_event_rate": 0.272,
+   "brier_breach": 0.0913,
+   "brier_climatology": 0.198,
+   "brier_skill": 0.5387
+  }
+ },
+ "cash_no_param_uncertainty": {
+  "forecast_param_uncertainty": 0.0,
   "well_specified": {
    "n_companies": 20,
    "truth_paths_per_company": 25,

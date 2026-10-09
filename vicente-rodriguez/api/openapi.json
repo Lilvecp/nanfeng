@@ -1,0 +1,1354 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "NanFeng Quant API",
+  "description": "Cash forecast (Monte Carlo), financing plan (MILP), quotes and Credit Passport. Every number is deterministic for a given seed; the LLM never computes.",
+  "version": "0.1.0"
+ },
+ "paths": {
+  "/quant/health": {
+   "get": {
+    "summary": "Health",
+    "operationId": "health_quant_health_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "type": "object",
+         "title": "Response Health Quant Health Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/scenarios": {
+   "get": {
+    "summary": "List Scenarios",
+    "operationId": "list_scenarios_quant_scenarios_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array",
+         "title": "Response List Scenarios Quant Scenarios Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/scenarios/{scenario_id}": {
+   "get": {
+    "summary": "Get Scenario",
+    "operationId": "get_scenario_quant_scenarios__scenario_id__get",
+    "parameters": [
+     {
+      "name": "scenario_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Scenario Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response Get Scenario Quant Scenarios  Scenario Id  Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/forecast": {
+   "post": {
+    "summary": "Forecast",
+    "operationId": "forecast_quant_forecast_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ForecastRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ForecastResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/quote": {
+   "post": {
+    "summary": "Quote",
+    "operationId": "quote_quant_quote_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuoteRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/QuoteResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/plan": {
+   "post": {
+    "summary": "Plan",
+    "operationId": "plan_quant_plan_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PlanRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/passport": {
+   "post": {
+    "summary": "Passport",
+    "operationId": "passport_quant_passport_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PassportRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PassportResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/demo/{artifact}": {
+   "get": {
+    "summary": "Demo",
+    "description": "Precomputed Cherry Crisis results for Demo Mode: no computation, no network dependency.",
+    "operationId": "demo_quant_demo__artifact__get",
+    "parameters": [
+     {
+      "name": "artifact",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "enum": [
+        "before",
+        "forecast",
+        "quotes",
+        "plan",
+        "passport",
+        "scenario_lab"
+       ],
+       "type": "string",
+       "title": "Artifact"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "title": "Response Demo Quant Demo  Artifact  Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/schema/scenario": {
+   "get": {
+    "summary": "Scenario Schema",
+    "description": "JSON Schema of a scenario object (company, customers, receivables, shipments, payables).",
+    "operationId": "scenario_schema_quant_schema_scenario_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "additionalProperties": true,
+         "type": "object",
+         "title": "Response Scenario Schema Quant Schema Scenario Get"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "Driver": {
+    "properties": {
+     "driver": {
+      "type": "string",
+      "enum": [
+       "customer",
+       "announced_delay",
+       "fx",
+       "price"
+      ],
+      "title": "Driver"
+     },
+     "id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Id"
+     },
+     "counterfactual": {
+      "type": "string",
+      "title": "Counterfactual"
+     },
+     "prob_negative_by_day": {
+      "type": "number",
+      "title": "Prob Negative By Day"
+     },
+     "delta_vs_base": {
+      "type": "number",
+      "title": "Delta Vs Base"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "driver",
+     "id",
+     "counterfactual",
+     "prob_negative_by_day",
+     "delta_vs_base"
+    ],
+    "title": "Driver"
+   },
+   "Drivers": {
+    "properties": {
+     "probe_date": {
+      "type": "string",
+      "title": "Probe Date"
+     },
+     "drivers": {
+      "items": {
+       "$ref": "#/components/schemas/Driver"
+      },
+      "type": "array",
+      "title": "Drivers"
+     },
+     "explanation": {
+      "type": "string",
+      "title": "Explanation"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "probe_date",
+     "drivers",
+     "explanation"
+    ],
+    "title": "Drivers"
+   },
+   "Explanation": {
+    "properties": {
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "selected": {
+      "type": "boolean",
+      "title": "Selected"
+     },
+     "reason": {
+      "type": "string",
+      "title": "Reason"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "product_id",
+     "name",
+     "selected",
+     "reason"
+    ],
+    "title": "Explanation"
+   },
+   "FanChart": {
+    "properties": {
+     "dates": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Dates"
+     },
+     "p10": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "P10"
+     },
+     "p50": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "P50"
+     },
+     "p90": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "P90"
+     },
+     "p_negative": {
+      "items": {
+       "type": "number"
+      },
+      "type": "array",
+      "title": "P Negative"
+     },
+     "buffer": {
+      "type": "number",
+      "title": "Buffer"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "dates",
+     "p10",
+     "p50",
+     "p90",
+     "p_negative",
+     "buffer"
+    ],
+    "title": "FanChart"
+   },
+   "ForecastRequest": {
+    "properties": {
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       }
+      ],
+      "title": "Scenario",
+      "description": "Scenario id in data/scenarios, or a full scenario object (see ScenarioSchema)",
+      "default": "cherry_crisis"
+     },
+     "overrides": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Overrides"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "n_paths": {
+      "type": "integer",
+      "maximum": 100000.0,
+      "minimum": 100.0,
+      "title": "N Paths",
+      "default": 10000
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed",
+      "default": 7
+     },
+     "explain": {
+      "type": "boolean",
+      "title": "Explain",
+      "default": true
+     }
+    },
+    "type": "object",
+    "title": "ForecastRequest"
+   },
+   "ForecastResponse": {
+    "properties": {
+     "summary": {
+      "$ref": "#/components/schemas/Summary"
+     },
+     "fan_chart": {
+      "$ref": "#/components/schemas/FanChart"
+     },
+     "drivers": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Drivers"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "latency_ms": {
+      "type": "integer",
+      "title": "Latency Ms"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "summary",
+     "fan_chart",
+     "latency_ms",
+     "source"
+    ],
+    "title": "ForecastResponse"
+   },
+   "HTTPValidationError": {
+    "properties": {
+     "detail": {
+      "items": {
+       "$ref": "#/components/schemas/ValidationError"
+      },
+      "type": "array",
+      "title": "Detail"
+     }
+    },
+    "type": "object",
+    "title": "HTTPValidationError"
+   },
+   "Overrides": {
+    "properties": {
+     "customer_delay_extra_days": {
+      "additionalProperties": {
+       "type": "number"
+      },
+      "type": "object",
+      "title": "Customer Delay Extra Days",
+      "description": "Extra delay per customer id, days"
+     },
+     "global_delay_extra_days": {
+      "type": "number",
+      "title": "Global Delay Extra Days",
+      "description": "Extra delay for every customer, days",
+      "default": 0.0
+     },
+     "cny_shift_pct": {
+      "type": "number",
+      "title": "Cny Shift Pct",
+      "description": "Level shift of CLP per CNY from today, %",
+      "default": 0.0
+     },
+     "usd_shift_pct": {
+      "type": "number",
+      "title": "Usd Shift Pct",
+      "description": "Level shift of CLP per USD from today, %",
+      "default": 0.0
+     },
+     "cherry_price_pct": {
+      "type": "number",
+      "title": "Cherry Price Pct",
+      "description": "Change in cherry price for uninvoiced shipments, %",
+      "default": 0.0
+     },
+     "extra_hires": {
+      "type": "integer",
+      "minimum": 0.0,
+      "title": "Extra Hires",
+      "description": "Extra workers added to every payroll",
+      "default": 0
+     },
+     "hire_monthly_wage_clp": {
+      "type": "number",
+      "title": "Hire Monthly Wage Clp",
+      "default": 650000.0
+     },
+     "on_time_customers": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "On Time Customers"
+     },
+     "defaulted_customers": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Defaulted Customers"
+     },
+     "ignore_announced_delays": {
+      "type": "boolean",
+      "title": "Ignore Announced Delays",
+      "default": false
+     },
+     "freeze_fx": {
+      "type": "boolean",
+      "title": "Freeze Fx",
+      "default": false
+     },
+     "freeze_price": {
+      "type": "boolean",
+      "title": "Freeze Price",
+      "default": false
+     }
+    },
+    "additionalProperties": false,
+    "type": "object",
+    "title": "Overrides",
+    "description": "Scenario Lab knobs and counterfactual switches. All optional."
+   },
+   "PassportFactor": {
+    "properties": {
+     "factor": {
+      "type": "string",
+      "title": "Factor"
+     },
+     "description": {
+      "type": "string",
+      "title": "Description"
+     },
+     "value": {
+      "type": "number",
+      "title": "Value"
+     },
+     "sub_score": {
+      "type": "number",
+      "title": "Sub Score"
+     },
+     "weight": {
+      "type": "number",
+      "title": "Weight"
+     },
+     "points": {
+      "type": "number",
+      "title": "Points"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "factor",
+     "description",
+     "value",
+     "sub_score",
+     "weight",
+     "points"
+    ],
+    "title": "PassportFactor"
+   },
+   "PassportRequest": {
+    "properties": {
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       }
+      ],
+      "title": "Scenario",
+      "description": "Scenario id in data/scenarios, or a full scenario object (see ScenarioSchema)",
+      "default": "cherry_crisis"
+     },
+     "consent": {
+      "type": "boolean",
+      "title": "Consent",
+      "description": "SME consents to share; adds a SHA-256 digest for on-chain anchoring",
+      "default": false
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed",
+      "default": 7
+     }
+    },
+    "type": "object",
+    "title": "PassportRequest"
+   },
+   "PassportResponse": {
+    "properties": {
+     "company_id": {
+      "type": "string",
+      "title": "Company Id"
+     },
+     "score": {
+      "type": "number",
+      "title": "Score"
+     },
+     "grade": {
+      "type": "string",
+      "enum": [
+       "A",
+       "B",
+       "C",
+       "D",
+       "E"
+      ],
+      "title": "Grade"
+     },
+     "factors": {
+      "items": {
+       "$ref": "#/components/schemas/PassportFactor"
+      },
+      "type": "array",
+      "title": "Factors"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     },
+     "consent": {
+      "type": "boolean",
+      "title": "Consent"
+     },
+     "digest_sha256": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Digest Sha256"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "company_id",
+     "score",
+     "grade",
+     "factors",
+     "summary",
+     "consent",
+     "source"
+    ],
+    "title": "PassportResponse"
+   },
+   "Plan": {
+    "properties": {
+     "status": {
+      "type": "string",
+      "enum": [
+       "optimal",
+       "feasible",
+       "infeasible",
+       "error"
+      ],
+      "title": "Status"
+     },
+     "total_cost_clp": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Total Cost Clp"
+     },
+     "actions": {
+      "items": {
+       "$ref": "#/components/schemas/PlanAction"
+      },
+      "type": "array",
+      "title": "Actions"
+     },
+     "confidence_target": {
+      "type": "number",
+      "title": "Confidence Target"
+     },
+     "out_of_sample_coverage": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Out Of Sample Coverage"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "status",
+     "total_cost_clp",
+     "actions",
+     "confidence_target",
+     "out_of_sample_coverage"
+    ],
+    "title": "Plan"
+   },
+   "PlanAction": {
+    "properties": {
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "product": {
+      "type": "string",
+      "title": "Product"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "factoring",
+       "lc_discount",
+       "loan",
+       "confirming",
+       "forward"
+      ],
+      "title": "Kind"
+     },
+     "lender": {
+      "type": "string",
+      "title": "Lender"
+     },
+     "date": {
+      "type": "string",
+      "title": "Date"
+     },
+     "cost_clp": {
+      "type": "number",
+      "title": "Cost Clp"
+     },
+     "summary": {
+      "type": "string",
+      "title": "Summary"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "product_id",
+     "product",
+     "kind",
+     "lender",
+     "date",
+     "cost_clp",
+     "summary"
+    ],
+    "title": "PlanAction"
+   },
+   "PlanRequest": {
+    "properties": {
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       }
+      ],
+      "title": "Scenario",
+      "description": "Scenario id in data/scenarios, or a full scenario object (see ScenarioSchema)",
+      "default": "cherry_crisis"
+     },
+     "confidence": {
+      "type": "number",
+      "exclusiveMaximum": 1.0,
+      "exclusiveMinimum": 0.5,
+      "title": "Confidence",
+      "description": "Share of scenarios that must stay above the buffer",
+      "default": 0.9
+     },
+     "overrides": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Overrides"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "n_paths": {
+      "type": "integer",
+      "maximum": 50000.0,
+      "minimum": 1000.0,
+      "title": "N Paths",
+      "default": 10000
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed",
+      "default": 7
+     },
+     "explain": {
+      "type": "boolean",
+      "title": "Explain",
+      "default": true
+     },
+     "n_scenarios": {
+      "type": "integer",
+      "maximum": 500.0,
+      "minimum": 50.0,
+      "title": "N Scenarios",
+      "description": "Scenarios inside the MILP",
+      "default": 200
+     }
+    },
+    "type": "object",
+    "title": "PlanRequest"
+   },
+   "PlanResponse": {
+    "properties": {
+     "optimal": {
+      "$ref": "#/components/schemas/Plan"
+     },
+     "default": {
+      "$ref": "#/components/schemas/Plan"
+     },
+     "default_product": {
+      "type": "string",
+      "title": "Default Product"
+     },
+     "savings_clp": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Savings Clp"
+     },
+     "savings_pct": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Savings Pct"
+     },
+     "forecast": {
+      "$ref": "#/components/schemas/Summary"
+     },
+     "explanation": {
+      "anyOf": [
+       {
+        "items": {
+         "$ref": "#/components/schemas/Explanation"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Explanation"
+     },
+     "latency_ms": {
+      "type": "integer",
+      "title": "Latency Ms"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "optimal",
+     "default",
+     "default_product",
+     "forecast",
+     "latency_ms",
+     "source"
+    ],
+    "title": "PlanResponse"
+   },
+   "Quote": {
+    "properties": {
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "name": {
+      "type": "string",
+      "title": "Name"
+     },
+     "kind": {
+      "type": "string",
+      "title": "Kind"
+     },
+     "lender": {
+      "type": "string",
+      "title": "Lender"
+     },
+     "eligible": {
+      "type": "boolean",
+      "title": "Eligible"
+     },
+     "reason": {
+      "type": "string",
+      "title": "Reason"
+     },
+     "cost_clp": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Cost Clp"
+     },
+     "eac": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Eac",
+      "description": "Effective annual cost (compound)"
+     },
+     "term_days": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Term Days"
+     },
+     "requirements": {
+      "type": "string",
+      "title": "Requirements"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "product_id",
+     "name",
+     "kind",
+     "lender",
+     "eligible",
+     "reason",
+     "requirements"
+    ],
+    "title": "Quote"
+   },
+   "QuoteRequest": {
+    "properties": {
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       }
+      ],
+      "title": "Scenario",
+      "description": "Scenario id in data/scenarios, or a full scenario object (see ScenarioSchema)",
+      "default": "cherry_crisis"
+     },
+     "amount_clp": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Amount Clp",
+      "description": "Cash need; default = P10 shortfall vs buffer on the crunch day"
+     },
+     "need_date": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Need Date",
+      "description": "ISO date of the need; default = crunch day"
+     },
+     "need_days": {
+      "type": "integer",
+      "minimum": 1.0,
+      "title": "Need Days",
+      "default": 30
+     },
+     "overrides": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Overrides"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed",
+      "default": 7
+     }
+    },
+    "type": "object",
+    "title": "QuoteRequest"
+   },
+   "QuoteResponse": {
+    "properties": {
+     "amount_clp": {
+      "type": "number",
+      "title": "Amount Clp"
+     },
+     "need_date": {
+      "type": "string",
+      "title": "Need Date"
+     },
+     "quotes": {
+      "items": {
+       "$ref": "#/components/schemas/Quote"
+      },
+      "type": "array",
+      "title": "Quotes"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "amount_clp",
+     "need_date",
+     "quotes",
+     "source"
+    ],
+    "title": "QuoteResponse"
+   },
+   "Source": {
+    "properties": {
+     "tool": {
+      "type": "string",
+      "title": "Tool"
+     },
+     "engine": {
+      "type": "string",
+      "title": "Engine"
+     },
+     "deterministic": {
+      "type": "boolean",
+      "title": "Deterministic"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Seed"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "tool",
+     "engine",
+     "deterministic"
+    ],
+    "title": "Source"
+   },
+   "Summary": {
+    "properties": {
+     "company_id": {
+      "type": "string",
+      "title": "Company Id"
+     },
+     "as_of": {
+      "type": "string",
+      "title": "As Of"
+     },
+     "horizon_days": {
+      "type": "integer",
+      "title": "Horizon Days"
+     },
+     "prob_negative_cash_horizon": {
+      "type": "number",
+      "title": "Prob Negative Cash Horizon"
+     },
+     "prob_below_buffer_horizon": {
+      "type": "number",
+      "title": "Prob Below Buffer Horizon"
+     },
+     "crunch_day": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Crunch Day"
+     },
+     "crunch_date": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Crunch Date"
+     },
+     "prob_negative_by_crunch_day": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Prob Negative By Crunch Day"
+     },
+     "headline": {
+      "type": "string",
+      "title": "Headline"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "company_id",
+     "as_of",
+     "horizon_days",
+     "prob_negative_cash_horizon",
+     "prob_below_buffer_horizon",
+     "crunch_day",
+     "crunch_date",
+     "prob_negative_by_crunch_day",
+     "headline"
+    ],
+    "title": "Summary"
+   },
+   "ValidationError": {
+    "properties": {
+     "loc": {
+      "items": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "integer"
+        }
+       ]
+      },
+      "type": "array",
+      "title": "Location"
+     },
+     "msg": {
+      "type": "string",
+      "title": "Message"
+     },
+     "type": {
+      "type": "string",
+      "title": "Error Type"
+     },
+     "input": {
+      "title": "Input"
+     },
+     "ctx": {
+      "type": "object",
+      "title": "Context"
+     }
+    },
+    "type": "object",
+    "required": [
+     "loc",
+     "msg",
+     "type"
+    ],
+    "title": "ValidationError"
+   }
+  }
+ }
+}

@@ -3,21 +3,21 @@
   "preset": "Base (after the Shanghai notice)",
   "overrides": {},
   "headline": "81% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.8248,
-  "prob_below_buffer_horizon": 0.9903,
+  "prob_negative_cash_horizon": 0.8208,
+  "prob_below_buffer_horizon": 0.983,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -36331455
+  "min_cash_p10": -40883850
  },
  {
   "preset": "Before the notice",
   "overrides": {
    "ignore_announced_delays": true
   },
-  "headline": "8% probability of negative cash within 90 days",
-  "prob_negative_cash_horizon": 0.0844,
-  "prob_below_buffer_horizon": 0.1026,
+  "headline": "10% probability of negative cash within 90 days",
+  "prob_negative_cash_horizon": 0.1021,
+  "prob_below_buffer_horizon": 0.1249,
   "crunch_date": null,
-  "min_cash_p10": 15703364
+  "min_cash_p10": -1368652
  },
  {
   "preset": "All customers +15 days late",
@@ -25,10 +25,10 @@
    "global_delay_extra_days": 15
   },
   "headline": "100% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 1.0,
-  "prob_below_buffer_horizon": 1.0,
+  "prob_negative_cash_horizon": 0.9999,
+  "prob_below_buffer_horizon": 0.9999,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -283366874
+  "min_cash_p10": -278914682
  },
  {
   "preset": "CNY -5% vs CLP",
@@ -36,64 +36,64 @@
    "cny_shift_pct": -5
   },
   "headline": "86% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.8706,
-  "prob_below_buffer_horizon": 0.9943,
+  "prob_negative_cash_horizon": 0.8667,
+  "prob_below_buffer_horizon": 0.9877,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -39024513
+  "min_cash_p10": -43812757
  },
  {
   "preset": "CNY +5% vs CLP",
   "overrides": {
    "cny_shift_pct": 5
   },
-  "headline": "76% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.7756,
-  "prob_below_buffer_horizon": 0.983,
+  "headline": "75% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.7673,
+  "prob_below_buffer_horizon": 0.975,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -33756700
+  "min_cash_p10": -38082020
  },
  {
   "preset": "USD -5% vs CLP",
   "overrides": {
    "usd_shift_pct": -5
   },
-  "headline": "90% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.9031,
-  "prob_below_buffer_horizon": 0.9965,
+  "headline": "89% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.8991,
+  "prob_below_buffer_horizon": 0.9904,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -42822830
+  "min_cash_p10": -49448832
  },
  {
   "preset": "Cherry price -10%",
   "overrides": {
    "cherry_price_pct": -10
   },
-  "headline": "96% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.961,
-  "prob_below_buffer_horizon": 0.9994,
+  "headline": "95% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.9543,
+  "prob_below_buffer_horizon": 0.9956,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -48695417
+  "min_cash_p10": -56622704
  },
  {
   "preset": "Cherry price +10%",
   "overrides": {
    "cherry_price_pct": 10
   },
-  "headline": "54% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.5666,
-  "prob_below_buffer_horizon": 0.9355,
+  "headline": "51% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.5442,
+  "prob_below_buffer_horizon": 0.9313,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -25004440
+  "min_cash_p10": -27646168
  },
  {
   "preset": "30 extra harvest workers",
   "overrides": {
    "extra_hires": 30
   },
-  "headline": "98% probability of negative cash in 19 days (2026-12-30)",
-  "prob_negative_cash_horizon": 0.9787,
-  "prob_below_buffer_horizon": 0.9995,
+  "headline": "97% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.9704,
+  "prob_below_buffer_horizon": 0.9966,
   "crunch_date": "2026-12-30",
-  "min_cash_p10": -57599926
+  "min_cash_p10": -65158258
  }
 ]

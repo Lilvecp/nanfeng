@@ -26,7 +26,7 @@ from scipy import stats
 
 from .fx import load_history, simulate_fx
 from .model import Company
-from .montecarlo import simulate
+from .montecarlo import PARAM_UNCERTAINTY, simulate
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS_DIR = ROOT / "results"
@@ -118,23 +118,25 @@ def point_forecast(company: Company) -> np.ndarray:
         cu.delay_sigma = 0.0
         cu.p_default = 0.0
     det.price_volatility = 0.0
-    return simulate(det, 1, 0, {"freeze_fx": True}).cash[0]
+    return simulate(det, 1, 0, {"freeze_fx": True}, param_uncertainty=0.0).cash[0]
 
 
 def cash_backtest(n_companies: int = 20, n_truths: int = 25, n_paths: int = 4000,
-                  days=(30, 60, 90)) -> dict[str, Any]:
+                  days=(30, 60, 90), tau: float | None = None) -> dict[str, Any]:
+    """Truth paths use the exact parameters (no parameter uncertainty); the forecast uses `tau`."""
+    tau = PARAM_UNCERTAINTY if tau is None else tau
     smes = [Company.from_dict(d) for d in json.loads(SMES_FILE.read_text(encoding="utf-8"))][:n_companies]
-    out = {}
+    out = {"forecast_param_uncertainty": tau}
     for label in ("well_specified", "misspecified"):
         acc = {d: {"crps": [], "crps_point": [], "cover": [], "scale": []} for d in days}
         brier, brier_clim, events = [], [], []
         for i, comp in enumerate(smes):
-            fc = simulate(comp, n_paths, seed=7)
+            fc = simulate(comp, n_paths, seed=7, param_uncertainty=tau)
             point = point_forecast(comp)
             if label == "well_specified":
-                truth = simulate(comp, n_truths, seed=10_000 + i)
+                truth = simulate(comp, n_truths, seed=10_000 + i, param_uncertainty=0.0)
             else:
-                truth = simulate(_misspecified(comp), n_truths, seed=10_000 + i,
+                truth = simulate(_misspecified(comp), n_truths, seed=10_000 + i, param_uncertainty=0.0,
                                  fx_kwargs={"lookback_years": 15, "mean_block": 30.0})
             p_breach = fc.p_below(comp.min_cash_buffer_clp)
             hit = (truth.cash[:, 1:].min(axis=1) < comp.min_cash_buffer_clp).astype(float)
@@ -166,7 +168,7 @@ def cash_backtest(n_companies: int = 20, n_truths: int = 25, n_paths: int = 4000
 
 
 def run(out_dir: Path = RESULTS_DIR) -> dict[str, Any]:
-    result = {"fx": fx_backtest(), "cash": cash_backtest()}
+    result = {"fx": fx_backtest(), "cash": cash_backtest(), "cash_no_param_uncertainty": cash_backtest(tau=0.0)}
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "backtest_results.json").write_text(json.dumps(result, indent=1), encoding="utf-8")
     (out_dir / "backtest_summary.md").write_text(render_markdown(result), encoding="utf-8")
@@ -183,9 +185,17 @@ def render_markdown(r: dict[str, Any]) -> str:
     for t in fx["table"]:
         lines.append(f"| {t['series']} | {t['horizon_days']} d | {t['crps_bootstrap_bp']} | {t['crps_gaussian_rw_bp']} | "
                      f"{t['crps_skill_vs_gaussian']:+.1%} | {t['coverage_p10_p90_bootstrap']:.1%} | {t['coverage_p10_p90_gaussian']:.1%} |")
-    for label, title in (("well_specified", "well-specified truth"), ("misspecified", "misspecified truth")):
-        c = r["cash"][label]
-        lines += ["", f"## 2. Cash, {title} ({c['n_companies']} synthetic SMEs × {c['truth_paths_per_company']} truth paths)", "",
+    tau = r["cash"]["forecast_param_uncertainty"]
+    lines += ["", f"Cash forecasts below use parameter uncertainty tau = {tau} (production default). "
+              "Truth paths use the exact parameters. Section 3 repeats the test with tau = 0 for comparison."]
+    for key, label, title in (("cash", "well_specified", "well-specified truth"), ("cash", "misspecified", "misspecified truth"),
+                              ("cash_no_param_uncertainty", "well_specified", "well-specified truth, tau = 0"),
+                              ("cash_no_param_uncertainty", "misspecified", "misspecified truth, tau = 0")):
+        if key not in r:
+            continue
+        c = r[key][label]
+        sec = "2" if key == "cash" else "3"
+        lines += ["", f"## {sec}. Cash, {title} ({c['n_companies']} synthetic SMEs × {c['truth_paths_per_company']} truth paths)", "",
                   "| Day | CRPS (MCLP) | MAE point forecast (MCLP) | CRPS skill vs point | Relative CRPS | P10–P90 coverage |",
                   "|---|---|---|---|---|---|"]
         for t in c["table"]:

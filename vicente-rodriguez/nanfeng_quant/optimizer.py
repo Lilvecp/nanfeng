@@ -26,6 +26,7 @@ from .catalog import Catalog, Product, eligibility, eligible_receivable, expecte
 from .model import Company
 from .montecarlo import ForecastResult
 
+MAX_ACTIONS = 5  # at most this many operations per plan: the owner approves it on a phone
 SOLVERS = ["CBC", "SCIP"]  # tried in order; CBC is ~5x faster here, SCIP is the fallback
 
 
@@ -104,9 +105,11 @@ def build_levers(company: Company, catalog: Catalog, res: ForecastResult, sample
                     levers.append(Lever(f"{p.id}:{r.id}:d{d}", p, p.kind, d, 1.0, cost, "fraction",
                                         r.id, j, {"face_clp": face_clp, "days_charged": max(exp_day - d, p.min_days_charged)}))
         elif p.kind == "loan":
+            cur = p.currencies[0]
+            k = fx0[cur]  # CLP per unit of the loan currency
             for d in days:
-                levers.append(Lever(f"{p.id}:d{d}", p, "loan", d, float(p.max_amount_clp),
-                                    catalog.loan_unit_cost(p), "CLP"))
+                levers.append(Lever(f"{p.id}:d{d}", p, "loan", d, float(p.max_amount_clp) / k,
+                                    catalog.loan_unit_cost(p) * k, cur, meta={"clp_per_unit": k, "currency": cur}))
         elif p.kind == "confirming":
             for j, x in enumerate(company.payables):
                 d = company.day(x.date)
@@ -141,10 +144,11 @@ def lever_flows(lever: Lever, company: Company, catalog: Catalog, res: ForecastR
         paid = rows[tau[rows] <= T]
         out[paid, tau[paid]] -= p.advance_rate * r.amount * rate[paid, tau[paid]]
     elif lever.kind == "loan":
-        out[:, d] += 1.0 - catalog.loan_upfront(p)
+        rate = res.fx.rate(lever.meta.get("currency", "CLP"))[paths]  # ones for CLP loans
+        out[:, d] += (1.0 - catalog.loan_upfront(p)) * rate[:, d]
         m = d + p.term_days
         if m <= T:
-            out[:, m] -= 1.0 + catalog.loan_interest(p)
+            out[:, m] -= (1.0 + catalog.loan_interest(p)) * rate[:, m]
     elif lever.kind == "confirming":
         a = lever.meta["amount_clp"]
         upfront = p.get("fee_pct", 0.0) + catalog.product_stamp(p)
@@ -164,14 +168,23 @@ def lever_flows(lever: Lever, company: Company, catalog: Catalog, res: ForecastR
 def optimize(res: ForecastResult, catalog: Catalog, confidence: float = 0.90, n_scenarios: int = 200,
              in_sample_alpha: float | None = None, buffer_clp: float | None = None, seed: int = 0,
              time_limit_s: float = 20.0, exact_time_limit_s: float = 20.0,
-             exclude: tuple[str, ...] = (), max_retries: int = 2) -> PlanResult:
+             exclude: tuple[str, ...] = (), max_retries: int = 2,
+             max_actions: int | None = MAX_ACTIONS) -> PlanResult:
     """Solve, then validate on every Monte Carlo path; if the out-of-sample coverage misses the
     target, tighten the in-sample breach budget and solve again (at most `max_retries` times)."""
     alpha = (1 - confidence) * 0.6 if in_sample_alpha is None else in_sample_alpha
     plan = None
     for attempt in range(max_retries + 1):
+        # Fast path without the action cap; add the cap (more binaries) only if the plan needs it.
         plan = _optimize_once(res, catalog, confidence, n_scenarios, alpha, buffer_clp, seed,
-                              time_limit_s, exact_time_limit_s, exclude)
+                              time_limit_s, exact_time_limit_s, exclude, None)
+        if max_actions is not None and len(plan.actions) > max_actions:
+            capped = _optimize_once(res, catalog, confidence, n_scenarios, alpha, buffer_clp, seed,
+                                    time_limit_s, exact_time_limit_s, exclude, max_actions)
+            capped.meta["uncapped_cost_clp"] = None if plan.total_cost_clp is None else round(plan.total_cost_clp)
+            capped.meta["uncapped_actions"] = len(plan.actions)
+            plan = capped if capped.total_cost_clp is not None else plan
+        plan.meta["max_actions"] = max_actions
         plan.meta["in_sample_alpha"] = round(alpha, 4)
         plan.meta["attempts"] = attempt + 1
         if plan.out_of_sample_coverage is None or plan.out_of_sample_coverage >= confidence:
@@ -181,7 +194,7 @@ def optimize(res: ForecastResult, catalog: Catalog, confidence: float = 0.90, n_
 
 
 def _optimize_once(res, catalog, confidence, n_scenarios, alpha, buffer_clp, seed,
-                   time_limit_s, exact_time_limit_s, exclude) -> PlanResult:
+                   time_limit_s, exact_time_limit_s, exclude, max_actions=MAX_ACTIONS) -> PlanResult:
     company = res.company
     B = company.min_cash_buffer_clp if buffer_clp is None else buffer_clp
     catalog = catalog.subset([p.id for p in catalog.products if p.id not in exclude])
@@ -203,7 +216,7 @@ def _optimize_once(res, catalog, confidence, n_scenarios, alpha, buffer_clp, see
     shortfall = float(np.max(B - base)) * 1.25 + 1.0
     for lv in levers:
         if lv.kind == "loan":
-            lv.ub = min(lv.ub, shortfall)
+            lv.ub = min(lv.ub, shortfall / lv.meta["clp_per_unit"])
     for lv in levers:  # repayments and settlements create new potential minima
         if lv.kind == "loan" and lv.day + lv.product.term_days <= T:
             out_days.add(lv.day + lv.product.term_days)
@@ -226,9 +239,9 @@ def _optimize_once(res, catalog, confidence, n_scenarios, alpha, buffer_clp, see
     #    constraints (no scenario binaries, fast). Gives a feasible plan and a MIP start.
     shortfall = np.max(B - base_c, axis=1)
     drop = set(np.argsort(-shortfall)[:k].tolist())
-    heur = _solve_any(*args, time_limit_s=time_limit_s, t0=t0, drop=drop)
+    heur = _solve_any(*args, time_limit_s=time_limit_s, t0=t0, drop=drop, max_actions=max_actions)
     # 2) Exact chance-constrained MILP, warm-started from the heuristic, under a time limit.
-    exact = _solve_any(*args, time_limit_s=exact_time_limit_s, t0=t0,
+    exact = _solve_any(*args, time_limit_s=exact_time_limit_s, t0=t0, max_actions=max_actions,
                        hint=heur.values if heur.total_cost_clp is not None else None)
     candidates = [p for p in (heur, exact) if p.total_cost_clp is not None]
     if not candidates:
@@ -255,7 +268,8 @@ def _solve_any(*args, **kw) -> PlanResult:
 
 
 def _solve(solver_name, res, catalog, levers, cum, base_c, worst, B, alpha, S, confidence, time_limit_s, t0,
-           drop: set[int] | None = None, hint: dict[str, float] | None = None) -> PlanResult:
+           drop: set[int] | None = None, hint: dict[str, float] | None = None,
+           max_actions: int | None = MAX_ACTIONS) -> PlanResult:
     """Build and solve the MILP in millions (MCLP / MCNY) to keep coefficients well scaled.
 
     drop: scenarios fixed as allowed breaches (heuristic mode, no z binaries).
@@ -263,7 +277,7 @@ def _solve(solver_name, res, catalog, levers, cum, base_c, worst, B, alpha, S, c
     """
     company = res.company
     U = 1e6
-    scale = np.array([U if lv.unit in ("CLP", "CNY") else 1.0 for lv in levers])
+    scale = np.array([U if lv.unit in ("CLP", "CNY", "USD") else 1.0 for lv in levers])
     solver = pywraplp.Solver.CreateSolver(solver_name)
     if solver is None:
         return PlanResult("error", None, [], levers, {}, None, None, time.perf_counter() - t0, S, confidence, B)
@@ -279,8 +293,9 @@ def _solve(solver_name, res, catalog, levers, cum, base_c, worst, B, alpha, S, c
         p = catalog.product(pid)
         if p.kind == "loan":
             idx = [i for i, lv in enumerate(levers) if lv.product.id == pid]
-            solver.Add(sum(x[i] for i in idx) <= p.max_amount_clp / U * y[pid])
-            solver.Add(sum(x[i] for i in idx) >= p.min_amount_clp / U * y[pid])
+            drawn = sum(x[i] * levers[i].meta["clp_per_unit"] for i in idx)  # MCLP
+            solver.Add(drawn <= p.max_amount_clp / U * y[pid])
+            solver.Add(drawn >= p.min_amount_clp / U * y[pid])
     # factoring: each (product, invoice, day) is one operation with its own fixed fee and min ticket
     ops: dict[int, pywraplp.Variable] = {}
     for i, lv in enumerate(levers):
@@ -295,6 +310,14 @@ def _solve(solver_name, res, catalog, levers, cum, base_c, worst, B, alpha, S, c
             ops[i] = solver.BoolVar(f"w:{lv.key}")
             solver.Add(x[i] <= ops[i])
             solver.Add(x[i] * lv.meta["amount_clp"] / U >= lv.product.min_amount_clp / U * ops[i])
+    # every other lever (loan draw, forward, confirming without ticket) counts as one action too
+    act: dict[int, pywraplp.Variable] = {}
+    if max_actions is not None:
+        for i, lv in enumerate(levers):
+            if i not in ops:
+                act[i] = solver.BoolVar(f"a:{lv.key}")
+                solver.Add(x[i] <= (lv.ub / scale[i]) * act[i])
+        solver.Add(sum(ops.values()) + sum(act.values()) <= max_actions)
     # each receivable financed at most once; forward only on the unfinanced part
     for j, r in enumerate(company.receivables):
         fin = [i for i, lv in enumerate(levers) if lv.kind in ("factoring", "lc_discount") and lv.target_index == j]
@@ -313,12 +336,13 @@ def _solve(solver_name, res, catalog, levers, cum, base_c, worst, B, alpha, S, c
             if lv.kind in ("factoring", "lc_discount"):
                 use.append(x[i] * lv.product.advance_rate * lv.meta["face_clp"] / U)
             elif lv.kind == "loan":
-                use.append(x[i])
+                use.append(x[i] * lv.meta["clp_per_unit"])
             elif lv.kind == "confirming":
                 use.append(x[i] * lv.meta["amount_clp"] / U)
         if use:
             solver.Add(sum(use) <= lender["credit_line_clp"] / U)
-    coll = [x[i] * lv.product.get("collateral_pct", 0.0) for i, lv in enumerate(levers) if lv.kind == "loan"]
+    coll = [x[i] * lv.meta["clp_per_unit"] * lv.product.get("collateral_pct", 0.0)
+            for i, lv in enumerate(levers) if lv.kind == "loan"]
     if coll:
         solver.Add(sum(coll) <= company.collateral_available_clp / U)
 
@@ -362,6 +386,8 @@ def _solve(solver_name, res, catalog, levers, cum, base_c, worst, B, alpha, S, c
         for pid, var in y.items():
             hv.append(var); hx.append(float(any(vec[i] > 0 for i, lv in enumerate(levers) if lv.product.id == pid)))
         for i, var in ops.items():
+            hv.append(var); hx.append(float(vec[i] > 0))
+        for i, var in act.items():
             hv.append(var); hx.append(float(vec[i] > 0))
         if z is not None:
             for s_, var in enumerate(z):
@@ -432,9 +458,10 @@ def describe_actions(plan: PlanResult, company: Company, catalog: Catalog) -> li
                      days_charged=lv.meta["days_charged"],
                      summary=f"Factor {v:.0%} of {lv.target} with {p.name}")
         elif lv.kind == "loan":
-            a.update(amount_clp=round(v), term_days=p.term_days,
+            cur = lv.meta.get("currency", "CLP")
+            a.update(amount_clp=round(v * lv.meta["clp_per_unit"]), currency=cur, amount=round(v, 2), term_days=p.term_days,
                      maturity=dates[lv.day + p.term_days].isoformat() if lv.day + p.term_days <= company.horizon_days else None,
-                     summary=f"Draw CLP {v:,.0f} from {p.name}")
+                     summary=f"Draw {cur} {v:,.0f} from {p.name}")
         elif lv.kind == "confirming":
             a.update(payable_id=lv.target, fraction=round(v, 4), amount_clp=round(v * lv.meta["amount_clp"]),
                      summary=f"Extend {v:.0%} of {lv.target} by {p.term_days} days via {p.name}")

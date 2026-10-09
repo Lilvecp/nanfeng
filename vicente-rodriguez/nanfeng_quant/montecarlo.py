@@ -19,6 +19,10 @@ from .fx import FxPaths, simulate_fx
 from .model import Company
 
 NEVER = np.iinfo(np.int64).max // 2  # pay-day sentinel: not paid inside the horizon
+# Parameter uncertainty: per path, each customer's median delay and dispersion and the cherry
+# price volatility are scaled by exp(tau * Z - tau^2 / 2). This fattens the tails to reflect that
+# the parameters themselves are estimates (calibrated in results/backtest_summary.md).
+PARAM_UNCERTAINTY = 0.35
 
 
 @dataclass
@@ -132,8 +136,10 @@ def _delays(rng_z: np.ndarray, median: float, sigma: float) -> np.ndarray:
 
 
 def simulate(company: Company, n_paths: int = 10_000, seed: int = 7,
-             overrides: Overrides | dict | None = None, fx_kwargs: dict | None = None) -> ForecastResult:
+             overrides: Overrides | dict | None = None, fx_kwargs: dict | None = None,
+             param_uncertainty: float | None = None) -> ForecastResult:
     ov = overrides if isinstance(overrides, Overrides) else Overrides.from_dict(overrides)
+    tau = PARAM_UNCERTAINTY if param_uncertainty is None else param_uncertainty
     rng = np.random.default_rng(seed)
     T = company.horizon_days
     n_items = len(company.receivables) + len(company.shipments)
@@ -145,8 +151,22 @@ def simulate(company: Company, n_paths: int = 10_000, seed: int = 7,
     z_delay = rng.standard_normal((n_paths, max(n_items, 1)))
     u_default = rng.random((n_paths, max(n_items, 1)))
     z_price = rng.standard_normal(n_paths)
+    # Drawn last and always with the same shape, so tau = 0 reproduces earlier results exactly.
+    n_c = max(len(company.customers), 1)
+    z_med = rng.standard_normal((n_paths, n_c))
+    z_sig = rng.standard_normal((n_paths, n_c))
+    z_pvol = rng.standard_normal(n_paths)
+    cidx = {c.id: i for i, c in enumerate(company.customers)}
 
-    sigma_p = company.price_volatility
+    def scale(z: np.ndarray) -> np.ndarray:
+        return np.exp(tau * z - 0.5 * tau ** 2) if tau > 0 else np.ones_like(z)
+
+    def delay_params(c) -> tuple[np.ndarray, np.ndarray]:
+        i = cidx[c.id]
+        med = (1.0 + c.delay_median_days) * scale(z_med[:, i]) - 1.0
+        return np.maximum(med, 0.0), c.delay_sigma * scale(z_sig[:, i])
+
+    sigma_p = company.price_volatility * scale(z_pvol)
     price = np.ones(n_paths) if ov.freeze_price else np.exp(sigma_p * z_price - 0.5 * sigma_p ** 2)
     price = price * (1.0 + ov.cherry_price_pct / 100.0)
 
@@ -168,7 +188,7 @@ def simulate(company: Company, n_paths: int = 10_000, seed: int = 7,
             delay = np.zeros(n_paths)
             announced = 0
         else:
-            delay = _delays(z_delay[:, j], c.delay_median_days, c.delay_sigma) + extra_delay(c.id)
+            delay = _delays(z_delay[:, j], *delay_params(c)) + extra_delay(c.id)
             announced = 0 if ov.ignore_announced_delays else r.announced_delay_days
         day = np.maximum(company.day(r.due_date) + announced + delay, 1).astype(np.int64)
         day = np.where((u_default[:, j] < c.p_default) | (c.id in ov.defaulted_customers), NEVER, day)
@@ -188,7 +208,7 @@ def simulate(company: Company, n_paths: int = 10_000, seed: int = 7,
         if c.id in ov.on_time_customers:
             delay = np.zeros(n_paths)
         else:
-            delay = _delays(z_delay[:, j], c.delay_median_days, c.delay_sigma) + extra_delay(c.id)
+            delay = _delays(z_delay[:, j], *delay_params(c)) + extra_delay(c.id)
         day = (ship + s.terms_days + delay).astype(np.int64)
         day = np.where((u_default[:, j] < c.p_default) | (c.id in ov.defaulted_customers), NEVER, day)
         add_inflow(day, amount * (1.0 - s.advance_pct), s.currency)

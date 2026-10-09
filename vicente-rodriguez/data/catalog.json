@@ -153,6 +153,27 @@
       "max_amount_uf": 15000
     },
     {
+      "id": "PAE-USD",
+      "name": "Pre-export loan in USD (PAE)",
+      "kind": "loan",
+      "lender_id": "bank-pacifico",
+      "rate_annual": 0.068,
+      "fee_pct": 0.003,
+      "fee_fixed_clp": 120000,
+      "term_days": 120,
+      "lead_days": 3,
+      "min_amount_clp": 30000000,
+      "max_amount_clp": 300000000,
+      "collateral_pct": 0.3,
+      "currencies": [
+        "USD"
+      ],
+      "stamp_tax": false,
+      "stamp_tax_note": "Assumed exempt as export financing (DL 3.475 art. 24) - VERIFY",
+      "requirements": "Export contract or shipping documents; repaid in USD with the export proceeds.",
+      "rate_reference": "Term SOFR + bank spread for exporters (bank trade-finance price lists)"
+    },
+    {
       "id": "OVERDRAFT",
       "name": "Credit line / overdraft",
       "kind": "loan",

@@ -8,7 +8,7 @@
   {
    "factor": "liquidity",
    "description": "Probability of negative cash within 90 days (Monte Carlo, no new financing)",
-   "value": 0.8248,
+   "value": 0.8208,
    "best_at": 0.0,
    "worst_at": 0.6,
    "sub_score": 0.0,
@@ -18,7 +18,7 @@
   {
    "factor": "buffer_months",
    "description": "Median minimum cash over 90 days, in months of average payroll",
-   "value": -0.0783,
+   "value": -0.0718,
    "best_at": 2.0,
    "worst_at": 0.0,
    "sub_score": 0.0,
@@ -66,11 +66,11 @@
    "points": 10.0
   }
  ],
- "summary": "Score 34/100 (grade E). Weakest factor: probability of negative cash within 90 days (monte carlo, no new financing) = 0.8248.",
+ "summary": "Score 34/100 (grade E). Weakest factor: probability of negative cash within 90 days (monte carlo, no new financing) = 0.8208.",
  "consent": true,
  "shareable": true,
  "synthetic": true,
- "digest_sha256": "e5874a4f5f67b04f2f97d2779068018065ccb10b995ed69c0ef8239f39271808",
+ "digest_sha256": "62400cbf9e199ad0be0fd16c02e48804502182b7cee7e1c049ba94ada040d00c",
  "issued_at": "2026-10-09",
  "source": {
   "tool": "credit_passport",

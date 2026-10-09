@@ -205,7 +205,7 @@ def run_deterministic(case_id: int, company: Company) -> dict[str, Any]:
     total_out = sum(p.amount * spot(company)[p.currency] for p in company.payables)
     company.opening_cash_clp -= float(ledger_cash(company).min()) + 0.05 * total_out
     t0 = time.perf_counter()
-    res = simulate(company, 200, SYSTEM_SEED, {"freeze_fx": True})
+    res = simulate(company, 200, SYSTEM_SEED, {"freeze_fx": True}, param_uncertainty=0.0)
     forecast_ms = (time.perf_counter() - t0) * 1000
     truth = ledger_cash(company)
     max_err = float(np.max(np.abs(res.cash - truth[None, :])))

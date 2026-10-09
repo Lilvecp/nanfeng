@@ -91,12 +91,14 @@ def financing_quote(scenario: str | dict[str, Any], amount_clp: float | None = N
 
 def optimize_plan(scenario: str | dict[str, Any], confidence: float = 0.90,
                   overrides: dict[str, Any] | None = None, n_paths: int = 10_000, seed: int = 7,
-                  explain: bool = True, n_scenarios: int = 200) -> dict[str, Any]:
+                  explain: bool = True, n_scenarios: int = 200,
+                  exact_time_limit_s: float = 20.0) -> dict[str, Any]:
     t0 = time.perf_counter()
     company = load_scenario(scenario)
     catalog = Catalog.load()
     res = simulate(company, n_paths, seed, overrides)
-    best, default = optimize_pair(res, catalog, confidence=confidence, n_scenarios=n_scenarios)
+    best, default = optimize_pair(res, catalog, confidence=confidence, n_scenarios=n_scenarios,
+                                  exact_time_limit_s=exact_time_limit_s)
     out = compare(best, default, catalog)
     out["forecast"] = res.summary()
     if explain and best.total_cost_clp is not None:

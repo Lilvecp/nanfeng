@@ -36,7 +36,7 @@ def run() -> dict[str, Any]:
     before = tools.forecast_run(SCENARIO, {"ignore_announced_delays": True})
     after = tools.forecast_run(SCENARIO)
     quotes = tools.financing_quote(SCENARIO)
-    plan = tools.optimize_plan(SCENARIO)
+    plan = tools.optimize_plan(SCENARIO, exact_time_limit_s=120.0)  # offline: give the MILP time to prove optimality
     passport = tools.credit_passport(SCENARIO, consent=True)
     lab = []
     for label, ov in LAB:
