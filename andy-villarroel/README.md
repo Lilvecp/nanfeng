@@ -13,11 +13,19 @@
 
 **Tools:** Python · promptfoo / garak · OWASP LLM Top 10
 
+## Work
+
+| Task | Where |
+|------|-------|
+| r4-01 Threat model | [threat-model.md](threat-model.md) |
+| r4-03 Anti-injection design | [anti-injection-design.md](anti-injection-design.md) |
+| r4-02 Policy engine | [`backend/app/policy.py`](../backend/app/policy.py) · tests in [`backend/tests/test_policy.py`](../backend/tests/test_policy.py) · rules in the [backend README](../backend/README.md#policy-engine-r4-02) |
+
 ## Tasks
 
-- [ ] `r4-01` **Oct 8** · Must — **Threat model** with STRIDE and the OWASP Top 10 for LLM apps (LLM01 prompt injection, LLM06 excessive agency).
-- [ ] `r4-03` **Oct 8** · Must — **Anti-injection design** for Renato: quarantined LLM, marking of untrusted content and guard classifier.
-- [ ] `r4-02` **Oct 9** · Must — Deterministic **policy engine** outside the LLM: levels L0–L3, limits per amount and per day, velocity, beneficiary allowlist, kill switch.
+- [x] `r4-01` **Oct 8** · Must — **Threat model** with STRIDE and the OWASP Top 10 for LLM apps (LLM01 prompt injection, LLM06 excessive agency).
+- [x] `r4-03` **Oct 8** · Must — **Anti-injection design** for Renato: quarantined LLM, marking of untrusted content and guard classifier.
+- [x] `r4-02` **Oct 9** · Must — Deterministic **policy engine** outside the LLM: levels L0–L3, limits per amount and per day, velocity, beneficiary allowlist, kill switch.
 - [ ] `r4-04` **Oct 10** · Must — **BEC anti-fraud**: detect a supplier's bank account change against its history → block and verify through another channel.
 - [ ] `r4-05` **Oct 10** · Must — **Step-up**: SMS OTP (Zavu) for L3. Voice never approves L3 and we explain why (deepfakes).
 - [ ] `r4-07` **Oct 11** · Should — **Privacy and compliance**: data minimization, PII masking before the LLM, encryption, Ley 21.719 (Chile), PIPL (China), simulated sanctions screening.

@@ -49,38 +49,43 @@ def _run(db: Session, appr: Approval, actor: str) -> None:
 
 @router.post("/approvals", response_model=ApprovalOut, status_code=201)
 def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Depends(require_agent)):
-    amounts, decisions = [], []
+    checks = []
     for o in body.operations:
         try:
-            amounts.append(bank.operation_amount_clp(db, o.op, o.params))
+            amount = bank.operation_amount_clp(db, o.op, o.params)
         except bank.BankError as exc:
             raise HTTPException(exc.status, exc.message) from exc
         except KeyError as exc:
             raise HTTPException(422, f"Missing parameter {exc} in {o.op}") from exc
-        allowlisted = bank.is_allowlisted(db, o.params.get("payee_id", "")) if o.op == "payment" else True
-        decisions.append(policy.evaluate(o.op, amounts[-1], allowlisted, _kill_switch["on"]))
-    # the whole request gets the strictest decision among its operations
-    decision = max(decisions, key=lambda d: (d.blocked, d.tier))
-    amount_clp = sum(amounts)
+        payee = str(o.params.get("payee_id", "")) if o.op == "payment" else ""
+        allowlisted = bank.is_allowlisted(db, payee) if o.op == "payment" else True
+        checks.append(policy.OpCheck(o.op, amount, payee, allowlisted))
+    amount_clp = sum(c.amount_clp for c in checks)
 
-    n = (db.scalar(select(func.count()).select_from(Approval)) or 0) + 1
-    appr = Approval(
-        id=f"{'APR' if decision.tier == 3 else 'AUT'}-{n:04d}", action=body.action,
-        operations=[o.model_dump() for o in body.operations], amount_clp=amount_clp, tier=decision.tier,
-        status="pending", otp_attempts_left=get_settings().otp_max_attempts,
-        channel=body.channel, explanation=body.explanation, note=decision.reason,
-    )
-    db.add(appr)
-    db.commit()  # persist before executing: a failed bank op rolls back its own changes only
+    # The decision and the execution it allows must see the same history (cumulative limits).
+    with policy.lock:
+        now = utcnow()
+        decision = policy.decide(checks, policy.load_history(db, now), now, _kill_switch["on"])
+        n = (db.scalar(select(func.count()).select_from(Approval)) or 0) + 1
+        appr = Approval(
+            id=f"{'APR' if decision.tier == 3 else 'AUT'}-{n:04d}", action=body.action,
+            operations=[o.model_dump() for o in body.operations], amount_clp=amount_clp, tier=decision.tier,
+            status="pending", otp_attempts_left=get_settings().otp_max_attempts,
+            channel=body.channel, explanation=body.explanation, note=decision.reason,
+        )
+        db.add(appr)
+        db.commit()  # persist before executing: a failed bank op rolls back its own changes only
 
-    if decision.blocked:
-        appr.status, appr.decided_at = "blocked", utcnow()
-    elif decision.tier < 3:
-        _run(db, appr, actor)
+        if decision.blocked:
+            appr.status, appr.decided_at = "blocked", utcnow()
+        elif decision.tier < 3:
+            _run(db, appr, actor)
+        db.commit()  # the final status must be visible to the next request's history
 
     audit.append(db, actor, "approval.created", {
         "approval_id": appr.id, "action": appr.action, "tier": appr.tier, "amount_clp": amount_clp,
-        "status": appr.status, "policy_reason": decision.reason,
+        "status": appr.status, "policy_reason": decision.reason, "policy_rules": decision.rules,
+        "policy_version": policy.POLICY["version"],
     })
     broker.publish("approval.requested" if appr.status == "pending" else f"approval.{appr.status}", _out(appr))
     return appr
@@ -143,6 +148,11 @@ def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
     audit.append(db, "owner", "approval.rejected", {"approval_id": appr.id, "reason": body.reason})
     broker.publish("approval.rejected", _out(appr))
     return appr
+
+
+@router.get("/policy", tags=["policy"], summary="Active policy: tier limits and rules the engine applies")
+def get_policy():
+    return {**policy.POLICY, "kill_switch": _kill_switch["on"]}
 
 
 @router.get("/policy/kill-switch", tags=["policy"])

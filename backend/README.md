@@ -32,11 +32,29 @@ uv venv --python 3.12 .venv && uv pip install -e ".[dev]"   # or: python3.12 -m 
 
 Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations, e.g. factoring + forward):
 
-1. The backend computes the CLP exposure and asks the policy (`app/policy.py`) for a tier.
+1. The backend computes the CLP exposure and asks the policy engine (`app/policy.py`) for a tier. See [Policy engine](#policy-engine-r4-02).
 2. L1/L2 run immediately (`status: auto`). L3 waits (`pending`) until `POST /approvals/{id}/approve` with the OTP (sandbox `482913`, 3 attempts, then `locked`) or `/reject` with a reason.
 3. The sandbox bank executes the operations in order (stopping at the first failure, the note says which ran), writes the transactions, appends to the audit log and publishes SSE events. An approved L3 request is anchored right away.
 
 Operations: `payment`, `fx_convert`, `factoring` (refuses an invoice that was already financed), `loan`, `forward`.
+
+## Policy engine (r4-02)
+
+Deterministic, outside the LLM: the agent proposes, `app/policy.py` decides. The limits are data (`POLICY`, served at `GET /policy`) with the same keys as the Settings screen.
+
+| Rule | Sends the request to |
+|------|----------------------|
+| Total ≤ CLP 1M, allowlisted payee | L1 (runs, owner notified) |
+| Total ≤ CLP 25M per action | L2 (runs within limits) |
+| `factoring`, `loan`, `forward` (new money or a binding FX commitment) | L3 |
+| Payee not on the allowlist | L3 |
+| Operations in one request add up above CLP 25M | L3 |
+| Agent spend above CLP 40M in 24 h or CLP 80M in 30 days (rolling) | L3 |
+| 5 automatic actions in 10 min (velocity) | L3 |
+| Payments to the same payee in 24 h add up above CLP 25M (split payments) | L3 |
+| Total above CLP 400M, owner-approved above CLP 400M in 30 days, kill switch on | blocked |
+
+Every decision lists the rules that fired in the `approval.created` audit entry (`policy_rules`, `policy_version`). Evaluation and execution run under one lock so concurrent requests cannot both squeeze under a cumulative limit.
 
 ## On-chain anchoring (r3-05)
 
@@ -51,13 +69,12 @@ Operations: `payment`, `fx_convert`, `factoring` (refuses an invoice that was al
 ## For the rest of the team
 
 - **Renato (agent):** publish each step with `POST /agent/events` (`{type: "agent.step", data: {tool, tier, model, cost_usd, status}}`) and propose actions with `POST /approvals`. Send `Authorization: Bearer $NANFENG_AGENT_TOKEN`.
-- **Andy (policy):** `app/policy.py` is a placeholder with the same L0–L3 shape; swap `evaluate()` for your engine. Security events go to `POST /audit/entries` so they are hash-chained and anchored.
+- **Andy (policy):** `app/policy.py` is the policy engine; `tests/test_policy.py` covers every rule. Security events go to `POST /audit/entries` so they are hash-chained and anchored.
 - **Vicente (quant):** your API is proxied unchanged under `/quant`. For the plan, the front calls `POST /quant/plan/jobs` and gets `quant.plan.*` events.
 - **Front:** one origin for everything; listen to `GET /agent/events` (SSE, supports `Last-Event-ID`) or poll `/agent/events/recent`.
 
 ## Not done yet
 
 - FISCO BCOS backend (Sepolia works today). The on-chain invoice registry (r3-06) is still off-chain only (`financed_by`).
-- The policy is a placeholder until Andy's engine lands.
 - Single instance: SSE history, plan jobs and the kill switch live in memory.
 - `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.
