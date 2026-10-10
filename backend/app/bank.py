@@ -198,6 +198,20 @@ def execute(db: Session, op: str, params: dict, actor: str) -> dict:
         raise
 
 
+def counterparty(db: Session, op: str, params: dict) -> str | None:
+    """Who is on the other side of an operation, for sanctions screening."""
+    if op in ("payment", "payee_bank_change"):
+        payee = db.get(Payee, params.get("payee_id", ""))
+        return payee.name if payee else None
+    if op == "factoring":
+        inv = db.get(Receivable, params.get("receivable_id", ""))
+        return inv.customer if inv else None
+    if op in ("loan", "forward"):
+        lender = db.get(Lender, params.get("lender_id", "LEN-FXDESK" if op == "forward" else ""))
+        return lender.name if lender else None
+    return None
+
+
 def is_allowlisted(db: Session, payee_id: str) -> bool:
     payee = db.get(Payee, payee_id)
     return bool(payee and payee.allowlisted)

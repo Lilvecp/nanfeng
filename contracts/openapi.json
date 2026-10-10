@@ -1299,6 +1299,59 @@
           }
         }
       }
+    },
+    "/privacy/mask": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Replace personal data with placeholders before an LLM call",
+        "operationId": "mask_privacy_mask_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaskIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1726,6 +1779,42 @@
           "fee_pct"
         ],
         "title": "LenderOut"
+      },
+      "MaskIn": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "MaskIn"
+      },
+      "MaskOut": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "mapping": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Mapping",
+            "description": "Keep it in the backend; never send it to the LLM"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "mapping"
+        ],
+        "title": "MaskOut"
       },
       "Operation": {
         "properties": {

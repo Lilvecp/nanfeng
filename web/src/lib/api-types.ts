@@ -519,6 +519,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/privacy/mask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replace personal data with placeholders before an LLM call */
+        post: operations["mask_privacy_mask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -693,6 +710,23 @@ export interface components {
             advance_pct: number;
             /** Fee Pct */
             fee_pct: number;
+        };
+        /** MaskIn */
+        MaskIn: {
+            /** Text */
+            text: string;
+        };
+        /** MaskOut */
+        MaskOut: {
+            /** Text */
+            text: string;
+            /**
+             * Mapping
+             * @description Keep it in the backend; never send it to the LLM
+             */
+            mapping: {
+                [key: string]: string;
+            };
         };
         /** Operation */
         Operation: {
@@ -1817,6 +1851,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SecurityVerdict"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mask_privacy_mask_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaskOut"];
                 };
             };
             /** @description Validation Error */

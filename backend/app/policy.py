@@ -57,6 +57,7 @@ class OpCheck:
     payee_id: str = ""
     payee_allowlisted: bool = True
     account_changed_at: datetime | None = None  # payee's account changed at (None = original account)
+    sanctions_hit: str = ""  # watchlist entry the counterparty matched
 
 
 @dataclass(frozen=True)
@@ -78,6 +79,9 @@ def decide(ops: list[OpCheck], history: list[Executed], now: datetime,
     """Pure function: same inputs, same decision. Any rule that fires sends the request to L3."""
     if kill_switch:
         return Decision(3, "Kill switch is on: every action is blocked", blocked=True, rules=["kill_switch"])
+    if hits := [o for o in ops if o.sanctions_hit]:
+        return Decision(3, f"Counterparty matches the sanctions list ({hits[0].sanctions_hit}): "
+                           "blocked and escalated to compliance", blocked=True, rules=["sanctions_hit"])
 
     l1, l2, l3 = p["tiers"]["L1"], p["tiers"]["L2"], p["tiers"]["L3"]
     total = sum(o.amount_clp for o in ops)
