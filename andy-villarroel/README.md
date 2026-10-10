@@ -37,7 +37,7 @@
 - [x] `r4-05` **Oct 10** · Must — **Step-up**: SMS OTP (Zavu) for L3. Voice never approves L3 and we explain why (deepfakes).
 - [x] `r4-07` **Oct 11** · Should — **Privacy and compliance**: data minimization, PII masking before the LLM, encryption, Ley 21.719 (Chile), PIPL (China), simulated sanctions screening.
 - [x] `r4-06` **Oct 12** · Must — **Red team** with 40 or more attacks: poisoned invoice, hidden text in PDF, instruction in image, fake approval, exfiltration, split payments. Before and after metrics.
-- [ ] `r4-08` **Oct 14** · Should — **Regulatory slide** for the deck: which regulations we comply with and how.
-- [ ] `r4-11` **Oct 14** · Should — **Compliance for China** in the deck and docs: PIPL, cross-border data transfer and the Interim Measures for generative AI (2023), plus Ley 21.719 in Chile.
-- [ ] `r4-09` **Oct 15** · Must — **Security Self-Assessment Report**: how the permission levels are implemented and an honest list of known risks.
-- [ ] `r4-10` **Oct 16** · Must — **Execution evidence**: review logs and hashes with Camilo and assemble package 06.
+- [x] `r4-08` **Oct 14** · Should — _(content ready in privacy-compliance.md; goes into Valentín's deck)_ **Regulatory slide** for the deck: which regulations we comply with and how.
+- [x] `r4-11` **Oct 14** · Should — **Compliance for China** in the deck and docs: PIPL, cross-border data transfer and the Interim Measures for generative AI (2023), plus Ley 21.719 in Chile.
+- [x] `r4-09` **Oct 15** · Must — _(v1; refresh after the freeze)_ **Security Self-Assessment Report**: how the permission levels are implemented and an honest list of known risks.
+- [ ] `r4-10` **Oct 16** · Must — _(builder + sample done; live export from Camilo's deploy pending)_ **Execution evidence**: review logs and hashes with Camilo and assemble package 06.

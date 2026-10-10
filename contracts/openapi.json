@@ -601,15 +601,27 @@
         ],
         "summary": "Set Kill Switch",
         "operationId": "set_kill_switch_policy_kill_switch_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/KillSwitchIn"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1620,6 +1632,7 @@
           "actor": {
             "type": "string",
             "title": "Actor",
+            "description": "Label only: the entry is recorded as agent:<label>",
             "default": "security"
           },
           "payload": {

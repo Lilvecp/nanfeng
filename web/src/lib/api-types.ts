@@ -645,6 +645,7 @@ export interface components {
             kind: string;
             /**
              * Actor
+             * @description Label only: the entry is recorded as agent:<label>
              * @default security
              */
             actor: string;
@@ -1345,7 +1346,9 @@ export interface operations {
     set_kill_switch_policy_kill_switch_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path?: never;
             cookie?: never;
         };
