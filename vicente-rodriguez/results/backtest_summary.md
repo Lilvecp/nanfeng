@@ -15,27 +15,27 @@ CRPS of the log change, in basis points (lower is better). Nominal P10–P90 cov
 | clp_per_cny | 60 d | 245.3 | 243.7 | -0.7% | 83.3% | 91.7% |
 | clp_per_cny | 90 d | 291.3 | 289.0 | -0.8% | 81.4% | 90.2% |
 
-Cash forecasts below use parameter uncertainty tau = 0.35 (production default). Truth paths use the exact parameters. Section 3 repeats the test with tau = 0 for comparison.
+Cash forecasts below use parameter uncertainty tau = 0.5 (production default). Truth paths use the exact parameters. Section 3 repeats the test with tau = 0 for comparison.
 
 ## 2. Cash, well-specified truth (20 synthetic SMEs × 25 truth paths)
 
 | Day | CRPS (MCLP) | MAE point forecast (MCLP) | CRPS skill vs point | Relative CRPS | P10–P90 coverage |
 |---|---|---|---|---|---|
-| 30 | 21.82 | 33.97 | +35.8% | 6.9% | 85.6% |
-| 60 | 35.5 | 56.16 | +36.8% | 6.5% | 85.6% |
-| 90 | 59.22 | 88.88 | +33.4% | 6.5% | 82.6% |
+| 30 | 22.82 | 33.97 | +32.8% | 7.2% | 87.8% |
+| 60 | 36.77 | 56.16 | +34.5% | 6.7% | 90.0% |
+| 90 | 60.14 | 88.88 | +32.3% | 6.6% | 85.8% |
 
-Buffer-breach probability: Brier 0.07 vs climatology 0.1914 (skill +63.4%), event rate 25.8%.
+Buffer-breach probability: Brier 0.0734 vs climatology 0.1914 (skill +61.7%), event rate 25.8%.
 
 ## 2. Cash, misspecified truth (20 synthetic SMEs × 25 truth paths)
 
 | Day | CRPS (MCLP) | MAE point forecast (MCLP) | CRPS skill vs point | Relative CRPS | P10–P90 coverage |
 |---|---|---|---|---|---|
-| 30 | 28.25 | 46.46 | +39.2% | 9.3% | 72.6% |
-| 60 | 44.76 | 75.32 | +40.6% | 8.6% | 75.2% |
-| 90 | 69.76 | 111.22 | +37.3% | 7.9% | 73.8% |
+| 30 | 29.06 | 46.46 | +37.5% | 9.5% | 78.8% |
+| 60 | 45.87 | 75.32 | +39.1% | 8.8% | 83.2% |
+| 90 | 69.88 | 111.22 | +37.2% | 7.9% | 80.0% |
 
-Buffer-breach probability: Brier 0.0913 vs climatology 0.198 (skill +53.9%), event rate 27.2%.
+Buffer-breach probability: Brier 0.0933 vs climatology 0.198 (skill +52.9%), event rate 27.2%.
 
 ## 3. Cash, well-specified truth, tau = 0 (20 synthetic SMEs × 25 truth paths)
 

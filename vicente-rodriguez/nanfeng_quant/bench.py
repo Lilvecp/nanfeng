@@ -39,6 +39,8 @@ SYSTEM_PATHS = 10_000
 SYSTEM_SEED = 7
 CRUNCH_TOL_DAYS = 2
 COVERAGE_TOL = 0.01
+OFFLINE_LIMIT_S = 30.0
+WORKERS = 8
 EVENTS = ["late_notice", "fx_shock", "price_drop", "new_hires", "customer_default", "none"]
 
 
@@ -172,14 +174,19 @@ def run_stochastic(case_id: int, company: Company, event: str, catalog: Catalog,
     plan_ok = True
     if s_need:
         t1 = time.perf_counter()
-        best, default = optimize_pair(sys_res, catalog, confidence=TARGET, exact_time_limit_s=10.0)
+        best, default = optimize_pair(sys_res, catalog, confidence=TARGET)  # online solver budget
         row["optimize_ms"] = round((time.perf_counter() - t1) * 1000)
         row["plan_status"] = best.status
         if best.total_cost_clp is not None:
             cov = _coverage_on(best, oracle, catalog)
+            # How far is the online plan (2 s budget) from what a long offline solve finds?
+            ref = optimize(sys_res, catalog, confidence=TARGET, exact_time_limit_s=OFFLINE_LIMIT_S, max_retries=0)
+            excess = (best.total_cost_clp / ref.total_cost_clp - 1) if ref.total_cost_clp else 0.0
             row.update(plan_cost_clp=round(best.total_cost_clp), oracle_coverage=round(cov, 4),
                        plan_actions=[a["summary"] for a in best.actions],
-                       optimality_gap=best.meta.get("optimality_gap"))
+                       optimality_gap=best.meta.get("optimality_gap"),
+                       offline_cost_clp=None if ref.total_cost_clp is None else round(ref.total_cost_clp),
+                       excess_vs_offline=round(max(excess, 0.0), 4))
             cost_ok = True
             if default.total_cost_clp is not None:
                 row["default_cost_clp"] = round(default.total_cost_clp)
@@ -223,18 +230,25 @@ def run_deterministic(case_id: int, company: Company) -> dict[str, Any]:
     }
 
 
-def run(limit: int | None = None, out_dir: Path = RESULTS_DIR, verbose: bool = True) -> dict[str, Any]:
-    smes = [Company.from_dict(d) for d in json.loads(SMES_FILE.read_text(encoding="utf-8"))]
-    catalog = Catalog.load()
-    rng = np.random.default_rng(99)
-    rows = []
+def _case(i: int) -> dict[str, Any]:
+    smes = json.loads(SMES_FILE.read_text(encoding="utf-8"))
+    company = Company.from_dict(smes[i])
+    if i < 40:
+        # one generator per case: results do not depend on the order cases run in
+        return run_stochastic(i + 1, company, EVENTS[i % len(EVENTS)], Catalog.load(), np.random.default_rng(99 + i))
+    return run_deterministic(i + 1, company)
+
+
+def run(limit: int | None = None, out_dir: Path = RESULTS_DIR, verbose: bool = True,
+        workers: int = WORKERS) -> dict[str, Any]:
+    """Cases run in parallel processes; latencies are therefore measured with `workers` cases
+    sharing the machine (conservative)."""
+    from concurrent.futures import ProcessPoolExecutor
+    n = 50 if limit is None else limit
     t_start = time.perf_counter()
-    for i in range(50 if limit is None else limit):
-        if i < 40:
-            row = run_stochastic(i + 1, smes[i], EVENTS[i % len(EVENTS)], catalog, rng)
-        else:
-            row = run_deterministic(i + 1, smes[i])
-        rows.append(row)
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        rows = list(ex.map(_case, range(n)))
+    for row in rows:
         if verbose:
             print(f"case {row['case']:02d} {row['kind'][:5]} {row['company_id']} {row['event']:<17} "
                   f"success={row['success']} detect={row['detect_ok']} crunch={row['crunch_ok']} plan={row['plan_ok']}"
@@ -272,6 +286,8 @@ def summarize(rows: list[dict[str, Any]], seconds: float) -> dict[str, Any]:
         "median_forecast_ms": round(statistics.median(r["forecast_ms"] for r in rows)),
         "median_optimize_ms": round(statistics.median(r["optimize_ms"] for r in rows if "optimize_ms" in r)) if any("optimize_ms" in r for r in rows) else None,
         "p90_optimize_ms": round(float(np.quantile([r["optimize_ms"] for r in rows if "optimize_ms" in r], 0.9))) if any("optimize_ms" in r for r in rows) else None,
+        "mean_excess_vs_offline": round(statistics.mean(r["excess_vs_offline"] for r in rows if "excess_vs_offline" in r), 4) if any("excess_vs_offline" in r for r in rows) else None,
+        "max_excess_vs_offline": round(max(r["excess_vs_offline"] for r in rows if "excess_vs_offline" in r), 4) if any("excess_vs_offline" in r for r in rows) else None,
         "runtime_s": round(seconds, 1),
     }
 
@@ -293,9 +309,10 @@ def render_markdown(summary: dict[str, Any], rows: list[dict[str, Any]]) -> str:
         f"| Mean / min oracle coverage of plans | {pct(summary['mean_oracle_coverage'])} / {pct(summary['min_oracle_coverage'])} |",
         f"| Mean / median savings vs. default bank loan | {pct(summary['mean_savings_vs_default_pct'])} / {pct(summary['median_savings_vs_default_pct'])} |",
         f"| Total savings across plans | CLP {summary['total_savings_clp']:,.0f} |",
-        f"| Median latency forecast / optimize | {summary['median_forecast_ms']} ms / {summary['median_optimize_ms']} ms |",
+        f"| Median latency forecast / optimize (plan + default loan) | {summary['median_forecast_ms']} ms / {summary['median_optimize_ms']} ms |",
         f"| p90 latency optimize | {summary['p90_optimize_ms']} ms |",
-        f"| Runtime | {summary['runtime_s']} s |", "",
+        f"| Online plan cost vs. {OFFLINE_LIMIT_S:.0f} s offline solve (mean / max excess) | {pct(summary['mean_excess_vs_offline'])} / {pct(summary['max_excess_vs_offline'])} |",
+        f"| Runtime | {summary['runtime_s']} s ({WORKERS} cases in parallel; latencies measured under that load) |", "",
         "## Cases", "",
         "| # | Kind | SME | Event | Oracle P(<buffer) | System | Crunch (oracle/system) | Coverage | Savings | OK |",
         "|---|---|---|---|---|---|---|---|---|---|",

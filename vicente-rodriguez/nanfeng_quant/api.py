@@ -25,6 +25,7 @@ DEMO_ARTIFACTS = {
     "before": "cherry_crisis_before.json", "forecast": "cherry_crisis_forecast.json",
     "quotes": "cherry_crisis_quotes.json", "plan": "cherry_crisis_plan.json",
     "passport": "cherry_crisis_passport.json", "scenario_lab": "cherry_crisis_scenario_lab.json",
+    "story": "cherry_crisis_story.json",
 }
 
 
@@ -41,7 +42,7 @@ class Overrides(BaseModel):
     usd_shift_pct: float = Field(0.0, description="Level shift of CLP per USD from today, %")
     cherry_price_pct: float = Field(0.0, description="Change in cherry price for uninvoiced shipments, %")
     extra_hires: int = Field(0, ge=0, description="Extra workers added to every payroll")
-    hire_monthly_wage_clp: float = 650_000.0
+    hire_monthly_wage_clp: float = 750_000.0  # assumption: harvest crew cost incl. employer contributions
     on_time_customers: list[str] = Field(default_factory=list)
     defaulted_customers: list[str] = Field(default_factory=list)
     ignore_announced_delays: bool = False
@@ -75,6 +76,7 @@ class PlanRequest(ScenarioRef):
     seed: int = 7
     explain: bool = True
     n_scenarios: int = Field(200, ge=50, le=500, description="Scenarios inside the MILP")
+    channel: str = Field("WEB", description="Channel written into approval_request (WEB, WHATSAPP, ...)")
 
 
 class PassportRequest(ScenarioRef):
@@ -185,12 +187,40 @@ class Explanation(Loose):
     reason: str
 
 
+class Operation(Loose):
+    op: str | None
+    params: dict[str, Any]
+
+
+class ApprovalRequest(Loose):
+    """Body for the backend's POST /approvals (extra keys are ignored there)."""
+    action: str
+    operations: list[Operation]
+    explanation: str
+    channel: str
+    unsupported: list[Operation] = []
+
+
+class CreditGrade(Loose):
+    score: float
+    grade: Literal["A", "B", "C", "D", "E"]
+
+
+class PassportChange(Loose):
+    before: CreditGrade
+    after_plan: CreditGrade
+
+
 class PlanResponse(Loose):
     optimal: Plan
     default: Plan
     default_product: str
     savings_clp: float | None = None
     savings_pct: float | None = None
+    headline: str
+    approval_request: ApprovalRequest | None = None
+    after_plan: dict[str, Any] | None = Field(None, description="Forecast with the plan applied: probabilities and fan chart (Cash Cockpit 'resolved' overlay)")
+    credit_passport: PassportChange | None = None
     forecast: Summary
     explanation: list[Explanation] | None = None
     latency_ms: int
@@ -271,7 +301,7 @@ def quote(req: QuoteRequest) -> dict[str, Any]:
 @app.post("/quant/plan", response_model=PlanResponse)
 def plan(req: PlanRequest) -> dict[str, Any]:
     return tools.optimize_plan(_scenario(req), req.confidence, _ov(req.overrides), req.n_paths, req.seed,
-                               req.explain, req.n_scenarios)
+                               req.explain, req.n_scenarios, channel=req.channel)
 
 
 @app.post("/quant/passport", response_model=PassportResponse)
@@ -280,9 +310,25 @@ def passport(req: PassportRequest) -> dict[str, Any]:
 
 
 @app.get("/quant/demo/{artifact}")
-def demo(artifact: Literal["before", "forecast", "quotes", "plan", "passport", "scenario_lab"]) -> Any:
+def demo(artifact: Literal["before", "forecast", "quotes", "plan", "passport", "scenario_lab", "story"]) -> Any:
     """Precomputed Cherry Crisis results for Demo Mode: no computation, no network dependency."""
     return json.loads((RESULTS_DIR / DEMO_ARTIFACTS[artifact]).read_text(encoding="utf-8"))
+
+
+@app.get("/quant/sandbox/seed")
+def sandbox_seed(scenario: str = "cherry_crisis") -> dict[str, Any]:
+    """Accounts, receivables, lenders and FX for the sandbox bank, from the same scenario and catalog
+    the engine uses (so plan operations reference lenders and invoices that exist in the bank)."""
+    try:
+        return tools.sandbox_seed(scenario)
+    except FileNotFoundError:
+        raise HTTPException(404, f"unknown scenario {scenario!r}")
+
+
+@app.get("/quant/tools")
+def agent_tools() -> list[dict[str, Any]]:
+    """Function-calling schemas (OpenAI / OpenRouter format) of the agent tools."""
+    return tools.TOOL_SPECS
 
 
 @app.get("/quant/schema/scenario")
@@ -295,7 +341,8 @@ def export(out_dir: Path = ROOT / "api") -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "openapi.json").write_text(json.dumps(app.openapi(), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     (out_dir / "scenario.schema.json").write_text(json.dumps(scenario_schema(), indent=1) + "\n", encoding="utf-8")
-    print(f"wrote {out_dir / 'openapi.json'} and {out_dir / 'scenario.schema.json'}")
+    (out_dir / "agent_tools.json").write_text(json.dumps(tools.TOOL_SPECS, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"wrote openapi.json, scenario.schema.json and agent_tools.json to {out_dir}")
 
 
 if __name__ == "__main__":

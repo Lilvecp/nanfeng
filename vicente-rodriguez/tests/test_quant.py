@@ -150,3 +150,68 @@ def test_action_cap_is_respected(cherry_res, catalog):
     from nanfeng_quant.optimizer import optimize
     plan = optimize(cherry_res, catalog, max_actions=1, exact_time_limit_s=10.0, max_retries=0)
     assert plan.total_cost_clp is None or len(plan.actions) <= 1
+
+
+# ---- iteration 3: fair default loan, realistic factoring, systemic delays, integration ----
+
+def test_loans_offer_several_terms_and_quote_picks_shortest_that_covers(catalog):
+    wc = catalog.product("WC-BANK")
+    assert wc.terms() == [30, 60, 90, 180]
+    assert catalog.loan_unit_cost(wc, 30) < catalog.loan_unit_cost(wc, 180)
+    assert catalog.stamp_tax(30) == pytest.approx(catalog.product_stamp(wc, 30))
+
+
+def test_non_recourse_factor_refuses_invoice_with_announced_delay(cherry, catalog):
+    from nanfeng_quant.catalog import eligible_receivable
+    late = next(r for r in cherry.receivables if r.announced_delay_days)
+    assert not eligible_receivable(catalog.product("FACT-BANK"), late)
+    assert eligible_receivable(catalog.product("FACT-FINTECH"), late)  # with recourse: the exporter keeps the risk
+
+
+def test_recourse_factoring_repays_advance_when_buyer_is_late(cherry, cherry_res, catalog):
+    p = catalog.product("FACT-FINTECH")
+    j = 0
+    r = cherry.receivables[j]
+    rd = 30
+    lv = Lever("t", p, "factoring", 5, 1.0, 0.0, "fraction", r.id, j,
+               {"face_clp": 1.0, "days_charged": 15, "recourse_day": rd})
+    paths = np.arange(cherry_res.n_paths)
+    f = lever_flows(lv, cherry, catalog, cherry_res, paths)
+    tau = cherry_res.receivable_pay_day[:, j]
+    late = np.nonzero(tau > rd)[0]
+    if late.size:
+        k = late[0]
+        assert f[k, rd] < 0 and f[k].sum() == pytest.approx(
+            p.advance_rate * r.amount * (cherry_res.fx.rate(r.currency)[k, 5] - cherry_res.fx.rate(r.currency)[k, rd]))
+
+
+def test_zero_systemic_share_matches_independent_customers(cherry):
+    a = simulate(cherry, 300, seed=5, systemic_share=0.0).cash
+    b = simulate(cherry, 300, seed=5, systemic_share=0.6).cash
+    assert not np.array_equal(a, b)
+    assert np.array_equal(a, simulate(cherry, 300, seed=5, systemic_share=0.0).cash)
+
+
+def test_plan_output_is_ready_for_the_backend():
+    out = tools.optimize_plan("cherry_crisis", explain=False)
+    req = out["approval_request"]
+    assert 1 <= len(req["operations"]) <= 5  # backend ApprovalCreate limit
+    assert all(op["op"] in ("payment", "fx_convert", "factoring", "loan", "forward") for op in req["operations"])
+    seed_ids = {l["id"] for l in tools.sandbox_seed()["lenders"]}
+    receivables = {r["id"] for r in tools.sandbox_seed()["receivables"]}
+    for op in req["operations"]:
+        assert op["params"]["lender_id"] in seed_ids
+        if op["op"] == "factoring":
+            assert op["params"]["receivable_id"] in receivables and 0 < op["params"]["share"] <= 1
+    assert out["after_plan"]["prob_negative_cash_horizon"] < out["forecast"]["prob_negative_cash_horizon"]
+    assert out["credit_passport"]["after_plan"]["score"] > out["credit_passport"]["before"]["score"]
+    assert out["savings_pct"] > 0
+    again = tools.optimize_plan("cherry_crisis", explain=False)
+    assert again["source"].get("cached") and again["optimal"]["total_cost_clp"] == out["optimal"]["total_cost_clp"]
+
+
+def test_agent_tool_specs_match_tools():
+    names = {s["function"]["name"] for s in tools.TOOL_SPECS}
+    assert names == set(tools.TOOLS)
+    err = json.loads(tools.call("forecast_run", {"scenario": "cherry_crisis", "bogus": 1}))
+    assert "error" in err

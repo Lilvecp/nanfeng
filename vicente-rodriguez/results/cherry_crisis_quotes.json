@@ -1,43 +1,27 @@
 {
- "amount_clp": 54845328,
+ "amount_clp": 55594431,
  "need_date": "2026-12-30",
  "need_days": 30,
  "quotes": [
   {
-   "product_id": "OVERDRAFT",
-   "name": "Credit line / overdraft",
-   "kind": "loan",
-   "lender": "Banco Andino (fictional)",
-   "requirements": "Pre-approved line on the current account.",
-   "eligible": true,
-   "reason": "eligible",
-   "rate_reference": "CMF statistics, credit lines on current accounts",
-   "amount_clp": 54845328.175027706,
-   "cost_clp": 1333838.3812166739,
-   "term_days": 30,
-   "eac": 0.33957521935413815,
-   "covers_need": true,
-   "note": ""
-  },
-  {
    "product_id": "FACT-BANK",
-   "name": "Export factoring, non-recourse",
+   "name": "Export factoring, non-recourse (bank)",
    "kind": "factoring",
    "lender": "Banco Andino (fictional)",
-   "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor.",
+   "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor. A non-recourse factor does not buy an invoice whose debtor has already announced a delay.",
    "eligible": true,
    "reason": "eligible",
-   "rate_reference": "CMF interest-rate statistics; bank factoring rates for exporters",
-   "amount_clp": 54845328.175027706,
-   "cost_clp": 1353704.5057756535,
-   "term_days": 39,
-   "eac": 0.25633095247664484,
+   "rate_reference": "Public Chilean ranges 2026: non-recourse 1.5%-2.2%/month, with recourse 1.2%-1.8%/month (chita.cl, simpli.cl); low end because the buyer is insured",
+   "amount_clp": 55594430.873377316,
+   "cost_clp": 844862.5535065033,
+   "term_days": 19,
+   "eac": 0.33608569942637145,
    "covers_need": true,
    "invoices": [
     {
-     "receivable_id": "INV-2026-118",
-     "fraction": 0.3644,
-     "days": 39
+     "receivable_id": "INV-2026-109",
+     "fraction": 0.4432,
+     "days": 19
     }
    ]
   },
@@ -49,13 +33,82 @@
    "requirements": "Export contract or shipping documents; repaid in USD with the export proceeds.",
    "eligible": true,
    "reason": "eligible",
-   "rate_reference": "Term SOFR + bank spread for exporters (bank trade-finance price lists)",
-   "amount_clp": 54845328.175027706,
-   "cost_clp": 1510667.1568763875,
-   "term_days": 120,
-   "eac": 0.0861583414922793,
+   "rate_reference": "CMF certificate 09/2026: foreign-currency bank average 10.26%/yr (up to 2,000 UF) and 5.78%/yr (above); Term SOFR + exporter spread",
+   "amount_clp": 55594430.873377316,
+   "cost_clp": 908222.4103280208,
+   "term_days": 60,
+   "term_options_days": [
+    60,
+    90,
+    120,
+    180
+   ],
+   "eac": 0.10360023341720259,
    "covers_need": true,
    "note": "cost of the full contract term"
+  },
+  {
+   "product_id": "WC-BANK",
+   "name": "Working capital loan (default bank credit)",
+   "kind": "loan",
+   "lender": "Banco Andino (fictional)",
+   "requirements": "Two years of financial statements; collateral or personal guarantee.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "CMF certificate 09/2026: bank average 20.06%/yr (90 days or more, 200-5,000 UF) and 33.34%/yr (under 90 days, up to 5,000 UF). We use 14% (a collateralized exporter with a good record), which makes the default loan cheaper and our savings conservative",
+   "amount_clp": 55594430.873377316,
+   "cost_clp": 1104381.21756026,
+   "term_days": 30,
+   "term_options_days": [
+    30,
+    60,
+    90,
+    180
+   ],
+   "eac": 0.2703863960024675,
+   "covers_need": true,
+   "note": ""
+  },
+  {
+   "product_id": "OVERDRAFT",
+   "name": "Credit line / overdraft",
+   "kind": "loan",
+   "lender": "Banco Andino (fictional)",
+   "requirements": "Pre-approved line on the current account.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "2.1%/month = 25.2%/yr, under the CMF short-term average of 33.34%/yr (certificate 09/2026)",
+   "amount_clp": 55594430.873377316,
+   "cost_clp": 1352056.5588405363,
+   "term_days": 30,
+   "term_options_days": [
+    30
+   ],
+   "eac": 0.33957521935413815,
+   "covers_need": true,
+   "note": ""
+  },
+  {
+   "product_id": "FACT-FINTECH",
+   "name": "Fintech factoring, with recourse (fast onboarding)",
+   "kind": "factoring",
+   "lender": "Cordillera Factoring (fictional fintech)",
+   "requirements": "Online onboarding; funds in 24 h. With recourse: if the buyer has not paid 30 days after the expected date, the exporter repays the advance.",
+   "eligible": true,
+   "reason": "eligible",
+   "rate_reference": "Fintech rate cards 2026 (Xepelin 0.5%-1.8%, GoCapital 0.6%-2.0%, Crecer 0.8%-2.2% per month; portalinnova.cl)",
+   "amount_clp": 55594430.873377316,
+   "cost_clp": 1714161.6185958008,
+   "term_days": 39,
+   "eac": 0.32871059765107535,
+   "covers_need": true,
+   "invoices": [
+    {
+     "receivable_id": "INV-2026-118",
+     "fraction": 0.3488,
+     "days": 39
+    }
+   ]
   },
   {
    "product_id": "CONF-BANK",
@@ -65,7 +118,7 @@
    "requirements": "Supplier enrolled in the bank's confirming program.",
    "eligible": true,
    "reason": "eligible",
-   "rate_reference": "Bank confirming programs (CMF statistics)",
+   "rate_reference": "Bank confirming programs; below the CMF short-term average because the risk is the buyer's (our SME)",
    "amount_clp": 70000000,
    "cost_clp": 1737400.0000000002,
    "term_days": 60,
@@ -77,44 +130,6 @@
    ]
   },
   {
-   "product_id": "FACT-FINTECH",
-   "name": "Fintech factoring (fast onboarding)",
-   "kind": "factoring",
-   "lender": "Cordillera Factoring (fictional fintech)",
-   "requirements": "Online onboarding; funds in 24 h.",
-   "eligible": true,
-   "reason": "eligible",
-   "rate_reference": "Public rate cards of Chilean factoring fintechs",
-   "amount_clp": 54845328.175027706,
-   "cost_clp": 1770285.3149828387,
-   "term_days": 39,
-   "eac": 0.34623792779285845,
-   "covers_need": true,
-   "invoices": [
-    {
-     "receivable_id": "INV-2026-118",
-     "fraction": 0.3441,
-     "days": 39
-    }
-   ]
-  },
-  {
-   "product_id": "WC-BANK",
-   "name": "Working capital loan (default bank credit)",
-   "kind": "loan",
-   "lender": "Banco Andino (fictional)",
-   "requirements": "Two years of financial statements; collateral or personal guarantee.",
-   "eligible": true,
-   "reason": "eligible",
-   "rate_reference": "CMF / BCCh commercial loan rates for SMEs; TMC cap",
-   "amount_clp": 54845328.175027706,
-   "cost_clp": 4211619.612882929,
-   "term_days": 180,
-   "eac": 0.1618638899486744,
-   "covers_need": true,
-   "note": "cost of the full contract term"
-  },
-  {
    "product_id": "FOGAPE",
    "name": "FOGAPE-guaranteed working capital loan",
    "kind": "loan",
@@ -122,11 +137,14 @@
    "requirements": "Net annual sales up to 100,000 UF (medium firms 25,001-100,000 UF get 50% guarantee coverage); financing up to 15,000 UF; no protests or overdue debts.",
    "eligible": true,
    "reason": "eligible",
-   "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator) and bidding results",
-   "amount_clp": 54845328.175027706,
-   "cost_clp": 7010511.350053491,
+   "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator); rate below the unguaranteed loan because half the risk is state-guaranteed",
+   "amount_clp": 55594430.873377316,
+   "cost_clp": 7104898.290045542,
    "term_days": 365,
-   "eac": 0.12782330935610187,
+   "term_options_days": [
+    365
+   ],
+   "eac": 0.12779874132047087,
    "covers_need": true,
    "note": "cost of the full contract term"
   },
@@ -149,14 +167,14 @@
    "requirements": "Only receivables backed by a confirmed documentary letter of credit.",
    "eligible": false,
    "reason": "every eligible invoice is collected before the need date",
-   "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted)"
+   "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted to a monthly discount)"
   }
  ],
- "catalog_status": "REFERENCE VALUES TO VERIFY. Rates are realistic order-of-magnitude figures for a Chilean exporting SME in 2026, not quotes. Lenders are fictional. See docs/financial-catalog.md for the sources to check each number against.",
+ "catalog_status": "REFERENCE VALUES, NOT QUOTES. Lenders are fictional. Loan rates are anchored to the CMF interest-rate certificate 09/2026 (bank averages for August 2026) and set below the market average on purpose, so the savings we report against the bank loan are conservative. Factoring rates come from public Chilean rate ranges. See docs/financial-catalog.md for every source.",
  "source": {
   "tool": "financing_quote",
-  "engine": "nanfeng_quant 0.1.0",
+  "engine": "nanfeng_quant 0.3.0",
   "deterministic": true,
-  "catalog_version": "0.1.0"
+  "catalog_version": "0.2.0"
  }
 }

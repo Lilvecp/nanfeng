@@ -1,47 +1,45 @@
 # Market data for the deck (r5-05)
 
-Figures for the problem and market slides, each with its source. **Status: collected from web search on 2026-10-09; every figure must be opened at the source and confirmed before it goes in the deck** (see the checklist in the README).
+Figures for the problem and market slides, each with its source. Re-checked on **2026-10-10**: the 2025/26 cherry season replaces the older 2024/25 numbers, and the weak "60% paid late" figure is replaced by the Bolsa de Productos ranking. Column "Status": ✅ confirmed at an official or primary source · 🟡 reputable secondary source (fine for a slide, cite it).
 
 ## Chile → China corridor
 
-| Figure | Value | Source | Check |
+| Figure | Value | Source | Status |
 |---|---|---|---|
-| Chilean goods exports, 2024 | USD 100,163 million (+5.9% y/y) | Banco Central de Chile, Indicadores de Comercio Exterior Q4 2024 ([BCCh on X](https://x.com/bcentralchile/status/1894130534483177947)) | Confirm in the BCCh publication itself |
-| Share of Chilean exports going to Mainland China, 2024 | ~36% (USD 37.3 bn); other sources say 36–40% | [Marca Chile, "Chile en cifras 2024"](https://www.marcachile.cl/en/cifras-economicas-chile-2024-exportaciones-inversion/), [Statista](https://www.statista.com/statistics/1105972/chile-trade-value-china/) | Use the BCCh number |
-| Share of Chile's cherry exports going to China (incl. Hong Kong SAR), 2024/25 | 90.9% (568,504 t) | [Frutas de Chile 2024/25 cherry handbook (Produce Report)](https://www.producereport.com/article/frutas-de-chile-releases-2024-25-cherry-trade-statistics-handbook) | Confirm in the Frutas de Chile handbook |
-| Chile's share of China's cherry imports, 2024/25 | ~98% | [Produce Report](https://www.producereport.com/article/chiles-fresh-cherry-exports-china-hit-record-high) | Secondary source |
-| Cherry export volume, 2024/25 (to week 9) | 626,013 t, +51% vs 413,979 t | [FreshFruitPortal, 2025-03-19](https://www.freshfruitportal.com/news/2025/03/19/final-stretch-of-chilean-cherry-season-sees-51-rise-in-exports/) | – |
-| Cherry FOB price, Sep–Dec 2024 vs. 2023 | USD 5,837/t vs. USD 8,862/t (−34%) | [FreshPlaza](https://www.freshplaza.com/north-america/article/9698304/chilean-fruit-exports-grow-in-volume-and-value/) | Supports the "price risk" story |
-| Cherry export value | USD 1.1 bn FOB Sep–Dec 2024; a source reports USD 2.60 bn for a full season (dates unclear) | [FreshPlaza](https://www.freshplaza.com/north-america/article/9698304/chilean-fruit-exports-grow-in-volume-and-value/), [USDA FAS Stone Fruit Annual 2025](https://apps.fas.usda.gov/newgainapi/api/Report/DownloadReportByFileName?fileName=Stone+Fruit+Annual_Santiago_Chile_CI2025-0017.pdfc) | **Ambiguous — take the full-season value from the USDA report** |
+| Chilean cherry exports, 2025/26 season | **USD 2.6 bn FOB** (Sep 2025–Feb 2026), 113.8 M boxes ≈ 569 kt; down 8% in value vs 2024/25 as prices fell | [FreshPlaza](https://www.freshplaza.com/north-america/article/9812438/chile-cherry-exports-reach-113-8-million-boxes-as-prices-fall/), [FreshFruitPortal](https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/) (Frutas de Chile data) | 🟡 |
+| Share going to China, 2025/26 | **~87%** of value and volume (98.9 M boxes); 92% the season before | Same sources | 🟡 |
+| Cherries in Chile's fresh-fruit exports | 60% of value, 38% of volume | [FreshFruitPortal](https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/) | 🟡 |
+| Chile's share of China's cherry imports | ~98% (2024/25) | [Produce Report](https://www.producereport.com/article/chiles-fresh-cherry-exports-china-hit-record-high) | 🟡 |
+| Price risk | FOB price Sep–Dec 2024 USD 5,837/t vs USD 8,862/t a year earlier (−34%) | [FreshPlaza](https://www.freshplaza.com/north-america/article/9698304/chilean-fruit-exports-grow-in-volume-and-value/) | 🟡 |
+| Chilean goods exports, 2024 | USD 100.2 bn (+5.9%); ~36% to Mainland China | Banco Central de Chile; [Marca Chile](https://www.marcachile.cl/en/cifras-economicas-chile-2024-exportaciones-inversion/) | 🟡 (use the BCCh figure) |
+| Logistics | Express services reach China in 21–23 days; ~4,000 containers arrived in the first week of January 2026 | [Xinhua](https://english.news.cn/20260113/0eb97c8640c940b69957e611e52bf62b/c.html) | 🟡 |
 
-## SME financing gap
+## Late payment (why cash breaks)
 
-| Figure | Value | Source | Check |
+| Figure | Value | Source | Status |
 |---|---|---|---|
-| MSME finance gap in emerging markets | USD 5.7 trillion; USD 8 trillion including informal firms | [SME Finance Forum, MSME Finance Gap report](https://www.smefinanceforum.org/post/msme-finance-gap-report); [IFC FIG MSME factsheet](https://www.ifc.org/content/dam/ifc/doclink/latest/msme-s-factsheet-ifc-financial-institutions-group.pdf) | Quote the IFC wording exactly |
-| MSMEs: share of firms / employment / GDP | >90% / ~70% / ~50% | [IFC MSME Day](https://www.ifc.org/en/what-we-do/msme-day) | – |
+| Legal maximum invoice term in Chile | 30 calendar days (Ley 21.131, since 2020) | Ley 21.131 (BCN) | ✅ |
+| Invoices paid after 30 days | **63% of the amount** invoiced by SMEs; average payment term **44 days** (Jul 2025–Jun 2026) | Bolsa de Productos, Ranking de Pagadores, as reported by the press in 2026 ([Orsan](https://www.orsancheque.cl/pagos-fuera-de-plazo-problemas-de-liquidez-en-2026/), [La Tercera](https://www.latercera.com/pulso/noticia/estudio-muestra-que-el-50-de-las-facturas-emitidas-por-pymes-se-pagan-a-mas-de-30-dias/)) | 🟡 open the ranking itself before quoting 63% |
+| SME invoices paid after 30 / 60 days | ~50% / ~15% | Xepelin analysis ([fintechile.org](https://fintechile.org/noticias/estudio-muestra-que-el-50-de-las-facturas-emitidas-por-pymes-se-pagan-a-mas-de-30-dias)) | 🟡 |
+| SMEs reporting late payments from customers | ~80% | ASECH + CobranzaOnline national survey, Jul–Aug 2025 | 🟡 |
+| Cherry exports to China: commercial terms | Consignment with partial advance, liquidation after sale in China (we model 15% advance and 75 days) | No public source found | **Assumption — say so if asked** |
 
-## Payment terms (why cash breaks)
+## SME financing
 
-| Figure | Value | Source | Check |
+| Figure | Value | Source | Status |
 |---|---|---|---|
-| Legal maximum invoice payment term in Chile | 30 calendar days (Ley 21.131, in force since 2020-04-01; longer terms only by written agreement) | [Defontana](https://www.defontana.com/blog/cl/las-claves-de-la-nueva-ley-de-pago-a-30-dias), [Presidencia](https://prensa.presidencia.cl/comunicado.aspx?id=89464) | Confirm in the law text (BCN) |
-| Share of companies paid after the legal term (private sector) | ~60% | [Duemint](https://duemint.com/blog/morosidad-y-ley-de-pago-a-30-dias-cuando-entra-en-vigencia-y-que-impacto-tendra) | **Weak source — find the original survey** |
-| Cherry exports to China: typical commercial terms | Consignment with partial advance, liquidation 60–90 days after arrival (assumption used in the model) | — | **Needs a source (ASOEX / Frutas de Chile / exporter interview)** |
+| MSME finance gap in emerging markets | USD 5.7 trillion; USD 8 trillion including informal firms | [SME Finance Forum / IFC](https://www.smefinanceforum.org/post/msme-finance-gap-report) | ✅ |
+| MSMEs: share of firms / employment / GDP | >90% / ~70% / ~50% | [IFC](https://www.ifc.org/en/what-we-do/msme-day) | ✅ |
+| What Chilean banks charge SMEs | 20.06%/yr average (CLP loans ≥ 90 days, 200–5,000 UF); 33.34%/yr under 90 days; 6.64%/yr for large loans above 5,000 UF | **CMF certificate 09/2026**, Diario Oficial 2026-09-15 | ✅ |
+| Factoring as the SME fallback | Factored invoice volume up 16% as bank credit tightened (2026) | [G5 Noticias](https://g5noticias.cl/2026/07/27/ante-el-freno-del-credito-bancario-pymes-se-vuelcan-al-factoring-y-disparan-en-16-el-monto-de-sus-facturas-adelantadas/) | 🟡 |
+| Monetary policy rate | 4.50% (held 2026-09-08); GDP growth 2026 cut to 0.25–0.75% | [BCCh](https://www.bcentral.cl/en/content/-/detalle/prensa/nota-de-prensa/bcch-publica-ipom-septiembre-2026) | ✅ |
 
-## Rates and regulation used by the catalog
-
-| Figure | Value | Source |
-|---|---|---|
-| BCCh monetary policy rate (TPM) | 4.50%, held at the September 2026 meeting; next meeting Oct 26–27 | [BCCh communiqué, Sep 2026](https://www.bcentral.cl/documents/33528/8618392/Comunicado+RPM+septiembre+2026.pdf/3cec1aa3-00d3-8486-98d6-1eeddb7d997e?t=1788898567406), [calendar](https://www.bcentral.cl/en/content/-/detalle/calendario-de-politica-monetaria-2026) |
-| UF | CLP 41,130.94 on 2026-10-09 | [uf-hoy.com](https://www.uf-hoy.com/) (confirm against SII/BCCh) |
-| FOGAPE eligibility | Net annual sales ≤ 100,000 UF; coverage 80% (≤ 25,000 UF) / 50% (25,001–100,000 UF); up to 15,000 UF financing | [BancoEstado FOGAPE](https://www.bancoestado.cl/content/bancoestado-public/cl/es/home/inicio---bancoestado-pequena-empresa/productos/garantias-estatales---bancoestado-pequena-empresa/fogape-para-el-pequeno-empresario---bancoestado-pequenas-empresa.html), [Hacienda](https://www.hacienda.cl/noticias-y-eventos/noticias/gobierno-concreta-cambios-al-reglamento-del-credito-fogape-incluira-a-todas-las) |
-| Stamp tax (ITE) on credit operations | 0.066% per month or fraction, cap 0.8%; 0.332% flat for sight credits / no maturity | [SII, Ley de Timbres y Estampillas](https://www.sii.cl/normativa_legislacion/timbres.pdf) |
+**Slide line that holds up:** *"Chile ships USD 2.6 bn of cherries a season, ~87% to China. Chilean SMEs wait 44 days on average to get paid, and 63% of what they invoice arrives late. When cash runs short, banks charge them 20% a year."*
 
 ## Data used by the model
 
 | Dataset | Source | License / terms | File |
 |---|---|---|---|
-| USD/CLP "dólar observado", daily 2010–2026 | Banco Central de Chile, via [mindicador.cl](https://mindicador.cl) public API | Public statistics; mindicador.cl is a free mirror — **confirm terms or switch to the official BDE API (needs registration)** | `data/fx/usdclp_observado.csv` |
-| USD/CNY spot (DEXCHUS), daily 2010–2026 | Board of Governors of the Federal Reserve System, via [FRED](https://fred.stlouisfed.org/series/DEXCHUS) | Public domain (Fed H.10); FRED terms of use apply | `data/fx/usdcny_fred.csv` |
+| USD/CLP "dólar observado", daily 2010–2026 | Banco Central de Chile, via the [mindicador.cl](https://mindicador.cl) public API | Official BCCh public statistics; mindicador.cl is a free, open mirror that republishes them. Decision: keep it (the BDE API needs a registered account and returns the same series); cite the BCCh as the source | `data/fx/usdclp_observado.csv` |
+| USD/CNY spot (DEXCHUS), daily 2010–2026 | Board of Governors of the Federal Reserve, via [FRED](https://fred.stlouisfed.org/series/DEXCHUS) | Public domain (Fed H.10); FRED terms of use ask for attribution | `data/fx/usdcny_fred.csv` |
 | SMEs, customers, invoices, costs | Generated by `nanfeng_quant.synthetic` | Synthetic, ours | `data/synthetic/smes.json` |

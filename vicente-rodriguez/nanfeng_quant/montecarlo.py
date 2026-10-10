@@ -22,7 +22,11 @@ NEVER = np.iinfo(np.int64).max // 2  # pay-day sentinel: not paid inside the hor
 # Parameter uncertainty: per path, each customer's median delay and dispersion and the cherry
 # price volatility are scaled by exp(tau * Z - tau^2 / 2). This fattens the tails to reflect that
 # the parameters themselves are estimates (calibrated in results/backtest_summary.md).
-PARAM_UNCERTAINTY = 0.35
+PARAM_UNCERTAINTY = 0.5
+# Systemic share of that uncertainty: in a bad season every importer pays late at once (port
+# congestion, a price collapse in China, Lunar New Year). Per path, each customer's parameter
+# shock is rho * Z_common + sqrt(1 - rho^2) * Z_customer, so delays are correlated across customers.
+SYSTEMIC_SHARE = 0.6
 
 
 @dataclass
@@ -34,7 +38,7 @@ class Overrides:
     usd_shift_pct: float = 0.0
     cherry_price_pct: float = 0.0
     extra_hires: int = 0
-    hire_monthly_wage_clp: float = 650_000.0
+    hire_monthly_wage_clp: float = 750_000.0  # assumption: harvest crew cost incl. employer contributions
     on_time_customers: list[str] = field(default_factory=list)  # counterfactual: pays on the due date
     defaulted_customers: list[str] = field(default_factory=list)  # stress: never pays inside the horizon
     ignore_announced_delays: bool = False
@@ -137,9 +141,10 @@ def _delays(rng_z: np.ndarray, median: float, sigma: float) -> np.ndarray:
 
 def simulate(company: Company, n_paths: int = 10_000, seed: int = 7,
              overrides: Overrides | dict | None = None, fx_kwargs: dict | None = None,
-             param_uncertainty: float | None = None) -> ForecastResult:
+             param_uncertainty: float | None = None, systemic_share: float | None = None) -> ForecastResult:
     ov = overrides if isinstance(overrides, Overrides) else Overrides.from_dict(overrides)
     tau = PARAM_UNCERTAINTY if param_uncertainty is None else param_uncertainty
+    rho = SYSTEMIC_SHARE if systemic_share is None else systemic_share
     rng = np.random.default_rng(seed)
     T = company.horizon_days
     n_items = len(company.receivables) + len(company.shipments)
@@ -156,6 +161,11 @@ def simulate(company: Company, n_paths: int = 10_000, seed: int = 7,
     z_med = rng.standard_normal((n_paths, n_c))
     z_sig = rng.standard_normal((n_paths, n_c))
     z_pvol = rng.standard_normal(n_paths)
+    # Drawn after everything else, so rho = 0 reproduces the per-customer model exactly.
+    z_sys = rng.standard_normal((n_paths, 1))
+    w = np.sqrt(max(1.0 - rho ** 2, 0.0))
+    z_med = rho * z_sys + w * z_med
+    z_sig = rho * z_sys + w * z_sig
     cidx = {c.id: i for i, c in enumerate(company.customers)}
 
     def scale(z: np.ndarray) -> np.ndarray:

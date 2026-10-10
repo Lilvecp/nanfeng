@@ -1,8 +1,8 @@
 """Sensitivity of the Cherry Crisis plan: how robust is the recommendation?
 
 1. Confidence target sweep (80% -> 97.5%): cost, actions, and when the CNY forward enters.
-2. Catalog rates +-30% (the rates are references to verify): does the chosen mix change, and
-   does the plan stay cheaper than the default bank loan?
+2. Catalog rates +-30% (the rates are references to verify) and products missing from the offer:
+   does the chosen mix change, and does the plan stay cheaper than the default bank loan?
 3. CNY forward spread sweep: at which bank spread would the hedge be worth buying?
 """
 from __future__ import annotations
@@ -20,6 +20,7 @@ from .tools import load_scenario
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS_DIR = ROOT / "results"
 RATE_KEYS = ("rate_monthly", "rate_annual", "guarantee_fee_annual", "spread_pct")
+BUDGET = {"exact_time_limit_s": 30.0}  # offline study: same solver budget class as the demo artifacts
 
 
 def _scaled(catalog: Catalog, factor: float, kinds: tuple[str, ...] | None = None,
@@ -31,6 +32,12 @@ def _scaled(catalog: Catalog, factor: float, kinds: tuple[str, ...] | None = Non
         for k in RATE_KEYS:
             if k in p.raw:
                 p.raw[k] = p.raw[k] * factor
+    return cat
+
+
+def _terms(catalog: Catalog, product_id: str, terms: list[int]) -> Catalog:
+    cat = copy.deepcopy(catalog)
+    cat.product(product_id).raw["term_options_days"] = terms
     return cat
 
 
@@ -55,7 +62,7 @@ def run(scenario: str = "cherry_crisis", out_dir: Path = RESULTS_DIR, verbose: b
     out: dict[str, Any] = {"scenario": company.id, "confidence": [], "rates": [], "forward_spread": []}
 
     for conf in (0.80, 0.85, 0.90, 0.95, 0.975):
-        best, default = optimize_pair(res, catalog, confidence=conf)
+        best, default = optimize_pair(res, catalog, confidence=conf, **BUDGET)
         out["confidence"].append({"confidence": conf, **_row(f"confidence {conf:.1%}", best, default)})
         if verbose:
             print("confidence", conf, out["confidence"][-1]["cost_clp"], out["confidence"][-1]["products"], flush=True)
@@ -66,9 +73,12 @@ def run(scenario: str = "cherry_crisis", out_dir: Path = RESULTS_DIR, verbose: b
         ("factoring +30%", _scaled(catalog, 1.3, kinds=("factoring", "lc_discount"))),
         ("factoring +60%", _scaled(catalog, 1.6, kinds=("factoring", "lc_discount"))),
         ("default bank loan -30%", _scaled(catalog, 0.7, ids=(catalog.default_product().id,))),
+        ("no pre-export loan (PAE) on offer", catalog.subset([p.id for p in catalog.products if p.id != "PAE-USD"])),
+        ("no factoring on offer", catalog.subset([p.id for p in catalog.products if p.kind not in ("factoring", "lc_discount")])),
+        ("bank loan only at 180 days (v0.1 assumption)", _terms(catalog, catalog.default_product().id, [180])),
     ]
     for label, cat in rate_cases:
-        best, default = optimize_pair(res, cat)
+        best, default = optimize_pair(res, cat, **BUDGET)
         out["rates"].append(_row(label, best, default))
         if verbose:
             print(label, out["rates"][-1]["cost_clp"], out["rates"][-1]["products"], flush=True)
@@ -77,7 +87,7 @@ def run(scenario: str = "cherry_crisis", out_dir: Path = RESULTS_DIR, verbose: b
         cat = copy.deepcopy(catalog)
         cat.product("FWD-CNY").raw["spread_pct"] = spread
         for conf in (0.90, 0.95):
-            best = optimize(res, cat, confidence=conf)
+            best = optimize(res, cat, confidence=conf, **BUDGET)
             row = _row(f"spread {spread:.2%} at {conf:.0%}", best)
             row.update(spread_pct=spread, confidence=conf)
             out["forward_spread"].append(row)
@@ -100,7 +110,7 @@ def render(out: dict[str, Any]) -> str:
     for r in out["confidence"]:
         lines.append(f"| {r['confidence']:.1%} | {money(r['cost_clp'])} | {money(r.get('default_cost_clp'))} | {pct(r.get('savings_pct'))} | "
                      f"{r['n_actions']} | {', '.join(r['products'])} | {'yes' if r['uses_forward'] else 'no'} | {pct(r['out_of_sample_coverage'])} |")
-    lines += ["", "## 2. Catalog rates (90% target)", "",
+    lines += ["", "## 2. Catalog rates and product availability (90% target)", "",
               "| Case | Plan cost (CLP) | Default loan (CLP) | Savings | Products |", "|---|---|---|---|---|"]
     for r in out["rates"]:
         lines.append(f"| {r['case']} | {money(r['cost_clp'])} | {money(r.get('default_cost_clp'))} | {pct(r.get('savings_pct'))} | {', '.join(r['products'])} |")

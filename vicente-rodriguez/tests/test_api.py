@@ -36,3 +36,12 @@ def test_errors_and_demo():
     assert client.post("/quant/forecast", json={"overrides": {"bad_knob": 1}}).status_code == 422
     assert "optimal" in client.get("/quant/demo/plan").json()
     assert "properties" in client.get("/quant/schema/scenario").json()
+
+
+def test_integration_endpoints():
+    seed = client.get("/quant/sandbox/seed").json()
+    assert seed["accounts"][0]["balance"] > 0 and any(l["id"] == "LEN-FACTOR" for l in seed["lenders"])
+    specs = client.get("/quant/tools").json()
+    assert {s["function"]["name"] for s in specs} >= {"forecast_run", "optimize_plan"}
+    story = client.get("/quant/demo/story").json()
+    assert story["forecast_after"]["crunch_date"] == "2026-12-30"

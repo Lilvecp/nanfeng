@@ -3,7 +3,7 @@
  "info": {
   "title": "NanFeng Quant API",
   "description": "Cash forecast (Monte Carlo), financing plan (MILP), quotes and Credit Passport. Every number is deterministic for a given seed; the LLM never computes.",
-  "version": "0.1.0"
+  "version": "0.3.0"
  },
  "paths": {
   "/quant/health": {
@@ -260,7 +260,8 @@
         "quotes",
         "plan",
         "passport",
-        "scenario_lab"
+        "scenario_lab",
+        "story"
        ],
        "type": "string",
        "title": "Artifact"
@@ -284,6 +285,73 @@
        "application/json": {
         "schema": {
          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/sandbox/seed": {
+   "get": {
+    "summary": "Sandbox Seed",
+    "description": "Accounts, receivables, lenders and FX for the sandbox bank, from the same scenario and catalog\nthe engine uses (so plan operations reference lenders and invoices that exist in the bank).",
+    "operationId": "sandbox_seed_quant_sandbox_seed_get",
+    "parameters": [
+     {
+      "name": "scenario",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "default": "cherry_crisis",
+       "title": "Scenario"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "additionalProperties": true,
+         "title": "Response Sandbox Seed Quant Sandbox Seed Get"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/quant/tools": {
+   "get": {
+    "summary": "Agent Tools",
+    "description": "Function-calling schemas (OpenAI / OpenRouter format) of the agent tools.",
+    "operationId": "agent_tools_quant_tools_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "items": {
+          "additionalProperties": true,
+          "type": "object"
+         },
+         "type": "array",
+         "title": "Response Agent Tools Quant Tools Get"
         }
        }
       }
@@ -315,6 +383,73 @@
  },
  "components": {
   "schemas": {
+   "ApprovalRequest": {
+    "properties": {
+     "action": {
+      "type": "string",
+      "title": "Action"
+     },
+     "operations": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array",
+      "title": "Operations"
+     },
+     "explanation": {
+      "type": "string",
+      "title": "Explanation"
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel"
+     },
+     "unsupported": {
+      "items": {
+       "$ref": "#/components/schemas/Operation"
+      },
+      "type": "array",
+      "title": "Unsupported",
+      "default": []
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "action",
+     "operations",
+     "explanation",
+     "channel"
+    ],
+    "title": "ApprovalRequest",
+    "description": "Body for the backend's POST /approvals (extra keys are ignored there)."
+   },
+   "CreditGrade": {
+    "properties": {
+     "score": {
+      "type": "number",
+      "title": "Score"
+     },
+     "grade": {
+      "type": "string",
+      "enum": [
+       "A",
+       "B",
+       "C",
+       "D",
+       "E"
+      ],
+      "title": "Grade"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "score",
+     "grade"
+    ],
+    "title": "CreditGrade"
+   },
    "Driver": {
     "properties": {
      "driver": {
@@ -568,6 +703,33 @@
     "type": "object",
     "title": "HTTPValidationError"
    },
+   "Operation": {
+    "properties": {
+     "op": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Op"
+     },
+     "params": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Params"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "op",
+     "params"
+    ],
+    "title": "Operation"
+   },
    "Overrides": {
     "properties": {
      "customer_delay_extra_days": {
@@ -612,7 +774,7 @@
      "hire_monthly_wage_clp": {
       "type": "number",
       "title": "Hire Monthly Wage Clp",
-      "default": 650000.0
+      "default": 750000.0
      },
      "on_time_customers": {
       "items": {
@@ -648,6 +810,23 @@
     "type": "object",
     "title": "Overrides",
     "description": "Scenario Lab knobs and counterfactual switches. All optional."
+   },
+   "PassportChange": {
+    "properties": {
+     "before": {
+      "$ref": "#/components/schemas/CreditGrade"
+     },
+     "after_plan": {
+      "$ref": "#/components/schemas/CreditGrade"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "before",
+     "after_plan"
+    ],
+    "title": "PassportChange"
    },
    "PassportFactor": {
     "properties": {
@@ -949,6 +1128,12 @@
       "title": "N Scenarios",
       "description": "Scenarios inside the MILP",
       "default": 200
+     },
+     "channel": {
+      "type": "string",
+      "title": "Channel",
+      "description": "Channel written into approval_request (WEB, WHATSAPP, ...)",
+      "default": "WEB"
      }
     },
     "type": "object",
@@ -988,6 +1173,43 @@
       ],
       "title": "Savings Pct"
      },
+     "headline": {
+      "type": "string",
+      "title": "Headline"
+     },
+     "approval_request": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ApprovalRequest"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "after_plan": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "After Plan",
+      "description": "Forecast with the plan applied: probabilities and fan chart (Cash Cockpit 'resolved' overlay)"
+     },
+     "credit_passport": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/PassportChange"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
      "forecast": {
       "$ref": "#/components/schemas/Summary"
      },
@@ -1019,6 +1241,7 @@
      "optimal",
      "default",
      "default_product",
+     "headline",
      "forecast",
      "latency_ms",
      "source"

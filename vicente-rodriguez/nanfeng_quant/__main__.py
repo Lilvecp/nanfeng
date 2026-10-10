@@ -9,6 +9,7 @@
   backtest                                  Run forecast backtests (writes results/)
   sensitivity                               Plan sensitivity to confidence, rates, forward spread
   demo                                      Recompute every results/cherry_crisis_* file
+  story                                     Rebuild cherry_crisis_story.json from saved results (no solve)
 """
 from __future__ import annotations
 
@@ -22,7 +23,7 @@ from . import tools
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="nanfeng_quant", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["forecast", "quote", "optimize", "passport", "generate", "bench", "backtest", "sensitivity", "demo"])
+    ap.add_argument("command", choices=["forecast", "quote", "optimize", "passport", "generate", "bench", "backtest", "sensitivity", "demo", "story"])
     ap.add_argument("scenario", nargs="?", default="cherry_crisis")
     ap.add_argument("--overrides", type=json.loads, default=None)
     ap.add_argument("--amount", type=float, default=None)
@@ -54,6 +55,9 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "sensitivity":
         from .sensitivity import run
         out = run(args.scenario)
+    elif args.command == "story":
+        from .demo import rebuild_story
+        out = rebuild_story()
     else:
         from .demo import run
         out = run()

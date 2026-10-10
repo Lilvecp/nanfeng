@@ -36,7 +36,9 @@ def _band(value: float, best: float, worst: float) -> float:
     return float(np.clip((value - worst) / (best - worst), 0.0, 1.0) * 100.0)
 
 
-def factor_values(company: Company, res: ForecastResult) -> dict[str, float]:
+def factor_values(company: Company, res: ForecastResult, cash: np.ndarray | None = None) -> dict[str, float]:
+    """`cash` (paths x days) replaces the forecast's cash paths, e.g. the paths after a financing plan."""
+    cash = res.cash if cash is None else cash
     fx = spot(company)
     by_customer: dict[str, float] = {}
     foreign = total = delay_w = 0.0
@@ -57,8 +59,8 @@ def factor_values(company: Company, res: ForecastResult) -> dict[str, float]:
     monthly_payroll = (sum(payroll) / max(len(payroll), 1)) if payroll else 1.0
     debt = sum(p.amount * fx[p.currency] for p in company.payables if p.category == "debt_service")
     return {
-        "liquidity": float(res.p_negative_cumulative[-1]),
-        "buffer_months": float(np.median(res.cash.min(axis=1))) / monthly_payroll,
+        "liquidity": float((cash.min(axis=1) < 0).mean()),
+        "buffer_months": float(np.median(cash.min(axis=1))) / monthly_payroll,
         "concentration": float((shares ** 2).sum()),
         "customer_delay": delay_w / max(total, 1.0),
         "debt_service": debt / max(total, 1.0),
@@ -66,8 +68,9 @@ def factor_values(company: Company, res: ForecastResult) -> dict[str, float]:
     }
 
 
-def credit_passport(company: Company, res: ForecastResult, consent: bool = False) -> dict[str, Any]:
-    values = factor_values(company, res)
+def credit_passport(company: Company, res: ForecastResult, consent: bool = False,
+                    cash: np.ndarray | None = None) -> dict[str, Any]:
+    values = factor_values(company, res, cash)
     factors = []
     score = 0.0
     for key, (weight, best, worst, desc) in FACTORS.items():

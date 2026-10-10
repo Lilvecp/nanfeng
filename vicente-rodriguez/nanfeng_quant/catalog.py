@@ -28,6 +28,10 @@ class Product:
     def get(self, key: str, default: Any = None) -> Any:
         return self.raw.get(key, default)
 
+    def terms(self) -> list[int]:
+        """Contract terms the lender offers (days). Loans can list several; the optimizer picks one."""
+        return sorted(self.raw.get("term_options_days") or [self.raw["term_days"]])
+
 
 @dataclass
 class Catalog:
@@ -61,27 +65,27 @@ class Catalog:
         months = max(1, math.ceil(term_days / 30))
         return min(self.market["stamp_tax_monthly"] * months, self.market["stamp_tax_cap"])
 
-    def product_stamp(self, p: Product) -> float:
+    def product_stamp(self, p: Product, term: int | None = None) -> float:
         """Stamp tax for a product: flat rate for sight credits (credit lines), monthly otherwise."""
         if not p.get("stamp_tax"):
             return 0.0
         if p.get("stamp_tax_flat") is not None:
             return p.stamp_tax_flat
-        return self.stamp_tax(p.term_days)
+        return self.stamp_tax(p.term_days if term is None else term)
 
-    def loan_unit_cost(self, p: Product) -> float:
+    def loan_unit_cost(self, p: Product, term: int | None = None) -> float:
         """Total cost per CLP borrowed over the contract term (interest + fees + stamp + guarantee)."""
-        term = p.term_days
+        term = p.term_days if term is None else term
         rate = p.get("rate_annual")
         interest = rate * term / 365 if rate is not None else p.rate_monthly * term / 30
         interest += p.get("guarantee_fee_annual", 0.0) * term / 365
-        return interest + p.get("fee_pct", 0.0) + self.product_stamp(p)
+        return interest + p.get("fee_pct", 0.0) + self.product_stamp(p, term)
 
-    def loan_upfront(self, p: Product) -> float:
-        return p.get("fee_pct", 0.0) + self.product_stamp(p)
+    def loan_upfront(self, p: Product, term: int | None = None) -> float:
+        return p.get("fee_pct", 0.0) + self.product_stamp(p, term)
 
-    def loan_interest(self, p: Product) -> float:
-        return self.loan_unit_cost(p) - self.loan_upfront(p)
+    def loan_interest(self, p: Product, term: int | None = None) -> float:
+        return self.loan_unit_cost(p, term) - self.loan_upfront(p, term)
 
     def factoring_unit_cost(self, p: Product, days: float) -> float:
         """Cost per CLP of invoice face value financed for `days`."""
@@ -134,6 +138,11 @@ def eligibility(company: Company, catalog: Catalog, p: Product) -> tuple[bool, s
 def eligible_receivable(p: Product, r: Receivable) -> bool:
     if r.currency not in p.currencies or not r.factoring_eligible:
         return False
+    # A non-recourse factor carries the buyer's risk: it will not buy an invoice whose debtor has
+    # already announced it will pay late. A factor with recourse will (the exporter keeps the risk).
+    limit = p.get("max_announced_delay_days")
+    if limit is not None and r.announced_delay_days > limit:
+        return False
     if p.kind == "lc_discount":
         return r.lc_backed
     return True
@@ -163,11 +172,13 @@ def financing_quote(company: Company, catalog: Catalog, amount_clp: float, need_
         if p.kind == "loan":
             amount = max(amount_clp, p.min_amount_clp)
             amount = min(amount, p.get("max_amount_clp", amount))
-            cost = amount * catalog.loan_unit_cost(p) + p.fee_fixed_clp
-            row.update(amount_clp=amount, cost_clp=cost, term_days=p.term_days,
-                       eac=effective_annual_cost(cost, amount, p.term_days),
+            # shortest term the lender offers that still covers the need
+            term = next((t for t in p.terms() if t >= need_days), p.terms()[-1])
+            cost = amount * catalog.loan_unit_cost(p, term) + p.fee_fixed_clp
+            row.update(amount_clp=amount, cost_clp=cost, term_days=term, term_options_days=p.terms(),
+                       eac=effective_annual_cost(cost, amount, term),
                        covers_need=amount >= amount_clp,
-                       note="cost of the full contract term" if p.term_days > need_days else "")
+                       note="cost of the full contract term" if term > need_days else "")
         elif p.kind in ("factoring", "lc_discount"):
             pool = sorted((r for r in company.receivables if eligible_receivable(p, r)),
                           key=lambda r: -r.amount * fx[r.currency])

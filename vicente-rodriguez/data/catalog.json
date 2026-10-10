@@ -1,15 +1,18 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "currency": "CLP",
-  "status": "REFERENCE VALUES TO VERIFY. Rates are realistic order-of-magnitude figures for a Chilean exporting SME in 2026, not quotes. Lenders are fictional. See docs/financial-catalog.md for the sources to check each number against.",
+  "status": "REFERENCE VALUES, NOT QUOTES. Lenders are fictional. Loan rates are anchored to the CMF interest-rate certificate 09/2026 (bank averages for August 2026) and set below the market average on purpose, so the savings we report against the bank loan are conservative. Factoring rates come from public Chilean rate ranges. See docs/financial-catalog.md for every source.",
   "market": {
     "uf_clp": 41131,
+    "uf_date": "2026-10-09",
     "clp_rate_annual": 0.045,
+    "clp_rate_reference": "BCCh monetary policy rate (TPM) 4.50%, held unanimously at the 2026-09-08 meeting",
     "cny_rate_annual": 0.015,
+    "cny_rate_reference": "Assumption: 1-year CNY loan prime rate area minus a margin; only used for the forward's interest parity",
     "stamp_tax_monthly": 0.00066,
     "stamp_tax_cap": 0.008,
-    "uf_date": "2026-10-09",
-    "clp_rate_reference": "BCCh monetary policy rate (TPM) 4.50%, held at the September 2026 meeting"
+    "stamp_tax_reference": "DL 3.475 art. 1 no. 3: 0.066% per month or fraction, capped at 0.8%; 0.332% for sight credits",
+    "cmf_certificate": "CMF Certificado 09/2026 (Diario Oficial 2026-09-15): interés corriente, non-adjustable CLP, 90 days or more, 200-5,000 UF = 20.06%/yr; less than 90 days, up to 5,000 UF = 33.34%/yr; foreign currency up to 2,000 UF = 10.26%/yr, above = 5.78%/yr"
   },
   "lenders": [
     {
@@ -31,10 +34,12 @@
   "products": [
     {
       "id": "FACT-BANK",
-      "name": "Export factoring, non-recourse",
+      "name": "Export factoring, non-recourse (bank)",
       "kind": "factoring",
       "lender_id": "bank-andino",
-      "rate_monthly": 0.0135,
+      "recourse": false,
+      "max_announced_delay_days": 0,
+      "rate_monthly": 0.015,
       "advance_rate": 0.85,
       "fee_pct": 0.0025,
       "fee_fixed_clp": 60000,
@@ -46,15 +51,22 @@
         "CNY"
       ],
       "stamp_tax": false,
-      "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor.",
-      "rate_reference": "CMF interest-rate statistics; bank factoring rates for exporters"
+      "stamp_tax_note": "Assignment of invoices (Ley 19.983) is a sale of credits, not a credit operation: no stamp tax",
+      "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor. A non-recourse factor does not buy an invoice whose debtor has already announced a delay.",
+      "rate_reference": "Public Chilean ranges 2026: non-recourse 1.5%-2.2%/month, with recourse 1.2%-1.8%/month (chita.cl, simpli.cl); low end because the buyer is insured",
+      "sandbox": {
+        "op": "factoring",
+        "lender_id": "LEN-FACTOR"
+      }
     },
     {
       "id": "FACT-FINTECH",
-      "name": "Fintech factoring (fast onboarding)",
+      "name": "Fintech factoring, with recourse (fast onboarding)",
       "kind": "factoring",
       "lender_id": "fintech-cordillera",
-      "rate_monthly": 0.0185,
+      "recourse": true,
+      "recourse_days": 30,
+      "rate_monthly": 0.0175,
       "advance_rate": 0.9,
       "fee_pct": 0.005,
       "fee_fixed_clp": 0,
@@ -67,14 +79,19 @@
         "CLP"
       ],
       "stamp_tax": false,
-      "requirements": "Online onboarding; funds in 24 h.",
-      "rate_reference": "Public rate cards of Chilean factoring fintechs"
+      "requirements": "Online onboarding; funds in 24 h. With recourse: if the buyer has not paid 30 days after the expected date, the exporter repays the advance.",
+      "rate_reference": "Fintech rate cards 2026 (Xepelin 0.5%-1.8%, GoCapital 0.6%-2.0%, Crecer 0.8%-2.2% per month; portalinnova.cl)",
+      "sandbox": {
+        "op": "factoring",
+        "lender_id": "LEN-FINTECH"
+      }
     },
     {
       "id": "LC-DISC",
       "name": "Letter of credit discounting",
       "kind": "lc_discount",
       "lender_id": "bank-andino",
+      "recourse": false,
       "rate_monthly": 0.0085,
       "advance_rate": 0.95,
       "fee_pct": 0.002,
@@ -87,7 +104,11 @@
       ],
       "stamp_tax": false,
       "requirements": "Only receivables backed by a confirmed documentary letter of credit.",
-      "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted)"
+      "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted to a monthly discount)",
+      "sandbox": {
+        "op": "factoring",
+        "lender_id": "LEN-LC"
+      }
     },
     {
       "id": "CONF-BANK",
@@ -105,17 +126,27 @@
       ],
       "stamp_tax": true,
       "requirements": "Supplier enrolled in the bank's confirming program.",
-      "rate_reference": "Bank confirming programs (CMF statistics)"
+      "rate_reference": "Bank confirming programs; below the CMF short-term average because the risk is the buyer's (our SME)",
+      "sandbox": {
+        "op": "confirming",
+        "lender_id": "LEN-CONFIRMING"
+      }
     },
     {
       "id": "WC-BANK",
       "name": "Working capital loan (default bank credit)",
       "kind": "loan",
       "lender_id": "bank-andino",
-      "rate_annual": 0.132,
+      "rate_annual": 0.14,
       "fee_pct": 0.005,
       "fee_fixed_clp": 150000,
-      "term_days": 180,
+      "term_days": 90,
+      "term_options_days": [
+        30,
+        60,
+        90,
+        180
+      ],
       "lead_days": 5,
       "min_amount_clp": 20000000,
       "max_amount_clp": 400000000,
@@ -126,7 +157,11 @@
       "stamp_tax": true,
       "default": true,
       "requirements": "Two years of financial statements; collateral or personal guarantee.",
-      "rate_reference": "CMF / BCCh commercial loan rates for SMEs; TMC cap"
+      "rate_reference": "CMF certificate 09/2026: bank average 20.06%/yr (90 days or more, 200-5,000 UF) and 33.34%/yr (under 90 days, up to 5,000 UF). We use 14% (a collateralized exporter with a good record), which makes the default loan cheaper and our savings conservative",
+      "sandbox": {
+        "op": "loan",
+        "lender_id": "LEN-ANDINO"
+      }
     },
     {
       "id": "FOGAPE",
@@ -143,14 +178,18 @@
       "max_amount_clp": 250000000,
       "collateral_pct": 0.2,
       "max_annual_sales_uf": 100000,
+      "guarantee_coverage": 0.5,
+      "max_amount_uf": 15000,
       "currencies": [
         "CLP"
       ],
       "stamp_tax": true,
       "requirements": "Net annual sales up to 100,000 UF (medium firms 25,001-100,000 UF get 50% guarantee coverage); financing up to 15,000 UF; no protests or overdue debts.",
-      "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator) and bidding results",
-      "guarantee_coverage": 0.5,
-      "max_amount_uf": 15000
+      "rate_reference": "FOGAPE rules (CORFO / BancoEstado administrator); rate below the unguaranteed loan because half the risk is state-guaranteed",
+      "sandbox": {
+        "op": "loan",
+        "lender_id": "LEN-FOGAPE"
+      }
     },
     {
       "id": "PAE-USD",
@@ -161,6 +200,12 @@
       "fee_pct": 0.003,
       "fee_fixed_clp": 120000,
       "term_days": 120,
+      "term_options_days": [
+        60,
+        90,
+        120,
+        180
+      ],
       "lead_days": 3,
       "min_amount_clp": 30000000,
       "max_amount_clp": 300000000,
@@ -169,9 +214,13 @@
         "USD"
       ],
       "stamp_tax": false,
-      "stamp_tax_note": "Assumed exempt as export financing (DL 3.475 art. 24) - VERIFY",
+      "stamp_tax_note": "Exempt: DL 3.475 art. 24 no. 11 (credits that finance exports), provided the export is made for at least the loan amount before it matures (SII Ord. 2402/2016)",
       "requirements": "Export contract or shipping documents; repaid in USD with the export proceeds.",
-      "rate_reference": "Term SOFR + bank spread for exporters (bank trade-finance price lists)"
+      "rate_reference": "CMF certificate 09/2026: foreign-currency bank average 10.26%/yr (up to 2,000 UF) and 5.78%/yr (above); Term SOFR + exporter spread",
+      "sandbox": {
+        "op": "loan",
+        "lender_id": "LEN-PAE"
+      }
     },
     {
       "id": "OVERDRAFT",
@@ -190,10 +239,14 @@
         "CLP"
       ],
       "stamp_tax": true,
-      "requirements": "Pre-approved line on the current account.",
-      "rate_reference": "CMF statistics, credit lines on current accounts",
       "stamp_tax_flat": 0.00332,
-      "stamp_tax_note": "Credits on sight / without maturity pay a flat 0.332% (DL 3.475 art. 1 no. 3)"
+      "stamp_tax_note": "Credits on sight / without maturity pay a flat 0.332% (DL 3.475 art. 1 no. 3)",
+      "requirements": "Pre-approved line on the current account.",
+      "rate_reference": "2.1%/month = 25.2%/yr, under the CMF short-term average of 33.34%/yr (certificate 09/2026)",
+      "sandbox": {
+        "op": "loan",
+        "lender_id": "LEN-OVERDRAFT"
+      }
     },
     {
       "id": "FWD-CNY",
@@ -206,7 +259,11 @@
         "CNY"
       ],
       "requirements": "FX framework agreement (contrato marco) with the bank; notional up to the hedged receivable.",
-      "rate_reference": "Covered interest parity CLP vs CNY + bank spread"
+      "rate_reference": "Covered interest parity CLP vs CNY + bank spread",
+      "sandbox": {
+        "op": "forward",
+        "lender_id": "LEN-FXDESK"
+      }
     }
   ]
 }

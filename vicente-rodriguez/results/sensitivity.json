@@ -5,206 +5,242 @@
    "confidence": 0.8,
    "case": "confidence 80.0%",
    "status": "optimal",
-   "cost_clp": 1142615,
-   "n_actions": 3,
+   "cost_clp": 1211558,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.8676,
+   "out_of_sample_coverage": 0.89,
    "actions": [
-    "Factor 10% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 46% of INV-2026-124 with Export factoring, non-recourse",
-    "Factor 31% of INV-2026-109 with Export factoring, non-recourse"
+    "Borrow USD 78,254 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 5004486,
-   "savings_pct": 0.7717
+   "default_cost_clp": 2310121,
+   "savings_pct": 0.4755
   },
   {
    "confidence": 0.85,
    "case": "confidence 85.0%",
    "status": "optimal",
-   "cost_clp": 1228259,
-   "n_actions": 2,
+   "cost_clp": 1368522,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.8857,
+   "out_of_sample_coverage": 0.9097,
    "actions": [
-    "Factor 48% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 27% of INV-2026-112 with Export factoring, non-recourse"
+    "Borrow USD 89,506 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 5320441,
-   "savings_pct": 0.7691
+   "default_cost_clp": 2689301,
+   "savings_pct": 0.4911
   },
   {
    "confidence": 0.9,
    "case": "confidence 90.0%",
    "status": "optimal",
-   "cost_clp": 1639278,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 5813905,
-   "savings_pct": 0.718
+   "default_cost_clp": 3796513,
+   "savings_pct": 0.4452
   },
   {
    "confidence": 0.95,
    "case": "confidence 95.0%",
    "status": "optimal",
-   "cost_clp": 1977260,
-   "n_actions": 2,
+   "cost_clp": 2466266,
+   "n_actions": 3,
    "products": [
-    "FACT-BANK"
+    "FACT-FINTECH",
+    "FWD-CNY",
+    "PAE-USD"
    ],
-   "uses_forward": false,
-   "out_of_sample_coverage": 0.9596,
+   "uses_forward": true,
+   "out_of_sample_coverage": 0.9721,
    "actions": [
-    "Factor 89% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 34% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 163,771 for 60 days from Pre-export loan in USD (PAE)",
+    "Sell CNY 23,729 forward at 146.76 CLP/CNY",
+    "Factor 2% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
    ],
-   "default_cost_clp": 8090539,
-   "savings_pct": 0.7556
+   "default_cost_clp": 4938609,
+   "savings_pct": 0.5006
   },
   {
    "confidence": 0.975,
    "case": "confidence 97.5%",
    "status": "optimal",
-   "cost_clp": 2695826,
-   "n_actions": 4,
+   "cost_clp": 3112144,
+   "n_actions": 3,
    "products": [
-    "FACT-BANK"
+    "FACT-BANK",
+    "FACT-FINTECH",
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9797,
+   "out_of_sample_coverage": 0.9784,
    "actions": [
-    "Factor 84% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 25% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 28% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 22% of INV-2026-118 with Export factoring, non-recourse"
+    "Factor 35% of INV-2026-109 with Export factoring, non-recourse (bank)",
+    "Borrow USD 145,996 for 60 days from Pre-export loan in USD (PAE)",
+    "Factor 11% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
    ],
-   "default_cost_clp": 9690493,
-   "savings_pct": 0.7218
+   "default_cost_clp": 6048588,
+   "savings_pct": 0.4855
   }
  ],
  "rates": [
   {
    "case": "all rates -30%",
    "status": "optimal",
-   "cost_clp": 1290451,
-   "n_actions": 3,
+   "cost_clp": 1636519,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9293,
+   "out_of_sample_coverage": 0.9608,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 23% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 4320316,
-   "savings_pct": 0.7013
+   "default_cost_clp": 3000188,
+   "savings_pct": 0.4545
   },
   {
    "case": "all rates +30%",
    "status": "optimal",
-   "cost_clp": 1991117,
-   "n_actions": 3,
+   "cost_clp": 2576139,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9604,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 7307494,
-   "savings_pct": 0.7275
+   "default_cost_clp": 4592838,
+   "savings_pct": 0.4391
   },
   {
    "case": "factoring +30%",
    "status": "optimal",
-   "cost_clp": 1948076,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "CONF-BANK",
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.926,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Extend 54% of P-05 by 60 days via Confirming (supplier payment extension)",
-    "Factor 52% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 13% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 5813905,
-   "savings_pct": 0.6649
+   "default_cost_clp": 3796513,
+   "savings_pct": 0.4452
   },
   {
    "case": "factoring +60%",
    "status": "optimal",
-   "cost_clp": 2026889,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "CONF-BANK",
     "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9248,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Extend 46% of P-02 by 60 days via Confirming (supplier payment extension)",
-    "Draw USD 59,382 from Pre-export loan in USD (PAE)",
-    "Draw USD 1,492 from Pre-export loan in USD (PAE)"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 5813905,
-   "savings_pct": 0.6514
+   "default_cost_clp": 3796513,
+   "savings_pct": 0.4452
   },
   {
    "case": "default bank loan -30%",
    "status": "optimal",
-   "cost_clp": 1639278,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
-   "default_cost_clp": 4320316,
-   "savings_pct": 0.6206
+   "default_cost_clp": 3000188,
+   "savings_pct": 0.2979
+  },
+  {
+   "case": "no pre-export loan (PAE) on offer",
+   "status": "optimal",
+   "cost_clp": 2409696,
+   "n_actions": 3,
+   "products": [
+    "FACT-BANK",
+    "FACT-FINTECH"
+   ],
+   "uses_forward": false,
+   "out_of_sample_coverage": 0.9323,
+   "actions": [
+    "Factor 43% of INV-2026-124 with Export factoring, non-recourse (bank)",
+    "Factor 87% of INV-2026-112 with Export factoring, non-recourse (bank)",
+    "Factor 29% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+   ],
+   "default_cost_clp": 3796513,
+   "savings_pct": 0.3653
+  },
+  {
+   "case": "no factoring on offer",
+   "status": "optimal",
+   "cost_clp": 2106329,
+   "n_actions": 1,
+   "products": [
+    "PAE-USD"
+   ],
+   "uses_forward": false,
+   "out_of_sample_coverage": 0.9606,
+   "actions": [
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
+   ],
+   "default_cost_clp": 3796513,
+   "savings_pct": 0.4452
+  },
+  {
+   "case": "bank loan only at 180 days (v0.1 assumption)",
+   "status": "optimal",
+   "cost_clp": 2106329,
+   "n_actions": 1,
+   "products": [
+    "PAE-USD"
+   ],
+   "uses_forward": false,
+   "out_of_sample_coverage": 0.9606,
+   "actions": [
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
+   ],
+   "default_cost_clp": 10401627,
+   "savings_pct": 0.7975
   }
  ],
  "forward_spread": [
   {
    "case": "spread 0.35% at 90%",
    "status": "optimal",
-   "cost_clp": 1639278,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
    "spread_pct": 0.0035,
    "confidence": 0.9
@@ -212,16 +248,19 @@
   {
    "case": "spread 0.35% at 95%",
    "status": "optimal",
-   "cost_clp": 1977260,
-   "n_actions": 2,
+   "cost_clp": 2466266,
+   "n_actions": 3,
    "products": [
-    "FACT-BANK"
+    "FACT-FINTECH",
+    "FWD-CNY",
+    "PAE-USD"
    ],
-   "uses_forward": false,
-   "out_of_sample_coverage": 0.9596,
+   "uses_forward": true,
+   "out_of_sample_coverage": 0.9721,
    "actions": [
-    "Factor 89% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 34% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 163,771 for 60 days from Pre-export loan in USD (PAE)",
+    "Sell CNY 23,729 forward at 146.76 CLP/CNY",
+    "Factor 2% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
    ],
    "spread_pct": 0.0035,
    "confidence": 0.95
@@ -229,17 +268,15 @@
   {
    "case": "spread 0.15% at 90%",
    "status": "optimal",
-   "cost_clp": 1639278,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
    "spread_pct": 0.0015,
    "confidence": 0.9
@@ -247,16 +284,17 @@
   {
    "case": "spread 0.15% at 95%",
    "status": "optimal",
-   "cost_clp": 1977260,
+   "cost_clp": 2458980,
    "n_actions": 2,
    "products": [
-    "FACT-BANK"
+    "FWD-CNY",
+    "PAE-USD"
    ],
-   "uses_forward": false,
-   "out_of_sample_coverage": 0.9596,
+   "uses_forward": true,
+   "out_of_sample_coverage": 0.9721,
    "actions": [
-    "Factor 89% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 34% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 167,134 for 60 days from Pre-export loan in USD (PAE)",
+    "Sell CNY 34,704 forward at 147.06 CLP/CNY"
    ],
    "spread_pct": 0.0015,
    "confidence": 0.95
@@ -264,17 +302,15 @@
   {
    "case": "spread 0.05% at 90%",
    "status": "optimal",
-   "cost_clp": 1639278,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
    "spread_pct": 0.0005,
    "confidence": 0.9
@@ -282,19 +318,17 @@
   {
    "case": "spread 0.05% at 95%",
    "status": "optimal",
-   "cost_clp": 1973694,
-   "n_actions": 4,
+   "cost_clp": 2453780,
+   "n_actions": 2,
    "products": [
-    "FACT-BANK",
-    "FWD-CNY"
+    "FWD-CNY",
+    "PAE-USD"
    ],
    "uses_forward": true,
-   "out_of_sample_coverage": 0.9586,
+   "out_of_sample_coverage": 0.9722,
    "actions": [
-    "Factor 89% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 33% of INV-2026-118 with Export factoring, non-recourse",
-    "Sell CNY 177,327 forward at 147.19 CLP/CNY",
-    "Sell CNY 75,634 forward at 147.20 CLP/CNY"
+    "Borrow USD 167,128 for 60 days from Pre-export loan in USD (PAE)",
+    "Sell CNY 34,396 forward at 147.20 CLP/CNY"
    ],
    "spread_pct": 0.0005,
    "confidence": 0.95
@@ -302,17 +336,15 @@
   {
    "case": "spread 0.00% at 90%",
    "status": "optimal",
-   "cost_clp": 1639278,
-   "n_actions": 3,
+   "cost_clp": 2106329,
+   "n_actions": 1,
    "products": [
-    "FACT-BANK"
+    "PAE-USD"
    ],
    "uses_forward": false,
-   "out_of_sample_coverage": 0.9294,
+   "out_of_sample_coverage": 0.9606,
    "actions": [
-    "Factor 44% of INV-2026-121 with Export factoring, non-recourse",
-    "Factor 24% of INV-2026-109 with Export factoring, non-recourse",
-    "Factor 21% of INV-2026-118 with Export factoring, non-recourse"
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
    ],
    "spread_pct": 0.0,
    "confidence": 0.9
@@ -320,19 +352,17 @@
   {
    "case": "spread 0.00% at 95%",
    "status": "optimal",
-   "cost_clp": 1954896,
-   "n_actions": 4,
+   "cost_clp": 2451215,
+   "n_actions": 2,
    "products": [
-    "FACT-BANK",
-    "FWD-CNY"
+    "FWD-CNY",
+    "PAE-USD"
    ],
    "uses_forward": true,
-   "out_of_sample_coverage": 0.9586,
+   "out_of_sample_coverage": 0.9721,
    "actions": [
-    "Factor 89% of INV-2026-112 with Export factoring, non-recourse",
-    "Factor 33% of INV-2026-118 with Export factoring, non-recourse",
-    "Sell CNY 177,201 forward at 147.26 CLP/CNY",
-    "Sell CNY 75,634 forward at 147.28 CLP/CNY"
+    "Borrow USD 167,125 for 60 days from Pre-export loan in USD (PAE)",
+    "Sell CNY 34,245 forward at 147.28 CLP/CNY"
    ],
    "spread_pct": 0.0,
    "confidence": 0.95
