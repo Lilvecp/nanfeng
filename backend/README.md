@@ -54,7 +54,23 @@ Deterministic, outside the LLM: the agent proposes, `app/policy.py` decides. The
 | Payments to the same payee in 24 h add up above CLP 25M (split payments) | L3 |
 | Total above CLP 400M, owner-approved above CLP 400M in 30 days, kill switch on | blocked |
 
+Also: payee bank-account changes (`payee_bank_change`) are always L3; payments to a payee whose account changed in the last 72 h go to L3; a counterparty on the (synthetic) sanctions watchlist is blocked.
+
 Every decision lists the rules that fired in the `approval.created` audit entry (`policy_rules`, `policy_version`). Evaluation and execution run under one lock so concurrent requests cannot both squeeze under a cumulative limit.
+
+## Step-up OTP (r4-05)
+
+`NANFENG_OTP_MODE=sandbox` (default) accepts the shared demo code. `NANFENG_OTP_MODE=sms` gives every L3 approval its own random code, texted by Zavu to `NANFENG_OWNER_PHONE` (needs `ZAVU_API_KEY` and a long `NANFENG_OTP_SECRET`): HMAC-bound to the approval and its amount, 5 min, single use, never logged. `POST /approvals/{id}/otp` sends a new one. The agent token is refused on approve/reject, any `VOICE` channel is refused on approve, and the agent can turn the kill switch on but not off.
+
+## Security endpoints (r4-03 / r4-04 / r4-07)
+
+| Endpoint | For |
+|----------|-----|
+| `POST /security/scan` | Guard on a document's raw text (OCR + PDF layer) before any LLM. `clean` / `suspicious` / `malicious` with rule ids |
+| `POST /security/check-payee` | BEC: issuer, sender domain and bank account vs master data; returns the call-back number on file |
+| `POST /privacy/mask` | Replace personal data with placeholders before an LLM call; keep the mapping in the backend |
+
+Non-clean verdicts are hash-chained (`security.flagged`, `security.attack_blocked`) and streamed on SSE; a malicious one also texts the owner when it did not arrive by SMS.
 
 ## On-chain anchoring (r3-05)
 
