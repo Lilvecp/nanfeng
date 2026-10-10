@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .. import anchoring, audit
+from ..config import get_settings
 from ..db import get_db
 from ..events import broker
 from ..models import Anchor, AuditEntry
@@ -43,10 +44,40 @@ def anchors(db: Session = Depends(get_db)):
 @router.post("/anchor", response_model=AnchorOut, status_code=201,
              summary="Anchor the Merkle root of every entry since the last anchor")
 def anchor(db: Session = Depends(get_db)):
-    a = anchoring.anchor_pending(db)
+    try:
+        a = anchoring.anchor_pending(db)
+    except anchoring.AnchorError as exc:
+        raise HTTPException(502, f"Anchoring failed: {exc}") from exc
     if not a:
         raise HTTPException(409, "Nothing new to anchor")
     return a
+
+
+@router.get("/anchors/{anchor_id}/chain", summary="Read the anchor back from the chain and compare")
+def anchor_on_chain(anchor_id: int, db: Session = Depends(get_db)):
+    a = db.get(Anchor, anchor_id)
+    if not a:
+        raise HTTPException(404, "Anchor not found")
+    try:
+        return anchoring.check_on_chain(a)
+    except Exception as exc:
+        raise HTTPException(502, f"Chain unreachable: {exc.__class__.__name__}") from exc
+
+
+@router.get("/anchor-wallet", summary="Anchor backend, wallet address and testnet balance")
+def anchor_wallet():
+    s = get_settings()
+    out = {"backend": s.anchor_backend, "address": None, "balance_eth": None, "chain_id": None}
+    if s.anchor_backend != "evm" or not s.evm_private_key:
+        return out
+    try:
+        w3 = anchoring.web3()
+        addr = w3.eth.account.from_key(s.evm_private_key).address
+        out.update(address=addr, chain_id=w3.eth.chain_id,
+                   balance_eth=float(w3.from_wei(w3.eth.get_balance(addr), "ether")))
+    except Exception as exc:
+        out["error"] = f"{exc.__class__.__name__}: {exc}"
+    return out
 
 
 @router.get("/proof/{seq}", summary="Merkle inclusion proof of one entry against its anchor")

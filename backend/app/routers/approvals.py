@@ -126,7 +126,10 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
         "result_hashes": [r.get("audit_hash") for r in appr.results or []],
     })
     if appr.status == "approved":
-        anchoring.anchor_pending(db)  # covers the execution and the approval entry itself
+        try:
+            anchoring.anchor_pending(db)  # covers the execution and the approval entry itself
+        except anchoring.AnchorError:
+            pass  # already executed; the failure is on the SSE stream and the next anchor covers it
     broker.publish(f"approval.{appr.status}", _out(appr))
     return appr
 

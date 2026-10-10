@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """All configuration comes from the environment (.env locally, secrets manager in deploy)."""
 
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="NANFENG_", extra="ignore")
+    model_config = SettingsConfigDict(env_file=("../.env", ".env"), env_prefix="NANFENG_", extra="ignore")
 
     # SQLite keeps local dev and tests dependency-free; docker compose sets Postgres.
     database_url: str = "sqlite:///./nanfeng.db"
@@ -19,8 +19,11 @@ class Settings(BaseSettings):
     # Token the agent (Renato) uses to publish events and create approvals. Empty = open (local dev).
     agent_token: str = ""
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3100"]
-    # "local" records the Merkle root in the DB only; "fisco" / "evm" plug in later (r3-05).
+    # "local" records the Merkle root in the DB only; "evm" sends it to an EVM testnet (r3-05).
     anchor_backend: str = "local"
+    evm_rpc_url: str = ""
+    evm_private_key: str = ""  # testnet-only wallet; never a key that holds real funds
+    evm_explorer_tx_url: str = "https://sepolia.etherscan.io/tx"
     seed_on_startup: bool = True
 
 

@@ -61,7 +61,7 @@ function OtpInput({ disabled, onChange }: { disabled: boolean; onChange: (code: 
 
 export default function ApprovalsPage() {
   const t = useT();
-  const { approval, approvalId, otpAttemptsLeft, rejectReason, history, submitOtp, reject } = useDesk();
+  const { mode, approval, approvalId, otpAttemptsLeft, rejectReason, history, submitOtp, reject } = useDesk();
   const [code, setCode] = useState("");
   const [otpError, setOtpError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -131,7 +131,7 @@ export default function ApprovalsPage() {
             {approval === "approved" ? (
               <div className="card-b" style={{ gap: 12, padding: 18 }}>
                 <span className="badge ok" style={{ alignSelf: "flex-start" }}>Approved 10:15 · OTP verified</span>
-                <span className="small">Factoring request sent to Banco Pacífico (sandbox). CNY forward booked. Every step is hash-chained and anchored on FISCO BCOS.</span>
+                <span className="small">Factoring request sent to Banco Pacífico (sandbox). CNY forward booked. Every step is hash-chained and anchored {mode === "live" ? "with a Merkle root (see the audit log)" : "on FISCO BCOS"}.</span>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <Link className="btn btn-primary" href="/cockpit">Back to cockpit</Link>
                   <Link className="btn btn-secondary" href="/security">Audit log</Link>

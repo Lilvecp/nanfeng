@@ -15,7 +15,7 @@ const RED_TEAM: [string, number][] = [
   ["Jailbreak via voice", 3],
 ];
 
-type AuditRow = { seq: number; time: string; event: string; tier: 0 | 1 | 2 | 3; prev: string; hash: string; anchor: string; bad?: boolean };
+type AuditRow = { seq: number; time: string; event: string; tier: 0 | 1 | 2 | 3; prev: string; hash: string; anchor: string; href?: string; bad?: boolean };
 
 const short = (h: string) => `${h.slice(0, 4)}…${h.slice(-4)}`;
 
@@ -32,6 +32,7 @@ function toRow(e: AuditEntry, anchors: Anchor[]): AuditRow {
     prev: short(e.prev_hash),
     hash: short(e.hash),
     anchor: a ? (a.tx_hash ? short(a.tx_hash) : `${a.backend} #${a.id}`) : "pending",
+    href: a?.explorer_url ?? undefined,
     bad: e.kind.startsWith("security."),
   };
 }
@@ -48,7 +49,7 @@ export default function SecurityPage() {
   const [reviewed, setReviewed] = useState(false);
   const [verify, setVerify] = useState<"idle" | "running" | "ok" | "broken">("idle");
   const [brokenAt, setBrokenAt] = useState<number | null>(null);
-  const [live, setLive] = useState<{ rows: AuditRow[]; lastAnchor: string } | null>(null);
+  const [live, setLive] = useState<{ rows: AuditRow[]; lastAnchor: string; onChain: boolean } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
 
@@ -64,6 +65,7 @@ export default function SecurityPage() {
         setLive({
           rows: entries.slice(-12).reverse().map((e) => toRow(e, anchors)),
           lastAnchor: last ? (last.tx_hash ? short(last.tx_hash) : `${last.backend} #${last.id}`) : "none yet",
+          onChain: anchors.some((x) => x.backend === "evm"),
         });
       })
       .catch(() => {});
@@ -172,7 +174,7 @@ export default function SecurityPage() {
 
         <div className="card">
           <div className="card-h">
-            <span className="h3">Audit chain · sha256 · FISCO BCOS anchors</span>
+            <span className="h3">Audit chain · sha256 · {live ? (live.onChain ? "Sepolia testnet anchors" : "local anchors") : "FISCO BCOS anchors"}</span>
             <button className="btn btn-secondary btn-sm" type="button" disabled={verify === "running"} onClick={runVerify}>
               {verify === "running" ? <>Verifying<span className="blink">_</span></> : verify === "ok" ? "Verified ✓" : verify === "broken" ? "Broken ✗" : "Verify chain"} <span className="key">V</span>
             </button>
@@ -186,7 +188,7 @@ export default function SecurityPage() {
                   <td><span className={`tier t${r.tier}`}><b>L{r.tier}</b></span></td>
                   <td className="num muted">{r.prev}</td><td className="num">{r.hash}</td>
                   <td>{verify === "running" ? <span className="skel" style={{ display: "inline-block", width: 32, height: 10 }} /> : verify === "broken" && brokenAt !== null && r.seq >= brokenAt ? <span className="badge crit">FAIL</span> : <span className="badge ok">OK</span>}</td>
-                  <td className={`num${r.anchor.startsWith("pending") ? " muted" : ""}`}>{r.anchor}</td>
+                  <td className={`num${r.anchor.startsWith("pending") ? " muted" : ""}`}>{r.href ? <a href={r.href} target="_blank" rel="noopener noreferrer">{r.anchor} ↗</a> : r.anchor}</td>
                 </tr>
               ))}
             </tbody>

@@ -38,6 +38,16 @@ Nothing calls the bank directly. Every operation is posted to `POST /approvals` 
 
 Operations: `payment`, `fx_convert`, `factoring` (refuses an invoice that was already financed), `loan`, `forward`.
 
+## On-chain anchoring (r3-05)
+
+`NANFENG_ANCHOR_BACKEND=evm` sends each Merkle root to an EVM testnet (Sepolia via a public RPC) as a 0-value transaction from the anchor wallet to itself; the calldata is `NANFENG1 | root | from_seq | to_seq`, readable on Etherscan. No contract to deploy.
+
+- An approved L3 request is anchored right away; `POST /audit/anchor` anchors whatever is new.
+- `GET /audit/anchors/{id}/chain` reads the transaction back and checks it matches our record.
+- `GET /audit/anchor-wallet` shows the wallet address and its testnet balance (fund it from a Sepolia faucet).
+- If the chain refuses (no funds, RPC down) the approval still executes, `audit.anchor_failed` goes out on SSE and the next anchor covers those entries.
+- `local` keeps roots in the DB only (tests, offline demo). FISCO BCOS would be one more backend in `app/anchoring.py`.
+
 ## For the rest of the team
 
 - **Renato (agent):** publish each step with `POST /agent/events` (`{type: "agent.step", data: {tool, tier, model, cost_usd, status}}`) and propose actions with `POST /approvals`. Send `Authorization: Bearer $NANFENG_AGENT_TOKEN`.
@@ -47,7 +57,7 @@ Operations: `payment`, `fx_convert`, `factoring` (refuses an invoice that was al
 
 ## Not done yet
 
-- Chain anchoring: `NANFENG_ANCHOR_BACKEND=local` stores roots in the DB only. FISCO BCOS / EVM go in `app/anchoring.py` (r3-05).
+- FISCO BCOS backend (Sepolia works today). The on-chain invoice registry (r3-06) is still off-chain only (`financed_by`).
 - The policy is a placeholder until Andy's engine lands.
 - Single instance: SSE history, plan jobs and the kill switch live in memory.
 - `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.

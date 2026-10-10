@@ -742,6 +742,65 @@
         }
       }
     },
+    "/audit/anchors/{anchor_id}/chain": {
+      "get": {
+        "tags": [
+          "audit"
+        ],
+        "summary": "Read the anchor back from the chain and compare",
+        "operationId": "anchor_on_chain_audit_anchors__anchor_id__chain_get",
+        "parameters": [
+          {
+            "name": "anchor_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Anchor Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audit/anchor-wallet": {
+      "get": {
+        "tags": [
+          "audit"
+        ],
+        "summary": "Anchor backend, wallet address and testnet balance",
+        "operationId": "anchor_wallet_audit_anchor_wallet_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/audit/proof/{seq}": {
       "get": {
         "tags": [
