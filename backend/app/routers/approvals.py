@@ -1,7 +1,7 @@
 """Approval Center API: every money movement enters here, gets a policy tier, and runs in the
 sandbox bank either right away (L1/L2) or after the owner approves with OTP (L3)."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -11,7 +11,7 @@ from ..db import get_db
 from ..events import broker
 from ..models import Approval, utcnow
 from ..schemas import ApprovalCreate, ApprovalOut, ApproveIn, KillSwitchIn, RejectIn
-from ..security import reject_agent, require_agent
+from ..security import is_agent, reject_agent, require_agent
 
 router = APIRouter(tags=["approvals"])
 
@@ -203,7 +203,10 @@ def kill_switch_state():
 
 
 @router.post("/policy/kill-switch", tags=["policy"])
-def set_kill_switch(body: KillSwitchIn, db: Session = Depends(get_db)):
+def set_kill_switch(body: KillSwitchIn, db: Session = Depends(get_db), authorization: str = Header(default="")):
+    # The agent may stop itself, never re-arm itself.
+    if not body.on and is_agent(authorization):
+        raise HTTPException(403, "Only the owner can turn the kill switch off")
     _kill_switch["on"] = body.on
     audit.append(db, "owner", "policy.kill_switch", {"on": body.on})
     broker.publish("policy.kill_switch", {"on": body.on})

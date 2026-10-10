@@ -125,7 +125,7 @@ class AnchorOut(ORM):
 
 class AuditAppendIn(BaseModel):
     kind: str = Field(examples=["security.attack_blocked"])
-    actor: str = "security"
+    actor: str = Field(default="security", description="Label only: the entry is recorded as agent:<label>")
     payload: dict[str, Any]
 
 

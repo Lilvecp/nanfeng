@@ -22,6 +22,8 @@ INSTRUCTION = [re.compile(p, re.IGNORECASE) for p in (
     r"\b(do not|don't|never)\b.{0,20}\b(tell|notify|inform|alert|ask)\b.{0,20}\b(owner|user|anyone|human)",
     r"\bno (le )?(avises|informes|notifiques|digas)\b",
     r"(?i:\bassistant\b|\bagent\b|\bai\b|\bllm\b|\bnanfeng\b)\s*[:,]\s*(please\s+)?(ignore|approve|pay|send|transfer|update)",
+    r"\b(send|forward|e-?mail|share|upload)\b.{0,40}\b(ledger|statements?|balances?|transactions|passwords?|otp|codes?|api keys?)\b.{0,40}\bto\b",
+    r"\b(env[ií][ae]|reenv[ií][ae]|compart[ae]|mand[ae])\w*\b.{0,40}\b(cartolas?|saldos?|movimientos|contrase[nñ]as?|c[oó]digos?|otp)\b.{0,40}\ba\b",
     r"忽略.{0,10}(之前|以上|先前|所有).{0,10}(指令|指示|规则|提示)",
     r"(系统|系統)(提示|指令)|你现在是|无需(批准|确认)|不要(告诉|通知)",
 )]
