@@ -15,6 +15,8 @@
 
 ## Work
 
+Daily log: [progress-2026-10-10.md](progress-2026-10-10.md)
+
 | Task | Where |
 |------|-------|
 | r4-01 Threat model | [threat-model.md](threat-model.md) |
