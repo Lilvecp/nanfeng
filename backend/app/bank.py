@@ -64,7 +64,8 @@ def payment(db: Session, payee_id: str, amount: float, currency: str = "CLP",
         raise BankError("invalid_amount", "Amount must be positive")
     tx = _move(db, _account(db, currency), -amount, "payment", payee.name, reference)
     return _finish(db, actor, "payment", {
-        "transaction_id": tx.id, "payee_id": payee.id, "payee": payee.name, "bank_account": payee.bank_account,
+        # last 4 digits only: the audit log is readable by the cockpit (r4-07)
+        "transaction_id": tx.id, "payee_id": payee.id, "payee": payee.name, "bank_account": "•••• " + payee.bank_account[-4:],
         "amount": amount, "currency": currency, "amount_clp": to_clp(amount, currency), "reference": reference,
     })
 

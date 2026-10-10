@@ -4,6 +4,8 @@ any LLM reads it. Rule ids are the ones the Security Console shows.
 The guard is one layer. It can miss things; the policy engine and the OTP do not depend on it.
 """
 
+import base64
+import binascii
 import re
 import unicodedata
 
@@ -39,6 +41,8 @@ PAYMENT_DETAIL = re.compile(
     re.IGNORECASE,
 )
 BASE64 = re.compile(r"[A-Za-z0-9+/]{80,}={0,2}")
+B64_CHUNK = re.compile(r"[A-Za-z0-9+/]{16,}={0,2}")
+SENTENCE = re.compile(r"[A-Za-z]{3,}[ ,.:;]+[A-Za-z]{2,}[ ,.:;]+[A-Za-z]{2,}|[\u4e00-\u9fff]{4,}")
 HEX = re.compile(r"\b[0-9a-fA-F]{64,}\b")
 WORD = re.compile(r"[^\W\d_]{4,}", re.UNICODE)
 
@@ -65,6 +69,20 @@ def hidden_words(ocr_text: str, text_layer: str) -> list[str]:
     return best
 
 
+def decoded_payloads(text: str) -> list[str]:
+    """Readable text hidden in base64 chunks, so an encoded instruction is scanned like a plain one."""
+    out = []
+    for chunk in B64_CHUNK.findall(text):
+        try:
+            raw = base64.b64decode(chunk + "=" * (-len(chunk) % 4), validate=True).decode("utf-8")
+        except (binascii.Error, UnicodeDecodeError, ValueError):
+            continue
+        # a sentence, not random bytes that happen to be printable
+        if all(ch.isprintable() or ch in "\n\t" for ch in raw) and SENTENCE.search(raw):
+            out.append(raw)
+    return out
+
+
 def scan(ocr_text: str, text_layer: str | None = None) -> dict:
     rules: list[str] = []
     details: dict[str, str | int | list[str]] = {}
@@ -75,10 +93,15 @@ def scan(ocr_text: str, text_layer: str | None = None) -> dict:
         rules.append("invisible-chars")
         details["invisible_chars"] = len(INVISIBLE.findall(raw))
 
+    decoded = decoded_payloads(text)
     for rx in INSTRUCTION:
         if m := rx.search(text):
             rules.append("doc-instruction")
             details["instruction"] = _snippet(text, m)
+            break
+        if hit := next((d for d in decoded if rx.search(normalize(d))), None):
+            rules.append("doc-instruction")
+            details["instruction"] = "base64: " + hit[:120]
             break
 
     if text_layer:
@@ -87,7 +110,7 @@ def scan(ocr_text: str, text_layer: str | None = None) -> dict:
             rules.append("hidden-text")
             details["hidden_text"] = " ".join(hidden[:20])
 
-    if BASE64.search(text) or HEX.search(text):
+    if BASE64.search(text) or HEX.search(text) or decoded:
         rules.append("encoded-payload")
 
     if any(rx.search(text) for rx in URGENCY):
