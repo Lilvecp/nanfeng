@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>南风 globe — Santiago to Shanghai</title>
+<script>window.__resources = {"https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js": "../vendor/react.production.min.js", "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js": "../vendor/react-dom.production.min.js", "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600&family=JetBrains+Mono:wght@500;700&display=swap": "../fonts/ibm-plex-sans-jetbrains-mono-500-700.css"};</script>
+<script src="../vendor/dc-runtime.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap">
+<style>body{margin:0}
+.nv-globe-label{font:700 10px/1 "JetBrains Mono",monospace;letter-spacing:.08em;color:rgba(255,255,255,.88);background:rgba(14,17,22,.55);padding:4px 6px;border-radius:2px;white-space:nowrap;pointer-events:none;transition:opacity .25s;transform:translate(10px,-50%)}</style>
+</helmet>
+<div style="position: relative; width: {{size}}px; height: {{size}}px; background: {{bg}}; overflow: hidden; font-family: 'IBM Plex Sans', system-ui, sans-serif">
+  <div ref="{{setMount}}" role="img" aria-label="Night-side Earth. A cherry arc carries cash from Santiago across the Pacific to Shanghai; it flickers red when a payment is delayed, then flows calmly again once NanFeng resolves it." style="width: 100%; height: 100%"></div>
+  <sc-if value="{{labels}}" hint-placeholder-val="{{ true }}">
+    <div style="position: absolute; left: 50%; bottom: 3.5%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 999px; background: {{chipBg}}; border: 1px solid {{chipBorder}}; color: {{chipFg}}; font-size: {{chipSize}}px; font-weight: 500; white-space: nowrap">
+      <span style="width: 8px; height: 8px; border-radius: 50%; background: {{chipColor}}; flex: none"></span>
+      <span>{{chipText}}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"size":{"editor":"int","min":280,"max":1200,"default":720},"labels":{"editor":"boolean","default":true},"motion":{"editor":"boolean","default":true},"tone":{"editor":"enum","options":["light","dark"],"default":"light"},"bg":{"editor":"color","default":"#F6F6F3","options":["#F6F6F3","#FFFFFF","#0E1116"]},"$preview":{"width":720,"height":720}}'>
+// Real 3D globe (globe.gl / three.js). Everything is self-hosted: no CDN, so it loads from mainland China.
+// NASA Black Marble texture, a soft atmosphere and one accent: the cherry arc.
+// Story loop: camera flies Santiago → mid-Pacific → Shanghai, the payment delay flickers the arc red
+// for 2 s, then the agent resolves it and the globe rotates slowly before flying back.
+const GLOBE_JS = '../vendor/globe.gl.min.js';
+const TEX = { night: '../textures/earth-night.jpg', bump: '../textures/earth-topology.png' };
+const SCL = { lat: -33.45, lng: -70.67, name: 'SANTIAGO' };
+const SHA = { lat: 31.23, lng: 121.47, name: 'SHANGHAI' };
+const PACIFIC = { lat: -5, lng: -160 };
+const CHERRY = ['rgba(240,107,128,0.15)', 'rgba(240,107,128,1)'];
+const CRISIS = ['rgba(255,45,61,0.35)', 'rgba(255,45,61,1)'];
+const CRISIS_DIM = ['rgba(255,45,61,0.05)', 'rgba(255,45,61,0.3)'];
+
+// The cities are ~170° apart, so a bezier arc would cut through the planet. Instead, sample the
+// great circle and lift it off the surface like a flight route; the globe hides the far side.
+function flightRoute(a, b, n = 160, peak = 0.05) {
+  const D = Math.PI / 180;
+  const v = (p) => [Math.cos(p.lat * D) * Math.cos(p.lng * D), Math.cos(p.lat * D) * Math.sin(p.lng * D), Math.sin(p.lat * D)];
+  const A = v(a), B = v(b);
+  const w = Math.acos(A[0] * B[0] + A[1] * B[1] + A[2] * B[2]), sw = Math.sin(w);
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1), k0 = Math.sin((1 - t) * w) / sw, k1 = Math.sin(t * w) / sw;
+    const x = k0 * A[0] + k1 * B[0], y = k0 * A[1] + k1 * B[1], z = k0 * A[2] + k1 * B[2];
+    pts.push([Math.asin(z) / D, Math.atan2(y, x) / D, 0.005 + peak * Math.sin(Math.PI * t)]);
+  }
+  return pts;
+}
+
+function loadGlobeLib() {
+  if (window.Globe) return Promise.resolve(window.Globe);
+  if (!window.__nvGlobeLib) {
+    window.__nvGlobeLib = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = GLOBE_JS;
+      s.onload = () => resolve(window.Globe);
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  return window.__nvGlobeLib;
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 0 };
+    this.timers = [];
+    this.setMount = (el) => {
+      if (el === this.mount) return;
+      this.teardown();
+      this.mount = el;
+      if (el) loadGlobeLib().then(() => { if (this.mount === el) this.build(); }).catch(() => {});
+    };
+  }
+  componentDidUpdate(prev) {
+    if (!this.globe) return;
+    if (prev.size !== this.props.size) this.globe.width(this.size()).height(this.size());
+    if (prev.motion !== this.props.motion) { this.clearTimers(); this.play(); }
+  }
+  componentWillUnmount() { this.teardown(); this.mount = null; }
+
+  size() { return this.props.size ?? 720; }
+  later(ms, fn) { this.timers.push(setTimeout(fn, ms)); }
+  clearTimers() {
+    this.timers.forEach(clearTimeout); this.timers = [];
+    if (this.flicker) { clearInterval(this.flicker); this.flicker = null; }
+  }
+  teardown() {
+    this.clearTimers();
+    if (this.globe) { this.globe._destructor(); this.globe = null; }
+    if (this.mount) this.mount.innerHTML = '';
+  }
+
+  build() {
+    const S = this.size();
+    const label = (d) => {
+      const el = document.createElement('div');
+      el.className = 'nv-globe-label';
+      el.textContent = d.name;
+      return el;
+    };
+    const g = new window.Globe(this.mount, { rendererConfig: { alpha: true, antialias: true }, animateIn: false })
+      .width(S).height(S)
+      .backgroundColor('rgba(0,0,0,0)')
+      .globeImageUrl(TEX.night)
+      .bumpImageUrl(TEX.bump)
+      .showAtmosphere(true)
+      .atmosphereColor('#5fa8d3')
+      .atmosphereAltitude(0.18)
+      .pathsData([flightRoute(SCL, SHA)])
+      .pathPoints((d) => d)
+      .pathPointLat((p) => p[0])
+      .pathPointLng((p) => p[1])
+      .pathPointAlt((p) => p[2])
+      .pathColor(() => CHERRY)
+      .pathStroke(S < 500 ? 2 : 2.6)
+      .pathDashLength(0.4)
+      .pathDashGap(0.15)
+      .pathTransitionDuration(0)
+      .pointsData([SCL, SHA])
+      .pointColor(() => '#FFFFFF')
+      .pointAltitude(0.01)
+      .pointRadius(0.35)
+      .pointsTransitionDuration(0)
+      .htmlElementsData(this.props.labels ?? true ? [SCL, SHA] : [])
+      .htmlElement(label)
+      .htmlAltitude(0.02)
+      .htmlTransitionDuration(0)
+      .htmlElementVisibilityModifier((el, visible) => { el.style.opacity = visible ? 1 : 0; })
+      .enablePointerInteraction(false);
+    const m = g.globeMaterial();
+    m.specular.set('#000000'); m.shininess = 0;
+    const c = g.controls();
+    c.enableZoom = false; c.enableRotate = false; c.enablePan = false;
+    c.autoRotate = false; c.autoRotateSpeed = 0.35;
+    this.globe = g;
+    this.play();
+  }
+
+  setPhase(phase) { if (phase !== this.state.phase) this.setState({ phase }); }
+  setArc(colors, dashMs) { this.globe.pathColor(() => colors).pathDashAnimateTime(dashMs); }
+
+  play() {
+    const g = this.globe;
+    const reduce = this.props.motion === false || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    g.controls().autoRotate = false;
+    if (reduce) {
+      // One still frame with both cities in view; the real app swaps in a pre-recorded clip here.
+      this.setPhase(0);
+      g.pathDashLength(1).pathDashGap(0);
+      this.setArc(CHERRY, 0);
+      g.pointOfView({ lat: -8, lng: -165, altitude: 2.6 }, 0);
+      return;
+    }
+    g.pathDashLength(0.4).pathDashGap(0.15);
+    const cycle = (first) => {
+      this.setPhase(0);
+      this.setArc(CHERRY, 2500);
+      if (first) g.pointOfView({ lat: SCL.lat, lng: SCL.lng, altitude: 1.8 }, 0);
+      this.later(800, () => g.pointOfView({ ...PACIFIC, altitude: 2.4 }, 3500));
+      this.later(4800, () => g.pointOfView({ lat: SHA.lat, lng: SHA.lng, altitude: 1.8 }, 3500));
+      this.later(8600, () => {
+        // Payment delayed: intense red flicker for 2 s
+        this.setPhase(1);
+        let on = true;
+        this.setArc(CRISIS, 600);
+        this.flicker = setInterval(() => { on = !on; this.setArc(on ? CRISIS : CRISIS_DIM, 600); }, 140);
+      });
+      this.later(10600, () => {
+        clearInterval(this.flicker); this.flicker = null;
+        this.setPhase(2);
+        this.setArc(CHERRY, 1200);
+      });
+      this.later(12600, () => {
+        this.setPhase(3);
+        this.setArc(CHERRY, 2500);
+        g.controls().autoRotate = true;
+      });
+      this.later(16600, () => {
+        g.controls().autoRotate = false;
+        g.pointOfView({ lat: SCL.lat, lng: SCL.lng, altitude: 1.8 }, 2500);
+      });
+      this.later(19100, () => cycle(false));
+    };
+    cycle(true);
+  }
+
+  renderVals() {
+    const ph = this.state.phase;
+    const dark = (this.props.tone ?? 'light') === 'dark';
+    const chips = dark ? [
+      ['Cash flowing · Santiago → Shanghai', '#EE6A80'],
+      ['Shanghai importer: payment delayed 45 days', '#F2817C'],
+      ['NanFeng negotiating · factoring + CNY forward', '#ECEDEF'],
+      ['Plan approved · cash secured', '#62C294']
+    ] : [
+      ['Cash flowing · Santiago → Shanghai', '#A3122E'],
+      ['Shanghai importer: payment delayed 45 days', '#A3262A'],
+      ['NanFeng negotiating · factoring + CNY forward', '#1F3358'],
+      ['Plan approved · cash secured', '#1E6B4A']
+    ];
+    return {
+      size: this.size(),
+      bg: this.props.bg ?? '#F6F6F3',
+      chipBg: dark ? 'rgba(21,26,33,.85)' : '#FFFFFF', chipFg: dark ? '#ECEDEF' : '#14171C', chipBorder: dark ? 'rgba(169,190,230,.22)' : '#DCDCD4',
+      labels: this.props.labels ?? true,
+      chipText: chips[ph][0], chipColor: chips[ph][1],
+      chipSize: this.size() < 500 ? 11 : 13,
+      setMount: this.setMount
+    };
+  }
+}
+</script>
+</body>
+</html>

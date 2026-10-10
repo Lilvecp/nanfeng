@@ -1,0 +1,385 @@
+/* Navigation with an Apple feel: frosted bars, quiet type, soft easing, content that glides. */
+
+:root {
+  --ease-apple: cubic-bezier(0.28, 0.11, 0.32, 1);
+  --nav-h: 52px;
+}
+
+/* ---------- Logo (concept 9 · Sail) ---------- */
+.app {
+  --logo-sail: #0e2a47;
+  --logo-jib: #17506f;
+  --logo-wave: #155b7c;
+  --logo-red: #c8263a;
+}
+.app[data-theme="dark"] {
+  --logo-sail: #f3f5fa;
+  --logo-jib: #c9d6f0;
+  --logo-wave: #7fb3d5;
+  --logo-red: #ee6a80;
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text);
+  line-height: 1;
+}
+.logo-word {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  font-family: var(--f-body);
+}
+.logo-word.stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.18em;
+}
+.logo-latin {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.logo-han {
+  font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-weight: 500;
+  font-size: 0.62em;
+  letter-spacing: 0.35em;
+  color: var(--muted);
+}
+.logo-word:not(.stacked) .logo-han {
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+}
+
+/* ---------- Site nav (landing), modelled on apple.com ---------- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s var(--ease-apple), background-color 0.3s var(--ease-apple);
+  view-transition-name: site-nav;
+}
+.site-nav.scrolled {
+  border-bottom-color: color-mix(in srgb, var(--text) 10%, transparent);
+}
+.site-nav .inner {
+  max-width: 1024px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.site-nav .home {
+  display: inline-flex;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  opacity: 0.92;
+  transition: opacity 0.2s var(--ease-apple);
+}
+.site-nav .home:hover {
+  opacity: 1;
+}
+.site-nav .links {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: clamp(18px, 3vw, 36px);
+}
+.site-nav .links a {
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  color: var(--text) !important;
+  opacity: 0.72;
+  text-decoration: none !important;
+  transition: opacity 0.2s var(--ease-apple);
+}
+.site-nav .links a:hover,
+.site-nav .links a[aria-current="true"] {
+  opacity: 1;
+}
+.site-nav .actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.site-nav .seg button {
+  min-height: 24px;
+  font-size: 11px;
+  padding: 0 8px;
+}
+.site-nav .icon-btn {
+  width: 28px;
+  height: 28px;
+}
+.pill-sm {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink) !important;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: filter 0.2s var(--ease-apple);
+}
+.pill-sm:hover {
+  filter: brightness(1.12);
+}
+
+/* hamburger that morphs into an X */
+.burger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  margin-right: -10px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  position: relative;
+}
+.burger span {
+  position: absolute;
+  left: 12px;
+  width: 17px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: transform 0.32s var(--ease-apple), top 0.32s var(--ease-apple);
+}
+.burger span:first-child {
+  top: 16px;
+}
+.burger span:last-child {
+  top: 23px;
+}
+.burger[aria-expanded="true"] span:first-child {
+  top: 19.5px;
+  transform: rotate(45deg);
+}
+.burger[aria-expanded="true"] span:last-child {
+  top: 19.5px;
+  transform: rotate(-45deg);
+}
+
+/* full-screen menu on phones */
+.site-menu {
+  position: fixed;
+  inset: var(--nav-h) 0 0 0;
+  z-index: 49;
+  background: color-mix(in srgb, var(--bg) 98%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 20px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-apple), visibility 0s linear 0.3s;
+}
+.site-menu.open {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s var(--ease-apple), visibility 0s;
+}
+.site-menu a {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  padding: 6px 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.35s var(--ease-apple), transform 0.35s var(--ease-apple);
+}
+.site-menu.open a {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i) * 40ms + 60ms);
+}
+.site-menu .menu-foot {
+  margin-top: auto;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (max-width: 833px) {
+  .site-nav .links,
+  .site-nav .actions .desk-only {
+    display: none;
+  }
+  .burger {
+    display: block;
+  }
+  .site-nav .actions {
+    margin-left: auto;
+  }
+}
+
+/* smooth in-page scrolling, sections clear the sticky nav */
+html {
+  scroll-behavior: smooth;
+}
+.lp section[id],
+.lp [id="top"] {
+  scroll-margin-top: var(--nav-h);
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.rise {
+  animation: rise 0.9s var(--ease-apple) both;
+}
+.rise-2 {
+  animation-delay: 0.12s;
+}
+.rise-3 {
+  animation-delay: 0.24s;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
+
+/* ---------- Desk: macOS-style sidebar + frosted topbar ---------- */
+.side {
+  gap: 18px;
+}
+.side .brand {
+  padding: 6px 8px 2px;
+  letter-spacing: 0;
+}
+.side .brand a {
+  text-decoration: none !important;
+}
+.nav {
+  gap: 2px;
+}
+.nav a {
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  gap: 10px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: background-color 0.2s var(--ease-apple), color 0.2s var(--ease-apple);
+}
+.nav a .ico {
+  display: grid;
+  place-items: center;
+  color: var(--faint);
+  transition: color 0.2s var(--ease-apple);
+}
+.nav a:hover .ico,
+.nav a.on .ico {
+  color: var(--accent);
+}
+.nav a.on {
+  font-weight: 600;
+}
+.nav a:active {
+  transform: scale(0.985);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* ---------- Page transitions between desk screens ---------- */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(.page) {
+  animation: 160ms var(--ease-apple) both page-out;
+}
+::view-transition-new(.page) {
+  animation: 340ms var(--ease-apple) 80ms both page-in;
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    transform: scale(0.992);
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+::view-transition-group(site-nav),
+::view-transition-group(desk-side) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-nav),
+::view-transition-old(desk-side) {
+  display: none;
+}
+::view-transition-new(site-nav),
+::view-transition-new(desk-side) {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .side {
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+  .topbar {
+    position: static;
+  }
+}
+
+/* sidebar stays in place while the screen scrolls */
+@media (min-width: 761px) {
+  .side {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    align-self: flex-start;
+    overflow-y: auto;
+  }
+}

@@ -12,6 +12,9 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 
 ```
 .
+├── web/                       # Web cockpit (Next.js): landing + all cockpit screens, runs on Cherry Crisis mocks
+├── design/
+│   └── private-desk/          # Chosen visual direction: static mockups the web app is built from
 ├── plan/                      # Main planning: projection of the battle plan
 │   ├── README.md              # Index + key dates
 │   ├── overview.md            # The bet, demo script, scoring, differentiators
