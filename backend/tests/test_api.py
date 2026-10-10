@@ -4,7 +4,7 @@ from app.db import SessionLocal
 from app.models import AuditEntry
 
 FACTORING = {"action": "factoring INV-2026-118", "explanation": "Cherry Crisis plan",
-             "operation": {"op": "factoring", "params": {"receivable_id": "INV-2026-118", "share": 0.5}}}
+             "operations": [{"op": "factoring", "params": {"receivable_id": "INV-2026-118", "share": 0.5}}]}
 
 
 def clp_balance(client) -> float:
@@ -18,12 +18,12 @@ def test_health_and_seed(client):
 
 
 def test_small_payment_runs_automatically(client):
-    r = client.post("/approvals", json={"action": "pay Cartonera Sur", "operation": {
-        "op": "payment", "params": {"payee_id": "PAY-CARTONERA", "amount": 500_000}}})
+    r = client.post("/approvals", json={"action": "pay Cartonera Sur", "operations": [{
+        "op": "payment", "params": {"payee_id": "PAY-CARTONERA", "amount": 500_000}}]})
     assert r.status_code == 201
     body = r.json()
     assert body["tier"] == 1 and body["status"] == "auto"
-    assert body["result"]["audit_hash"]
+    assert body["results"][0]["audit_hash"]
     assert clp_balance(client) == 175_000_000
 
 
@@ -38,8 +38,8 @@ def test_financing_needs_otp_and_runs_once(client):
 
     ok = client.post(f"/approvals/{appr['id']}/approve", json={"otp": "482913"}).json()
     assert ok["status"] == "approved"
-    assert ok["result"]["proceeds_clp"] > 0
-    assert clp_balance(client) == 175_500_000 + ok["result"]["proceeds_clp"]
+    assert ok["results"][0]["proceeds_clp"] > 0
+    assert clp_balance(client) == 175_500_000 + ok["results"][0]["proceeds_clp"]
 
     again = client.post(f"/approvals/{appr['id']}/approve", json={"otp": "482913"})
     assert again.status_code == 409
@@ -69,15 +69,15 @@ def test_reject_requires_reason(client):
 
 def test_kill_switch_blocks_everything(client):
     client.post("/policy/kill-switch", json={"on": True})
-    r = client.post("/approvals", json={"action": "pay", "operation": {
-        "op": "payment", "params": {"payee_id": "PAY-CARTONERA", "amount": 1000}}}).json()
+    r = client.post("/approvals", json={"action": "pay", "operations": [{
+        "op": "payment", "params": {"payee_id": "PAY-CARTONERA", "amount": 1000}}]}).json()
     assert r["status"] == "blocked"
     assert clp_balance(client) == 175_500_000
 
 
 def test_insufficient_funds_fails_cleanly(client):
-    a = client.post("/approvals", json={"action": "huge payroll", "operation": {
-        "op": "payment", "params": {"payee_id": "PAY-PAYROLL", "amount": 999_000_000}}}).json()
+    a = client.post("/approvals", json={"action": "huge payroll", "operations": [{
+        "op": "payment", "params": {"payee_id": "PAY-PAYROLL", "amount": 999_000_000}}]}).json()
     r = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
     assert r["status"] == "failed" and r["note"].startswith("insufficient_funds")
     assert clp_balance(client) == 175_500_000
@@ -111,8 +111,8 @@ def test_anchor_and_inclusion_proof(client):
 
 
 def test_bank_log_export_is_jsonl(client):
-    client.post("/approvals", json={"action": "pay", "operation": {
-        "op": "payment", "params": {"payee_id": "PAY-FRIO", "amount": 2_000_000}}})
+    client.post("/approvals", json={"action": "pay", "operations": [{
+        "op": "payment", "params": {"payee_id": "PAY-FRIO", "amount": 2_000_000}}]})
     r = client.get("/bank/logs")
     lines = r.text.strip().splitlines()
     assert r.headers["content-type"].startswith("application/x-ndjson")
@@ -128,3 +128,29 @@ def test_agent_events_round_trip(client):
 def test_quant_proxy_reports_unreachable_engine(client):
     r = client.post("/quant/forecast", json={"scenario": "cherry_crisis"})
     assert r.status_code == 503
+
+
+def test_cherry_crisis_plan_executes_both_operations_and_anchors(client):
+    plan = {"action": "factoring + CNY forward", "operations": [
+        {"op": "factoring", "params": {"receivable_id": "INV-2026-118", "share": 0.6667}},
+        {"op": "forward", "params": {"currency": "CNY", "notional": 1_200_000, "tenor_days": 60}},
+    ]}
+    a = client.post("/approvals", json=plan).json()
+    assert a["tier"] == 3 and a["status"] == "pending"
+    done = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
+    assert done["status"] == "approved" and len(done["results"]) == 2
+    anchors = client.get("/audit/anchors").json()
+    assert len(anchors) == 1 and anchors[0]["to_seq"] >= done["results"][1]["audit_seq"]
+    assert client.get("/audit/verify").json()["valid"] is True
+
+
+def test_partial_failure_reports_what_ran(client):
+    plan = {"action": "forward then double factoring", "operations": [
+        {"op": "forward", "params": {"currency": "CNY", "notional": 100_000, "tenor_days": 30}},
+        {"op": "factoring", "params": {"receivable_id": "INV-2026-118"}},
+        {"op": "factoring", "params": {"receivable_id": "INV-2026-118"}},
+    ]}
+    a = client.post("/approvals", json=plan).json()
+    r = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
+    assert r["status"] == "failed" and len(r["results"]) == 2
+    assert "already_financed" in r["note"] and "1-2 executed" in r["note"]

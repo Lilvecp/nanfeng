@@ -30,11 +30,11 @@ uv venv --python 3.12 .venv && uv pip install -e ".[dev]"   # or: python3.12 -m 
 
 ## How money moves
 
-Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operation: {op, params}}`:
+Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations, e.g. factoring + forward):
 
 1. The backend computes the CLP exposure and asks the policy (`app/policy.py`) for a tier.
 2. L1/L2 run immediately (`status: auto`). L3 waits (`pending`) until `POST /approvals/{id}/approve` with the OTP (sandbox `482913`, 3 attempts, then `locked`) or `/reject` with a reason.
-3. The sandbox bank executes, writes the transaction, appends to the audit log and publishes an SSE event.
+3. The sandbox bank executes the operations in order (stopping at the first failure, the note says which ran), writes the transactions, appends to the audit log and publishes SSE events. An approved L3 request is anchored right away.
 
 Operations: `payment`, `fx_convert`, `factoring` (refuses an invoice that was already financed), `loan`, `forward`.
 

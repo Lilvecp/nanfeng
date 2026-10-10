@@ -69,7 +69,7 @@ class Approval(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     action: Mapped[str] = mapped_column(String(160))
-    operation: Mapped[dict] = mapped_column(JSON)  # {"op": "...", "params": {...}} executed on approval
+    operations: Mapped[list] = mapped_column(JSON)  # [{"op": "...", "params": {...}}], executed in order
     amount_clp: Mapped[float] = mapped_column(Money, default=0)
     tier: Mapped[int] = mapped_column(Integer)
     status: Mapped[str] = mapped_column(String(16))  # pending | approved | rejected | auto | locked | failed
@@ -77,7 +77,7 @@ class Approval(Base):
     channel: Mapped[str] = mapped_column(String(32), default="")
     explanation: Mapped[str] = mapped_column(Text, default="")
     note: Mapped[str] = mapped_column(Text, default="")
-    result: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    results: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
 
 class AuditEntry(Base):

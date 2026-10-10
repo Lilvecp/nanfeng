@@ -20,7 +20,8 @@ KEEPALIVE_S = 15
 
 
 def _sse(event: dict) -> str:
-    return f"id: {event['id']}\nevent: {event['type']}\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
+    # No "event:" line on purpose: EventSource.onmessage then receives every type; it is in data.type.
+    return f"id: {event['id']}\ndata: {json.dumps(event, ensure_ascii=False)}\n\n"
 
 
 @router.get("/events", summary="SSE stream of agent, approval, bank and audit events",

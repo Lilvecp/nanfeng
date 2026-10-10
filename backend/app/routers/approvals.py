@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import audit, bank, policy
+from .. import anchoring, audit, bank, policy
 from ..config import get_settings
 from ..db import get_db
 from ..events import broker
@@ -32,31 +32,41 @@ def _out(appr: Approval) -> dict:
 
 
 def _run(db: Session, appr: Approval, actor: str) -> None:
-    op = appr.operation
-    try:
-        appr.result = bank.execute(db, op["op"], op["params"], actor=actor)
-        appr.status = "approved" if appr.tier == 3 else "auto"
-    except bank.BankError as exc:
-        appr.status, appr.note = "failed", f"{exc.code}: {exc.message}"
-    appr.decided_at = utcnow()
+    """Executes the operations in order. Stops at the first failure; earlier ones stay executed
+    (the note says which), like a real bank would."""
+    results: list[dict] = []
+    status = "approved" if appr.tier == 3 else "auto"
+    for i, op in enumerate(appr.operations):
+        try:
+            results.append(bank.execute(db, op["op"], op["params"], actor=actor))
+        except bank.BankError as exc:
+            status = "failed"
+            done = f" (operations 1-{i} executed)" if i else ""
+            appr.note = f"{exc.code}: {exc.message}{done}"
+            break
+    appr.results, appr.status, appr.decided_at = results, status, utcnow()
 
 
 @router.post("/approvals", response_model=ApprovalOut, status_code=201)
 def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Depends(require_agent)):
-    op, params = body.operation.op, body.operation.params
-    try:
-        amount_clp = bank.operation_amount_clp(db, op, params)
-    except bank.BankError as exc:
-        raise HTTPException(exc.status, exc.message) from exc
-    except KeyError as exc:
-        raise HTTPException(422, f"Missing parameter {exc}") from exc
-    allowlisted = bank.is_allowlisted(db, params.get("payee_id", "")) if op == "payment" else True
-    decision = policy.evaluate(op, amount_clp, allowlisted, _kill_switch["on"])
+    amounts, decisions = [], []
+    for o in body.operations:
+        try:
+            amounts.append(bank.operation_amount_clp(db, o.op, o.params))
+        except bank.BankError as exc:
+            raise HTTPException(exc.status, exc.message) from exc
+        except KeyError as exc:
+            raise HTTPException(422, f"Missing parameter {exc} in {o.op}") from exc
+        allowlisted = bank.is_allowlisted(db, o.params.get("payee_id", "")) if o.op == "payment" else True
+        decisions.append(policy.evaluate(o.op, amounts[-1], allowlisted, _kill_switch["on"]))
+    # the whole request gets the strictest decision among its operations
+    decision = max(decisions, key=lambda d: (d.blocked, d.tier))
+    amount_clp = sum(amounts)
 
     n = (db.scalar(select(func.count()).select_from(Approval)) or 0) + 1
     appr = Approval(
         id=f"{'APR' if decision.tier == 3 else 'AUT'}-{n:04d}", action=body.action,
-        operation=body.operation.model_dump(), amount_clp=amount_clp, tier=decision.tier,
+        operations=[o.model_dump() for o in body.operations], amount_clp=amount_clp, tier=decision.tier,
         status="pending", otp_attempts_left=get_settings().otp_max_attempts,
         channel=body.channel, explanation=body.explanation, note=decision.reason,
     )
@@ -113,8 +123,10 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
     _run(db, appr, actor="owner")
     audit.append(db, "owner", "approval.approved", {
         "approval_id": appr.id, "status": appr.status, "channel": body.channel,
-        "result_hash": (appr.result or {}).get("audit_hash"),
+        "result_hashes": [r.get("audit_hash") for r in appr.results or []],
     })
+    if appr.status == "approved":
+        anchoring.anchor_pending(db)  # covers the execution and the approval entry itself
     broker.publish(f"approval.{appr.status}", _out(appr))
     return appr
 

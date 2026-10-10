@@ -43,20 +43,9 @@ def anchors(db: Session = Depends(get_db)):
 @router.post("/anchor", response_model=AnchorOut, status_code=201,
              summary="Anchor the Merkle root of every entry since the last anchor")
 def anchor(db: Session = Depends(get_db)):
-    last = db.scalars(select(Anchor).order_by(Anchor.id.desc()).limit(1)).first()
-    from_seq = (last.to_seq + 1) if last else 1
-    rows = db.scalars(select(AuditEntry).where(AuditEntry.seq >= from_seq).order_by(AuditEntry.seq)).all()
-    if not rows:
+    a = anchoring.anchor_pending(db)
+    if not a:
         raise HTTPException(409, "Nothing new to anchor")
-    root = audit.merkle_root([r.hash for r in rows])
-    receipt = anchoring.anchor(root, from_seq, rows[-1].seq)
-    a = Anchor(from_seq=from_seq, to_seq=rows[-1].seq, merkle_root=root, **receipt)
-    db.add(a)
-    db.flush()
-    audit.append(db, "system", "audit.anchored", {
-        "anchor_id": a.id, "from_seq": a.from_seq, "to_seq": a.to_seq, "merkle_root": root, **receipt,
-    })
-    broker.publish("audit.anchored", AnchorOut.model_validate(a).model_dump(mode="json"))
     return a
 
 

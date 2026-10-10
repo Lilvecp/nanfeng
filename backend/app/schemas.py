@@ -66,7 +66,7 @@ class Operation(BaseModel):
 
 class ApprovalCreate(BaseModel):
     action: str = Field(examples=["factoring + CNY forward"])
-    operation: Operation
+    operations: list[Operation] = Field(min_length=1, max_length=5)
     explanation: str = ""
     channel: str = "WEB"
 
@@ -76,7 +76,7 @@ class ApprovalOut(ORM):
     created_at: datetime
     decided_at: datetime | None
     action: str
-    operation: dict
+    operations: list[dict]
     amount_clp: float
     tier: int
     status: Literal["pending", "approved", "rejected", "auto", "locked", "failed", "blocked"]
@@ -84,7 +84,7 @@ class ApprovalOut(ORM):
     channel: str
     explanation: str
     note: str
-    result: dict | None
+    results: list[dict] | None
 
 
 class ApproveIn(BaseModel):

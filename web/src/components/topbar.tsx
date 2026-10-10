@@ -1,5 +1,6 @@
 "use client";
 
+import { useDesk } from "@/lib/desk-state";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
 import { useT } from "@/lib/i18n";
 
@@ -36,6 +37,14 @@ export function ThemeToggle() {
   );
 }
 
+/** Whether the screen is talking to the backend or running on the local sandbox mocks. */
+function ApiBadge() {
+  const { mode } = useDesk();
+  const label = mode === "live" ? "API LIVE" : mode === "checking" ? "API…" : "SANDBOX";
+  const title = mode === "live" ? "Connected to the NanFeng API" : mode === "checking" ? "Connecting to the API" : "No backend: local Cherry Crisis sandbox";
+  return <span className={`badge${mode === "live" ? " ok" : ""}`} title={title}>{label}</span>;
+}
+
 /** Ticker row on top of every desk screen; each screen passes its own ticks. */
 export function Topbar({ children, controls = true }: { children: React.ReactNode; controls?: boolean }) {
   return (
@@ -46,6 +55,7 @@ export function Topbar({ children, controls = true }: { children: React.ReactNod
       {children}
       {controls && (
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          <ApiBadge />
           <LangSwitch />
           <ThemeToggle />
         </div>

@@ -2,7 +2,12 @@
 
 The web app the jury sees: landing page plus the full cockpit, built on the **Private desk** design direction (`design/private-desk`). Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 (theme + utilities only).
 
-Right now everything runs on **mock data from the Cherry Crisis scenario** in the browser. No backend is needed; the screens are shaped so the API can replace the mocks one by one.
+Two modes, picked automatically (badge in the top bar):
+
+- **API LIVE**: with `NEXT_PUBLIC_API_URL` set (see `.env.example`) and the backend up, Approvals (OTP, reject, history), Mission Control (kill switch, live SSE event stream) and Security (audit chain, verify, anchors) use the real API in `../backend`.
+- **SANDBOX**: no URL or the backend is down, so every screen runs on the Cherry Crisis mocks in the browser. Demo Mode never depends on the network.
+
+The typed client lives in `src/lib/api.ts`; types are generated from `../contracts/openapi.json` with `npm run api:types`.
 
 ## Run it
 
@@ -10,6 +15,8 @@ Right now everything runs on **mock data from the Cherry Crisis scenario** in th
 cd web
 npm install
 npm run dev -- -p 3100   # any free port; open http://localhost:3100
+# live mode: run the backend (see ../backend/README.md), then
+NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev -- -p 3100
 ```
 
 Production build: `npm run build && npm start`.

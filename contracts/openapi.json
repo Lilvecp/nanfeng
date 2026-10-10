@@ -1158,8 +1158,14 @@
               "factoring + CNY forward"
             ]
           },
-          "operation": {
-            "$ref": "#/components/schemas/Operation"
+          "operations": {
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            },
+            "type": "array",
+            "maxItems": 5,
+            "minItems": 1,
+            "title": "Operations"
           },
           "explanation": {
             "type": "string",
@@ -1175,7 +1181,7 @@
         "type": "object",
         "required": [
           "action",
-          "operation"
+          "operations"
         ],
         "title": "ApprovalCreate"
       },
@@ -1206,10 +1212,13 @@
             "type": "string",
             "title": "Action"
           },
-          "operation": {
-            "additionalProperties": true,
-            "type": "object",
-            "title": "Operation"
+          "operations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Operations"
           },
           "amount_clp": {
             "type": "number",
@@ -1248,17 +1257,20 @@
             "type": "string",
             "title": "Note"
           },
-          "result": {
+          "results": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Result"
+            "title": "Results"
           }
         },
         "type": "object",
@@ -1267,7 +1279,7 @@
           "created_at",
           "decided_at",
           "action",
-          "operation",
+          "operations",
           "amount_clp",
           "tier",
           "status",
@@ -1275,7 +1287,7 @@
           "channel",
           "explanation",
           "note",
-          "result"
+          "results"
         ],
         "title": "ApprovalOut"
       },
