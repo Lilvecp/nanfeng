@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import anchoring, audit, bank, otp, policy
+from .. import anchoring, audit, bank, bec, otp, policy
 from ..config import get_settings
 from ..db import get_db
 from ..events import broker
@@ -57,7 +57,8 @@ def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Dep
             raise HTTPException(422, f"Missing parameter {exc} in {o.op}") from exc
         payee = str(o.params.get("payee_id", "")) if o.op == "payment" else ""
         allowlisted = bank.is_allowlisted(db, payee) if o.op == "payment" else True
-        checks.append(policy.OpCheck(o.op, amount, payee, allowlisted))
+        changed = bec.account_changed_at(db, payee) if payee else None
+        checks.append(policy.OpCheck(o.op, amount, payee, allowlisted, changed))
     amount_clp = sum(c.amount_clp for c in checks)
 
     # The decision and the execution it allows must see the same history (cumulative limits).

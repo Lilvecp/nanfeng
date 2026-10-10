@@ -52,7 +52,7 @@ class LenderOut(ORM):
     fee_pct: float
 
 
-Op = Literal["payment", "fx_convert", "factoring", "loan", "forward"]
+Op = Literal["payment", "fx_convert", "factoring", "loan", "forward", "payee_bank_change"]
 
 
 class Operation(BaseModel):
@@ -60,7 +60,8 @@ class Operation(BaseModel):
     params: dict[str, Any] = Field(
         description="Arguments of the sandbox operation, e.g. payment: {payee_id, amount, currency, reference}; "
                     "factoring: {receivable_id, lender_id?, share?}; loan: {lender_id, amount_clp, term_days}; "
-                    "forward: {currency, notional, tenor_days}; fx_convert: {from_currency, to_currency, amount}",
+                    "forward: {currency, notional, tenor_days}; fx_convert: {from_currency, to_currency, amount}; "
+                    "payee_bank_change: {payee_id, bank_account, verified_by} (always L3)",
     )
 
 
@@ -135,3 +136,30 @@ class EventIn(BaseModel):
                    "cost_usd": 0.0004, "status": "done"}],
     )
     source: str = "agent"
+
+
+class ScanIn(BaseModel):
+    doc_id: str = Field(max_length=64, examples=["DOC-0042"])
+    source: str = Field(default="upload", max_length=32, examples=["email", "whatsapp", "sms", "upload"])
+    ocr_text: str = Field(max_length=200_000, description="Mistral OCR of the rendered pages")
+    text_layer: str | None = Field(default=None, max_length=200_000, description="PDF text layer, if any")
+
+
+class PayeeCheckIn(BaseModel):
+    doc_id: str = Field(max_length=64)
+    source: str = Field(default="upload", max_length=32)
+    issuer_name: str = Field(default="", max_length=160)
+    tax_id: str = Field(default="", max_length=32)
+    sender_domain: str = Field(default="", max_length=160, description="From the mail headers, never the body")
+    bank_account: str = Field(default="", max_length=64)
+
+
+class SecurityVerdict(BaseModel):
+    doc_id: str
+    verdict: Literal["clean", "suspicious", "malicious"]
+    rules: list[str]
+    details: dict[str, Any] = {}
+    payee_id: str | None = None
+    verify_by: dict[str, str] | None = None
+    alerted_via: str | None = None
+    audit_seq: int | None = None

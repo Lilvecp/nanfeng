@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from . import audit
 from .events import broker
-from .models import Account, Lender, Payee, Receivable, Transaction
+from .models import Account, Lender, Payee, PayeeAccount, Receivable, Transaction
 from .seed import FX_RATES
 
 ACCOUNT_BY_CCY = {"CLP": "ACC-CLP", "USD": "ACC-USD", "CNY": "ACC-CNY"}
@@ -137,12 +137,31 @@ def forward(db: Session, currency: str, notional: float, tenor_days: int,
     })
 
 
+def payee_bank_change(db: Session, payee_id: str, bank_account: str, verified_by: str,
+                      actor: str = "agent") -> dict:
+    """Changes a payee's bank account (r4-04). Always L3, and only after a call-back to the number on
+    file: `verified_by` records who confirmed it. The old account stays in the history."""
+    payee = db.get(Payee, payee_id)
+    if not payee:
+        raise BankError("unknown_payee", f"Payee {payee_id} not found", 404)
+    if len(verified_by.strip()) < 5:
+        raise BankError("not_verified", "An account change needs a call-back to the number on file (verified_by)")
+    old = payee.bank_account
+    payee.bank_account = bank_account
+    db.add(PayeeAccount(payee_id=payee.id, bank_account=bank_account, source=f"changed by {actor}"))
+    return _finish(db, actor, "payee_bank_change", {
+        "payee_id": payee.id, "old_account_last4": old[-4:], "new_account_last4": bank_account[-4:],
+        "verified_by": verified_by, "amount_clp": 0,
+    })
+
+
 OPERATIONS = {
     "payment": payment,
     "fx_convert": fx_convert,
     "factoring": factoring,
     "loan": loan,
     "forward": forward,
+    "payee_bank_change": payee_bank_change,
 }
 
 
@@ -161,6 +180,8 @@ def operation_amount_clp(db: Session, op: str, params: dict) -> float:
         return float(params["amount_clp"])
     if op == "forward":
         return to_clp(params["notional"], params["currency"])
+    if op == "payee_bank_change":
+        return 0.0
     raise BankError("unknown_operation", f"Unknown operation {op}")
 
 

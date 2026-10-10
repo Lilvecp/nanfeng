@@ -50,7 +50,7 @@ def test_sandbox_code_does_not_work_in_sms_mode(client, sms):
 
 
 def test_code_is_bound_to_its_approval(client, sms):
-    a = client.post("/approvals", json=FACTORING).json()
+    client.post("/approvals", json=FACTORING)  # its code is sms[0]
     b = client.post("/approvals", json={**FACTORING, "operations": [
         {"op": "factoring", "params": {"receivable_id": "INV-2026-115"}}]}).json()
     r = client.post(f"/approvals/{b['id']}/approve", json={"otp": code_in(sms[0])})

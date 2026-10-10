@@ -25,8 +25,10 @@ POLICY: dict = {
         "L2": {"per_action": 25_000_000, "per_day": 40_000_000, "per_month": 80_000_000},
         "L3": {"per_action": 400_000_000, "per_month": 400_000_000},
     },
-    # New money or a binding FX commitment always goes to the owner, whatever the amount.
-    "always_l3": ["factoring", "loan", "forward"],
+    # New money, a binding FX commitment or a new payee account always goes to the owner.
+    "always_l3": ["factoring", "loan", "forward", "payee_bank_change"],
+    # After a payee's account changes, payments to it need the owner for this long (BEC).
+    "account_change_cooling_hours": 72,
     "velocity": {"window_minutes": 10, "max_auto_actions": 5},
     "structuring": {"window_hours": 24},
 }
@@ -54,6 +56,7 @@ class OpCheck:
     amount_clp: float
     payee_id: str = ""
     payee_allowlisted: bool = True
+    account_changed_at: datetime | None = None  # payee's account changed at (None = original account)
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,9 @@ def decide(ops: list[OpCheck], history: list[Executed], now: datetime,
             fired.setdefault("financing", f"{o.op} always needs the owner's approval")
         elif o.op == "payment" and not o.payee_allowlisted:
             fired.setdefault("payee_not_allowlisted", f"payee {o.payee_id or '?'} is not on the allowlist")
+        elif o.account_changed_at and now - o.account_changed_at < timedelta(hours=p["account_change_cooling_hours"]):
+            fired.setdefault("recent_account_change", f"{o.payee_id} changed its bank account "
+                                                      f"less than {p['account_change_cooling_hours']} h ago")
         elif o.amount_clp > l2["per_action"]:
             fired.setdefault("l2_per_action", f"{_clp(o.amount_clp)} is above the L2 limit per action")
 
