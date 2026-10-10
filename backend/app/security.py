@@ -14,3 +14,11 @@ def require_agent(authorization: str = Header(default="")) -> str:
     if not hmac.compare_digest(supplied, token):
         raise HTTPException(status_code=401, detail="Invalid agent token")
     return "agent"
+
+
+def reject_agent(authorization: str = Header(default="")) -> None:
+    """Owner-only routes: the agent may propose an action but never approve it (r4-05)."""
+    token = get_settings().agent_token
+    supplied = authorization.removeprefix("Bearer ").strip()
+    if token and supplied and hmac.compare_digest(supplied, token):
+        raise HTTPException(status_code=403, detail="The agent cannot approve its own requests")

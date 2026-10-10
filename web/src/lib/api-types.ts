@@ -192,6 +192,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/approvals/{approval_id}/otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the owner a new code (SMS mode) */
+        post: operations["resend_code_approvals__approval_id__otp_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/approvals/{approval_id}/approve": {
         parameters: {
             query?: never;
@@ -1032,10 +1049,43 @@ export interface operations {
             };
         };
     };
-    approve_approvals__approval_id__approve_post: {
+    resend_code_approvals__approval_id__otp_post: {
         parameters: {
             query?: never;
             header?: never;
+            path: {
+                approval_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_approvals__approval_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
             path: {
                 approval_id: string;
             };
@@ -1070,7 +1120,9 @@ export interface operations {
     reject_approvals__approval_id__reject_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path: {
                 approval_id: string;
             };

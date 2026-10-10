@@ -391,6 +391,46 @@
         }
       }
     },
+    "/approvals/{approval_id}/otp": {
+      "post": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Send the owner a new code (SMS mode)",
+        "operationId": "resend_code_approvals__approval_id__otp_post",
+        "parameters": [
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Approval Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/approvals/{approval_id}/approve": {
       "post": {
         "tags": [
@@ -406,6 +446,16 @@
             "schema": {
               "type": "string",
               "title": "Approval Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
             }
           }
         ],
@@ -458,6 +508,16 @@
             "schema": {
               "type": "string",
               "title": "Approval Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
             }
           }
         ],

@@ -1,19 +1,17 @@
 """Approval Center API: every money movement enters here, gets a policy tier, and runs in the
 sandbox bank either right away (L1/L2) or after the owner approves with OTP (L3)."""
 
-import hmac
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import anchoring, audit, bank, policy
+from .. import anchoring, audit, bank, otp, policy
 from ..config import get_settings
 from ..db import get_db
 from ..events import broker
 from ..models import Approval, utcnow
 from ..schemas import ApprovalCreate, ApprovalOut, ApproveIn, KillSwitchIn, RejectIn
-from ..security import require_agent
+from ..security import reject_agent, require_agent
 
 router = APIRouter(tags=["approvals"])
 
@@ -87,8 +85,28 @@ def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Dep
         "status": appr.status, "policy_reason": decision.reason, "policy_rules": decision.rules,
         "policy_version": policy.POLICY["version"],
     })
+    if appr.status == "pending":
+        try:
+            _send_code(db, appr)
+        except otp.OtpError:
+            pass  # still pending: logged and on SSE, the owner asks for a new code with POST .../otp
     broker.publish("approval.requested" if appr.status == "pending" else f"approval.{appr.status}", _out(appr))
     return appr
+
+
+def _send_code(db: Session, appr: Approval) -> dict:
+    """Texts the owner a fresh code (SMS mode). Logs where it went, never the code itself."""
+    try:
+        info = otp.issue(db, appr)
+    except otp.OtpError as exc:
+        audit.append(db, "security", "approval.otp_not_sent", {"approval_id": appr.id, "error": exc.code})
+        broker.publish("approval.otp_not_sent", {"approval_id": appr.id, "error": exc.code})
+        raise
+    if info["mode"] == "sms":
+        audit.append(db, "security", "approval.otp_sent", {"approval_id": appr.id, **info})
+        broker.publish("approval.otp_sent", {"approval_id": appr.id, "sent_to": info["sent_to"],
+                                             "expires_at": info["expires_at"]})
+    return info
 
 
 @router.get("/approvals", response_model=list[ApprovalOut])
@@ -104,15 +122,36 @@ def get_approval(approval_id: str, db: Session = Depends(get_db)):
     return _get(db, approval_id)
 
 
-@router.post("/approvals/{approval_id}/approve", response_model=ApprovalOut)
+@router.post("/approvals/{approval_id}/otp", summary="Send the owner a new code (SMS mode)")
+def resend_code(approval_id: str, db: Session = Depends(get_db)):
+    appr = _get(db, approval_id)
+    if appr.status != "pending":
+        raise HTTPException(409, f"Approval is {appr.status}")
+    try:
+        info = _send_code(db, appr)
+    except otp.OtpError as exc:
+        raise HTTPException(exc.status, {"error": exc.code, "detail": exc.message}) from exc
+    return {k: v for k, v in info.items() if k != "delivery_id"}
+
+
+@router.post("/approvals/{approval_id}/approve", response_model=ApprovalOut,
+             dependencies=[Depends(reject_agent)])
 def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
         raise HTTPException(409, f"Approval is {appr.status}")
     if _kill_switch["on"]:
         raise HTTPException(423, "Kill switch is on")
+    if "VOICE" in body.channel.upper():
+        audit.append(db, "security", "approval.voice_refused", {"approval_id": appr.id, "channel": body.channel})
+        raise HTTPException(403, {"error": "voice_cannot_approve",
+                                  "detail": "L3 actions need the OTP; voice never approves (deepfake risk)"})
 
-    if not hmac.compare_digest(body.otp, get_settings().sandbox_otp):
+    check = otp.verify(db, appr, body.otp)
+    if check == "expired":
+        audit.append(db, "owner", "approval.otp_expired", {"approval_id": appr.id, "channel": body.channel})
+        raise HTTPException(410, {"error": "otp_expired", "attempts_left": appr.otp_attempts_left})
+    if check != "ok":
         appr.otp_attempts_left -= 1
         if appr.otp_attempts_left <= 0:
             appr.status, appr.decided_at = "locked", utcnow()
@@ -139,7 +178,8 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
     return appr
 
 
-@router.post("/approvals/{approval_id}/reject", response_model=ApprovalOut)
+@router.post("/approvals/{approval_id}/reject", response_model=ApprovalOut,
+             dependencies=[Depends(reject_agent)])
 def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
