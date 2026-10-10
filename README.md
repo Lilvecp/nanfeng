@@ -13,6 +13,9 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 ```
 .
 ├── web/                       # Web cockpit (Next.js): landing + all cockpit screens, runs on Cherry Crisis mocks
+├── backend/                   # API gateway (FastAPI): sandbox bank, approvals + OTP, audit log, agent SSE, quant proxy
+├── contracts/                 # OpenAPI contracts (generated)
+├── docker-compose.yml         # One-command stack: Postgres + backend (+ quant profile)
 ├── design/
 │   └── private-desk/          # Chosen visual direction: static mockups the web app is built from
 ├── plan/                      # Main planning: projection of the battle plan
