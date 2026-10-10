@@ -22,6 +22,7 @@ def main() -> None:
     ap.add_argument("--label", required=True)
     ap.add_argument("--otp-mode", default="sms")
     ap.add_argument("--ref", default="", help="git ref of the backend, for the record")
+    ap.add_argument("--min-stopped", type=int, default=0, help="exit 1 below this (CI regression gate)")
     args = ap.parse_args()
 
     backend = Path(args.backend).resolve()
@@ -75,6 +76,11 @@ def main() -> None:
                                "results": results}, indent=2, ensure_ascii=False) + "\n")
     n = sum(r["stopped"] for r in results)
     print(f"{args.label}: {n}/{len(results)} attacks stopped -> {out.relative_to(HERE)}")
+    for r in results:
+        if not r["stopped"]:
+            print(f"  open: {r['id']} {r['name']} | {r['evidence']}")
+    if n < args.min_stopped:
+        sys.exit(f"red team regression: {n} stopped, expected at least {args.min_stopped}")
 
 
 if __name__ == "__main__":

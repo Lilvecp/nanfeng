@@ -12,3 +12,4 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 *.db
+andy-villarroel/redteam/results/ci.json
