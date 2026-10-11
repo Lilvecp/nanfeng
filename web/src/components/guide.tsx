@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SailMark } from "@/components/logo";
 import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
-import { GUIDE_UI, guideContent, markTourSeen, setGuideOn, useGuideOn, useTourSeen, type GuideStep } from "@/lib/guide";
+import { GUIDE_UI, guideContent, markHelloSeen, markTourSeen, setGuideOn, useGuideOn, useHelloSeen, useTourSeen, type GuideStep } from "@/lib/guide";
 import { useLang } from "@/lib/i18n";
 import { usePref } from "@/lib/prefs";
 
@@ -42,8 +42,12 @@ function place(box: Box | null, w: number, h: number) {
   return { top, left };
 }
 
-function Tour({ steps, onClose }: { steps: GuideStep[]; onClose: () => void }) {
+const HELLO = "__hello";
+
+function Tour({ steps: pageSteps, hello, onClose }: { steps: GuideStep[]; hello: boolean; onClose: () => void }) {
   const ui = GUIDE_UI[useLang()];
+  // First tour ever: the guide introduces itself in a centred bubble before the screen's steps.
+  const steps = hello ? [{ target: HELLO, title: ui.helloTitle, body: ui.helloBody }, ...pageSteps] : pageSteps;
   const [i, setI] = useState(0);
   const [box, setBox] = useState<Box | null>(null);
   const [size, setSize] = useState({ w: 360, h: 200 });
@@ -52,6 +56,8 @@ function Tour({ steps, onClose }: { steps: GuideStep[]; onClose: () => void }) {
   const nextBtn = useRef<HTMLButtonElement>(null);
   const step = steps[i];
   const last = i === steps.length - 1;
+  const isHello = step.target === HELLO;
+  const n = hello ? i : i + 1; // step number among the screen's own steps
 
   // Bring the target into view, then follow it every frame: the page can shift under it (smooth
   // scroll, a notice closing, data arriving), and a stale spotlight would point at the wrong thing.
@@ -125,17 +131,17 @@ function Tour({ steps, onClose }: { steps: GuideStep[]; onClose: () => void }) {
       ) : (
         <div className="guide-dim" aria-hidden="true" />
       )}
-      <div ref={bubble} className="guide-bubble" role="dialog" aria-modal="true" aria-labelledby="guide-title" aria-describedby="guide-body" style={{ top: pos.top, left: pos.left }}>
-        <span className={`guide-avatar${moving ? " moving" : ""}`} aria-hidden="true"><SailMark size={26} /></span>
-        <span className="guide-count">{ui.step} {i + 1} {ui.of} {steps.length}</span>
+      <div ref={bubble} className={`guide-bubble${isHello ? " hello" : ""}`} role="dialog" aria-modal="true" aria-labelledby="guide-title" aria-describedby="guide-body" style={{ top: pos.top, left: pos.left }}>
+        <span className={`guide-avatar${moving ? " moving" : ""}`} aria-hidden="true"><SailMark size={isHello ? 40 : 26} /></span>
+        {!isHello && <span className="guide-count">{ui.step} {n} {ui.of} {pageSteps.length}</span>}
         <h2 id="guide-title" className="guide-title">{step.title}</h2>
         <p id="guide-body" className="guide-body" aria-live="polite">{step.body}</p>
-        <div className="guide-dots" aria-hidden="true">{steps.map((s, n) => <i key={s.target} className={n === i ? "on" : undefined} />)}</div>
+        {!isHello && <div className="guide-dots" aria-hidden="true">{pageSteps.map((s, k) => <i key={s.target} className={k === n - 1 ? "on" : undefined} />)}</div>}
         <div className="guide-actions">
-          <button className="btn btn-ghost btn-sm" type="button" onClick={onClose}>{ui.skip}</button>
+          <button className="btn btn-ghost btn-sm" type="button" onClick={onClose}>{isHello ? ui.helloLater : ui.skip}</button>
           <span style={{ flex: 1 }} />
-          {i > 0 && <button className="btn btn-secondary btn-sm" type="button" onClick={() => go(i - 1)}>{ui.back}</button>}
-          <button ref={nextBtn} className="btn btn-primary btn-sm" type="button" onClick={() => (last ? onClose() : go(i + 1))}>{last ? ui.done : ui.next}</button>
+          {i > 0 && !(hello && i === 1) && <button className="btn btn-secondary btn-sm" type="button" onClick={() => go(i - 1)}>{ui.back}</button>}
+          <button ref={nextBtn} className="btn btn-primary btn-sm" type="button" onClick={() => (last ? onClose() : go(i + 1))}>{isHello ? ui.helloGo : last ? ui.done : ui.next}</button>
         </div>
       </div>
     </div>
@@ -148,6 +154,7 @@ export function Guide() {
   const ui = GUIDE_UI[lang];
   const on = useGuideOn();
   const seen = useTourSeen(pathname);
+  const helloSeen = useHelloSeen();
   const intro = usePref("intro");
   const view = usePref("view");
   const { notify } = useDesk();
@@ -196,6 +203,7 @@ export function Guide() {
   const endTour = useCallback(() => {
     setTouring(false);
     markTourSeen(pathname);
+    markHelloSeen();
     fab.current?.focus({ preventScroll: true });
   }, [pathname, setTouring]);
 
@@ -204,7 +212,7 @@ export function Guide() {
 
   return (
     <>
-      {touring && steps && <Tour key={pathname} steps={steps} onClose={endTour} />}
+      {touring && steps && <Tour key={pathname} steps={steps} hello={!helloSeen} onClose={endTour} />}
       {panel && page && (
         <div ref={panelRef} className="guide-panel" role="dialog" aria-label={ui.name}>
           <div className="guide-panel-h"><SailMark size={22} /><b>{ui.name}</b></div>

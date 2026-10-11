@@ -22,6 +22,9 @@ export const GUIDE_UI: Record<Lang, Record<string, string>> = {
     openApprovals: "Open approvals", settingsTitle: "Guide",
     settingsBody: "A short tour the first time you open each screen, then help whenever you tap the sail button.",
     on: "On", offLabel: "Off", replay: "Show all tours again", replayed: "Tours reset: they will play again on each screen.",
+    helloTitle: "Hi, I'm your NanFeng guide",
+    helloBody: "The first time you open each screen, I'll show you around in a few steps. After that I'll wait here in the corner: tap me whenever you need a hand. You can turn me off in Settings.",
+    helloGo: "Let's start", helloLater: "Not now",
   },
   es: {
     name: "Guía", open: "Abrir la guía", close: "Cerrar la guía", next: "Siguiente", back: "Atrás", done: "Listo",
@@ -30,6 +33,9 @@ export const GUIDE_UI: Record<Lang, Record<string, string>> = {
     openApprovals: "Ir a aprobaciones", settingsTitle: "Guía",
     settingsBody: "Un recorrido corto la primera vez que abres cada pantalla y ayuda cuando tocas el botón del velero.",
     on: "Activada", offLabel: "Desactivada", replay: "Volver a ver los recorridos", replayed: "Recorridos reiniciados: se mostrarán de nuevo en cada pantalla.",
+    helloTitle: "¡Hola! Soy tu guía de NanFeng",
+    helloBody: "La primera vez que abras cada pantalla te la voy a mostrar en unos pocos pasos. Después me quedo aquí en la esquina: tócame cuando necesites ayuda. Puedes apagarme en Ajustes.",
+    helloGo: "Empecemos", helloLater: "Ahora no",
   },
   zh: {
     name: "向导", open: "打开向导", close: "关闭向导", next: "下一步", back: "上一步", done: "完成",
@@ -38,6 +44,9 @@ export const GUIDE_UI: Record<Lang, Record<string, string>> = {
     openApprovals: "前往审批", settingsTitle: "向导",
     settingsBody: "首次打开每个页面时进行简短导览，之后点击帆船按钮即可随时获得帮助。",
     on: "开启", offLabel: "关闭", replay: "重新播放全部导览", replayed: "导览已重置，将在每个页面重新播放。",
+    helloTitle: "你好！我是NanFeng向导",
+    helloBody: "第一次打开每个页面时，我会用几个步骤带您了解。之后我会待在角落里，需要帮助时点我即可。也可以在设置中把我关闭。",
+    helloGo: "开始吧", helloLater: "以后再说",
   },
 };
 
@@ -199,6 +208,7 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
 
 const KEY_ON = "nanfeng.guide";
 const KEY_SEEN = "nanfeng.guide.seen";
+const KEY_HELLO = "nanfeng.guide.hello";
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
@@ -247,9 +257,32 @@ export function markTourSeen(route: string) {
   emit();
 }
 
+function readHello() {
+  try {
+    return window.localStorage.getItem(KEY_HELLO) === "seen";
+  } catch {
+    return false;
+  }
+}
+
+/** The guide introduces itself once, before the first tour it plays. */
+export function markHelloSeen() {
+  try {
+    window.localStorage.setItem(KEY_HELLO, "seen");
+  } catch {
+    // ignore
+  }
+  emit();
+}
+
+export function useHelloSeen(): boolean {
+  return useSyncExternalStore(subscribe, readHello, () => true);
+}
+
 export function resetTours() {
   try {
     window.localStorage.removeItem(KEY_SEEN);
+    window.localStorage.removeItem(KEY_HELLO);
   } catch {
     // ignore
   }

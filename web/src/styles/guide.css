@@ -14,6 +14,10 @@
 .guide-bubble{position:fixed;width:min(360px,calc(100vw - 32px));background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px rgba(8,16,30,.28);padding:18px 18px 14px 18px;display:flex;flex-direction:column;gap:8px;transition:top .35s ease,left .35s ease}
 .guide-avatar{position:absolute;top:-20px;left:16px;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);display:grid;place-items:center;box-shadow:0 4px 12px rgba(8,16,30,.15)}
 .guide-avatar.moving{animation:guide-sail .65s ease}
+.guide-bubble.hello{width:min(420px,calc(100vw - 32px));padding:40px 24px 18px;text-align:center;align-items:center}
+.guide-bubble.hello .guide-avatar{top:-34px;left:50%;margin-left:-34px;width:68px;height:68px;animation:guide-hello .9s ease}
+.guide-bubble.hello .guide-title{font-size:21px}
+.guide-bubble.hello .guide-actions{width:100%}
 .guide-count{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:46px;min-height:16px}
 .guide-title{margin:4px 0 0;font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.25}
 .guide-body{margin:0;font-size:14px;line-height:1.5;color:var(--text)}
@@ -28,6 +32,7 @@
 
 @keyframes guide-ring{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
 @keyframes guide-sail{0%{transform:translate(-10px,6px) rotate(-8deg)}60%{transform:translate(2px,-3px) rotate(3deg)}100%{transform:none}}
+@keyframes guide-hello{0%{transform:translateY(14px) scale(.6) rotate(-12deg);opacity:0}55%{transform:translateY(-6px) scale(1.06) rotate(4deg);opacity:1}100%{transform:none}}
 @keyframes guide-pop{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
 
 @media (max-width:640px){
@@ -35,7 +40,7 @@
   .guide-panel{right:16px;bottom:72px}
 }
 @media (prefers-reduced-motion:reduce){
-  .guide-fab.fresh::after,.guide-avatar.moving,.guide-panel{animation:none}
+  .guide-fab.fresh::after,.guide-avatar.moving,.guide-panel,.guide-bubble.hello .guide-avatar{animation:none}
   .guide-spot,.guide-bubble,.guide-fab{transition:none}
 }
 
