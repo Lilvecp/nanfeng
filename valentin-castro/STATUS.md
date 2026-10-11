@@ -18,6 +18,7 @@ Everything below is on branch **`valentin-castro`** (from `main` at `63742ff`, w
 | fe-07 | Scenario Lab on the 9 precomputed engine runs (no more in-browser guesswork) | `web/src/app/(desk)/scenario` |
 | fe-10 (UI) | Demo Mode captions and labels with the real numbers, EN / ES / 中文 | `web/src/app/(desk)/demo` |
 | — | **Simple view for the owner** (default on Home): plain-language status, what happened, a cash chart with the payroll day, one recommendation with cost vs bank loan and an approve button, what NanFeng did today, a 3-step welcome on first visit; switch to the Detailed view keeps the full desk. Sidebar grouped into “Your business” and “Under the hood”. Approvals opens with a plain summary. EN / ES / 中文 | `web/src/components/owner-view.tsx`, `web/src/styles/owner.css` |
+| — | **Navigation and layout cleanup**: 5 sections (Home, Approvals, Financing, Messages, Security) with related screens as tabs inside them, Settings at the bottom of the sidebar, one-row top bar, company card in the sidebar; checked on desktop, laptop and 390 px phones (no page overflows), light and dark. Security shows the real red team (41/43) | `web/src/lib/sections.ts`, `web/src/components/sidebar.tsx`, `web/src/components/topbar.tsx` |
 | — | Landing: globe story, final CTA and benchmark (50/50 · −41% · 41/43) with real figures | `web/src/app/page.tsx`, `web/src/components/` |
 
 `npm run lint` and `npm run build` pass. Checked in the browser: Cockpit, Financing, Scenario Lab, Approvals (EN and 中文).

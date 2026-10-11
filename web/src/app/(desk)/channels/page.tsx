@@ -61,7 +61,7 @@ export default function ChannelsPage() {
       </Topbar>
 
       <div className="content">
-        <h1 className="h1">Channels &amp; Conversations</h1>
+        <h1 className="h1">{t("tab.conversations")}</h1>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
           <figure style={{ margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             <figcaption className="mono small" style={{ display: "flex", gap: 8, alignItems: "center" }}><b>OWNER · WHATSAPP</b><span className="badge acc">Sandbox replay</span></figcaption>

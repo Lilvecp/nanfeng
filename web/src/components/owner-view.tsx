@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { band, fx, fy, line } from "@/components/forecast-chart";
 import { useDesk } from "@/lib/desk-state";
-import { useLang } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
 import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, dayOf, longDate, outOf10, pesos, usd } from "@/lib/scenario";
 
@@ -190,15 +190,14 @@ const COPY: Record<Lang, Copy> = {
   },
 };
 
-/** Simple / Detailed switch shown on top of the cockpit in both views. */
+/** Summary / Full detail tabs on Home, styled like every section's tabs. */
 export function ViewSwitch() {
   const view = usePref("view");
-  const lang = useLang();
-  const label = { en: ["Simple", "Detailed"], es: ["Simple", "Detallada"], zh: ["简洁", "详细"] }[lang];
+  const t = useT();
   return (
-    <div className="seg" role="group" aria-label={lang === "es" ? "Vista" : lang === "zh" ? "视图" : "View"}>
-      <button type="button" className={view === "simple" ? "on" : undefined} aria-pressed={view === "simple"} onClick={() => setPref("view", "simple")}>{label[0]}</button>
-      <button type="button" className={view === "detail" ? "on" : undefined} aria-pressed={view === "detail"} onClick={() => setPref("view", "detail")}>{label[1]}</button>
+    <div className="ptabs" role="group" aria-label={t("nav.cockpit")}>
+      <button type="button" className={view === "simple" ? "on" : undefined} aria-pressed={view === "simple"} onClick={() => setPref("view", "simple")}>{t("tab.summary")}</button>
+      <button type="button" className={view === "detail" ? "on" : undefined} aria-pressed={view === "detail"} onClick={() => setPref("view", "detail")}>{t("tab.detail")}</button>
     </div>
   );
 }

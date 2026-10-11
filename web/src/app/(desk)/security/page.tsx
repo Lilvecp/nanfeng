@@ -1,18 +1,23 @@
 "use client";
 
+import { TabTitle } from "@/components/tab-title";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Topbar } from "@/components/topbar";
 import { useDesk } from "@/lib/desk-state";
 
-const RED_TEAM: [string, number][] = [
-  ["Prompt injection in docs", 12],
-  ["Bank-detail swap", 8],
-  ["Social engineering · chat", 7],
-  ["Tool misuse / escalation", 6],
-  ["Data exfiltration", 4],
-  ["Jailbreak via voice", 3],
+// Red team results after the guard (andy-villarroel/redteam/results/REPORT.md): [category, attacks, stopped].
+const RED_TEAM: [string, number, number][] = [
+  ["Prompt injection in docs", 12, 12],
+  ["Bank-detail swap", 8, 8],
+  ["Social engineering · chat", 7, 7],
+  ["Tool misuse / escalation", 6, 6],
+  ["Data exfiltration", 4, 4],
+  ["Jailbreak via voice", 3, 3],
+  ["Public API", 3, 1],
 ];
+const RT_TOTAL = RED_TEAM.reduce((a, r) => a + r[1], 0);
+const RT_STOPPED = RED_TEAM.reduce((a, r) => a + r[2], 0);
 
 type AuditRow = { seq: number; time: string; event: string; tier: 0 | 1 | 3; prev: string; hash: string; anchor: string; bad?: boolean };
 
@@ -55,7 +60,7 @@ export default function SecurityPage() {
       </Topbar>
 
       <div className="content">
-        <h1 className="h1">Security Console</h1>
+        <h1 className="h1"><TabTitle k="tab.protection" /></h1>
 
         <div className="card" style={{ borderColor: reviewed ? "var(--line)" : "var(--crit)" }}>
           <div className="card-h" style={{ background: reviewed ? undefined : "var(--crit-soft)" }}>
@@ -86,14 +91,14 @@ export default function SecurityPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 12 }}>
           <div className="card">
-            <div className="card-h"><span className="h3">Red team · 40 attacks</span><div style={{ display: "flex", gap: 6, alignItems: "center" }}><span className="num up" style={{ fontSize: 18, fontWeight: 700 }}>40/40</span><span className="badge warn">Placeholder</span></div></div>
+            <div className="card-h"><span className="h3">Red team · {RT_TOTAL} attacks</span><div style={{ display: "flex", gap: 6, alignItems: "center" }}><span className="num up" style={{ fontSize: 18, fontWeight: 700 }}>{RT_STOPPED}/{RT_TOTAL}</span><span className="badge">4/{RT_TOTAL} before</span></div></div>
             <div className="tbl-wrap"><table className="tbl">
               <tbody>
-                {RED_TEAM.map(([name, n]) => (
+                {RED_TEAM.map(([name, n, ok]) => (
                   <tr key={name}>
                     <td className="small">{name}</td>
-                    <td><div style={{ display: "flex", gap: 2, flexWrap: "wrap" }}>{Array.from({ length: n }, (_, i) => <i key={i} className="cell" style={{ width: 18, height: 18, background: "var(--ok)", display: "inline-block" }} />)}</div></td>
-                    <td className="r num">{n}/{n}</td>
+                    <td><div style={{ display: "flex", gap: 2, flexWrap: "wrap" }}>{Array.from({ length: n }, (_, i) => <i key={i} className="cell" style={{ width: 14, height: 14, borderRadius: 3, background: i < ok ? "var(--ok)" : "var(--crit)", display: "inline-block" }} />)}</div></td>
+                    <td className={`r num${ok < n ? " down" : ""}`}>{ok}/{n}</td>
                   </tr>
                 ))}
               </tbody>

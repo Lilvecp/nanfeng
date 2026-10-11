@@ -127,7 +127,7 @@ export default function DocumentsPage() {
 
       <div className="content">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <h1 className="h1">{t("nav.documents")}</h1>
+          <h1 className="h1">{t("tab.documents")}</h1>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <div className="seg" role="group" aria-label="Filter">
               {([["all", `ALL ${counts.all}`], ["flagged", `FLAGGED ${counts.flagged}`], ["inv", "INV"], ["bank", "BANK"], ["notice", "NOTICE"]] as [Filter, string][]).map(([f, label]) => (
