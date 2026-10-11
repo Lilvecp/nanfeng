@@ -15,11 +15,11 @@ Behind it are three things almost no team will have together: probabilistic fore
 | 08:00 | Huerto Austral Export SpA (fictional) receives its cash briefing by voice, in Spanish, with ElevenLabs. |
 | 10:12 | The Shanghai importer emails that it will pay USD 180,000 45 days late. Mistral OCR reads the notice. |
 | 10:13 ⚠ | NanFeng re-runs 10,000 scenarios: 81% probability of negative cash in 19 days, right at harvest payroll. |
-| 10:14 | Quotes 4 options and the MILP picks partial factoring + CNY forward, cheaper than the default bank loan. |
+| 10:14 | Checks 9 products (7 quotes) and the MILP picks a 60-day USD pre-export loan (PAE) of USD 142,400: CLP 2.1M vs CLP 3.8M for the default bank loan (45% cheaper). |
 | 10:15 | WhatsApp to the owner via Zavu: summary, cost, why. Approves with OTP (level L3). Executed in the sandbox and the hash goes on-chain. |
 | 10:31 ⚠ | A "supplier" invoice arrives with a changed bank account and a hidden instruction. NanFeng blocks it and alerts through another channel. |
 
-_Illustrative figures: Valentín and Vicente set the real scenario numbers on Oct 8._
+_Numbers come from the quant engine's run (`vicente-rodriguez/results/cherry_crisis_story.json`); see [valentin-castro/scope-moscow.md](../valentin-castro/scope-moscow.md)._
 
 ## How we are scored — every rubric point has an owner
 
