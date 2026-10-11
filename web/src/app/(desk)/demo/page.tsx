@@ -9,7 +9,16 @@ import type { Lang } from "@/lib/prefs";
 import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, usd } from "@/lib/scenario";
 
 // Deterministic replay of the Cherry Crisis (fixed seed, no network), for the jury and the video.
-const LABELS = ["DELAY", "FORECAST", "QUOTES", "PLAN", "APPROVE", "CLOSED"];
+const LABELS: Record<Lang, string[]> = {
+  en: ["DELAY", "FORECAST", "QUOTES", "PLAN", "APPROVE", "CLOSED"],
+  es: ["ATRASO", "PRONÓSTICO", "COTIZACIONES", "PLAN", "APROBAR", "CERRADA"],
+  zh: ["延迟", "预测", "报价", "方案", "批准", "补足"],
+};
+const UI = {
+  en: { cash: "Cash", exit: "Exit demo", step: "STEP", delayed: `Delayed +${N.delayDays}D`, plan: "Plan", run: "RUN CHERRY CRISIS", searching: "SEARCHING…", pae: "PAE LOAN", executed: "EXECUTED", pNeg: `P(cash<0) · ${N.crunchDay}D` },
+  es: { cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `P(caja<0) · ${N.crunchDay}D` },
+  zh: { cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金<0概率 · ${N.crunchDay}天` },
+};
 const LENDERS = new Set(S.arena.map((a) => a.lender)).size;
 const CAPTIONS: Record<Lang, string[]> = {
   en: [
@@ -71,20 +80,21 @@ export default function DemoPage() {
   const fixed = step === 6;
   const prob = step === 1 ? N.pNegBefore : fixed ? N.pNegAfterPlan : N.pNeg;
   const probColor = fixed ? "var(--ok)" : step === 1 ? "var(--text)" : "var(--crit)";
-  const plan = step < 4 ? "SEARCHING…" : step < 6 ? "PAE LOAN" : "EXECUTED";
+  const u = UI[lang];
+  const plan = step < 4 ? u.searching : step < 6 ? u.pae : u.executed;
 
   return (
     <>
       <Topbar controls={false}>
-        <div className="tick"><span className="l">Cash</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
-        <span className="status"><span className="dot crit blink" />DEMO · CHERRY CRISIS · STEP {step}/6</span>
-        <Link href="/cockpit" className="btn btn-secondary btn-sm" style={{ marginLeft: "auto" }}>Exit demo</Link>
+        <div className="tick"><span className="l">{u.cash}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <span className="status"><span className="dot crit blink" />DEMO · CHERRY CRISIS · {u.step} {step}/6</span>
+        <Link href="/cockpit" className="btn btn-secondary btn-sm" style={{ marginLeft: "auto" }}>{u.exit}</Link>
       </Topbar>
       <div className="content" style={{ flex: 1 }}>
         <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
-          <div className="kpi"><span className="kpi-l">P(cash&lt;0) · {N.crunchDay}D</span><span className="kpi-v" style={{ fontSize: "clamp(32px, 5vw, 52px)", color: probColor }}>{prob}</span></div>
-          <div className="kpi"><span className="kpi-l">Delayed +{N.delayDays}D</span><span className="kpi-v" style={{ fontSize: "clamp(24px, 4vw, 40px)" }}>{usd(N.overdueUsd)}</span></div>
-          <div className="kpi"><span className="kpi-l">Plan</span><span className="kpi-v" style={{ fontSize: "clamp(20px, 3vw, 30px)" }}>{plan}</span></div>
+          <div className="kpi"><span className="kpi-l">{u.pNeg}</span><span className="kpi-v" style={{ fontSize: "clamp(32px, 5vw, 52px)", color: probColor }}>{prob}</span></div>
+          <div className="kpi"><span className="kpi-l">{u.delayed}</span><span className="kpi-v" style={{ fontSize: "clamp(24px, 4vw, 40px)" }}>{usd(N.overdueUsd, lang)}</span></div>
+          <div className="kpi"><span className="kpi-l">{u.plan}</span><span className="kpi-v" style={{ fontSize: "clamp(20px, 3vw, 30px)" }}>{plan}</span></div>
         </div>
         <div className="card">
           <div className="card-h"><span className="h3">Cash forecast · 90D · CLP M</span></div>
@@ -99,9 +109,9 @@ export default function DemoPage() {
         </div>
         <div style={{ height: 3, background: "#232930" }}><div style={{ height: 3, background: "var(--accent)", width: `${Math.round((step / 6) * 100)}%`, transition: "width .4s" }} /></div>
         <div className="demo-bar" style={{ borderLeft: 0, borderRight: 0, borderBottom: 0 }}>
-          <span style={{ fontWeight: 700, letterSpacing: ".08em", fontSize: 13 }}>RUN CHERRY CRISIS</span>
+          <span style={{ fontWeight: 700, letterSpacing: ".08em", fontSize: 13 }}>{u.run}</span>
           <div className="demo-steps">
-            {LABELS.map((label, i) => (
+            {LABELS[lang].map((label, i) => (
               <button key={label} className={`demo-step${i + 1 < step ? " done" : i + 1 === step ? " now" : ""}`} type="button" aria-current={i + 1 === step ? "step" : undefined} onClick={() => setStep(i + 1)} style={{ background: i + 1 === step ? undefined : "transparent", border: 0, borderRight: "1px solid #2A313C", fontFamily: "var(--f-mono)", cursor: "pointer" }}>
                 <i>{i + 1}</i>{label}
               </button>
