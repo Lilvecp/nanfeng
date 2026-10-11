@@ -1,0 +1,291 @@
+{
+ "$defs": {
+  "Customer": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "country": {
+     "title": "Country",
+     "type": "string"
+    },
+    "currency": {
+     "title": "Currency",
+     "type": "string"
+    },
+    "delay_median_days": {
+     "default": 5.0,
+     "title": "Delay Median Days",
+     "type": "number"
+    },
+    "delay_sigma": {
+     "default": 0.6,
+     "title": "Delay Sigma",
+     "type": "number"
+    },
+    "p_default": {
+     "default": 0.0,
+     "title": "P Default",
+     "type": "number"
+    }
+   },
+   "required": [
+    "id",
+    "name",
+    "country",
+    "currency"
+   ],
+   "title": "Customer",
+   "type": "object"
+  },
+  "Payable": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "category": {
+     "title": "Category",
+     "type": "string"
+    },
+    "currency": {
+     "title": "Currency",
+     "type": "string"
+    },
+    "amount": {
+     "title": "Amount",
+     "type": "number"
+    },
+    "date": {
+     "format": "date",
+     "title": "Date",
+     "type": "string"
+    },
+    "confirming_eligible": {
+     "default": false,
+     "title": "Confirming Eligible",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id",
+    "name",
+    "category",
+    "currency",
+    "amount",
+    "date"
+   ],
+   "title": "Payable",
+   "type": "object"
+  },
+  "Receivable": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "customer_id": {
+     "title": "Customer Id",
+     "type": "string"
+    },
+    "currency": {
+     "title": "Currency",
+     "type": "string"
+    },
+    "amount": {
+     "title": "Amount",
+     "type": "number"
+    },
+    "due_date": {
+     "format": "date",
+     "title": "Due Date",
+     "type": "string"
+    },
+    "announced_delay_days": {
+     "default": 0,
+     "title": "Announced Delay Days",
+     "type": "integer"
+    },
+    "factoring_eligible": {
+     "default": true,
+     "title": "Factoring Eligible",
+     "type": "boolean"
+    },
+    "lc_backed": {
+     "default": false,
+     "title": "Lc Backed",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id",
+    "customer_id",
+    "currency",
+    "amount",
+    "due_date"
+   ],
+   "title": "Receivable",
+   "type": "object"
+  },
+  "Shipment": {
+   "description": "Planned shipment not yet invoiced: amount depends on the cherry price.",
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "customer_id": {
+     "title": "Customer Id",
+     "type": "string"
+    },
+    "currency": {
+     "title": "Currency",
+     "type": "string"
+    },
+    "ship_date": {
+     "format": "date",
+     "title": "Ship Date",
+     "type": "string"
+    },
+    "expected_amount": {
+     "title": "Expected Amount",
+     "type": "number"
+    },
+    "advance_pct": {
+     "default": 0.0,
+     "title": "Advance Pct",
+     "type": "number"
+    },
+    "terms_days": {
+     "default": 75,
+     "title": "Terms Days",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id",
+    "customer_id",
+    "currency",
+    "ship_date",
+    "expected_amount"
+   ],
+   "title": "Shipment",
+   "type": "object"
+  }
+ },
+ "properties": {
+  "id": {
+   "title": "Id",
+   "type": "string"
+  },
+  "name": {
+   "title": "Name",
+   "type": "string"
+  },
+  "as_of": {
+   "format": "date",
+   "title": "As Of",
+   "type": "string"
+  },
+  "opening_cash_clp": {
+   "title": "Opening Cash Clp",
+   "type": "number"
+  },
+  "min_cash_buffer_clp": {
+   "title": "Min Cash Buffer Clp",
+   "type": "number"
+  },
+  "annual_sales_usd": {
+   "title": "Annual Sales Usd",
+   "type": "number"
+  },
+  "customers": {
+   "items": {
+    "$ref": "#/$defs/Customer"
+   },
+   "title": "Customers",
+   "type": "array"
+  },
+  "receivables": {
+   "items": {
+    "$ref": "#/$defs/Receivable"
+   },
+   "title": "Receivables",
+   "type": "array"
+  },
+  "shipments": {
+   "items": {
+    "$ref": "#/$defs/Shipment"
+   },
+   "title": "Shipments",
+   "type": "array"
+  },
+  "payables": {
+   "items": {
+    "$ref": "#/$defs/Payable"
+   },
+   "title": "Payables",
+   "type": "array"
+  },
+  "horizon_days": {
+   "default": 90,
+   "title": "Horizon Days",
+   "type": "integer"
+  },
+  "collateral_available_clp": {
+   "default": 0.0,
+   "title": "Collateral Available Clp",
+   "type": "number"
+  },
+  "price_volatility": {
+   "default": 0.12,
+   "title": "Price Volatility",
+   "type": "number"
+  },
+  "fx_spot": {
+   "anyOf": [
+    {
+     "additionalProperties": {
+      "type": "number"
+     },
+     "type": "object"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Fx Spot"
+  },
+  "synthetic": {
+   "default": true,
+   "title": "Synthetic",
+   "type": "boolean"
+  },
+  "notes": {
+   "default": "",
+   "title": "Notes",
+   "type": "string"
+  }
+ },
+ "required": [
+  "id",
+  "name",
+  "as_of",
+  "opening_cash_clp",
+  "min_cash_buffer_clp",
+  "annual_sales_usd",
+  "customers"
+ ],
+ "title": "Company",
+ "type": "object"
+}

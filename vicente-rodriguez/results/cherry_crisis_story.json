@@ -1,0 +1,356 @@
+{
+ "scenario": "cherry_crisis",
+ "company": "Huerto Austral Export SpA",
+ "fictional": true,
+ "as_of": "2026-12-11",
+ "opening_cash_clp": 176000000,
+ "buffer_clp": 25000000,
+ "fx_spot": {
+  "clp_per_usd": 983.84,
+  "clp_per_cny": 146.76,
+  "cny_per_usd": 6.7038,
+  "date": "2026-10-02",
+  "source": "BCCh dólar observado and FRED DEXCHUS, last day with both quotes"
+ },
+ "event": {
+  "time": "10:12",
+  "invoice": "INV-2026-118",
+  "customer": "Shanghai Hongxin Fresh Fruit Import Co. (fictional)",
+  "amount": 180000,
+  "currency": "USD",
+  "delay_days": 45,
+  "due_date": "2026-12-18"
+ },
+ "forecast_before": {
+  "prob_negative_90d": 0.127,
+  "headline": "13% probability of negative cash within 90 days"
+ },
+ "forecast_after": {
+  "prob_negative_by_crunch": 0.8128,
+  "crunch_day": 19,
+  "crunch_date": "2026-12-30",
+  "prob_below_buffer_90d": 0.9767,
+  "headline": "81% probability of negative cash in 19 days (2026-12-30)",
+  "crunch_outflow": {
+   "id": "P-07",
+   "name": "Harvest payroll (December)",
+   "amount": 238000000,
+   "currency": "CLP"
+  },
+  "driver": "Probability of negative cash by 2026-12-30 is 81%. If Shanghai Hongxin Fresh Fruit Import Co. (fictional) pays every invoice on its due date, it would be 1%. The crunch day carries Harvest payroll (December) (CLP 238,000,000).",
+  "n_paths": 10000
+ },
+ "plan": {
+  "actions": [
+   {
+    "summary": "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)",
+    "date": "2026-12-30",
+    "product_id": "PAE-USD",
+    "lender": "Banco del Pacífico Sur (fictional)",
+    "cost_clp": 2106329,
+    "amount": 142399.75,
+    "currency": "USD",
+    "amount_clp": 140098568,
+    "term_days": 60,
+    "receivable_id": null,
+    "fraction": null,
+    "proceeds_clp": null
+   }
+  ],
+  "cost_clp": 2106329,
+  "default_cost_clp": 3796513,
+  "default_product": "WC-BANK",
+  "default_actions": [
+   "Borrow CLP 92,712,062 for 60 days from Working capital loan (default bank credit)",
+   "Borrow CLP 45,257,288 for 30 days from Working capital loan (default bank credit)"
+  ],
+  "savings_clp": 1690184,
+  "savings_pct": 0.4452,
+  "coverage": 0.9606,
+  "default_coverage": 0.9445,
+  "prob_negative_after_plan": 0.0245,
+  "method": "exact chance-constrained MILP",
+  "optimality_gap": 0.0,
+  "forward_chosen": false
+ },
+ "approval_request": {
+  "action": "Pre-export loan in USD (PAE)",
+  "operations": [
+   {
+    "op": "loan",
+    "params": {
+     "lender_id": "LEN-PAE",
+     "amount_clp": 140098568,
+     "term_days": 60
+    }
+   }
+  ],
+  "explanation": "81% probability of negative cash in 19 days (2026-12-30). Plan: Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE). Cost CLP 2,106,329 vs CLP 3,796,513 for the default bank loan (45% cheaper); cash stays above the buffer in 96% of 10,000 scenarios.",
+  "channel": "WEB",
+  "execute_on": {
+   "0": "2026-12-30"
+  },
+  "unsupported": []
+ },
+ "credit_passport": {
+  "before": {
+   "score": 33.5,
+   "grade": "E"
+  },
+  "after_plan": {
+   "score": 67.2,
+   "grade": "B"
+  }
+ },
+ "financing_arena": [
+  {
+   "product": "Export factoring, non-recourse (bank)",
+   "lender": "Banco Andino (fictional)",
+   "cost_clp": 844863,
+   "eac": 0.3361,
+   "term_days": 19,
+   "covers_need": true,
+   "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor. A non-recourse factor does not buy an invoice whose debtor has already announced a delay."
+  },
+  {
+   "product": "Pre-export loan in USD (PAE)",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "cost_clp": 908222,
+   "eac": 0.1036,
+   "term_days": 60,
+   "covers_need": true,
+   "requirements": "Export contract or shipping documents; repaid in USD with the export proceeds."
+  },
+  {
+   "product": "Working capital loan (default bank credit)",
+   "lender": "Banco Andino (fictional)",
+   "cost_clp": 1104381,
+   "eac": 0.2704,
+   "term_days": 30,
+   "covers_need": true,
+   "requirements": "Two years of financial statements; collateral or personal guarantee."
+  },
+  {
+   "product": "Credit line / overdraft",
+   "lender": "Banco Andino (fictional)",
+   "cost_clp": 1352057,
+   "eac": 0.3396,
+   "term_days": 30,
+   "covers_need": true,
+   "requirements": "Pre-approved line on the current account."
+  },
+  {
+   "product": "Fintech factoring, with recourse (fast onboarding)",
+   "lender": "Cordillera Factoring (fictional fintech)",
+   "cost_clp": 1714162,
+   "eac": 0.3287,
+   "term_days": 39,
+   "covers_need": true,
+   "requirements": "Online onboarding; funds in 24 h. With recourse: if the buyer has not paid 30 days after the expected date, the exporter repays the advance."
+  },
+  {
+   "product": "Confirming (supplier payment extension)",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "cost_clp": 1737400,
+   "eac": 0.1608,
+   "term_days": 60,
+   "covers_need": true,
+   "requirements": "Supplier enrolled in the bank's confirming program."
+  },
+  {
+   "product": "FOGAPE-guaranteed working capital loan",
+   "lender": "Banco del Pacífico Sur (fictional)",
+   "cost_clp": 7104898,
+   "eac": 0.1278,
+   "term_days": 365,
+   "covers_need": true,
+   "requirements": "Net annual sales up to 100,000 UF (medium firms 25,001-100,000 UF get 50% guarantee coverage); financing up to 15,000 UF; no protests or overdue debts."
+  }
+ ],
+ "financing_need": {
+  "amount_clp": 55594431,
+  "need_date": "2026-12-30",
+  "need_days": 30
+ },
+ "scenario_lab": [
+  {
+   "preset": "Base (after the Shanghai notice)",
+   "overrides": {},
+   "headline": "81% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.8322,
+   "prob_below_buffer_horizon": 0.9767,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -54550868,
+   "plan_cost_clp": 2106329,
+   "default_cost_clp": 3796513,
+   "savings_pct": 0.4452,
+   "plan_actions": [
+    "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
+   ]
+  },
+  {
+   "preset": "Before the notice",
+   "overrides": {
+    "ignore_announced_delays": true
+   },
+   "headline": "13% probability of negative cash within 90 days",
+   "prob_negative_cash_horizon": 0.127,
+   "prob_below_buffer_horizon": 0.153,
+   "crunch_date": null,
+   "min_cash_p10": -8165780,
+   "plan_cost_clp": 618608,
+   "default_cost_clp": 845995,
+   "savings_pct": 0.2688,
+   "plan_actions": [
+    "Factor 32% of INV-2026-109 with Export factoring, non-recourse (bank)"
+   ]
+  },
+  {
+   "preset": "All customers +15 days late",
+   "overrides": {
+    "global_delay_extra_days": 15
+   },
+   "headline": "100% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.9997,
+   "prob_below_buffer_horizon": 0.9998,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -276236105,
+   "plan_cost_clp": 5144640,
+   "default_cost_clp": null,
+   "savings_pct": null,
+   "plan_actions": [
+    "Factor 90% of INV-2026-124 with Export factoring, non-recourse (bank)",
+    "Factor 26% of INV-2026-109 with Export factoring, non-recourse (bank)",
+    "Borrow USD 117,248 for 60 days from Pre-export loan in USD (PAE)",
+    "Borrow USD 106,366 for 60 days from Pre-export loan in USD (PAE)",
+    "Factor 50% of INV-2026-112 with Export factoring, non-recourse (bank)"
+   ]
+  },
+  {
+   "preset": "CNY -5% vs CLP",
+   "overrides": {
+    "cny_shift_pct": -5
+   },
+   "headline": "86% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.8739,
+   "prob_below_buffer_horizon": 0.9821,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -58120154,
+   "plan_cost_clp": 2283240,
+   "default_cost_clp": 4257880,
+   "savings_pct": 0.4638,
+   "plan_actions": [
+    "Borrow USD 142,881 for 60 days from Pre-export loan in USD (PAE)",
+    "Extend 26% of P-10 by 60 days via Confirming (supplier payment extension)"
+   ]
+  },
+  {
+   "preset": "CNY +5% vs CLP",
+   "overrides": {
+    "cny_shift_pct": 5
+   },
+   "headline": "75% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.7803,
+   "prob_below_buffer_horizon": 0.9713,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -50807125,
+   "plan_cost_clp": 2071808,
+   "default_cost_clp": 3728711,
+   "savings_pct": 0.4444,
+   "plan_actions": [
+    "Borrow USD 139,925 for 60 days from Pre-export loan in USD (PAE)"
+   ]
+  },
+  {
+   "preset": "USD -5% vs CLP",
+   "overrides": {
+    "usd_shift_pct": -5
+   },
+   "headline": "89% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.904,
+   "prob_below_buffer_horizon": 0.9862,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -66124559,
+   "plan_cost_clp": 2528136,
+   "default_cost_clp": 4521079,
+   "savings_pct": 0.4408,
+   "plan_actions": [
+    "Borrow USD 172,639 for 60 days from Pre-export loan in USD (PAE)"
+   ]
+  },
+  {
+   "preset": "Cherry price -10%",
+   "overrides": {
+    "cherry_price_pct": -10
+   },
+   "headline": "95% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.951,
+   "prob_below_buffer_horizon": 0.9933,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -72581429,
+   "plan_cost_clp": 2585640,
+   "default_cost_clp": 4646188,
+   "savings_pct": 0.4435,
+   "plan_actions": [
+    "Borrow USD 172,796 for 60 days from Pre-export loan in USD (PAE)",
+    "Factor 2% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+   ]
+  },
+  {
+   "preset": "Cherry price +10%",
+   "overrides": {
+    "cherry_price_pct": 10
+   },
+   "headline": "55% probability of negative cash within 90 days",
+   "prob_negative_cash_horizon": 0.5486,
+   "prob_below_buffer_horizon": 0.9325,
+   "crunch_date": null,
+   "min_cash_p10": -37868508,
+   "plan_cost_clp": 1823108,
+   "default_cost_clp": 3341769,
+   "savings_pct": 0.4544,
+   "plan_actions": [
+    "Borrow USD 90,330 for 60 days from Pre-export loan in USD (PAE)",
+    "Factor 18% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+   ]
+  },
+  {
+   "preset": "30 extra harvest workers",
+   "overrides": {
+    "extra_hires": 30
+   },
+   "headline": "97% probability of negative cash in 19 days (2026-12-30)",
+   "prob_negative_cash_horizon": 0.9737,
+   "prob_below_buffer_horizon": 0.9946,
+   "crunch_date": "2026-12-30",
+   "min_cash_p10": -90497338,
+   "plan_cost_clp": 3248493,
+   "default_cost_clp": 5676445,
+   "savings_pct": 0.4277,
+   "plan_actions": [
+    "Factor 21% of INV-2026-109 with Export factoring, non-recourse (bank)",
+    "Borrow USD 48,839 for 60 days from Pre-export loan in USD (PAE)",
+    "Borrow USD 94,800 for 90 days from Pre-export loan in USD (PAE)",
+    "Factor 2% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+   ]
+  }
+ ],
+ "strings": {
+  "alert": {
+   "en": "Shanghai Hongxin Fresh Fruit Import Co. will pay USD 180,000 45 days late. 81% chance cash goes negative on 2026-12-30 (harvest payroll CLP 238.0M).",
+   "es": "Shanghai Hongxin Fresh Fruit Import Co. pagará USD 180.000 con 45 días de atraso. 81% de probabilidad de caja negativa el 2026-12-30 (nómina de cosecha CLP 238,0M).",
+   "zh": "上海客户的 180,000 美元货款将延迟 45 天支付。2026-12-30（采收工资 23,800万智利比索 发放日）现金为负的概率为 81%。"
+  },
+  "plan": {
+   "en": "Best plan: 60-day pre-export loan of USD 142,400. Cost CLP 2.1M vs CLP 3.8M for the bank loan (45% cheaper). Cash stays above the buffer in 96% of 10,000 scenarios.",
+   "es": "Mejor plan: crédito de pre-exportación (PAE) por USD 142.400 a 60 días. Costo CLP 2,1M vs CLP 3,8M del crédito bancario (45% más barato). La caja se mantiene sobre el colchón en el 96% de 10.000 escenarios.",
+   "zh": "最优方案：60天期出口前融资（PAE）142,400美元。成本 211万智利比索，银行贷款需 380万智利比索（节省 45%）。在 10,000 个模拟情景中，96% 的情景现金保持在安全垫之上。"
+  },
+  "approval": {
+   "en": "Approve this plan? Reply with the 6-digit code we just sent by SMS. Cost CLP 2.1M.",
+   "es": "¿Apruebas este plan? Responde con el código de 6 dígitos que te enviamos por SMS. Costo CLP 2,1M.",
+   "zh": "是否批准此方案？请回复我们刚通过短信发送的6位验证码。成本 211万智利比索。"
+  },
+  "note": "ES and 中文 strings are machine-assisted: have a native reader check them before the video (plan/risks.md)."
+ }
+}

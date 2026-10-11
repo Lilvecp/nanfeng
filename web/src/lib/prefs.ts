@@ -8,8 +8,11 @@ import { STORAGE_KEY } from "./prefs-boot";
 
 export type Lang = "en" | "es" | "zh";
 export type Theme = "light" | "dark";
+/** "simple" is the owner's plain-language view; "detail" shows the full desk. */
+export type View = "simple" | "detail";
+export type Intro = "new" | "seen";
 
-const DEFAULTS = { lang: "en" as Lang, theme: "light" as Theme };
+const DEFAULTS = { lang: "en" as Lang, theme: "light" as Theme, view: "simple" as View, intro: "new" as Intro };
 type Key = keyof typeof DEFAULTS;
 
 const listeners = new Set<() => void>();
@@ -19,6 +22,8 @@ function read<K extends Key>(key: K): (typeof DEFAULTS)[K] {
     const v = window.localStorage.getItem(STORAGE_KEY[key]);
     if (key === "lang" && (v === "en" || v === "es" || v === "zh")) return v as (typeof DEFAULTS)[K];
     if (key === "theme" && (v === "light" || v === "dark")) return v as (typeof DEFAULTS)[K];
+    if (key === "view" && (v === "simple" || v === "detail")) return v as (typeof DEFAULTS)[K];
+    if (key === "intro" && (v === "new" || v === "seen")) return v as (typeof DEFAULTS)[K];
   } catch {
     // storage blocked (private mode): fall back to defaults
   }

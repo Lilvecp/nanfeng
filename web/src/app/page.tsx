@@ -26,7 +26,11 @@ const L = {
     zh: "企业主在兰卡瓜通过 WhatsApp 审批；上海的进口商通过企业微信收到礼貌的提醒。",
   },
   secH: { en: "An agent that can't be talked into moving your money.", es: "Un agente al que nadie puede convencer de mover tu dinero.", zh: "任何人都无法诱使它动用您的资金。" },
-  benchH: { en: "Measured on the Cherry Crisis suite.", es: "Medido en la suite Cherry Crisis.", zh: "基于“樱桃危机”测试集的评估。" },
+  benchH: { en: "Measured, not promised.", es: "Medido, no prometido.", zh: "实测结果，而非承诺。" },
+  benchNote: { en: "NanFeng-Bench · 50 synthetic exporters · red-team suite of 43 attacks", es: "NanFeng-Bench · 50 exportadoras sintéticas · red team de 43 ataques", zh: "NanFeng-Bench · 50家模拟出口企业 · 43项红队攻击" },
+  bench1: { en: "Benchmark cases solved", es: "Casos del benchmark resueltos", zh: "基准测试案例全部通过" },
+  bench2: { en: "Average financing cost vs default bank loan", es: "Costo financiero promedio vs crédito bancario", zh: "平均融资成本（对比银行贷款）" },
+  bench3: { en: "Red-team attacks stopped (4/43 before)", es: "Ataques del red team frenados (4/43 antes)", zh: "红队攻击拦截数（之前为4/43）" },
   teamH: { en: "Built at Universidad del Desarrollo, Chile.", es: "Hecho en la Universidad del Desarrollo, Chile.", zh: "由智利发展大学团队打造。" },
   sandbox: { en: "NANFENG 南风 · SOUTH WIND · SANDBOX DEMO — NO REAL FUNDS MOVE", es: "NANFENG 南风 · VIENTO DEL SUR · DEMO SANDBOX — NO SE MUEVE DINERO REAL", zh: "南风 NANFENG · 沙盒演示 — 不涉及真实资金" },
 } satisfies Record<string, Record<Lang, string>>;
@@ -81,7 +85,7 @@ export default function LandingPage() {
         <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><span className="eyebrow" style={{ textAlign: "center", color: "var(--brass)" }}>{t("lp.nav.how")}</span><h2 className="lp-h">{l("howH")}</h2></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 20 }}>
           <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">01 · PREDICT</span><h3 className="h2" style={{ fontSize: 24 }}>Monte Carlo cash forecast</h3><p className="muted" style={{ margin: 0 }}>P10 / P50 / P90 over 90 days, refreshed whenever an email, invoice or bank statement changes the picture.</p><Link className="mono small" href="/cockpit">Cash Cockpit →</Link></div></div>
-          <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">02 · DECIDE</span><h3 className="h2" style={{ fontSize: 24 }}>Optimizer picks the cheapest financing</h3><p className="muted" style={{ margin: 0 }}>Factoring, working-capital loans, FOGAPE guarantees and CNY forwards — ranked by cost, speed and gap coverage.</p><Link className="mono small" href="/financing">Financing Arena →</Link></div></div>
+          <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">02 · DECIDE</span><h3 className="h2" style={{ fontSize: 24 }}>Optimizer picks the cheapest financing</h3><p className="muted" style={{ margin: 0 }}>Pre-export loans, factoring, FOGAPE guarantees, credit lines and CNY forwards — ranked by cost, timing and gap coverage.</p><Link className="mono small" href="/financing">Financing Arena →</Link></div></div>
           <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">03 · ACT</span><h3 className="h2" style={{ fontSize: 24 }}>Executes with owner approval</h3><p className="muted" style={{ margin: 0 }}>Tiered permissions; a six-digit code for anything that moves money; every step written to an audit chain.</p><Link className="mono small" href="/approvals">Approval Center →</Link></div></div>
         </div>
       </div></section>
@@ -97,11 +101,11 @@ export default function LandingPage() {
       </div></section>
 
       <section className="lp-section alt metrics-section"><div className="wrap" style={{ position: "relative", display: "flex", flexDirection: "column", gap: 28 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}><h2 className="lp-h" style={{ color: "var(--text)" }}>{l("benchH")}</h2><span className="badge warn" style={{ background: "transparent" }}>Placeholder figures · final benchmark pending</span></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}><h2 className="lp-h" style={{ color: "var(--text)" }}>{l("benchH")}</h2><span className="badge" style={{ background: "transparent" }}>{l("benchNote")}</span></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: 0, borderTop: "1px solid var(--line)" }}>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>94%</span><span className="muted">Task success rate</span></div>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--accent)", fontSize: 64 }}>−27%</span><span className="muted">Financing cost vs default loan</span></div>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>40/40</span><span className="muted">Red-team attacks blocked</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>50/50</span><span className="muted">{l("bench1")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--accent)", fontSize: 64 }}>−41%</span><span className="muted">{l("bench2")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>41/43</span><span className="muted">{l("bench3")}</span></div>
         </div>
       </div></section>
 

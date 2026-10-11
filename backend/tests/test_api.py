@@ -1,7 +1,10 @@
 from sqlalchemy import update
 
 from app.db import SessionLocal
+from app.seed import ACCOUNTS
 from app.models import AuditEntry
+
+OPENING = next(b for i, _, _, b in ACCOUNTS if i == "ACC-CLP")
 
 FACTORING = {"action": "factoring INV-2026-118", "explanation": "Cherry Crisis plan",
              "operations": [{"op": "factoring", "params": {"receivable_id": "INV-2026-118", "share": 0.5}}]}
@@ -13,7 +16,7 @@ def clp_balance(client) -> float:
 
 def test_health_and_seed(client):
     assert client.get("/health").json()["status"] == "ok"
-    assert clp_balance(client) == 175_500_000
+    assert clp_balance(client) == OPENING
     assert len(client.get("/bank/receivables").json()) == 6
 
 
@@ -24,13 +27,13 @@ def test_small_payment_runs_automatically(client):
     body = r.json()
     assert body["tier"] == 1 and body["status"] == "auto"
     assert body["results"][0]["audit_hash"]
-    assert clp_balance(client) == 175_000_000
+    assert clp_balance(client) == OPENING - 500_000
 
 
 def test_financing_needs_otp_and_runs_once(client):
     appr = client.post("/approvals", json=FACTORING).json()
     assert appr["tier"] == 3 and appr["status"] == "pending"
-    assert clp_balance(client) == 175_500_000
+    assert clp_balance(client) == OPENING
 
     bad = client.post(f"/approvals/{appr['id']}/approve", json={"otp": "000000"})
     assert bad.status_code == 403
@@ -39,7 +42,7 @@ def test_financing_needs_otp_and_runs_once(client):
     ok = client.post(f"/approvals/{appr['id']}/approve", json={"otp": "482913"}).json()
     assert ok["status"] == "approved"
     assert ok["results"][0]["proceeds_clp"] > 0
-    assert clp_balance(client) == 175_500_000 + ok["results"][0]["proceeds_clp"]
+    assert clp_balance(client) == OPENING + ok["results"][0]["proceeds_clp"]
 
     again = client.post(f"/approvals/{appr['id']}/approve", json={"otp": "482913"})
     assert again.status_code == 409
@@ -72,7 +75,7 @@ def test_kill_switch_blocks_everything(client):
     r = client.post("/approvals", json={"action": "pay", "operations": [{
         "op": "payment", "params": {"payee_id": "PAY-CARTONERA", "amount": 1000}}]}).json()
     assert r["status"] == "blocked"
-    assert clp_balance(client) == 175_500_000
+    assert clp_balance(client) == OPENING
 
 
 def test_insufficient_funds_fails_cleanly(client):
@@ -80,7 +83,7 @@ def test_insufficient_funds_fails_cleanly(client):
         "op": "payment", "params": {"payee_id": "PAY-PAYROLL", "amount": 300_000_000}}]}).json()
     r = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
     assert r["status"] == "failed" and r["note"].startswith("insufficient_funds")
-    assert clp_balance(client) == 175_500_000
+    assert clp_balance(client) == OPENING
 
 
 def test_audit_chain_detects_tampering(client):
@@ -154,3 +157,15 @@ def test_partial_failure_reports_what_ran(client):
     r = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
     assert r["status"] == "failed" and len(r["results"]) == 2
     assert "already_financed" in r["note"] and "1-2 executed" in r["note"]
+
+
+def test_cherry_crisis_pae_loan_from_the_quant_plan(client):
+    """The exact body the quant engine produces (web/src/data/cherry-crisis.json approvalRequest)."""
+    plan = {"action": "Pre-export loan in USD (PAE)", "operations": [
+        {"op": "loan", "params": {"lender_id": "LEN-PAE", "amount_clp": 140098568, "term_days": 60}}]}
+    a = client.post("/approvals", json=plan).json()
+    assert a["tier"] == 3 and a["status"] == "pending"
+    done = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
+    r = done["results"][0]
+    assert done["status"] == "approved" and r["lender_id"] == "LEN-PAE" and r["annual_rate"] == 0.068
+    assert clp_balance(client) == OPENING + r["proceeds_clp"]

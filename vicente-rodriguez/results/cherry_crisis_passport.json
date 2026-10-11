@@ -1,0 +1,81 @@
+{
+ "company_id": "huerto-austral",
+ "company": "Huerto Austral Export SpA",
+ "as_of": "2026-12-11",
+ "score": 33.5,
+ "grade": "E",
+ "factors": [
+  {
+   "factor": "liquidity",
+   "description": "Probability of negative cash within 90 days (Monte Carlo, no new financing)",
+   "value": 0.8322,
+   "best_at": 0.0,
+   "worst_at": 0.6,
+   "sub_score": 0.0,
+   "weight": 0.3,
+   "points": 0.0
+  },
+  {
+   "factor": "buffer_months",
+   "description": "Median minimum cash over 90 days, in months of average payroll",
+   "value": -0.0718,
+   "best_at": 2.0,
+   "worst_at": 0.0,
+   "sub_score": 0.0,
+   "weight": 0.15,
+   "points": 0.0
+  },
+  {
+   "factor": "fx_exposure",
+   "description": "Share of expected inflows in foreign currency",
+   "value": 1.0,
+   "best_at": 0.3,
+   "worst_at": 1.0,
+   "sub_score": 0.0,
+   "weight": 0.1,
+   "points": 0.0
+  },
+  {
+   "factor": "concentration",
+   "description": "Herfindahl index of expected inflows by customer",
+   "value": 0.409,
+   "best_at": 0.2,
+   "worst_at": 0.7,
+   "sub_score": 58.2,
+   "weight": 0.2,
+   "points": 11.6
+  },
+  {
+   "factor": "customer_delay",
+   "description": "Inflow-weighted median customer delay, days",
+   "value": 6.2387,
+   "best_at": 0.0,
+   "worst_at": 30.0,
+   "sub_score": 79.2,
+   "weight": 0.15,
+   "points": 11.9
+  },
+  {
+   "factor": "debt_service",
+   "description": "Debt service as a share of expected inflows in the horizon",
+   "value": 0.0275,
+   "best_at": 0.05,
+   "worst_at": 0.4,
+   "sub_score": 100.0,
+   "weight": 0.1,
+   "points": 10.0
+  }
+ ],
+ "summary": "Score 34/100 (grade E). Weakest factor: probability of negative cash within 90 days (monte carlo, no new financing) = 0.8322.",
+ "consent": true,
+ "shareable": true,
+ "synthetic": true,
+ "digest_sha256": "6be04f4577e3ae5eca316a49e4bdd87c2fd7a0063cfd861f0cbe6c1ec49a1b79",
+ "issued_at": "2026-10-10",
+ "source": {
+  "tool": "credit_passport",
+  "engine": "nanfeng_quant 0.3.0",
+  "deterministic": true,
+  "seed": 7
+ }
+}

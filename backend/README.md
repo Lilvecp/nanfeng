@@ -28,6 +28,17 @@ uv venv --python 3.12 .venv && uv pip install -e ".[dev]"   # or: python3.12 -m 
 .venv/bin/python -m app.main ../contracts/openapi.json      # re-export the contract after changing routes
 ```
 
+## Sandbox data
+
+Accounts, receivables, lenders and FX rates come from Vicente's engine so the bank matches the forecast and the MILP plan (e.g. the PAE loan, lender `LEN-PAE`). After the scenario or the catalog changes:
+
+```sh
+cd vicente-rodriguez
+python -c "import json; from nanfeng_quant.tools import sandbox_seed; json.dump(sandbox_seed('cherry_crisis'), open('../backend/app/data/sandbox_seed.json', 'w'), indent=1, ensure_ascii=False)"
+```
+
+Then reset the sandbox (`POST /bank/reset`, or delete `nanfeng.db` locally).
+
 ## How money moves
 
 Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations, e.g. factoring + forward):

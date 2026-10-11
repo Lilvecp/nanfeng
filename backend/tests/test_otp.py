@@ -8,6 +8,7 @@ from app import otp
 from app.config import get_settings
 from app.db import SessionLocal
 from app.models import Approval, OtpChallenge, utcnow
+from app.seed import FX_RATES
 
 FACTORING = {"action": "factoring INV-2026-118", "operations": [
     {"op": "factoring", "params": {"receivable_id": "INV-2026-118", "share": 0.5}}]}
@@ -38,7 +39,8 @@ def code_in(msg: dict) -> str:
 def test_l3_request_texts_a_fresh_code_to_the_owner(client, sms):
     a = client.post("/approvals", json=FACTORING).json()
     assert a["status"] == "pending" and len(sms) == 1
-    assert sms[0]["to"] == "+56911112222" and "CLP 84,600,000" in sms[0]["text"]
+    clp = round(180_000 * 0.5 * FX_RATES["USD"])  # half of INV-2026-118 at the seed's spot
+    assert sms[0]["to"] == "+56911112222" and f"CLP {clp:,}" in sms[0]["text"]
     done = client.post(f"/approvals/{a['id']}/approve", json={"otp": code_in(sms[0])}).json()
     assert done["status"] == "approved"
 

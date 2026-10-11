@@ -1,0 +1,120 @@
+"""Sensitivity of the Cherry Crisis plan: how robust is the recommendation?
+
+1. Confidence target sweep (80% -> 97.5%): cost, actions, and when the CNY forward enters.
+2. Catalog rates +-30% (the rates are references to verify) and products missing from the offer:
+   does the chosen mix change, and does the plan stay cheaper than the default bank loan?
+3. CNY forward spread sweep: at which bank spread would the hedge be worth buying?
+"""
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+from typing import Any
+
+from .catalog import Catalog
+from .montecarlo import simulate
+from .optimizer import optimize, optimize_pair
+from .tools import load_scenario
+
+ROOT = Path(__file__).resolve().parents[1]
+RESULTS_DIR = ROOT / "results"
+RATE_KEYS = ("rate_monthly", "rate_annual", "guarantee_fee_annual", "spread_pct")
+BUDGET = {"exact_time_limit_s": 30.0}  # offline study: same solver budget class as the demo artifacts
+
+
+def _scaled(catalog: Catalog, factor: float, kinds: tuple[str, ...] | None = None,
+            ids: tuple[str, ...] | None = None) -> Catalog:
+    cat = copy.deepcopy(catalog)
+    for p in cat.products:
+        if (kinds and p.kind not in kinds) or (ids and p.id not in ids):
+            continue
+        for k in RATE_KEYS:
+            if k in p.raw:
+                p.raw[k] = p.raw[k] * factor
+    return cat
+
+
+def _terms(catalog: Catalog, product_id: str, terms: list[int]) -> Catalog:
+    cat = copy.deepcopy(catalog)
+    cat.product(product_id).raw["term_options_days"] = terms
+    return cat
+
+
+def _row(label: str, best, default=None) -> dict[str, Any]:
+    row = {"case": label, "status": best.status,
+           "cost_clp": None if best.total_cost_clp is None else round(best.total_cost_clp),
+           "n_actions": len(best.actions), "products": sorted({a["product_id"] for a in best.actions}),
+           "uses_forward": any(a["kind"] == "forward" for a in best.actions),
+           "out_of_sample_coverage": best.out_of_sample_coverage,
+           "actions": [a["summary"] for a in best.actions]}
+    if default is not None:
+        row["default_cost_clp"] = None if default.total_cost_clp is None else round(default.total_cost_clp)
+        if best.total_cost_clp is not None and default.total_cost_clp:
+            row["savings_pct"] = round(1 - best.total_cost_clp / default.total_cost_clp, 4)
+    return row
+
+
+def run(scenario: str = "cherry_crisis", out_dir: Path = RESULTS_DIR, verbose: bool = True) -> dict[str, Any]:
+    company = load_scenario(scenario)
+    res = simulate(company, 10_000, seed=7)
+    catalog = Catalog.load()
+    out: dict[str, Any] = {"scenario": company.id, "confidence": [], "rates": [], "forward_spread": []}
+
+    for conf in (0.80, 0.85, 0.90, 0.95, 0.975):
+        best, default = optimize_pair(res, catalog, confidence=conf, **BUDGET)
+        out["confidence"].append({"confidence": conf, **_row(f"confidence {conf:.1%}", best, default)})
+        if verbose:
+            print("confidence", conf, out["confidence"][-1]["cost_clp"], out["confidence"][-1]["products"], flush=True)
+
+    rate_cases = [
+        ("all rates -30%", _scaled(catalog, 0.7)),
+        ("all rates +30%", _scaled(catalog, 1.3)),
+        ("factoring +30%", _scaled(catalog, 1.3, kinds=("factoring", "lc_discount"))),
+        ("factoring +60%", _scaled(catalog, 1.6, kinds=("factoring", "lc_discount"))),
+        ("default bank loan -30%", _scaled(catalog, 0.7, ids=(catalog.default_product().id,))),
+        ("no pre-export loan (PAE) on offer", catalog.subset([p.id for p in catalog.products if p.id != "PAE-USD"])),
+        ("no factoring on offer", catalog.subset([p.id for p in catalog.products if p.kind not in ("factoring", "lc_discount")])),
+        ("bank loan only at 180 days (v0.1 assumption)", _terms(catalog, catalog.default_product().id, [180])),
+    ]
+    for label, cat in rate_cases:
+        best, default = optimize_pair(res, cat, **BUDGET)
+        out["rates"].append(_row(label, best, default))
+        if verbose:
+            print(label, out["rates"][-1]["cost_clp"], out["rates"][-1]["products"], flush=True)
+
+    for spread in (0.0035, 0.0015, 0.0005, 0.0):
+        cat = copy.deepcopy(catalog)
+        cat.product("FWD-CNY").raw["spread_pct"] = spread
+        for conf in (0.90, 0.95):
+            best = optimize(res, cat, confidence=conf, **BUDGET)
+            row = _row(f"spread {spread:.2%} at {conf:.0%}", best)
+            row.update(spread_pct=spread, confidence=conf)
+            out["forward_spread"].append(row)
+            if verbose:
+                print(row["case"], row["cost_clp"], row["uses_forward"], flush=True)
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "sensitivity.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+    (out_dir / "sensitivity_summary.md").write_text(render(out), encoding="utf-8")
+    return out
+
+
+def render(out: dict[str, Any]) -> str:
+    money = lambda v: "infeasible" if v is None else f"{v:,.0f}"
+    pct = lambda v: "–" if v is None else f"{v:.1%}"
+    lines = ["# Plan sensitivity — Cherry Crisis", "", "Generated by `python -m nanfeng_quant sensitivity`.", "",
+             "## 1. Confidence target", "",
+             "| Target | Plan cost (CLP) | Default loan (CLP) | Savings | Actions | Products | Forward? | Out-of-sample |",
+             "|---|---|---|---|---|---|---|---|"]
+    for r in out["confidence"]:
+        lines.append(f"| {r['confidence']:.1%} | {money(r['cost_clp'])} | {money(r.get('default_cost_clp'))} | {pct(r.get('savings_pct'))} | "
+                     f"{r['n_actions']} | {', '.join(r['products'])} | {'yes' if r['uses_forward'] else 'no'} | {pct(r['out_of_sample_coverage'])} |")
+    lines += ["", "## 2. Catalog rates and product availability (90% target)", "",
+              "| Case | Plan cost (CLP) | Default loan (CLP) | Savings | Products |", "|---|---|---|---|---|"]
+    for r in out["rates"]:
+        lines.append(f"| {r['case']} | {money(r['cost_clp'])} | {money(r.get('default_cost_clp'))} | {pct(r.get('savings_pct'))} | {', '.join(r['products'])} |")
+    lines += ["", "## 3. CNY forward spread", "", "| Spread | Target | Plan cost (CLP) | Forward chosen? | Products |", "|---|---|---|---|---|"]
+    for r in out["forward_spread"]:
+        lines.append(f"| {r['spread_pct']:.2%} | {r['confidence']:.0%} | {money(r['cost_clp'])} | {'yes' if r['uses_forward'] else 'no'} | {', '.join(r['products'])} |")
+    return "\n".join(lines) + "\n"
