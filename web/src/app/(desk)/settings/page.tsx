@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Topbar } from "@/components/topbar";
 import { SANDBOX_OTP, useDesk } from "@/lib/desk-state";
-import { useT } from "@/lib/i18n";
+import { GUIDE_UI, resetTours, setGuideOn, useGuideOn } from "@/lib/guide";
+import { useLang, useT } from "@/lib/i18n";
 
 const CREDIT_LINE = 400_000_000;
 type LimitKey = "l2Action" | "l2Month" | "l3Action" | "l3Month";
@@ -140,6 +141,7 @@ export default function SettingsPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <GuideSettings />
             <div className="card">
               <div className="card-h"><span className="h3">Connected channels</span></div>
               <div className="tbl-wrap"><table className="tbl"><tbody>
@@ -171,5 +173,25 @@ export default function SettingsPage() {
         </div>
       </div>
     </>
+  );
+}
+
+/** Guide on/off and "show the tours again" (lib/guide.ts). */
+function GuideSettings() {
+  const ui = GUIDE_UI[useLang()];
+  const on = useGuideOn();
+  const { notify } = useDesk();
+  return (
+    <div className="card">
+      <div className="card-h"><span className="h3">{ui.settingsTitle}</span></div>
+      <div className="card-b" style={{ gap: 12 }}>
+        <span className="small">{ui.settingsBody}</span>
+        <div className="seg" role="group" aria-label={ui.settingsTitle} style={{ alignSelf: "flex-start" }}>
+          <button type="button" className={on !== false ? "on" : undefined} aria-pressed={on !== false} onClick={() => setGuideOn(true)}>{ui.on}</button>
+          <button type="button" className={on === false ? "on" : undefined} aria-pressed={on === false} onClick={() => setGuideOn(false)}>{ui.offLabel}</button>
+        </div>
+        <button className="btn btn-secondary btn-sm" type="button" style={{ alignSelf: "flex-start" }} onClick={() => { resetTours(); setGuideOn(true); notify(ui.replayed); }}>{ui.replay}</button>
+      </div>
+    </div>
   );
 }
