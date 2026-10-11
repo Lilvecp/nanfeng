@@ -1,21 +1,20 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { N, usd } from "./scenario";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 // Front-end state for the Cherry Crisis sandbox. Everything here is mock data until the API lands;
 // the shape mirrors what the backend will own (approval status, chosen plan, history).
 
 export type ApprovalStatus = "pending" | "verifying" | "approved" | "rejected";
 export type PlanId = string; // quant product id, e.g. "PAE-USD"
-
-export const SANDBOX_OTP = "482913";
-
 // The plan the MILP picks in the Cherry Crisis (see lib/scenario.ts).
 export const DEFAULT_PLAN: PlanId = "PAE-USD";
 const APPROVED_ACTION = `pae.loan ${N.termDays}D`;
 const APPROVED_AMOUNT = usd(N.loanUsd);
 const NEXT_BEST = "export factoring";
+
+export const SANDBOX_OTP = "482913";
 
 export type HistoryRow = {
   time: string;
