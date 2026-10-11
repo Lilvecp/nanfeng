@@ -56,9 +56,9 @@ export default function DesignSystemPage() {
     </section>
 
     <section style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" }}>
-      <div className="card"><div className="card-h"><span className="h3">Display · IBM Plex Sans Condensed</span></div><div className="card-b"><span className="display" style={{ fontSize: "40px", lineHeight: "1" }}>Runway 23D</span><span className="hint">600 · uppercase · OFL</span></div></div>
-      <div className="card"><div className="card-h"><span className="h3">Body · IBM Plex Sans</span></div><div className="card-b"><span style={{ fontSize: "15px" }}>Shanghai Fresh Imports delayed payment by 45 days. Plan ready.</span><span className="hint">400/500/600 · 14px base · OFL</span></div></div>
-      <div className="card"><div className="card-h"><span className="h3">Numeric · JetBrains Mono</span></div><div className="card-b"><span className="num" style={{ fontSize: "18px", fontWeight: "700" }}>CLP $142.300.000</span><span className="num" style={{ fontSize: "18px", fontWeight: "700" }}>USD 180,000.00 · ¥1,200,000</span><span className="num muted small">2026年10月09日 09:14:06</span></div></div>
+      <div className="card"><div className="card-h"><span className="h3">Display · IBM Plex Sans Condensed</span></div><div className="card-b"><span className="display" style={{ fontSize: "40px", lineHeight: "1" }}>Crunch D19</span><span className="hint">600 · uppercase · OFL</span></div></div>
+      <div className="card"><div className="card-h"><span className="h3">Body · IBM Plex Sans</span></div><div className="card-b"><span style={{ fontSize: "15px" }}>Shanghai Hongxin will pay 45 days late. Plan ready.</span><span className="hint">400/500/600 · 14px base · OFL</span></div></div>
+      <div className="card"><div className="card-h"><span className="h3">Numeric · JetBrains Mono</span></div><div className="card-b"><span className="num" style={{ fontSize: "18px", fontWeight: "700" }}>CLP $176.000.000</span><span className="num" style={{ fontSize: "18px", fontWeight: "700" }}>USD 180,000.00 · ¥1,200,000</span><span className="num muted small">2026年10月09日 09:14:06</span></div></div>
     </section>
     <div className="alert" style={{ fontFamily: "var(--f-mono)", fontSize: "12px" }}><span className="ic" style={{ background: "var(--accent)" }}>SELF-HOST</span><span>All fonts OFL, shipped as subset woff2 from our own origin. CJK: Noto Sans SC self-hosted. No third-party font CDN in production.</span></div>
 
@@ -77,7 +77,7 @@ export default function DesignSystemPage() {
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}><span className="tier t3"><b>L3</b><span>OTP</span></span><span className="small muted">Owner + one-time code</span></div>
       </div></div>
       <div className="card"><div className="card-h"><span className="h3">KPI cell · badges</span></div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}><div className="kpi"><span className="kpi-l">P(cash&lt;0) 19D</span><span className="kpi-v" style={{ color: "var(--crit)" }}>81.0%</span></div><div className="kpi"><span className="kpi-l">Runway P50</span><span className="kpi-v">23D</span></div></div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}><div className="kpi"><span className="kpi-l">P(cash&lt;0) 19D</span><span className="kpi-v" style={{ color: "var(--crit)" }}>81.3%</span></div><div className="kpi"><span className="kpi-l">Crunch day</span><span className="kpi-v">D19</span></div></div>
         <div className="card-b" style={{ flexDirection: "row", flexWrap: "wrap", borderTop: "1px solid var(--line)" }}><span className="badge ok">Verified</span><span className="badge warn">Pending</span><span className="badge crit">Blocked</span><span className="badge acc">Best</span><span className="badge solid crit">Live threat</span></div>
       </div>
       <div className="card" style={{ gridColumn: "span 2" }}><div className="card-h"><span className="h3">Table · blotter</span></div>
@@ -108,9 +108,9 @@ export default function DesignSystemPage() {
       <div className="card"><div className="card-h"><span className="h3">Timeline · chat</span></div><div className="card-b">
         <div className="tl">
           <div className="tl-item done"><span className="muted">09:08:49</span><span className="tl-dot">✓</span><span>montecarlo.run <span className="tier t0"><b>L0</b></span> 4.2s</span></div>
-          <div className="tl-item now"><span className="muted">09:09:06</span><span className="tl-dot">!</span><span>factoring.request <span className="tier t3"><b>L3</b></span> WAIT</span></div>
+          <div className="tl-item now"><span className="muted">09:09:06</span><span className="tl-dot">!</span><span>loan.request <span className="tier t3"><b>L3</b></span> WAIT</span></div>
         </div>
-        <div className="bubble in">Plan ready: factoring + CNY fwd. Saves CLP 4.1M. APPROVE / WHY<span className="t">09:09</span></div>
+        <div className="bubble in">Plan ready: PAE loan USD 142,400. Saves CLP 1.7M (45%). APPROVE / WHY<span className="t">09:09</span></div>
         <div className="bubble out">WHY<span className="t">09:12</span></div>
       </div></div>
     </section>

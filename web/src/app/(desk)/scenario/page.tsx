@@ -1,120 +1,120 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Topbar } from "@/components/topbar";
-import { useT } from "@/lib/i18n";
+import { useLang, useT } from "@/lib/i18n";
+import type { Lang } from "@/lib/prefs";
+import { S, clpFull, clpM, pct } from "@/lib/scenario";
 
-// Fast what-if model on top of the base P50 path. The real recompute comes from the Monte Carlo
-// service; this keeps the sliders instant in the sandbox.
-const BASE: [number, number][] = [[0, 142], [10, 88], [19, 0], [30, -32], [45, -38], [60, -8], [75, 42], [90, 78]];
-const DEFAULTS = { delay: 45, cny: 0, price: 0, hires: 0 };
+// Every preset is a full run of the quant engine (10,000-path Monte Carlo + MILP), precomputed so
+// the lab answers instantly and offline. Free-form what-ifs go to /quant once the API is connected.
+const PRESETS = S.scenarioLab;
+type Preset = (typeof PRESETS)[number];
+const BASE = PRESETS[0];
 
-const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-const xs = (d: number) => Math.round(50 + d * 9);
-const ys = (v: number) => Math.round(20 + (160 - clamp(v, -100, 160)));
-const linePath = (p: [number, number][]) => p.map(([d, v], i) => (i ? "L" : "M") + xs(d) + "," + ys(v)).join(" ");
-const fmt = (v: number) => (v < 0 ? "−" : "") + Math.abs(Math.round(v)) + "M";
-const sign = (n: number, u: string) => (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n) + u;
+const NAME: Record<string, Record<Lang, string>> = {
+  "Base (after the Shanghai notice)": { en: "Base · after the Shanghai notice", es: "Base · tras el aviso de Shanghái", zh: "基准 · 上海通知之后" },
+  "Before the notice": { en: "Before the notice", es: "Antes del aviso", zh: "通知之前" },
+  "All customers +15 days late": { en: "All customers +15 days late", es: "Todos los clientes +15 días", zh: "所有客户再延迟15天" },
+  "CNY -5% vs CLP": { en: "CNY −5% vs CLP", es: "CNY −5% vs CLP", zh: "人民币兑比索 −5%" },
+  "CNY +5% vs CLP": { en: "CNY +5% vs CLP", es: "CNY +5% vs CLP", zh: "人民币兑比索 +5%" },
+  "USD -5% vs CLP": { en: "USD −5% vs CLP", es: "USD −5% vs CLP", zh: "美元兑比索 −5%" },
+  "Cherry price -10%": { en: "Cherry price −10%", es: "Precio de la cereza −10%", zh: "樱桃价格 −10%" },
+  "Cherry price +10%": { en: "Cherry price +10%", es: "Precio de la cereza +10%", zh: "樱桃价格 +10%" },
+  "30 extra harvest workers": { en: "30 extra harvest workers", es: "30 temporeros más", zh: "增加30名采收工人" },
+};
+const name = (p: Preset, lang: Lang) => NAME[p.preset]?.[lang] ?? p.preset;
 
-function simulate(s: typeof DEFAULTS) {
-  const r1 = (d: number) => Math.min(1, d / 30);
-  const r2 = (d: number) => clamp((d - 20) / 40, 0, 1);
-  const pts = BASE.map(([d, v]) => [d, d === 0 ? v : v + (45 - s.delay) * 1.6 * r1(d) + s.cny * 1.57 * r2(d) + s.price * 2 * r2(d) - (s.hires * 1.4 * d) / 30] as [number, number]);
-  const up = pts.map(([d, v]) => [d, v + d * 0.9] as [number, number]);
-  const dn = pts.map(([d, v]) => [d, v - d * 0.9] as [number, number]).reverse();
-  let cross: number | null = null;
-  for (let i = 1; i < pts.length; i++) {
-    const [d0, v0] = pts[i - 1];
-    const [d1, v1] = pts[i];
-    if (v0 >= 0 && v1 < 0) {
-      cross = d0 + (v0 / (v0 - v1)) * (d1 - d0);
-      break;
-    }
-  }
-  const prob = clamp(Math.round(81 - pts[2][1] * 0.9), 3, 99);
-  return {
-    line: linePath(pts),
-    band: linePath(up) + " " + dn.map(([d, v]) => "L" + xs(d) + "," + ys(v)).join(" ") + " Z",
-    cross,
-    prob,
-    probColor: prob > 50 ? "var(--crit)" : prob > 20 ? "var(--warn)" : "var(--ok)",
-    runway: cross !== null ? Math.round(cross) + "D" : ">90D",
-    trough: fmt(Math.min(...pts.map((p) => p[1]))),
-    end: fmt(pts[pts.length - 1][1]),
-  };
-}
+const TX = {
+  en: { mode: "Mode", sim: "SIMULATION · NO EXECUTION", presets: "Scenarios", price: "Price financing", pNeg: "P(cash<0) · 90D", pBuf: "P(below buffer)", plan: "Plan cost", save: "Saved vs bank loan", none: "no bank-only plan",
+    chart: "Probability of negative cash · every scenario", table: "Base → scenario", metric: "Metric", base: "Base", scen: "Scen", low: "P10 low point", crunch: "Crunch date", actions: "Optimizer plan for this scenario",
+    note: "Simulation only: nothing here executes. Each scenario is a full 10,000-path Monte Carlo and MILP run of the quant engine." },
+  es: { mode: "Modo", sim: "SIMULACIÓN · NO EJECUTA", presets: "Escenarios", price: "Cotizar financiamiento", pNeg: "P(caja<0) · 90D", pBuf: "P(bajo el colchón)", plan: "Costo del plan", save: "Ahorro vs crédito", none: "sin plan solo con crédito",
+    chart: "Probabilidad de caja negativa · todos los escenarios", table: "Base → escenario", metric: "Métrica", base: "Base", scen: "Esc.", low: "Mínimo P10", crunch: "Día crítico", actions: "Plan del optimizador para este escenario",
+    note: "Solo simulación: nada se ejecuta. Cada escenario es una corrida completa del motor quant (Monte Carlo de 10.000 caminos y MILP)." },
+  zh: { mode: "模式", sim: "仅模拟 · 不执行", presets: "情景", price: "融资报价", pNeg: "90天内现金<0概率", pBuf: "低于安全垫概率", plan: "方案成本", save: "比银行贷款节省", none: "无仅用银行贷款的方案",
+    chart: "各情景现金为负的概率", table: "基准 → 情景", metric: "指标", base: "基准", scen: "情景", low: "P10 最低点", crunch: "危机日", actions: "该情景下的优化方案",
+    note: "仅为模拟，不会执行任何操作。每个情景都是量化引擎的完整运行（10,000路径蒙特卡洛 + MILP）。" },
+};
 
 export default function ScenarioPage() {
   const t = useT();
-  const [s, setS] = useState(DEFAULTS);
-  const r = useMemo(() => simulate(s), [s]);
-  const set = (k: keyof typeof DEFAULTS) => (e: React.ChangeEvent<HTMLInputElement>) => setS((p) => ({ ...p, [k]: +e.target.value }));
-
-  const sliders = [
-    { k: "delay" as const, id: "tts-delay", label: "Payment delay", value: `${s.delay}D`, min: 0, max: 90, step: 5, hint: "0 · base 45 · 90" },
-    { k: "cny" as const, id: "tts-cny", label: "CNY/USD Δ", value: sign(s.cny, "%"), min: -10, max: 10, step: 1, hint: "−10% · 0 · +10%" },
-    { k: "price" as const, id: "tts-price", label: "Cherry price Δ", value: sign(s.price, "%"), min: -20, max: 20, step: 1, hint: "−20% · 0 · +20%" },
-    { k: "hires" as const, id: "tts-hires", label: "New hires", value: String(s.hires), min: 0, max: 5, step: 1, hint: "CLP 1.4M/mo each" },
-  ];
+  const lang = useLang();
+  const x = TX[lang];
+  const [sel, setSel] = useState(BASE.preset);
+  const p = PRESETS.find((q) => q.preset === sel)!;
+  const color = (v: number) => (v > 0.5 ? "var(--crit)" : v > 0.2 ? "var(--warn)" : "var(--ok)");
 
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">CLP $142.300.000</span></div>
-        <div className="tick"><span className="l">Mode</span><span className="v" style={{ color: "var(--warn)" }}>SIMULATION · NO EXECUTION</span></div>
+        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <div className="tick"><span className="l">{x.mode}</span><span className="v" style={{ color: "var(--warn)" }}>{x.sim}</span></div>
       </Topbar>
 
       <div className="content">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <h1 className="h1">{t("nav.scenario")}</h1>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn btn-secondary" type="button" onClick={() => setS(DEFAULTS)}>Reset <span className="key">0</span></button>
-            <Link className="btn btn-primary" href="/financing">Price financing</Link>
+          <Link className="btn btn-primary" href="/financing">{x.price}</Link>
+        </div>
+
+        <div className="card">
+          <div className="card-h"><span className="h3">{x.presets}</span></div>
+          <div className="card-b">
+            <div className="chips" role="group" aria-label={x.presets}>
+              {PRESETS.map((q) => (
+                <button key={q.preset} type="button" aria-pressed={q.preset === sel} onClick={() => setSel(q.preset)} style={q.preset === sel ? { background: "var(--accent)", color: "#FFFFFF", borderColor: "var(--accent)" } : undefined}>{name(q, lang)}</button>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
-          {sliders.map((sl) => (
-            <div key={sl.k} className="kpi" style={{ gap: 8 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}><label className="kpi-l" htmlFor={sl.id}>{sl.label}</label><b className="num">{sl.value}</b></div>
-              <input id={sl.id} className="range" type="range" min={sl.min} max={sl.max} step={sl.step} value={s[sl.k]} onChange={set(sl.k)} />
-              <span className="hint">{sl.hint}</span>
-            </div>
-          ))}
+          <div className="kpi"><span className="kpi-l">{x.pNeg}</span><span className="kpi-v" style={{ color: color(p.probNeg90d) }}>{pct(p.probNeg90d)}</span><span className="mono small muted">{p.headline}</span></div>
+          <div className="kpi"><span className="kpi-l">{x.pBuf}</span><span className="kpi-v">{pct(p.probBelowBuffer90d)}</span></div>
+          <div className="kpi"><span className="kpi-l">{x.plan}</span><span className="kpi-v">{clpM(p.planCostClp, lang)}</span></div>
+          <div className="kpi"><span className="kpi-l">{x.save}</span><span className="kpi-v up">{p.savingsPct !== null ? pct(p.savingsPct) : "—"}</span><span className="mono small muted">{p.defaultCostClp !== null ? clpM(p.defaultCostClp, lang) : x.none}</span></div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2.2fr) minmax(300px, 1fr)", gap: 12 }}>
           <div className="card">
-            <div className="card-h"><span className="h3">P50 · base vs scenario · CLP M</span><div className="legend"><span><i className="sw" style={{ borderTop: "1px dashed var(--faint)", height: 0 }} />BASE</span><span><i className="sw" style={{ background: "var(--ok)", height: 2 }} />SCENARIO</span><span><i className="sw" style={{ background: "var(--chart-band)" }} />P10–90</span></div></div>
+            <div className="card-h"><span className="h3">{x.chart}</span></div>
             <div className="card-b">
-              <svg viewBox="0 0 900 310" width="100%" role="img" aria-label={`Scenario forecast versus base forecast. Probability of negative cash ${r.prob}%.`}>
-                <rect className="ch-neg" x="50" y="180" width="810" height="100" />
-                {[30, 80, 130, 230, 280].map((y) => <line key={y} className="ch-grid" x1="50" x2="860" y1={y} y2={y} />)}
-                <line className="ch-zero" x1="50" x2="860" y1="180" y2="180" />
-                <path className="ch-band" d={r.band} />
-                <path className="ch-before" d="M50,38 L140,92 L221,180 L320,212 L455,218 L590,188 L725,138 L860,102" />
-                <path className="ch-after" d={r.line} />
-                <line className="ch-buffer" x1="50" x2="860" y1="140" y2="140" />
-                {r.cross !== null && <line className="ch-mark" x1={xs(r.cross)} x2={xs(r.cross)} y1="20" y2="280" />}
-                {[150, 100, 50, 0, -50, -100].map((v, i) => <text key={v} className="ch-axis" x="42" y={34 + i * 50} textAnchor="end">{v}</text>)}
-                <text className="ch-axis" x="50" y="302">D0</text><text className="ch-axis" x="320" y="302" textAnchor="middle">D30</text><text className="ch-axis" x="590" y="302" textAnchor="middle">D60</text><text className="ch-axis" x="860" y="302" textAnchor="end">D90</text>
+              <svg viewBox={`0 0 640 ${PRESETS.length * 30 + 30}`} width="100%" role="img" aria-label={`${x.chart}. ${PRESETS.map((q) => `${name(q, "en")}: ${pct(q.probNeg90d)}`).join("; ")}.`}>
+                {[0, 0.25, 0.5, 0.75, 1].map((v) => (
+                  <g key={v}>
+                    <line className="ch-grid" x1={240 + v * 360} x2={240 + v * 360} y1="4" y2={PRESETS.length * 30 + 6} />
+                    <text className="ch-axis" x={240 + v * 360} y={PRESETS.length * 30 + 24} textAnchor="middle">{v * 100}%</text>
+                  </g>
+                ))}
+                {PRESETS.map((q, i) => (
+                  <g key={q.preset} onClick={() => setSel(q.preset)} style={{ cursor: "pointer" }}>
+                    <text className="ch-axis" x="232" y={i * 30 + 22} textAnchor="end" style={q.preset === sel ? { fill: "var(--text)", fontWeight: 700 } : undefined}>{name(q, lang)}</text>
+                    <rect x="240" y={i * 30 + 10} width={Math.max(2, q.probNeg90d * 360)} height="16" fill={color(q.probNeg90d)} opacity={q.preset === sel ? 1 : 0.4} />
+                    <text className="ch-axis" x={246 + q.probNeg90d * 360} y={i * 30 + 22} textAnchor={q.probNeg90d > 0.9 ? "end" : "start"} dx={q.probNeg90d > 0.9 ? -10 : 0} style={q.probNeg90d > 0.9 ? { fill: "#FFFFFF" } : undefined}>{pct(q.probNeg90d)}</text>
+                  </g>
+                ))}
               </svg>
             </div>
           </div>
           <div className="card">
-            <div className="card-h"><span className="h3">Before → after</span></div>
+            <div className="card-h"><span className="h3">{x.table}</span></div>
             <div className="tbl-wrap"><table className="tbl">
-              <thead><tr><th>Metric</th><th className="r">Base</th><th className="r">Scen</th></tr></thead>
+              <thead><tr><th>{x.metric}</th><th className="r">{x.base}</th><th className="r">{x.scen}</th></tr></thead>
               <tbody>
-                <tr><td>P(cash&lt;0) 19D</td><td className="r num">81%</td><td className="r num"><b style={{ color: r.probColor }}>{r.prob}%</b></td></tr>
-                <tr><td>Runway P50</td><td className="r num">19D</td><td className="r num"><b>{r.runway}</b></td></tr>
-                <tr><td>Trough P50</td><td className="r num">−38M</td><td className="r num"><b>{r.trough}</b></td></tr>
-                <tr><td>D90 P50</td><td className="r num">78M</td><td className="r num"><b>{r.end}</b></td></tr>
+                <tr><td>{x.pNeg}</td><td className="r num">{pct(BASE.probNeg90d)}</td><td className="r num"><b style={{ color: color(p.probNeg90d) }}>{pct(p.probNeg90d)}</b></td></tr>
+                <tr><td>{x.crunch}</td><td className="r num">{BASE.crunchDate ?? "—"}</td><td className="r num"><b>{p.crunchDate ?? "—"}</b></td></tr>
+                <tr><td>{x.low}</td><td className="r num">{clpM(BASE.minCashP10Clp, lang)}</td><td className="r num"><b>{clpM(p.minCashP10Clp, lang)}</b></td></tr>
+                <tr><td>{x.plan}</td><td className="r num">{clpM(BASE.planCostClp, lang)}</td><td className="r num"><b>{clpM(p.planCostClp, lang)}</b></td></tr>
               </tbody>
             </table></div>
+            <div className="card-h" style={{ borderTop: "1px solid var(--line)" }}><span className="h3">{x.actions}</span></div>
+            <div className="card-b mono small" style={{ gap: 6 }}>
+              {p.planActions.map((a) => <span key={a}>→ {a}</span>)}
+            </div>
             <div className="card-b" style={{ borderTop: "1px solid var(--line)" }}>
-              <span className="mono small muted">Simulation only: nothing here executes. Use “Price financing” to act on a scenario.</span>
+              <span className="mono small muted">{x.note}</span>
             </div>
           </div>
         </div>

@@ -3,121 +3,175 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Topbar } from "@/components/topbar";
-import { useDesk, type PlanId } from "@/lib/desk-state";
-import { useT } from "@/lib/i18n";
+import { DEFAULT_PLAN, useDesk } from "@/lib/desk-state";
+import { useLang, useT } from "@/lib/i18n";
+import type { Lang } from "@/lib/prefs";
+import { N, PRODUCT_SHORT, S, clpM, pct } from "@/lib/scenario";
 
-type Option = {
-  id: PlanId;
-  rank: string;
-  name: string;
-  badge?: { cls: string; label: string };
-  who: string;
-  eac: { v: string; cls?: string };
-  cost: string;
-  term: string;
-  req: string;
-  ttc: { v: string; cls?: string };
-  gap: { v: string; cls: string };
-  score: string;
-  verdict: string;
-  closesGap: boolean;
+// Product names come from the quant catalog in English; these are the ES / 中文 labels.
+const PRODUCT_NAME: Record<string, Record<Exclude<Lang, "en">, string>> = {
+  "Export factoring, non-recourse (bank)": { es: "Factoring de exportación sin recurso (banco)", zh: "出口保理（无追索权，银行）" },
+  "Pre-export loan in USD (PAE)": { es: "Crédito de pre-exportación en USD (PAE)", zh: "美元出口前融资（PAE）" },
+  "Working capital loan (default bank credit)": { es: "Crédito de capital de trabajo (banco, por defecto)", zh: "流动资金贷款（默认银行贷款）" },
+  "Credit line / overdraft": { es: "Línea de crédito / sobregiro", zh: "信用额度 / 透支" },
+  "Fintech factoring, with recourse (fast onboarding)": { es: "Factoring fintech con recurso (alta rápida)", zh: "金融科技保理（有追索权，快速开户）" },
+  "Confirming (supplier payment extension)": { es: "Confirming (extensión de pago a proveedores)", zh: "供应商付款延期（Confirming）" },
+  "FOGAPE-guaranteed working capital loan": { es: "Crédito de capital de trabajo con garantía FOGAPE", zh: "FOGAPE 担保流动资金贷款" },
+  "CNY forward (sell CNY, cash-settled)": { es: "Forward CNY (venta de CNY, compensado)", zh: "人民币远期（卖出人民币，现金交割）" },
+  "Letter of credit discounting": { es: "Descuento de carta de crédito", zh: "信用证贴现" },
 };
+const pname = (p: string, lang: Lang) => (lang === "en" ? p : PRODUCT_NAME[p]?.[lang] ?? p);
 
-const OPTIONS: Option[] = [
-  { id: "fact-fwd", rank: "01", name: "CNY forward + partial factoring", badge: { cls: "badge acc", label: "Best" }, who: "Banco Pacífico + FX desk", eac: { v: "11.8%" }, cost: "CLP 8.5M", term: "60D", req: "Assignable invoice · FX line", ttc: { v: "48H" }, gap: { v: "+31.0M ✓", cls: "up" }, score: "0.92", verdict: "Recommended: closes the D19 gap at the lowest cost and hedges the CNY exposure.", closesGap: true },
-  { id: "factoring", rank: "02", name: "Invoice factoring (full)", who: "Banco Pacífico", eac: { v: "13.9%" }, cost: "CLP 10.9M", term: "60D", req: "Invoice · credit check", ttc: { v: "48H" }, gap: { v: "+79.0M ✓", cls: "up" }, score: "0.81", verdict: "Closes the gap, but costs CLP 2.4M more and leaves ¥1.2M unhedged.", closesGap: true },
-  { id: "fogape", rank: "03", name: "FOGAPE-backed loan", who: "Banco Andino", eac: { v: "9.6%", cls: "up" }, cost: "CLP 7.2M", term: "24M", req: "Sales < UF 100k · window", ttc: { v: "~21D", cls: "down" }, gap: { v: "MISS by 2D", cls: "down" }, score: "0.44", verdict: "Cheapest rate, but cash arrives on D21, two days after payroll. Apply now for next season.", closesGap: false },
-  { id: "bank-loan", rank: "04", name: "Working-capital loan", badge: { cls: "badge", label: "Default" }, who: "Banco Andino", eac: { v: "16.4%", cls: "down" }, cost: "CLP 12.6M", term: "12M", req: "2y financials · collateral", ttc: { v: "~15BD", cls: "down" }, gap: { v: "MISS by 2D", cls: "down" }, score: "0.21", verdict: "Most expensive and late: fallback only.", closesGap: false },
-];
+const PLAN_NAME = "Pre-export loan in USD (PAE)";
+const DEFAULT_NAME = "Working capital loan (default bank credit)";
+
+type Row = { product: string; productId: string; lender: string; cost: number | null; eac: number | null; term: number | null; req: string; alone: number | null; selected: boolean; reason: string };
+
+const ROWS: Row[] = S.explanation.map((e) => {
+  const q = S.arena.find((a) => a.product === e.product);
+  return {
+    product: e.product,
+    productId: e.productId,
+    lender: q?.lender.replace(/ \(fictional.*\)/, "") ?? "—",
+    cost: q?.cost_clp ?? null,
+    eac: q?.eac ?? null,
+    term: q?.term_days ?? null,
+    req: q?.requirements ?? "",
+    alone: e.selected ? N.planCost : e.aloneCostClp,
+    selected: e.selected,
+    reason: e.reason,
+  };
+}).sort((a, b) => (a.alone ?? Infinity) - (b.alone ?? Infinity));
+
+const TX = {
+  en: {
+    need: `Need · D${N.crunchDay}`, asOf: "Quotes as of", status: `${S.arena.length} ELIGIBLE · ${ROWS.length} CHECKED`, closed: "CLOSED",
+    book: "Option book · ranked by plan cost", hint: "CLICK A ROW TO INSPECT", option: "Option", lender: "Lender", eac: "EAC", quote: `Quote for CLP ${(S.need.amount_clp / 1e6).toFixed(1)}M`, term: "Term", alone: "Plan cost if used alone",
+    best: "Chosen", def: "Default", inPlan: "In the plan", out: "Left out", na: "not eligible",
+    chart: "What each option would cost to close the gap", chartHint: `CLP M · same target: cash above the buffer in 90% of scenarios`,
+    why: "Why this", whyNot: "Why not the others", send: "Send to approval", approved: "Approved · executing",
+    pros: [
+      `${clpM(N.savings)} cheaper than the default bank loan (${N.savingsPct})`,
+      `Cash on ${S.plan.actions[0].date}, the day of the payroll`,
+      `Repaid in USD with the export proceeds (${S.plan.maturity})`,
+      `Cash above the buffer in ${N.coverage} of 10,000 scenarios`,
+    ],
+    source: `Exact chance-constrained MILP · ${S.plan.solver} · gap ${S.plan.optimality_gap} · ${S.plan.nScenarios} scenarios`,
+  },
+  es: {
+    need: `Necesidad · D${N.crunchDay}`, asOf: "Cotizaciones al", status: `${S.arena.length} ELEGIBLES · ${ROWS.length} REVISADAS`, closed: "CERRADA",
+    book: "Opciones · ordenadas por costo del plan", hint: "HAZ CLIC EN UNA FILA", option: "Opción", lender: "Prestamista", eac: "CAE", quote: `Cotización por CLP ${(S.need.amount_clp / 1e6).toFixed(1).replace(".", ",")}M`, term: "Plazo", alone: "Costo del plan si se usa sola",
+    best: "Elegida", def: "Por defecto", inPlan: "En el plan", out: "Fuera", na: "no elegible",
+    chart: "Cuánto costaría cerrar la brecha con cada opción", chartHint: "CLP M · misma meta: caja sobre el colchón en el 90% de los escenarios",
+    why: "Por qué esta", whyNot: "Por qué no las otras", send: "Enviar a aprobación", approved: "Aprobada · ejecutándose",
+    pros: [
+      `${clpM(N.savings, "es")} más barato que el crédito bancario (${N.savingsPct})`,
+      `Caja el ${S.plan.actions[0].date}, el día de la nómina`,
+      `Se paga en USD con el retorno de la exportación (${S.plan.maturity})`,
+      `Caja sobre el colchón en el ${N.coverage} de 10.000 escenarios`,
+    ],
+    source: `MILP exacto con restricción de probabilidad · ${S.plan.solver} · gap ${S.plan.optimality_gap} · ${S.plan.nScenarios} escenarios`,
+  },
+  zh: {
+    need: `资金需求 · 第${N.crunchDay}天`, asOf: "报价日期", status: `${S.arena.length}项符合条件 · 共评估${ROWS.length}项`, closed: "已补足",
+    book: "方案列表 · 按方案成本排序", hint: "点击行查看详情", option: "方案", lender: "贷款方", eac: "年化成本", quote: `${Math.round(S.need.amount_clp / 1e4).toLocaleString("en-US")}万比索报价`, term: "期限", alone: "单独使用时的方案成本",
+    best: "已选", def: "默认", inPlan: "纳入方案", out: "未选", na: "不符合条件",
+    chart: "用各方案补足缺口的成本", chartHint: "百万智利比索 · 同一目标：90%情景中现金高于安全垫",
+    why: "选择理由", whyNot: "其他方案为何未选", send: "提交审批", approved: "已批准 · 执行中",
+    pros: [
+      `比默认银行贷款便宜${clpM(N.savings, "zh")}（${N.savingsPct}）`,
+      `${S.plan.actions[0].date} 到账，正值发薪日`,
+      `以出口收入美元还款（${S.plan.maturity}）`,
+      `10,000个情景中${N.coverage}现金高于安全垫`,
+    ],
+    source: `精确机会约束 MILP · ${S.plan.solver} · 间隙 ${S.plan.optimality_gap} · ${S.plan.nScenarios}个情景`,
+  },
+};
 
 export default function FinancingPage() {
   const t = useT();
-  const { plan, choosePlan, approval } = useDesk();
-  const [focus, setFocus] = useState<PlanId>(plan);
-  const selected = OPTIONS.find((o) => o.id === focus)!;
+  const lang = useLang();
+  const x = TX[lang];
+  const { choosePlan, approval } = useDesk();
+  const [focus, setFocus] = useState(PLAN_NAME);
+  const selected = ROWS.find((r) => r.product === focus)!;
+
+  const priced = ROWS.filter((r) => r.alone !== null);
+  const max = Math.max(...priced.map((r) => r.alone!));
+  const barW = (v: number) => Math.max(4, (v / max) * 300);
 
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">Gap D19</span><span className={`v ${approval === "approved" ? "up" : "down"}`}>{approval === "approved" ? "CLOSED" : "CLP −77M"}</span></div>
-        <div className="tick"><span className="l">Quotes valid</span><span className="v">2026-10-10 18:00</span></div>
-        <span className="status"><span className="dot" />4 QUOTES · 3 COUNTERPARTIES</span>
+        <div className="tick"><span className="l">{x.need}</span><span className={`v ${approval === "approved" ? "up" : "down"}`}>{approval === "approved" ? x.closed : `−${clpM(S.need.amount_clp, lang).replace("−", "")}`}</span></div>
+        <div className="tick"><span className="l">{x.asOf}</span><span className="v">{S.asOf} 10:14</span></div>
+        <span className="status"><span className="dot" />{x.status}</span>
       </Topbar>
 
       <div className="content">
         <h1 className="h1">{t("nav.financing")}</h1>
         <div className="card">
-          <div className="card-h"><span className="h3">Option book · ranked by optimizer score</span><span className="hint">CLICK A ROW TO INSPECT</span></div>
+          <div className="card-h"><span className="h3">{x.book}</span><span className="hint">{x.hint}</span></div>
           <div className="tbl-wrap"><table className="tbl">
-            <thead><tr><th>Rank</th><th>Option</th><th>Counterparty</th><th className="r">EAC</th><th className="r">Total cost</th><th className="r">Term</th><th>Requirements</th><th className="r">Time to cash</th><th className="r">D19 gap impact</th><th className="r">Score</th></tr></thead>
+            <thead><tr><th>#</th><th>{x.option}</th><th>{x.lender}</th><th className="r">{x.eac}</th><th className="r">{x.quote}</th><th className="r">{x.term}</th><th className="r">{x.alone}</th></tr></thead>
             <tbody>
-              {OPTIONS.map((o) => (
-                <tr key={o.id} className={focus === o.id ? "pick" : undefined} onClick={() => setFocus(o.id)} style={{ cursor: "pointer" }} aria-selected={focus === o.id}>
-                  <td className="num">{o.rank}</td>
-                  <td>{o.rank === "01" ? <b>{o.name}</b> : o.name} {o.badge && <span className={o.badge.cls}>{o.badge.label}</span>}</td>
-                  <td>{o.who}</td>
-                  <td className={`r num ${o.eac.cls ?? ""}`}>{o.eac.v}</td>
-                  <td className="r num">{o.cost}</td>
-                  <td className="r num">{o.term}</td>
-                  <td className="small">{o.req}</td>
-                  <td className={`r num ${o.ttc.cls ?? ""}`}>{o.ttc.v}</td>
-                  <td className={`r num ${o.gap.cls}`}>{o.gap.v}</td>
-                  <td className="r num">{o.rank === "01" ? <b>{o.score}</b> : o.score}</td>
+              {ROWS.map((r, i) => (
+                <tr key={r.product} className={focus === r.product ? "pick" : undefined} onClick={() => setFocus(r.product)} style={{ cursor: "pointer" }} aria-selected={focus === r.product}>
+                  <td className="num">{String(i + 1).padStart(2, "0")}</td>
+                  <td>
+                    {r.selected ? <b>{pname(r.product, lang)}</b> : pname(r.product, lang)}{" "}
+                    {r.selected && <span className="badge acc">{x.best}</span>}
+                    {r.product === DEFAULT_NAME && <span className="badge">{x.def}</span>}
+                  </td>
+                  <td>{r.lender}</td>
+                  <td className="r num">{r.eac !== null ? pct(r.eac) : "—"}</td>
+                  <td className="r num">{r.cost !== null ? clpM(r.cost, lang) : <span className="muted">{x.na}</span>}</td>
+                  <td className="r num">{r.term !== null ? `${r.term}D` : "—"}</td>
+                  <td className={`r num${r.selected ? " up" : ""}`}>{r.alone !== null ? (r.selected ? <b>{clpM(r.alone, lang)}</b> : clpM(r.alone, lang)) : "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table></div>
           <div className="card-b" style={{ borderTop: "1px solid var(--line)", flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-            <span className={`badge ${selected.closesGap ? "ok" : "crit"}`}>{selected.closesGap ? "Closes gap" : "Misses D19"}</span>
-            <span className="small" style={{ flex: "1 1 320px" }}>{selected.verdict}</span>
+            <span className={`badge ${selected.selected ? "ok" : "crit"}`}>{selected.selected ? x.inPlan : x.out}</span>
+            <span className="small" style={{ flex: "1 1 320px" }}>{selected.selected ? S.approvalRequest.explanation : selected.reason}</span>
+            {selected.req && <span className="small muted" style={{ flex: "1 1 100%" }}>{selected.req}</span>}
           </div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1fr)", gap: 12 }}>
           <div className="card">
-            <div className="card-h"><span className="h3">Cost vs speed</span><div className="legend"><span><i className="sw" style={{ background: "var(--accent)" }} />BEST</span><span><i className="sw" style={{ background: "var(--muted)" }} />OTHER</span><span><i className="sw" style={{ background: "var(--crit)", opacity: 0.3 }} />AFTER D19</span></div></div>
+            <div className="card-h"><span className="h3">{x.chart}</span><span className="hint">{x.chartHint}</span></div>
             <div className="card-b">
-              <svg viewBox="0 0 520 300" width="100%" role="img" aria-label="Scatter of effective annual cost against days to cash. Only the two factoring options arrive before day 19; the recommended plan is cheaper of the two.">
-                <rect x="392" y="30" width="108" height="230" fill="var(--crit)" opacity=".1" />
-                {[40, 106, 172, 238].map((y) => <line key={y} className="ch-grid" x1="50" x2="500" y1={y} y2={y} />)}
-                <line className="ch-zero" x1="50" x2="500" y1="260" y2="260" /><line className="ch-zero" x1="50" x2="50" y1="30" y2="260" />
-                <line className="ch-mark" x1="392" x2="392" y1="30" y2="260" strokeDasharray="4 3" /><text className="ch-lbl" x="398" y="46">D19 GAP</text>
-                {[
-                  { id: "fact-fwd" as PlanId, x: 80, y: 170, label: "FWD+FACT 11.8%", tx: 100, ty: 181, anchor: "start" as const },
-                  { id: "factoring" as PlanId, x: 80, y: 124, label: "FACTORING 13.9%", tx: 100, ty: 135, anchor: "start" as const },
-                  { id: "fogape" as PlanId, x: 422, y: 219, label: "FOGAPE 9.6%", tx: 416, ty: 214, anchor: "end" as const },
-                  { id: "bank-loan" as PlanId, x: 422, y: 69, label: "WC LOAN 16.4%", tx: 416, ty: 64, anchor: "end" as const },
-                ].map((p) => (
-                  <g key={p.id} onClick={() => setFocus(p.id)} style={{ cursor: "pointer" }}>
-                    <rect x={p.x} y={p.y} width="12" height="12" fill={p.id === "fact-fwd" ? "var(--accent)" : "var(--muted)"} stroke={focus === p.id ? "var(--text)" : "none"} strokeWidth="2" />
-                    <text className="ch-axis" x={p.tx} y={p.ty} textAnchor={p.anchor} style={p.id === "fact-fwd" ? { fill: "var(--accent)", fontWeight: 700 } : undefined}>{p.label}</text>
+              <svg viewBox={`0 0 520 ${priced.length * 30 + 10}`} width="100%" role="img" aria-label={`${x.chart}. ${priced.map((r) => `${PRODUCT_SHORT[r.product] ?? r.product}: ${clpM(r.alone!)}`).join("; ")}.`}>
+                {priced.map((r, i) => (
+                  <g key={r.product} onClick={() => setFocus(r.product)} style={{ cursor: "pointer" }}>
+                    <text className="ch-axis" x="130" y={i * 30 + 22} textAnchor="end" style={r.selected ? { fill: "var(--accent)", fontWeight: 700 } : undefined}>{PRODUCT_SHORT[r.product] ?? r.product}</text>
+                    <rect x="140" y={i * 30 + 10} width={barW(r.alone!)} height="16" fill={r.selected ? "var(--accent)" : "var(--muted)"} opacity={r.selected ? 1 : 0.45} stroke={focus === r.product ? "var(--text)" : "none"} strokeWidth="2" />
+                    <text className="ch-axis" x={146 + barW(r.alone!)} y={i * 30 + 22}>{(r.alone! / 1e6).toFixed(1)}</text>
                   </g>
                 ))}
-                <text className="ch-axis" x="44" y="44" textAnchor="end">18%</text><text className="ch-axis" x="44" y="176" textAnchor="end">12%</text><text className="ch-axis" x="44" y="264" textAnchor="end">8%</text>
-                <text className="ch-axis" x="50" y="282">0D</text><text className="ch-axis" x="230" y="282" textAnchor="middle">10D</text><text className="ch-axis" x="500" y="282" textAnchor="end">25D · TIME TO CASH</text>
               </svg>
+              <span className="mono small muted">{x.source}</span>
             </div>
           </div>
           <div className="card">
             <div className="card-h">
-              <span className="h3">Why this</span>
+              <span className="h3">{x.why}</span>
               {approval === "approved" ? (
-                <span className="badge ok">Approved · executing</span>
+                <span className="badge ok">{x.approved}</span>
               ) : (
-                <Link className="btn btn-primary btn-sm" href="/approvals" onClick={() => choosePlan("fact-fwd")}>Send to approval</Link>
+                <Link className="btn btn-primary btn-sm" href="/approvals" onClick={() => choosePlan(DEFAULT_PLAN)}>{x.send}</Link>
               )}
             </div>
             <div className="card-b small" style={{ gap: 6 }}>
-              <span><span className="up">+</span> Funds in 48H — 17 days before the gap</span>
-              <span><span className="up">+</span> CLP 4.1M cheaper than default loan</span>
-              <span><span className="up">+</span> Forward hedges ¥1.2M remaining exposure</span>
-              <span><span className="up">+</span> No new long-term debt pre-harvest</span>
+              {x.pros.map((p) => <span key={p}><span className="up">+</span> {p}</span>)}
             </div>
-            <div className="card-h" style={{ borderTop: "1px solid var(--line)" }}><span className="h3">Why not the others</span></div>
+            <div className="card-h" style={{ borderTop: "1px solid var(--line)" }}><span className="h3">{x.whyNot}</span></div>
             <div className="card-b small" style={{ gap: 6 }}>
-              <span><span className="down">−</span> <b>Full factoring</b>: +CLP 2.4M, FX still open</span>
-              <span><span className="down">−</span> <b>FOGAPE</b>: cheapest, but arrives D21 (apply now for next season)</span>
-              <span><span className="down">−</span> <b>WC loan</b>: most expensive and late — fallback only</span>
+              {ROWS.filter((r) => !r.selected).map((r) => (
+                <span key={r.product}><span className="down">−</span> <b>{PRODUCT_SHORT[r.product] ?? r.product}</b>: {r.reason}</span>
+              ))}
             </div>
           </div>
         </div>

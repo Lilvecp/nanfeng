@@ -4,24 +4,26 @@ import { useEffect, useRef, useState } from "react";
 import { Topbar } from "@/components/topbar";
 import { SANDBOX_OTP } from "@/lib/desk-state";
 import { useT } from "@/lib/i18n";
+import { N, RECEIVABLE, S, clpM, usd } from "@/lib/scenario";
 
 type TLang = "es" | "en" | "zh";
 
+// Alert call script (ElevenLabs). Numbers from the quant engine's Cherry Crisis run.
 const TRANSCRIPT: Record<TLang, { at: number; text: string }[]> = {
   en: [
-    { at: 0, text: "Good morning. Cash: CLP 142.3 million." },
-    { at: 6, text: "Shanghai Fresh Imports is 45 days late — 81% risk for payroll on Oct 28." },
-    { at: 19, text: "A plan 4.1 million cheaper than a loan needs your approval." },
+    { at: 0, text: `Good morning. Cash today: CLP ${Math.round(S.openingCashClp / 1e6)} million.` },
+    { at: 6, text: `Shanghai Hongxin will pay ${N.delayDays} days late: ${N.pNeg} risk for the harvest payroll on December 30.` },
+    { at: 19, text: `A plan ${clpM(N.savings).replace("CLP ", "")} pesos cheaper than a bank loan needs your approval.` },
   ],
   es: [
-    { at: 0, text: "Buenos días. Caja: 142,3 millones de pesos." },
-    { at: 6, text: "Shanghai Fresh Imports lleva 45 días de atraso: 81% de riesgo para la nómina del 28 de octubre." },
-    { at: 19, text: "Un plan 4,1 millones más barato que un crédito espera tu aprobación." },
+    { at: 0, text: `Buenos días. Caja de hoy: ${Math.round(S.openingCashClp / 1e6)} millones de pesos.` },
+    { at: 6, text: `Shanghai Hongxin pagará con ${N.delayDays} días de atraso: ${N.pNeg} de riesgo para la nómina de cosecha del 30 de diciembre.` },
+    { at: 19, text: `Un plan ${(N.savings / 1e6).toFixed(1).replace(".", ",")} millones más barato que un crédito bancario espera tu aprobación.` },
   ],
   zh: [
-    { at: 0, text: "早上好。当前现金 1.423 亿智利比索。" },
-    { at: 6, text: "上海 Fresh Imports 已逾期45天，10月28日发薪有81%的风险。" },
-    { at: 19, text: "有一项比贷款便宜410万比索的方案等待您批准。" },
+    { at: 0, text: `早上好。今日现金 ${(S.openingCashClp / 1e8).toFixed(2)} 亿智利比索。` },
+    { at: 6, text: `上海鸿信将延迟${N.delayDays}天付款，12月30日采收工资发放有${N.pNeg}的风险。` },
+    { at: 19, text: `有一项比银行贷款便宜${clpM(N.savings, "zh").replace("智利比索", "比索")}的方案等待您批准。` },
   ],
 };
 const DURATION = 48;
@@ -66,14 +68,14 @@ export default function ChannelsPage() {
             <div className="phone"><div className="phone-screen" style={{ background: "var(--bg)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">NanFeng CFO</b><span className="mono small muted" style={{ fontSize: 10 }}>VERIFIED BUSINESS</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
-                <div className="bubble in" style={{ borderColor: "var(--crit)" }}><b className="down">ALERT</b> Shanghai Fresh Imports moved USD 180,000 by 45d. P=0.81 cash &lt; 0 on Oct 28 (payroll).<span className="t">09:09</span></div>
-                <div className="bubble in">PLAN factoring USD 120k (Banco Pacífico) + CNY fwd ¥1.2M. −CLP 4.1M vs loan. Reply APPROVE / WHY<span className="t">09:09</span></div>
-                <div className="bubble out">WHY<span className="t">09:12</span></div>
-                <div className="bubble in">Loan lands D21 (after payroll), costs 12.6M vs 8.5M.<span className="t">09:12</span></div>
-                <div className="bubble out">APPROVE<span className="t">09:13</span></div>
-                <div className="bubble in">OTP sent by SMS to •••• 4127. Reply with it. We never ask by phone.<span className="t">09:13</span></div>
-                <div className="bubble out"><span className="num">{SANDBOX_OTP}</span><span className="t">09:14</span></div>
-                <div className="bubble in" style={{ borderColor: "var(--ok)" }}><b className="up">EXECUTED</b> ref BP-77120 (sandbox). Funds ETA Oct 11.<span className="t">09:14</span></div>
+                <div className="bubble in" style={{ borderColor: "var(--crit)" }}><b className="down">ALERT</b> Shanghai Hongxin will pay {usd(N.overdueUsd)} {N.delayDays}d late. P={S.after.probNegByCrunch.toFixed(2)} cash &lt; 0 on {N.crunchDate} (payroll {clpM(N.payroll)}).<span className="t">10:13</span></div>
+                <div className="bubble in">PLAN {N.termDays}-day pre-export loan {usd(N.loanUsd)} ({N.lender}). Cost {clpM(N.planCost)} vs {clpM(N.defaultCost)} bank loan. Reply APPROVE / WHY<span className="t">10:15</span></div>
+                <div className="bubble out">WHY<span className="t">10:15</span></div>
+                <div className="bubble in">{N.savingsPct} cheaper, repaid in USD with the export proceeds. Cash stays above the buffer in {N.coverage} of 10,000 scenarios.<span className="t">10:15</span></div>
+                <div className="bubble out">APPROVE<span className="t">10:16</span></div>
+                <div className="bubble in">OTP sent by SMS to •••• 4127. Reply with it. We never ask by phone.<span className="t">10:16</span></div>
+                <div className="bubble out"><span className="num">{SANDBOX_OTP}</span><span className="t">10:16</span></div>
+                <div className="bubble in" style={{ borderColor: "var(--ok)" }}><b className="up">EXECUTED</b> ref PAE-14240 (sandbox). Funds on {N.crunchDate}.<span className="t">10:16</span></div>
               </div>
             </div></div>
           </figure>
@@ -83,10 +85,10 @@ export default function ChannelsPage() {
             <div className="phone"><div className="phone-screen" style={{ background: "var(--bg)" }} lang="zh-CN">
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">Huerto Austral · 应收账款</b><span className="small muted" style={{ fontSize: 11 }}>由南风代发 · 模拟</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
-                <span className="mono small muted" style={{ alignSelf: "center", fontSize: 11 }}>2026年10月09日 08:30</span>
-                <div className="bubble in">尊敬的上海鲜果进口有限公司财务部：您好！关于发票 INV-2026-0871（USD 180,000，原到期日 2026年08月25日），我们尚未收到款项。如已安排付款，请忽略本提醒；如需调整付款计划，欢迎随时沟通。谢谢！<span className="t">08:30</span></div>
-                <div className="bubble out">收到，我们会在本周内确认付款时间。<span className="t">10:02</span></div>
-                <div className="bubble in">非常感谢！确认后我们将同步更新对账单。<span className="t">10:03</span></div>
+                <span className="mono small muted" style={{ alignSelf: "center", fontSize: 11 }}>2026年12月11日 10:20</span>
+                <div className="bubble in">尊敬的上海鸿信鲜果进口有限公司财务部：您好！感谢告知发票 {RECEIVABLE.id}（USD 180,000，原到期日 2026年12月18日）将延迟{N.delayDays}天付款。请确认新的付款日期；如可提前支付部分款项，欢迎随时沟通。谢谢！<span className="t">10:20</span></div>
+                <div className="bubble out">收到，我们会在本周内确认付款时间。<span className="t">11:02</span></div>
+                <div className="bubble in">非常感谢！确认后我们将同步更新对账单。<span className="t">11:03</span></div>
               </div>
             </div></div>
           </figure>

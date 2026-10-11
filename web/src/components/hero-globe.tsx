@@ -6,6 +6,7 @@ import type { GlobeMethods } from "react-globe.gl";
 import { MeshPhongMaterial } from "three";
 import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
+import { N, S, clpM, shortDate, usd } from "@/lib/scenario";
 
 // three.js needs the browser: load the globe client-side only.
 const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
@@ -82,27 +83,28 @@ function story(s: number): Frame {
 type Step = { title: string; body: string; stat: string };
 const STEP_TONE = ["navy", "crit", "brass", "ok", "navy"] as const;
 const STEP_START = [0, 2, 8.2, 10.2, 12.4];
+const LENDERS = new Set(S.arena.map((a) => a.lender)).size;
 const STEPS: Record<Lang, Step[]> = {
   en: [
-    { title: "An invoice is due", body: "Shanghai Fresh Imports owes Huerto Austral USD 180,000 for the last shipment. It should land in Santiago today.", stat: "USD 180,000 · due today" },
-    { title: "The payment is 45 days late", body: "Payroll can't wait. NanFeng re-runs 10,000 scenarios: 81% chance cash goes negative on day 19, the harvest payroll.", stat: "81% risk · day 19 · −CLP 77M" },
-    { title: "NanFeng finds the cheapest fix", body: "Four quotes from three banks. Partial factoring plus a CNY forward closes the gap, CLP 4.1M cheaper than a bank loan.", stat: "Cash in 48 h · −CLP 4.1M cost" },
+    { title: "An invoice is due", body: `Shanghai Hongxin owes Huerto Austral ${usd(N.overdueUsd)} for the last shipment. It should land in Santiago on ${shortDate(S.event.due_date)}.`, stat: `${usd(N.overdueUsd)} · due ${shortDate(S.event.due_date)}` },
+    { title: `The payment will be ${N.delayDays} days late`, body: `Payroll can't wait. NanFeng re-runs 10,000 scenarios: ${N.pNeg} chance cash goes negative on day ${N.crunchDay}, the harvest payroll.`, stat: `${N.pNeg} risk · day ${N.crunchDay} · need ${clpM(S.need.amount_clp)}` },
+    { title: "NanFeng finds the cheapest fix", body: `${S.arena.length} quotes from ${LENDERS} lenders. A ${N.termDays}-day USD pre-export loan closes the gap, ${N.savingsPct} cheaper than a bank loan.`, stat: `Cash on payroll day · ${clpM(N.planCost)} cost` },
     { title: "The owner approves with one code", body: "A six-digit code on WhatsApp. Payroll is covered and every step is hash-chained and anchored on-chain.", stat: "L3 · OTP · audited" },
-    { title: "Day 45: the importer pays", body: "The original payment finally crosses the Pacific and repays the bank. Cash never went negative.", stat: "Gap closed · 0 days short" },
+    { title: "Day 45: the importer pays", body: "The delayed payment finally crosses the Pacific and the loan is repaid in USD. Cash never went negative.", stat: `Gap closed in ${N.coverage} of scenarios` },
   ],
   es: [
-    { title: "Hay una factura por cobrar", body: "Shanghai Fresh Imports le debe a Huerto Austral USD 180.000 por el último embarque. Debería llegar hoy a Santiago.", stat: "USD 180.000 · vence hoy" },
-    { title: "El pago se atrasa 45 días", body: "Los sueldos no esperan. NanFeng corre 10.000 escenarios: 81% de probabilidad de caja negativa el día 19, el pago de la cosecha.", stat: "81% de riesgo · día 19 · −CLP 77M" },
-    { title: "NanFeng encuentra la solución más barata", body: "Cuatro cotizaciones de tres bancos. Factoring parcial más un forward CNY cierran la brecha, CLP 4,1M más barato que un crédito.", stat: "Caja en 48 h · −CLP 4,1M de costo" },
+    { title: "Hay una factura por cobrar", body: `Shanghai Hongxin le debe a Huerto Austral ${usd(N.overdueUsd, "es")} por el último embarque. Debería llegar a Santiago el ${shortDate(S.event.due_date, "es")}.`, stat: `${usd(N.overdueUsd, "es")} · vence el ${shortDate(S.event.due_date, "es")}` },
+    { title: `El pago llegará ${N.delayDays} días tarde`, body: `Los sueldos no esperan. NanFeng corre 10.000 escenarios: ${N.pNeg} de probabilidad de caja negativa el día ${N.crunchDay}, el pago de la cosecha.`, stat: `${N.pNeg} de riesgo · día ${N.crunchDay} · faltan ${clpM(S.need.amount_clp, "es")}` },
+    { title: "NanFeng encuentra la solución más barata", body: `${S.arena.length} cotizaciones de ${LENDERS} prestamistas. Un crédito de pre-exportación en USD a ${N.termDays} días cierra la brecha, ${N.savingsPct} más barato que un crédito bancario.`, stat: `Caja el día de la nómina · costo ${clpM(N.planCost, "es")}` },
     { title: "El dueño aprueba con un código", body: "Un código de seis dígitos por WhatsApp. Los sueldos quedan cubiertos y cada paso queda encadenado y anclado on-chain.", stat: "L3 · OTP · auditado" },
-    { title: "Día 45: el importador paga", body: "El pago original por fin cruza el Pacífico y le devuelve el adelanto al banco. La caja nunca quedó negativa.", stat: "Brecha cerrada · 0 días en rojo" },
+    { title: "Día 45: el importador paga", body: "El pago atrasado por fin cruza el Pacífico y el crédito se paga en dólares. La caja nunca quedó negativa.", stat: `Brecha cerrada en el ${N.coverage} de los escenarios` },
   ],
   zh: [
-    { title: "一张发票到期", body: "上海 Fresh Imports 欠 Huerto Austral 180,000 美元货款，今天应汇到圣地亚哥。", stat: "180,000 美元 · 今日到期" },
-    { title: "付款延迟45天", body: "工资不能等。南风重新运行10,000次模拟：第19天（采收工资日）现金为负的概率为81%。", stat: "风险81% · 第19天 · −7,700万比索" },
-    { title: "南风找到最低成本方案", body: "3家银行的4份报价。部分保理加人民币远期补足缺口，比银行贷款便宜410万比索。", stat: "48小时到账 · 节省410万比索" },
+    { title: "一张发票即将到期", body: `上海鸿信欠 Huerto Austral ${usd(N.overdueUsd, "zh")}货款，应于${shortDate(S.event.due_date, "zh")}汇到圣地亚哥。`, stat: `${usd(N.overdueUsd, "zh")} · ${shortDate(S.event.due_date, "zh")}到期` },
+    { title: `付款将延迟${N.delayDays}天`, body: `工资不能等。南风重新运行10,000次模拟：第${N.crunchDay}天（采收工资日）现金为负的概率为${N.pNeg}。`, stat: `风险${N.pNeg} · 第${N.crunchDay}天 · 缺口${clpM(S.need.amount_clp, "zh").replace("智利比索", "比索")}` },
+    { title: "南风找到最低成本方案", body: `${LENDERS}家贷款方的${S.arena.length}份报价。${N.termDays}天期美元出口前融资补足缺口，比银行贷款便宜${N.savingsPct}。`, stat: `发薪日到账 · 成本${clpM(N.planCost, "zh").replace("智利比索", "比索")}` },
     { title: "企业主一键批准", body: "通过 WhatsApp 输入6位验证码。工资得到保障，每一步都上链存证。", stat: "L3 · 验证码 · 可审计" },
-    { title: "第45天：进口商付款", body: "原始货款终于跨过太平洋，偿还银行垫款。现金从未为负。", stat: "缺口已补足 · 0天赤字" },
+    { title: "第45天：进口商付款", body: "延迟的货款终于跨过太平洋，贷款以美元偿还。现金从未为负。", stat: `${N.coverage}的情景中缺口已补足` },
   ],
 };
 
@@ -287,8 +289,8 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
         </div>
         <div ref={scl} className="globe-scl" data-state="idle" aria-hidden="true">
           <span className="ring" />
-          <span className="tag risk">D19 · −CLP 77M</span>
-          <span className="tag fixed">+CLP 108.9M · 48H</span>
+          <span className="tag risk">D{N.crunchDay} · −{clpM(S.need.amount_clp)}</span>
+          <span className="tag fixed">+USD {(N.loanUsd / 1000).toFixed(1)}K · PAE</span>
         </div>
       </div>
       <aside className={`globe-callout tone-${STEP_TONE[shown]}`} aria-live="polite">

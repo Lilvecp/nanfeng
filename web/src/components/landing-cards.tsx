@@ -17,7 +17,7 @@ const CARDS: Card[] = [
   {
     n: "02 · DECIDE",
     title: ["Cheapest", "money"],
-    body: "Factoring, FOGAPE-backed loans, working-capital lines and CNY forwards, ranked by real annual cost, speed and how much of the gap they cover. The optimizer picks the mix.",
+    body: "Pre-export loans, factoring, FOGAPE-backed loans, credit lines and CNY forwards, ranked by real annual cost, speed and how much of the gap they cover. The optimizer picks the mix.",
     glyph: <svg width="56" height="56" viewBox="0 0 56 56"><path d="M8 44h40M14 44V24M28 44V14M42 44V30" stroke="currentColor" strokeWidth="3" fill="none" /></svg>,
   },
   {
