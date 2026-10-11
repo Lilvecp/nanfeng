@@ -12,7 +12,7 @@ type Step = { n: number; step: string; tool: string; tier: 0 | 1 | 3; model: str
 const STEPS: Step[] = [
   { n: 1, step: "Read delay notice via OCR", tool: "ocr.extract", tier: 0, model: "Mistral OCR", left: 0, width: 11.2, latency: "2.8s", cost: "0.004" },
   { n: 2, step: "Re-ran 10,000 scenarios", tool: "montecarlo.run", tier: 0, model: "— numerical", left: 12, width: 16.8, latency: "4.2s", cost: "0.000" },
-  { n: 3, step: `Quoted ${S.arena.length} financing options`, tool: "bank.quote×4", tier: 1, model: "Qwen3-32B", left: 29.6, width: 24.4, latency: "6.1s", cost: "0.011" },
+  { n: 3, step: `Quoted ${S.arena.length} financing options`, tool: `bank.quote×${S.arena.length}`, tier: 1, model: "Qwen3-32B", left: 29.6, width: 24.4, latency: "6.1s", cost: "0.011" },
   { n: 4, step: "Optimizer selected plan", tool: "optimize_plan", tier: 0, model: "MILP OR-Tools CBC", left: 54.4, width: 3.6, latency: `${S.plan.solveSeconds.toFixed(1)}s`, cost: "0.000" },
 ];
 
@@ -55,7 +55,7 @@ export default function MissionPage() {
 
       <div className="content">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}><h1 className="h1">{t("nav.mission")}</h1><span className="mono small muted">TRIGGER email:shanghai-hongxin · START 10:12:41.032 · ELAPSED 25.1S · COST USD 0.015</span></div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}><h1 className="h1">{t("tab.agent")}</h1><span className="mono small muted">TRIGGER email:shanghai-hongxin · START 10:12:41.032 · ELAPSED 25.1S · COST USD 0.015</span></div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-secondary" type="button" disabled={killed} aria-pressed={paused} onClick={() => { setPaused((p) => !p); notify(paused ? "Run resumed" : "Run paused · no new tool calls"); }}>{paused ? "Resume" : "Pause"} <span className="key">P</span></button>
             {killed ? (

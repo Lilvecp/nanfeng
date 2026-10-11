@@ -26,6 +26,26 @@ const NAME: Record<string, Record<Lang, string>> = {
 };
 const name = (p: Preset, lang: Lang) => NAME[p.preset]?.[lang] ?? p.preset;
 
+// The engine writes headlines and plan actions in English; these patterns give the ES / 中文 copy.
+function headline(h: string, lang: Lang) {
+  if (lang === "en") return h;
+  let m = h.match(/^(\d+)% probability of negative cash in (\d+) days \((.+)\)$/);
+  if (m) return lang === "es" ? `${m[1]}% de probabilidad de caja negativa en ${m[2]} días (${m[3]})` : `${m[2]}天内（${m[3]}）现金为负的概率为${m[1]}%`;
+  m = h.match(/^(\d+)% probability of negative cash within 90 days$/);
+  if (m) return lang === "es" ? `${m[1]}% de probabilidad de caja negativa en 90 días` : `90天内现金为负的概率为${m[1]}%`;
+  return h;
+}
+function action(a: string, lang: Lang) {
+  if (lang === "en") return a;
+  let m = a.match(/^Borrow USD ([\d,]+) for (\d+) days from Pre-export loan in USD \(PAE\)$/);
+  if (m) return lang === "es" ? `Crédito de pre-exportación (PAE) por USD ${m[1].replace(/,/g, ".")} a ${m[2]} días` : `出口前融资（PAE）${m[1]} 美元，期限${m[2]}天`;
+  m = a.match(/^Factor (\d+)% of (\S+) with (.+)$/);
+  if (m) return lang === "es" ? `Factoring del ${m[1]}% de la ${m[2]} (${m[3].includes("Fintech") ? "fintech" : "banco"})` : `将 ${m[2]} 的${m[1]}%进行保理（${m[3].includes("Fintech") ? "金融科技" : "银行"}）`;
+  m = a.match(/^Extend (\d+)% of (\S+) by (\d+) days via Confirming/);
+  if (m) return lang === "es" ? `Postergar ${m[3]} días el ${m[1]}% del pago ${m[2]} (confirming)` : `通过 Confirming 将付款 ${m[2]} 的${m[1]}%延期${m[3]}天`;
+  return a;
+}
+
 const TX = {
   en: { mode: "Mode", sim: "SIMULATION · NO EXECUTION", presets: "Scenarios", price: "Price financing", pNeg: "P(cash<0) · 90D", pBuf: "P(below buffer)", plan: "Plan cost", save: "Saved vs bank loan", none: "no bank-only plan",
     chart: "Probability of negative cash · every scenario", table: "Base → scenario", metric: "Metric", base: "Base", scen: "Scen", low: "P10 low point", crunch: "Crunch date", actions: "Optimizer plan for this scenario",
@@ -71,7 +91,7 @@ export default function ScenarioPage() {
         </div>
 
         <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
-          <div className="kpi"><span className="kpi-l">{x.pNeg}</span><span className="kpi-v" style={{ color: color(p.probNeg90d) }}>{pct(p.probNeg90d)}</span><span className="mono small muted">{p.headline}</span></div>
+          <div className="kpi"><span className="kpi-l">{x.pNeg}</span><span className="kpi-v" style={{ color: color(p.probNeg90d) }}>{pct(p.probNeg90d)}</span><span className="mono small muted">{headline(p.headline, lang)}</span></div>
           <div className="kpi"><span className="kpi-l">{x.pBuf}</span><span className="kpi-v">{pct(p.probBelowBuffer90d)}</span></div>
           <div className="kpi"><span className="kpi-l">{x.plan}</span><span className="kpi-v">{clpM(p.planCostClp, lang)}</span></div>
           <div className="kpi"><span className="kpi-l">{x.save}</span><span className="kpi-v up">{p.savingsPct !== null ? pct(p.savingsPct) : "—"}</span><span className="mono small muted">{p.defaultCostClp !== null ? clpM(p.defaultCostClp, lang) : x.none}</span></div>
@@ -111,7 +131,7 @@ export default function ScenarioPage() {
             </table></div>
             <div className="card-h" style={{ borderTop: "1px solid var(--line)" }}><span className="h3">{x.actions}</span></div>
             <div className="card-b mono small" style={{ gap: 6 }}>
-              {p.planActions.map((a) => <span key={a}>→ {a}</span>)}
+              {p.planActions.map((a) => <span key={a}>→ {action(a, lang)}</span>)}
             </div>
             <div className="card-b" style={{ borderTop: "1px solid var(--line)" }}>
               <span className="mono small muted">{x.note}</span>

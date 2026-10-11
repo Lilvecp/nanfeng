@@ -104,9 +104,8 @@ export default function CockpitPage() {
   if (view === "detail") return <CockpitDetail />;
   return (
     <>
-      <Topbar>
+      <Topbar lead={<ViewSwitch />}>
         <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
-        <ViewSwitch />
       </Topbar>
       <div className="content"><OwnerView /></div>
     </>
@@ -132,12 +131,11 @@ function CockpitDetail() {
 
   return (
     <>
-      <Topbar>
+      <Topbar lead={<ViewSwitch />}>
         <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
         <div className="tick"><span className="l">USD/CLP</span><span className="v">{S.fx.clp_per_usd.toFixed(2)}</span></div>
         <div className="tick"><span className="l">USD/CNY</span><span className="v">{S.fx.cny_per_usd.toFixed(4)}</span></div>
         <span className="status"><span className="dot" />{x.monitoring} · {resolved ? 6 : 5} {x.actions}</span>
-        <ViewSwitch />
       </Topbar>
 
       <div className="content">
