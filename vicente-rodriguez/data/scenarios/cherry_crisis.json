@@ -1,0 +1,300 @@
+{
+  "id": "huerto-austral",
+  "name": "Huerto Austral Export SpA",
+  "synthetic": true,
+  "notes": "Fictional company for the Cherry Crisis demo. All figures are synthetic and must be confirmed with Valentín. This is the state AFTER the Shanghai late-payment notice (10:12); the state before it is the same file run with the override ignore_announced_delays=true.",
+  "as_of": "2026-12-11",
+  "horizon_days": 90,
+  "opening_cash_clp": 176000000,
+  "min_cash_buffer_clp": 25000000,
+  "annual_sales_usd": 3800000,
+  "collateral_available_clp": 150000000,
+  "price_volatility": 0.12,
+  "fx_spot": null,
+  "customers": [
+    {
+      "id": "C-SHA",
+      "name": "Shanghai Hongxin Fresh Fruit Import Co. (fictional)",
+      "country": "Mainland China",
+      "currency": "USD",
+      "delay_median_days": 6,
+      "delay_sigma": 0.5,
+      "p_default": 0.01
+    },
+    {
+      "id": "C-GZ",
+      "name": "Guangzhou Lingnan Produce Trading Co. (fictional)",
+      "country": "Mainland China",
+      "currency": "CNY",
+      "delay_median_days": 8,
+      "delay_sigma": 0.6,
+      "p_default": 0.01
+    },
+    {
+      "id": "C-HK",
+      "name": "Kowloon Premium Fruits Ltd. (fictional)",
+      "country": "Hong Kong SAR",
+      "currency": "USD",
+      "delay_median_days": 2,
+      "delay_sigma": 0.5,
+      "p_default": 0.0
+    },
+    {
+      "id": "C-MIA",
+      "name": "Miami Orchard Distributors LLC (fictional)",
+      "country": "United States",
+      "currency": "USD",
+      "delay_median_days": 10,
+      "delay_sigma": 0.7,
+      "p_default": 0.02
+    }
+  ],
+  "receivables": [
+    {
+      "id": "INV-2026-118",
+      "customer_id": "C-SHA",
+      "currency": "USD",
+      "amount": 180000,
+      "due_date": "2026-12-18",
+      "announced_delay_days": 45,
+      "factoring_eligible": true
+    },
+    {
+      "id": "INV-2026-115",
+      "customer_id": "C-HK",
+      "currency": "USD",
+      "amount": 95000,
+      "due_date": "2026-12-17",
+      "factoring_eligible": true,
+      "lc_backed": true
+    },
+    {
+      "id": "INV-2026-121",
+      "customer_id": "C-GZ",
+      "currency": "CNY",
+      "amount": 820000,
+      "due_date": "2027-01-14",
+      "factoring_eligible": true
+    },
+    {
+      "id": "INV-2026-124",
+      "customer_id": "C-MIA",
+      "currency": "USD",
+      "amount": 60000,
+      "due_date": "2027-01-08",
+      "factoring_eligible": true
+    },
+    {
+      "id": "INV-2026-109",
+      "customer_id": "C-SHA",
+      "currency": "USD",
+      "amount": 150000,
+      "due_date": "2027-01-12",
+      "factoring_eligible": true
+    },
+    {
+      "id": "INV-2026-112",
+      "customer_id": "C-GZ",
+      "currency": "CNY",
+      "amount": 700000,
+      "due_date": "2027-01-15",
+      "factoring_eligible": true
+    }
+  ],
+  "shipments": [
+    {
+      "id": "SHP-131",
+      "customer_id": "C-SHA",
+      "currency": "USD",
+      "ship_date": "2026-12-14",
+      "expected_amount": 420000,
+      "advance_pct": 0.15,
+      "terms_days": 75
+    },
+    {
+      "id": "SHP-132",
+      "customer_id": "C-GZ",
+      "currency": "CNY",
+      "ship_date": "2026-12-21",
+      "expected_amount": 2600000,
+      "advance_pct": 0.15,
+      "terms_days": 75
+    },
+    {
+      "id": "SHP-133",
+      "customer_id": "C-SHA",
+      "currency": "USD",
+      "ship_date": "2027-01-04",
+      "expected_amount": 380000,
+      "advance_pct": 0.15,
+      "terms_days": 75
+    },
+    {
+      "id": "SHP-134",
+      "customer_id": "C-HK",
+      "currency": "USD",
+      "ship_date": "2027-01-11",
+      "expected_amount": 150000,
+      "advance_pct": 0.3,
+      "terms_days": 30
+    }
+  ],
+  "payables": [
+    {
+      "id": "P-01",
+      "name": "Monthly PPM tax installment",
+      "category": "tax",
+      "currency": "CLP",
+      "amount": 6000000,
+      "date": "2026-12-14"
+    },
+    {
+      "id": "P-02",
+      "name": "Packaging supplier (boxes, liners)",
+      "category": "supplier",
+      "currency": "CLP",
+      "amount": 34000000,
+      "date": "2026-12-15",
+      "confirming_eligible": true
+    },
+    {
+      "id": "P-03",
+      "name": "Bank loan installment",
+      "category": "debt_service",
+      "currency": "CLP",
+      "amount": 18500000,
+      "date": "2026-12-15"
+    },
+    {
+      "id": "P-04",
+      "name": "Ocean freight and reefer containers",
+      "category": "freight",
+      "currency": "USD",
+      "amount": 42000,
+      "date": "2026-12-18"
+    },
+    {
+      "id": "P-05",
+      "name": "Packing house services",
+      "category": "supplier",
+      "currency": "CLP",
+      "amount": 52000000,
+      "date": "2026-12-21",
+      "confirming_eligible": true
+    },
+    {
+      "id": "P-06",
+      "name": "Energy, fuel and irrigation",
+      "category": "utilities",
+      "currency": "CLP",
+      "amount": 9500000,
+      "date": "2026-12-28"
+    },
+    {
+      "id": "P-07",
+      "name": "Harvest payroll (December)",
+      "category": "payroll",
+      "currency": "CLP",
+      "amount": 238000000,
+      "date": "2026-12-30"
+    },
+    {
+      "id": "P-08",
+      "name": "Monthly PPM tax installment",
+      "category": "tax",
+      "currency": "CLP",
+      "amount": 5500000,
+      "date": "2027-01-12"
+    },
+    {
+      "id": "P-09",
+      "name": "Bank loan installment",
+      "category": "debt_service",
+      "currency": "CLP",
+      "amount": 18500000,
+      "date": "2027-01-15"
+    },
+    {
+      "id": "P-10",
+      "name": "Packaging supplier (boxes, liners)",
+      "category": "supplier",
+      "currency": "CLP",
+      "amount": 26000000,
+      "date": "2027-01-15",
+      "confirming_eligible": true
+    },
+    {
+      "id": "P-11",
+      "name": "Ocean freight and reefer containers",
+      "category": "freight",
+      "currency": "USD",
+      "amount": 36000,
+      "date": "2027-01-18"
+    },
+    {
+      "id": "P-12",
+      "name": "Packing house services",
+      "category": "supplier",
+      "currency": "CLP",
+      "amount": 44000000,
+      "date": "2027-01-20",
+      "confirming_eligible": true
+    },
+    {
+      "id": "P-13",
+      "name": "Energy, fuel and irrigation",
+      "category": "utilities",
+      "currency": "CLP",
+      "amount": 9500000,
+      "date": "2027-01-28"
+    },
+    {
+      "id": "P-14",
+      "name": "Harvest payroll (January)",
+      "category": "payroll",
+      "currency": "CLP",
+      "amount": 205000000,
+      "date": "2027-01-29"
+    },
+    {
+      "id": "P-15",
+      "name": "Monthly PPM tax installment",
+      "category": "tax",
+      "currency": "CLP",
+      "amount": 5000000,
+      "date": "2027-02-12"
+    },
+    {
+      "id": "P-16",
+      "name": "Bank loan installment",
+      "category": "debt_service",
+      "currency": "CLP",
+      "amount": 18500000,
+      "date": "2027-02-15"
+    },
+    {
+      "id": "P-17",
+      "name": "Packing house services",
+      "category": "supplier",
+      "currency": "CLP",
+      "amount": 20000000,
+      "date": "2027-02-19"
+    },
+    {
+      "id": "P-18",
+      "name": "Energy, fuel and irrigation",
+      "category": "utilities",
+      "currency": "CLP",
+      "amount": 8000000,
+      "date": "2027-02-26"
+    },
+    {
+      "id": "P-19",
+      "name": "Harvest payroll (February)",
+      "category": "payroll",
+      "currency": "CLP",
+      "amount": 128000000,
+      "date": "2027-02-26"
+    }
+  ]
+}

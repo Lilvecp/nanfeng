@@ -3,24 +3,25 @@
 import Link from "next/link";
 import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
+import { N, S, clpM } from "@/lib/scenario";
 
 // Final call to action: headline + demo button on the left, a compact preview of the
 // Cherry Crisis run on the right (gap detected → options evaluated → owner approves).
 const STAGES: Record<Lang, { label: string; meta: string }[]> = {
   en: [
-    { label: "Cash gap detected", meta: "Day 19 · 81% risk · −CLP 77M" },
-    { label: "Financing options evaluated", meta: "4 quotes · best at 11.8% EAC" },
-    { label: "Owner approves action", meta: "One-time code · cash in 48 h" },
+    { label: "Cash gap detected", meta: `Day ${N.crunchDay} · ${N.pNeg} risk · −${clpM(S.need.amount_clp)}` },
+    { label: "Financing options evaluated", meta: `${S.arena.length} quotes · plan ${N.savingsPct} cheaper than a bank loan` },
+    { label: "Owner approves action", meta: "One-time code · cash on payroll day" },
   ],
   es: [
-    { label: "Brecha de caja detectada", meta: "Día 19 · 81% de riesgo · −CLP 77M" },
-    { label: "Opciones de financiamiento evaluadas", meta: "4 cotizaciones · la mejor a 11,8% CAE" },
-    { label: "El dueño aprueba la acción", meta: "Código de un uso · caja en 48 h" },
+    { label: "Brecha de caja detectada", meta: `Día ${N.crunchDay} · ${N.pNeg} de riesgo · −${clpM(S.need.amount_clp, "es")}` },
+    { label: "Opciones de financiamiento evaluadas", meta: `${S.arena.length} cotizaciones · plan ${N.savingsPct} más barato que un crédito` },
+    { label: "El dueño aprueba la acción", meta: "Código de un uso · caja el día de la nómina" },
   ],
   zh: [
-    { label: "发现现金缺口", meta: "第19天 · 风险81% · −7,700万比索" },
-    { label: "评估融资方案", meta: "4份报价 · 最低年化11.8%" },
-    { label: "企业主批准执行", meta: "一次性验证码 · 48小时到账" },
+    { label: "发现现金缺口", meta: `第${N.crunchDay}天 · 风险${N.pNeg} · −${clpM(S.need.amount_clp, "zh").replace("智利比索", "比索")}` },
+    { label: "评估融资方案", meta: `${S.arena.length}份报价 · 比银行贷款便宜${N.savingsPct}` },
+    { label: "企业主批准执行", meta: "一次性验证码 · 发薪日到账" },
   ],
 };
 

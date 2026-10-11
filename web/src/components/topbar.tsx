@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useDesk } from "@/lib/desk-state";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
+import { sectionOf } from "@/lib/sections";
 import { useT } from "@/lib/i18n";
 
 const LANGS: { id: Lang; label: string }[] = [
@@ -45,16 +48,33 @@ function ApiBadge() {
   return <span className={`badge${mode === "live" ? " ok" : ""}`} title={title}>{label}</span>;
 }
 
-/** Ticker row on top of every desk screen; each screen passes its own ticks. */
-export function Topbar({ children, controls = true }: { children: React.ReactNode; controls?: boolean }) {
+/** Tabs of the current section (e.g. Financing → Options · What if…), from lib/sections.ts. */
+function SectionTabs() {
+  const pathname = usePathname();
+  const t = useT();
+  const section = sectionOf(pathname);
+  if (!section?.tabs) return null;
+  return (
+    <nav className="ptabs" aria-label={t(section.key)}>
+      {section.tabs.map((tab) => (
+        <Link key={tab.href} href={tab.href} className={pathname === tab.href ? "on" : undefined} aria-current={pathname === tab.href ? "page" : undefined}>{t(tab.key)}</Link>
+      ))}
+    </nav>
+  );
+}
+
+/**
+ * Top bar of every desk screen: the section's tabs (or `lead`) on the left, up to a few key
+ * figures passed by the screen, and language / theme on the right. One row; figures that do not
+ * fit are hidden on narrow screens instead of wrapping over the content.
+ */
+export function Topbar({ children, controls = true, lead }: { children?: React.ReactNode; controls?: boolean; lead?: React.ReactNode }) {
   return (
     <div className="topbar">
-      <div className="tick">
-        <span className="v" style={{ fontFamily: "var(--f-body)" }}>Huerto Austral Export SpA</span>
-      </div>
-      {children}
+      {lead ?? <SectionTabs />}
+      <div className="topbar-ticks">{children}</div>
       {controls && (
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="topbar-ctl">
           <ApiBadge />
           <LangSwitch />
           <ThemeToggle />

@@ -1,0 +1,175 @@
+{
+ "company": "Huerto Austral Export SpA (fictional)",
+ "as_of": "2026-12-11",
+ "synthetic": true,
+ "accounts": [
+  {
+   "id": "ACC-CLP",
+   "name": "Operating account CLP",
+   "currency": "CLP",
+   "balance": 176000000
+  },
+  {
+   "id": "ACC-USD",
+   "name": "Export proceeds USD",
+   "currency": "USD",
+   "balance": 0
+  },
+  {
+   "id": "ACC-CNY",
+   "name": "Export proceeds CNY",
+   "currency": "CNY",
+   "balance": 0
+  }
+ ],
+ "receivables": [
+  {
+   "id": "INV-2026-118",
+   "customer": "Shanghai Hongxin Fresh Fruit Import Co. (fictional)",
+   "currency": "USD",
+   "amount": 180000,
+   "due_date": "2026-12-18",
+   "announced_delay_days": 45,
+   "factoring_eligible": true
+  },
+  {
+   "id": "INV-2026-115",
+   "customer": "Kowloon Premium Fruits Ltd. (fictional)",
+   "currency": "USD",
+   "amount": 95000,
+   "due_date": "2026-12-17",
+   "announced_delay_days": 0,
+   "factoring_eligible": true
+  },
+  {
+   "id": "INV-2026-121",
+   "customer": "Guangzhou Lingnan Produce Trading Co. (fictional)",
+   "currency": "CNY",
+   "amount": 820000,
+   "due_date": "2027-01-14",
+   "announced_delay_days": 0,
+   "factoring_eligible": true
+  },
+  {
+   "id": "INV-2026-124",
+   "customer": "Miami Orchard Distributors LLC (fictional)",
+   "currency": "USD",
+   "amount": 60000,
+   "due_date": "2027-01-08",
+   "announced_delay_days": 0,
+   "factoring_eligible": true
+  },
+  {
+   "id": "INV-2026-109",
+   "customer": "Shanghai Hongxin Fresh Fruit Import Co. (fictional)",
+   "currency": "USD",
+   "amount": 150000,
+   "due_date": "2027-01-12",
+   "announced_delay_days": 0,
+   "factoring_eligible": true
+  },
+  {
+   "id": "INV-2026-112",
+   "customer": "Guangzhou Lingnan Produce Trading Co. (fictional)",
+   "currency": "CNY",
+   "amount": 700000,
+   "due_date": "2027-01-15",
+   "announced_delay_days": 0,
+   "factoring_eligible": true
+  }
+ ],
+ "lenders": [
+  {
+   "id": "LEN-FACTOR",
+   "name": "Banco Andino (fictional) · Export factoring, non-recourse (bank)",
+   "product": "factoring",
+   "annual_rate": 0.18,
+   "advance_pct": 0.85,
+   "fee_pct": 0.0025,
+   "catalog_product_id": "FACT-BANK"
+  },
+  {
+   "id": "LEN-FINTECH",
+   "name": "Cordillera Factoring (fictional fintech) · Fintech factoring, with recourse (fast onboarding)",
+   "product": "factoring",
+   "annual_rate": 0.21,
+   "advance_pct": 0.9,
+   "fee_pct": 0.005,
+   "catalog_product_id": "FACT-FINTECH"
+  },
+  {
+   "id": "LEN-LC",
+   "name": "Banco Andino (fictional) · Letter of credit discounting",
+   "product": "factoring",
+   "annual_rate": 0.102,
+   "advance_pct": 0.95,
+   "fee_pct": 0.002,
+   "catalog_product_id": "LC-DISC"
+  },
+  {
+   "id": "LEN-CONFIRMING",
+   "name": "Banco del Pacífico Sur (fictional) · Confirming (supplier payment extension)",
+   "product": "confirming",
+   "annual_rate": 0.132,
+   "advance_pct": 1.0,
+   "fee_pct": 0.0015,
+   "catalog_product_id": "CONF-BANK"
+  },
+  {
+   "id": "LEN-ANDINO",
+   "name": "Banco Andino (fictional) · Working capital loan (default bank credit)",
+   "product": "wc_loan",
+   "annual_rate": 0.14,
+   "advance_pct": 1.0,
+   "fee_pct": 0.005,
+   "catalog_product_id": "WC-BANK"
+  },
+  {
+   "id": "LEN-FOGAPE",
+   "name": "Banco del Pacífico Sur (fictional) · FOGAPE-guaranteed working capital loan",
+   "product": "fogape",
+   "annual_rate": 0.115,
+   "advance_pct": 1.0,
+   "fee_pct": 0.003,
+   "catalog_product_id": "FOGAPE"
+  },
+  {
+   "id": "LEN-PAE",
+   "name": "Banco del Pacífico Sur (fictional) · Pre-export loan in USD (PAE)",
+   "product": "wc_loan",
+   "annual_rate": 0.068,
+   "advance_pct": 1.0,
+   "fee_pct": 0.003,
+   "catalog_product_id": "PAE-USD"
+  },
+  {
+   "id": "LEN-OVERDRAFT",
+   "name": "Banco Andino (fictional) · Credit line / overdraft",
+   "product": "wc_loan",
+   "annual_rate": 0.252,
+   "advance_pct": 1.0,
+   "fee_pct": 0.0,
+   "catalog_product_id": "OVERDRAFT"
+  },
+  {
+   "id": "LEN-FXDESK",
+   "name": "Banco del Pacífico Sur (fictional) · CNY forward (sell CNY, cash-settled)",
+   "product": "forward",
+   "annual_rate": 0.0,
+   "advance_pct": 1.0,
+   "fee_pct": 0.0035,
+   "catalog_product_id": "FWD-CNY"
+  }
+ ],
+ "fx_rates_clp": {
+  "USD": 983.84,
+  "CNY": 146.7586,
+  "CLP": 1.0
+ },
+ "source": {
+  "tool": "sandbox_seed",
+  "engine": "nanfeng_quant 0.3.0",
+  "deterministic": true,
+  "catalog_version": "0.2.0"
+ }
+}
