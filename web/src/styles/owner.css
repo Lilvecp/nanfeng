@@ -106,3 +106,23 @@
   .side.open .workspace{display:flex}
 }
 @media (max-width:760px){.owner-foot .btn{white-space:normal;height:auto;padding:10px 16px;text-align:left;max-width:100%}}
+
+/* Greeting + closable notices */
+.owner-greet{display:flex;flex-direction:column;gap:6px;padding:6px 2px 2px}
+.owner-greet h1{margin:0;font-family:var(--f-display);font-size:clamp(26px,3.4vw,36px);font-weight:600;line-height:1.1;letter-spacing:-.01em}
+.owner-greet p{margin:0;font-size:clamp(15px,1.5vw,18px);line-height:1.45;color:var(--muted);max-width:64ch}
+.owner-alert{display:flex;gap:14px;align-items:flex-start;padding:14px 14px 14px 16px;border-radius:14px;border:1px solid transparent;animation:owner-in .25s ease}
+.owner-alert.risk{background:var(--crit-soft);border-color:color-mix(in srgb,var(--crit) 25%,transparent)}
+.owner-alert.ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 25%,transparent)}
+.owner-alert-ic{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff}
+.owner-alert.risk .owner-alert-ic{background:var(--crit)}
+.owner-alert.ok .owner-alert-ic{background:var(--ok)}
+.owner-alert-txt{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.owner-alert-txt b{font-size:16px}
+.owner-alert.risk .owner-alert-txt b{color:var(--crit)}
+.owner-alert.ok .owner-alert-txt b{color:var(--ok)}
+.owner-alert-txt span{font-size:14.5px;line-height:1.45}
+.close-x{flex:none;width:30px;height:30px;border-radius:50%;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.close-x:hover{background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text)}
+@keyframes owner-in{from{opacity:0;transform:translateY(-4px)}}
+@media (prefers-reduced-motion:reduce){.owner-alert{animation:none}}

@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { band, fx, fy, line } from "@/components/forecast-chart";
+import { CloseButton } from "@/components/close-button";
 import { useDesk } from "@/lib/desk-state";
+import { setDismissed, useDismissed } from "@/lib/dismiss";
 import { useLang, useT } from "@/lib/i18n";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
 import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, dayOf, longDate, outOf10, pesos, usd } from "@/lib/scenario";
@@ -19,6 +21,7 @@ const repay = longDate(S.plan.maturity ?? N.crunchDate, "en");
 
 type Copy = {
   today: string;
+  hello: { title: string; pending: string; done: string; rejected: string };
   intro: { title: string; steps: [string, string][]; ok: string };
   pending: { title: string; sub: (lang: Lang) => string };
   done: { title: string; sub: string };
@@ -37,6 +40,12 @@ type Copy = {
 const COPY: Record<Lang, Copy> = {
   en: {
     today: `Today · ${longDate(S.asOf, "en")}`,
+    hello: {
+      title: "Good morning, Huerto Austral team 👋",
+      pending: "I checked your cash this morning. Everything is running, but there is one decision for you today.",
+      done: "Everything is in order: December payroll is covered and NanFeng keeps watching.",
+      rejected: "You turned down this morning's plan, so payroll is still at risk. Here is the next option.",
+    },
     intro: {
       title: "Welcome to NanFeng, your autonomous CFO",
       steps: [
@@ -88,6 +97,12 @@ const COPY: Record<Lang, Copy> = {
   },
   es: {
     today: `Hoy · ${longDate(S.asOf, "es")}`,
+    hello: {
+      title: "Buenos días, equipo de Huerto Austral 👋",
+      pending: "Revisé tu caja esta mañana. Todo sigue andando, pero hay una decisión que tomar hoy.",
+      done: "Todo en orden: los sueldos de diciembre están cubiertos y NanFeng sigue vigilando.",
+      rejected: "Rechazaste el plan de esta mañana, así que los sueldos siguen en riesgo. Aquí va la siguiente opción.",
+    },
     intro: {
       title: "Bienvenido a NanFeng, tu gerente de finanzas",
       steps: [
@@ -139,6 +154,12 @@ const COPY: Record<Lang, Copy> = {
   },
   zh: {
     today: `今天 · ${longDate(S.asOf, "zh")}`,
+    hello: {
+      title: "早上好，Huerto Austral 团队 👋",
+      pending: "我今早检查了您的现金。一切正常运转，但今天有一项决定需要您处理。",
+      done: "一切就绪：12月工资已有保障，南风会持续关注。",
+      rejected: "您拒绝了今早的方案，工资仍有风险。以下是次优方案。",
+    },
     intro: {
       title: "欢迎使用南风，您的 AI 财务官",
       steps: [
@@ -239,6 +260,8 @@ export function OwnerView() {
   const rejected = approval === "rejected";
   const head = resolved ? c.done : rejected ? c.rejected : { title: c.pending.title, sub: c.pending.sub(lang) };
   const ratio = N.planCost / N.defaultCost;
+  const alertId = `owner-${approval}`;
+  const alertClosed = useDismissed(alertId);
 
   return (
     <div className="owner">
@@ -254,11 +277,22 @@ export function OwnerView() {
         </section>
       )}
 
-      <header className={`owner-hero ${resolved ? "ok" : "risk"}`}>
+      <header className="owner-greet">
         <span className="owner-eyebrow">{c.today}</span>
-        <h1>{head.title}</h1>
-        <p>{head.sub}</p>
+        <h1>{c.hello.title}</h1>
+        <p>{resolved ? c.hello.done : rejected ? c.hello.rejected : c.hello.pending}</p>
       </header>
+
+      {!alertClosed && (
+        <section className={`owner-alert ${resolved ? "ok" : "risk"}`} role="status">
+          <span className="owner-alert-ic" aria-hidden="true">{resolved ? "✓" : "!"}</span>
+          <div className="owner-alert-txt">
+            <b>{head.title}</b>
+            <span>{head.sub}</span>
+          </div>
+          <CloseButton onClick={() => setDismissed(alertId)} />
+        </section>
+      )}
 
       <div className="owner-grid">
         <div className="owner-col">

@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ForecastChart, ForecastLegend } from "@/components/forecast-chart";
+import { CloseButton } from "@/components/close-button";
 import { OwnerView, ViewSwitch } from "@/components/owner-view";
 import { Topbar } from "@/components/topbar";
 import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
+import { setDismissed, useDismissed } from "@/lib/dismiss";
 import { useLang, useT } from "@/lib/i18n";
 import { usePref, type Lang } from "@/lib/prefs";
 import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, clpM, pct, usd } from "@/lib/scenario";
@@ -118,6 +120,7 @@ function CockpitDetail() {
   const x = TX[lang];
   const { approval } = useDesk();
   const { resolved, pNeg } = useCrisisNumbers();
+  const alertClosed = useDismissed(`detail-${approval}`);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<Answer | "fallback" | null>(null);
 
@@ -171,7 +174,7 @@ function CockpitDetail() {
           )}
         </div>
 
-        {approval === "approved" ? (
+        {alertClosed ? null : approval === "approved" ? (
           <div className="alert ok" style={{ alignItems: "center", flexWrap: "wrap" }}>
             <span className="ic">OK</span>
             <div style={{ flex: "1 1 480px", display: "flex", flexDirection: "column", gap: 2 }}>
@@ -179,6 +182,7 @@ function CockpitDetail() {
               <span className="mono small">{t("cockpit.done.sub")}</span>
             </div>
             <Link className="btn btn-secondary" href="/security">{t("cockpit.audit")}</Link>
+            <CloseButton onClick={() => setDismissed(`detail-${approval}`)} />
           </div>
         ) : (
           <div className="alert crit" style={{ alignItems: "center", flexWrap: "wrap" }}>
@@ -190,6 +194,7 @@ function CockpitDetail() {
             <div style={{ display: "flex", gap: 8 }}>
               <Link className="btn btn-primary" href="/financing">{t("cockpit.review")} <span className="key" style={{ borderColor: "currentColor", color: "inherit" }}>R</span></Link>
               <Link className="btn btn-secondary" href="/mission">{t("cockpit.why")} <span className="key">?</span></Link>
+              <CloseButton onClick={() => setDismissed(`detail-${approval}`)} />
             </div>
           </div>
         )}
