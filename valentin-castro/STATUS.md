@@ -45,10 +45,11 @@ Everything below is on branch **`valentin-castro`** (from `main` at `63742ff`, w
 
 ## Merging this branch
 
-A trial merge with `origin/andy` leaves two one-line conflicts, both easy:
+A trial merge with `origin/andy` leaves three small conflicts, all easy:
 
 1. `web/package.json` — keep both scripts (`sync:scenario` and `api:types`).
 2. `web/src/app/(desk)/approvals/page.tsx`, approved message — keep `{x.approvedBody}` (theirs still says factoring + CNY forward), and `mode` is then unused there.
+3. `web/src/components/topbar.tsx` — keep this branch's `Topbar` (section tabs, one row) and their `useDesk` import and `ApiBadge` function; put `<ApiBadge />` first inside `<div className="topbar-ctl">`.
 
 Suggested order: `andy` → `main`, then `vicente-rodriguez` is already in, then `valentin-castro`.
 
