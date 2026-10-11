@@ -20,16 +20,27 @@ const ICONS: Record<string, React.ReactNode> = {
   "/settings": <><circle cx="12" cy="12" r="3" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8" /></>,
 };
 
-const NAV: { href: string; key: I18nKey }[] = [
-  { href: "/cockpit", key: "nav.cockpit" },
-  { href: "/mission", key: "nav.mission" },
-  { href: "/approvals", key: "nav.approvals" },
-  { href: "/financing", key: "nav.financing" },
-  { href: "/scenario", key: "nav.scenario" },
-  { href: "/security", key: "nav.security" },
-  { href: "/channels", key: "nav.channels" },
-  { href: "/documents", key: "nav.documents" },
-  { href: "/settings", key: "nav.settings" },
+// Owner-facing screens first; the agent trace, security console and settings are grouped below.
+const NAV: { group: I18nKey; items: { href: string; key: I18nKey }[] }[] = [
+  {
+    group: "nav.group.business",
+    items: [
+      { href: "/cockpit", key: "nav.cockpit" },
+      { href: "/approvals", key: "nav.approvals" },
+      { href: "/financing", key: "nav.financing" },
+      { href: "/scenario", key: "nav.scenario" },
+      { href: "/channels", key: "nav.channels" },
+      { href: "/documents", key: "nav.documents" },
+    ],
+  },
+  {
+    group: "nav.group.hood",
+    items: [
+      { href: "/mission", key: "nav.mission" },
+      { href: "/security", key: "nav.security" },
+      { href: "/settings", key: "nav.settings" },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -50,13 +61,16 @@ export function Sidebar() {
         </button>
       </div>
       <nav className="nav" aria-label="App">
-        {NAV.map((n) => (
+        {NAV.map((g) => [
+          <span key={g.group} className="nav-group">{t(g.group)}</span>,
+          ...g.items.map((n) => (
           <Link key={n.href} className={pathname === n.href ? "on" : undefined} href={n.href} onClick={() => setOpen(false)} aria-current={pathname === n.href ? "page" : undefined}>
             <span className="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[n.href]}</svg></span>
             {t(n.key)}
             {n.href === "/approvals" && pendingCount > 0 && <span className="count">{pendingCount}</span>}
           </Link>
-        ))}
+          )),
+        ])}
       </nav>
       <div className="side-foot">
         {inDemo ? (

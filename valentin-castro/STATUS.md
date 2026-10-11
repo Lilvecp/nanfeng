@@ -17,13 +17,14 @@ Everything below is on branch **`valentin-castro`** (from `main` at `63742ff`, w
 | fe-06 | Financing Arena: 9 products, real quotes, plan cost alone, the optimizer's reason for each | `web/src/app/(desk)/financing` |
 | fe-07 | Scenario Lab on the 9 precomputed engine runs (no more in-browser guesswork) | `web/src/app/(desk)/scenario` |
 | fe-10 (UI) | Demo Mode captions and labels with the real numbers, EN / ES / 中文 | `web/src/app/(desk)/demo` |
+| — | **Simple view for the owner** (default on Home): plain-language status, what happened, a cash chart with the payroll day, one recommendation with cost vs bank loan and an approve button, what NanFeng did today, a 3-step welcome on first visit; switch to the Detailed view keeps the full desk. Sidebar grouped into “Your business” and “Under the hood”. Approvals opens with a plain summary. EN / ES / 中文 | `web/src/components/owner-view.tsx`, `web/src/styles/owner.css` |
 | — | Landing: globe story, final CTA and benchmark (50/50 · −41% · 41/43) with real figures | `web/src/app/page.tsx`, `web/src/components/` |
 
 `npm run lint` and `npm run build` pass. Checked in the browser: Cockpit, Financing, Scenario Lab, Approvals (EN and 中文).
 
 ## Still mine
 
-- [ ] fe-11: Documents, Settings and the table headers / status chips of Approvals are still English-only.
+- [ ] fe-11: Documents and Settings are still English-only; toasts (`desk-state` notify) too.
 - [ ] fe-12 (with Camilo): loading/error states and an accessibility pass.
 - [ ] r1-08 final English edit (Oct 16) · r1-12 China access test (Oct 16) · fe-13 record the video (Oct 15) · r1-09 send the UDD email (Oct 18).
 - [ ] Deck slides themselves (outline is ready; due Oct 14).

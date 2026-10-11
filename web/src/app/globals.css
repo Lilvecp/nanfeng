@@ -3,6 +3,7 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "../styles/private-desk.css";
 @import "../styles/apple-nav.css";
+@import "../styles/owner.css";
 
 html,
 body {

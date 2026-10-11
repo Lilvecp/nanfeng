@@ -39,6 +39,25 @@ export function shortDate(iso: string, lang: Lang = "en") {
   return d.toLocaleDateString(LOCALE[lang], { month: "short", day: "numeric" }).replace(".", "");
 }
 
+/** Long date for plain-language copy: "December 30" · "30 de diciembre" · "12月30日". */
+export function longDate(iso: string, lang: Lang = "en") {
+  const d = new Date(`${iso}T12:00:00`);
+  if (lang === "zh") return `${d.getMonth() + 1}月${d.getDate()}日`;
+  return d.toLocaleDateString(LOCALE[lang], { month: "long", day: "numeric" });
+}
+
+/** Pesos the way an owner says them: "CLP 238 million" · "$238 millones" · "2.38亿智利比索". */
+export function pesos(v: number, lang: Lang = "en") {
+  const m = Math.abs(v) / 1e6;
+  const n = m < 10 ? num(m, lang, 1) : num(Math.round(m), lang);
+  if (lang === "es") return `$${n} millones`;
+  if (lang === "zh") return Math.abs(v) >= 1e8 ? `${num(Math.abs(v) / 1e8, "zh", 2)}亿智利比索` : `${num(Math.round(Math.abs(v) / 1e4), "zh")}万智利比索`;
+  return `CLP ${n} million`;
+}
+
+/** 0.8128 → 8 (out of 10). */
+export const outOf10 = (p: number) => Math.round(p * 10);
+
 /** Days between the as-of date and an ISO date. */
 export const dayOf = (iso: string) => Math.round((Date.parse(iso) - Date.parse(S.asOf)) / 864e5);
 
