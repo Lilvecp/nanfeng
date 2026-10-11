@@ -43,7 +43,7 @@ export function Sidebar() {
       <div className="workspace" title={t("shell.demoNote")}>
         <span className="workspace-eyebrow">{t("shell.demoCompany")}</span>
         <div className="workspace-row">
-          <span className="workspace-mark" aria-hidden="true">🍒</span>
+          <span className="workspace-mark" aria-hidden="true">HA</span>
           <span className="workspace-text"><b>Huerto Austral</b><span>{t("shell.workspace")}</span></span>
         </div>
       </div>

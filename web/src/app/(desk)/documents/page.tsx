@@ -196,7 +196,7 @@ export default function DocumentsPage() {
             {doc.flagged && (
               <div className="card-b" style={{ flexDirection: "row", flexWrap: "wrap" }}>
                 <button className="btn btn-danger btn-sm" type="button" onClick={() => notify("Kept blocked · beneficiary change needs a call-back on a known number")}>Keep blocked</button>
-                <button className="btn btn-secondary btn-sm" type="button" disabled={reported} onClick={() => { setReported(true); notify("Sender reported · domain added to the blocklist"); }}>{reported ? "Reported ✓" : "Report sender"}</button>
+                <button className="btn btn-secondary btn-sm" type="button" disabled={reported} onClick={() => { setReported(true); notify("Sender reported · domain added to the blocklist"); }}>{reported ? "Reported" : "Report sender"}</button>
               </div>
             )}
           </div>

@@ -124,7 +124,7 @@ export default function SecurityPage() {
           <div className="card-h">
             <span className="h3">Audit chain · sha256 · FISCO BCOS anchors</span>
             <button className="btn btn-secondary btn-sm" type="button" disabled={verify === "running"} onClick={runVerify}>
-              {verify === "running" ? <>Verifying<span className="blink">_</span></> : verify === "ok" ? "Verified ✓" : "Verify chain"} <span className="key">V</span>
+              {verify === "running" ? <>Verifying<span className="blink">_</span></> : verify === "ok" ? "Verified" : "Verify chain"} <span className="key">V</span>
             </button>
           </div>
           <div className="tbl-wrap"><table className="tbl">

@@ -107,7 +107,7 @@ export default function DesignSystemPage() {
       </div>
       <div className="card"><div className="card-h"><span className="h3">Timeline · chat</span></div><div className="card-b">
         <div className="tl">
-          <div className="tl-item done"><span className="muted">09:08:49</span><span className="tl-dot">✓</span><span>montecarlo.run <span className="tier t0"><b>L0</b></span> 4.2s</span></div>
+          <div className="tl-item done"><span className="muted">09:08:49</span><span className="tl-dot"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span><span>montecarlo.run <span className="tier t0"><b>L0</b></span> 4.2s</span></div>
           <div className="tl-item now"><span className="muted">09:09:06</span><span className="tl-dot">!</span><span>loan.request <span className="tier t3"><b>L3</b></span> WAIT</span></div>
         </div>
         <div className="bubble in">Plan ready: PAE loan USD 142,400. Saves CLP 1.7M (45%). APPROVE / WHY<span className="t">09:09</span></div>

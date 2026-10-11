@@ -4,7 +4,7 @@ import { useLang } from "@/lib/i18n";
 
 const LABEL = { en: "Close notice", es: "Cerrar aviso", zh: "关闭提示" };
 
-/** Small round ✕ used to close notices. */
+/** Small round close button for notices. */
 export function CloseButton({ onClick }: { onClick: () => void }) {
   const lang = useLang();
   return (

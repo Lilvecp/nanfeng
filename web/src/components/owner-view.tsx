@@ -41,7 +41,7 @@ const COPY: Record<Lang, Copy> = {
   en: {
     today: `Today · ${longDate(S.asOf, "en")}`,
     hello: {
-      title: "Good morning, Huerto Austral team 👋",
+      title: "Good morning, Huerto Austral team",
       pending: "I checked your cash this morning. Everything is running, but there is one decision for you today.",
       done: "Everything is in order: December payroll is covered and NanFeng keeps watching.",
       rejected: "You turned down this morning's plan, so payroll is still at risk. Here is the next option.",
@@ -98,7 +98,7 @@ const COPY: Record<Lang, Copy> = {
   es: {
     today: `Hoy · ${longDate(S.asOf, "es")}`,
     hello: {
-      title: "Buenos días, equipo de Huerto Austral 👋",
+      title: "Buenos días, equipo de Huerto Austral",
       pending: "Revisé tu caja esta mañana. Todo sigue andando, pero hay una decisión que tomar hoy.",
       done: "Todo en orden: los sueldos de diciembre están cubiertos y NanFeng sigue vigilando.",
       rejected: "Rechazaste el plan de esta mañana, así que los sueldos siguen en riesgo. Aquí va la siguiente opción.",
@@ -155,7 +155,7 @@ const COPY: Record<Lang, Copy> = {
   zh: {
     today: `今天 · ${longDate(S.asOf, "zh")}`,
     hello: {
-      title: "早上好，Huerto Austral 团队 👋",
+      title: "早上好，Huerto Austral 团队",
       pending: "我今早检查了您的现金。一切正常运转，但今天有一项决定需要您处理。",
       done: "一切就绪：12月工资已有保障，南风会持续关注。",
       rejected: "您拒绝了今早的方案，工资仍有风险。以下是次优方案。",
@@ -285,7 +285,7 @@ export function OwnerView() {
 
       {!alertClosed && (
         <section className={`owner-alert ${resolved ? "ok" : "risk"}`} role="status">
-          <span className="owner-alert-ic" aria-hidden="true">{resolved ? "✓" : "!"}</span>
+          <span className="owner-alert-ic" aria-hidden="true">{resolved ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg> : "!"}</span>
           <div className="owner-alert-txt">
             <b>{head.title}</b>
             <span>{head.sub}</span>
