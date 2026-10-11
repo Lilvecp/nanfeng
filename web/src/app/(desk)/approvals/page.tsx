@@ -1,5 +1,7 @@
 "use client";
 
+import { CloseButton } from "@/components/close-button";
+import { setDismissed, useDismissed } from "@/lib/dismiss";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { Topbar } from "@/components/topbar";
@@ -104,6 +106,7 @@ function OtpInput({ disabled, onChange }: { disabled: boolean; onChange: (code: 
 
 export default function ApprovalsPage() {
   const x = TX[useLang()];
+  const plainClosed = useDismissed("approvals-plain");
   const t = useT();
   const { approval, otpAttemptsLeft, rejectReason, history, submitOtp, reject } = useDesk();
   const [code, setCode] = useState("");
@@ -140,7 +143,9 @@ export default function ApprovalsPage() {
 
       <div className="content">
         <h1 className="h1">{t("approvals.title")}</h1>
-        {pending && <div className="owner-hero risk" style={{ padding: "14px 18px" }}><p>{x.plain}</p></div>}
+        {pending && !plainClosed && (
+          <div className="owner-alert risk"><span className="owner-alert-ic" aria-hidden="true">i</span><div className="owner-alert-txt"><span>{x.plain}</span></div><CloseButton onClick={() => setDismissed("approvals-plain")} /></div>
+        )}
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(360px, 1fr)", gap: 12, alignItems: "start" }}>
           <div className="card">
             <div className="card-h">
