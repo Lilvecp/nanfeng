@@ -108,7 +108,7 @@ export default function ApprovalsPage() {
   const x = TX[useLang()];
   const plainClosed = useDismissed("approvals-plain");
   const t = useT();
-  const { approval, otpAttemptsLeft, rejectReason, history, submitOtp, reject } = useDesk();
+  const { approval, approvalId, otpAttemptsLeft, rejectReason, history, submitOtp, reject } = useDesk();
   const [code, setCode] = useState("");
   const [otpError, setOtpError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -119,15 +119,15 @@ export default function ApprovalsPage() {
   const pending = approval === "pending";
   const rows = history.filter((r) => filter === "all" || r.decision === filter);
 
-  const approve = (value = code) => {
+  const approve = async (value = code) => {
     if (value.length < 6) {
       setOtpError("ENTER THE 6-DIGIT CODE");
       return;
     }
-    const r = submitOtp(value);
-    if (r === "ok") setOtpError(null);
+    const r = await submitOtp(value);
+    if (r.status === "ok") setOtpError(null);
     else {
-      setOtpError(r === "locked" || otpAttemptsLeft - 1 <= 0 ? "ERR OTP_LOCKED · REQUEST A NEW CODE" : `ERR OTP_MISMATCH · ${otpAttemptsLeft - 1} ATTEMPTS LEFT`);
+      setOtpError(r.status === "locked" || r.attemptsLeft <= 0 ? "ERR OTP_LOCKED · REQUEST A NEW CODE" : `ERR OTP_MISMATCH · ${r.attemptsLeft} ATTEMPTS LEFT`);
       setCode("");
       setOtpKey((k) => k + 1);
     }
@@ -149,7 +149,7 @@ export default function ApprovalsPage() {
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(360px, 1fr)", gap: 12, alignItems: "start" }}>
           <div className="card">
             <div className="card-h">
-              <span className="h3">{pending || approval === "verifying" ? "Pending" : approval === "approved" ? "Approved" : "Rejected"} · APR-0412-05</span>
+              <span className="h3">{pending || approval === "verifying" ? "Pending" : approval === "approved" ? "Approved" : "Rejected"} · {approvalId}</span>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 <span className="tier t3"><b>L3</b><span>OWNER+OTP</span></span>
                 <span className="badge warn">Risk MOD</span>

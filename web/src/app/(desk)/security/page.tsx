@@ -4,7 +4,8 @@ import { TabTitle } from "@/components/tab-title";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Topbar } from "@/components/topbar";
-import { useDesk } from "@/lib/desk-state";
+import { api, type Anchor, type AuditEntry } from "@/lib/api";
+import { fmtLocal, useDesk } from "@/lib/desk-state";
 
 // Red team results after the guard (andy-villarroel/redteam/results/REPORT.md): [category, attacks, stopped].
 const RED_TEAM: [string, number, number][] = [
@@ -19,7 +20,27 @@ const RED_TEAM: [string, number, number][] = [
 const RT_TOTAL = RED_TEAM.reduce((a, r) => a + r[1], 0);
 const RT_STOPPED = RED_TEAM.reduce((a, r) => a + r[2], 0);
 
-type AuditRow = { seq: number; time: string; event: string; tier: 0 | 1 | 3; prev: string; hash: string; anchor: string; bad?: boolean };
+type AuditRow = { seq: number; time: string; event: string; tier: 0 | 1 | 2 | 3; prev: string; hash: string; anchor: string; href?: string; bad?: boolean };
+
+const short = (h: string) => `${h.slice(0, 4)}…${h.slice(-4)}`;
+
+function toRow(e: AuditEntry, anchors: Anchor[]): AuditRow {
+  const p = e.payload as Record<string, unknown>;
+  const subject = [p.approval_id, p.action, p.receivable_id, p.payee, p.currency && p.notional ? `${p.currency} ${p.notional}` : null, p.from_seq ? `batch ${p.from_seq}–${p.to_seq}` : null]
+    .filter(Boolean).join(" ");
+  const a = anchors.find((x) => x.from_seq <= e.seq && e.seq <= x.to_seq);
+  return {
+    seq: e.seq,
+    time: fmtLocal(e.ts, false),
+    event: `${e.kind}${subject ? ` ${subject}` : ""}`,
+    tier: (typeof p.tier === "number" ? Math.min(3, Math.max(0, p.tier)) : 0) as AuditRow["tier"],
+    prev: short(e.prev_hash),
+    hash: short(e.hash),
+    anchor: a ? (a.tx_hash ? short(a.tx_hash) : `${a.backend} #${a.id}`) : "pending",
+    href: a?.explorer_url ?? undefined,
+    bad: e.kind.startsWith("security."),
+  };
+}
 
 const AUDIT: AuditRow[] = [
   { seq: 1042, time: "10:15:06", event: "approval.request pae.loan USD 142.4k", tier: 3, prev: "5d02…e4b1", hash: "a71f…0c9e", anchor: "pending · 10:30" },
@@ -29,22 +50,58 @@ const AUDIT: AuditRow[] = [
 ];
 
 export default function SecurityPage() {
-  const { approval, notify } = useDesk();
+  const { approval, notify, mode, events } = useDesk();
   const [reviewed, setReviewed] = useState(false);
-  const [verify, setVerify] = useState<"idle" | "running" | "ok">("idle");
+  const [verify, setVerify] = useState<"idle" | "running" | "ok" | "broken">("idle");
+  const [brokenAt, setBrokenAt] = useState<number | null>(null);
+  const [live, setLive] = useState<{ rows: AuditRow[]; lastAnchor: string; onChain: boolean } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  const rows: AuditRow[] = approval === "approved"
+  // Live mode: reload the chain whenever the backend reports something new.
+  const isLive = mode === "live";
+  useEffect(() => {
+    if (!isLive) return;
+    let cancelled = false;
+    Promise.all([api.audit.entries(), api.audit.anchors()])
+      .then(([entries, anchors]) => {
+        if (cancelled) return;
+        const last = anchors[0];
+        setLive({
+          rows: entries.slice(-12).reverse().map((e) => toRow(e, anchors)),
+          lastAnchor: last ? (last.tx_hash ? short(last.tx_hash) : `${last.backend} #${last.id}`) : "none yet",
+          onChain: anchors.some((x) => x.backend === "evm"),
+        });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isLive, events.length, approval]);
+
+  const mockRows: AuditRow[] = approval === "approved"
     ? [
         { seq: 1044, time: "10:16:09", event: "anchor.merkle root batch 1031–1043", tier: 0, prev: "c90e…77b2", hash: "f41d…a0e3", anchor: "#8,412,309" },
         { seq: 1043, time: "10:16:02", event: "pae.loan.execute USD 142.4k (sandbox)", tier: 3, prev: "a71f…0c9e", hash: "c90e…77b2", anchor: "#8,412,309" },
         ...AUDIT.map((r) => (r.anchor.startsWith("pending") ? { ...r, anchor: "#8,412,309" } : r)),
       ]
     : AUDIT;
+  const rows = live?.rows ?? mockRows;
 
-  const runVerify = () => {
+  const runVerify = async () => {
     setVerify("running");
+    if (isLive) {
+      try {
+        const r = await api.audit.verify();
+        setVerify(r.valid ? "ok" : "broken");
+        setBrokenAt(r.broken_at_seq);
+        notify(r.valid ? `Chain verified · ${r.entries} events · no gaps` : `Chain broken at seq ${r.broken_at_seq}`);
+      } catch {
+        setVerify("idle");
+        notify("Backend unreachable · could not verify");
+      }
+      return;
+    }
     timer.current = setTimeout(() => {
       setVerify("ok");
       notify(`Chain verified · ${rows[0].seq} events · no gaps`);
@@ -55,8 +112,8 @@ export default function SecurityPage() {
     <>
       <Topbar>
         <div className="tick"><span className="l">Blocked today</span><span className="v down">2</span></div>
-        <div className="tick"><span className="l">Chain</span><span className="v up">VERIFIED {verify === "ok" ? "10:16" : "09:15"}</span></div>
-        <div className="tick"><span className="l">Last anchor</span><span className="v">{approval === "approved" ? "#8,412,309" : "#8,412,077"}</span></div>
+        <div className="tick"><span className="l">Chain</span>{verify === "broken" ? <span className="v down">BROKEN @ {brokenAt}</span> : <span className="v up">VERIFIED {verify === "ok" ? "10:16" : "09:15"}</span>}</div>
+        <div className="tick"><span className="l">Last anchor</span><span className="v">{live ? live.lastAnchor : approval === "approved" ? "#8,412,309" : "#8,412,077"}</span></div>
       </Topbar>
 
       <div className="content">
@@ -122,9 +179,9 @@ export default function SecurityPage() {
 
         <div className="card">
           <div className="card-h">
-            <span className="h3">Audit chain · sha256 · FISCO BCOS anchors</span>
+            <span className="h3">Audit chain · sha256 · {live ? (live.onChain ? "Sepolia testnet anchors" : "local anchors") : "FISCO BCOS anchors"}</span>
             <button className="btn btn-secondary btn-sm" type="button" disabled={verify === "running"} onClick={runVerify}>
-              {verify === "running" ? <>Verifying<span className="blink">_</span></> : verify === "ok" ? "Verified" : "Verify chain"} <span className="key">V</span>
+              {verify === "running" ? <>Verifying<span className="blink">_</span></> : verify === "ok" ? "Verified" : verify === "broken" ? "Broken" : "Verify chain"} <span className="key">V</span>
             </button>
           </div>
           <div className="tbl-wrap"><table className="tbl">
@@ -135,8 +192,8 @@ export default function SecurityPage() {
                   <td className="num">{r.seq}</td><td className="num">{r.time}</td><td className={r.bad ? "down" : undefined}>{r.event}</td>
                   <td><span className={`tier t${r.tier}`}><b>L{r.tier}</b></span></td>
                   <td className="num muted">{r.prev}</td><td className="num">{r.hash}</td>
-                  <td>{verify === "running" ? <span className="skel" style={{ display: "inline-block", width: 32, height: 10 }} /> : <span className="badge ok">OK</span>}</td>
-                  <td className={`num${r.anchor.startsWith("pending") ? " muted" : ""}`}>{r.anchor}</td>
+                  <td>{verify === "running" ? <span className="skel" style={{ display: "inline-block", width: 32, height: 10 }} /> : verify === "broken" && brokenAt !== null && r.seq >= brokenAt ? <span className="badge crit">FAIL</span> : <span className="badge ok">OK</span>}</td>
+                  <td className={`num${r.anchor.startsWith("pending") ? " muted" : ""}`}>{r.href ? <a href={r.href} target="_blank" rel="noopener noreferrer">{r.anchor}</a> : r.anchor}</td>
                 </tr>
               ))}
             </tbody>

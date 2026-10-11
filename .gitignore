@@ -5,3 +5,10 @@
 
 # Original battle plan page (Spanish, kept local; English projection lives in plan/)
 NanFeng Battle Plan.html
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+*.db

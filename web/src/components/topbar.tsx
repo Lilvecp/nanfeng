@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDesk } from "@/lib/desk-state";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
 import { sectionOf } from "@/lib/sections";
 import { useT } from "@/lib/i18n";
@@ -39,6 +40,14 @@ export function ThemeToggle() {
   );
 }
 
+/** Whether the screen is talking to the backend or running on the local sandbox mocks. */
+function ApiBadge() {
+  const { mode } = useDesk();
+  const label = mode === "live" ? "API LIVE" : mode === "checking" ? "API…" : "SANDBOX";
+  const title = mode === "live" ? "Connected to the NanFeng API" : mode === "checking" ? "Connecting to the API" : "No backend: local Cherry Crisis sandbox";
+  return <span className={`badge${mode === "live" ? " ok" : ""}`} title={title}>{label}</span>;
+}
+
 /** Tabs of the current section (e.g. Financing → Options · What if…), from lib/sections.ts. */
 function SectionTabs() {
   const pathname = usePathname();
@@ -66,6 +75,7 @@ export function Topbar({ children, controls = true, lead }: { children?: React.R
       <div className="topbar-ticks">{children}</div>
       {controls && (
         <div className="topbar-ctl">
+          <ApiBadge />
           <LangSwitch />
           <ThemeToggle />
         </div>

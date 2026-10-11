@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Topbar } from "@/components/topbar";
-import { useDesk } from "@/lib/desk-state";
+import type { ApiEvent } from "@/lib/api";
+import { fmtLocal, useDesk } from "@/lib/desk-state";
 import { useT } from "@/lib/i18n";
 import { N, S, clpFull, clpM, pct, usd } from "@/lib/scenario";
 
@@ -22,11 +23,21 @@ const REPLIES: { match: RegExp; text: string }[] = [
   { match: /forward|cny|hedge/i, text: "The CNY invoices are collected in mid-January, after the crunch day. A forward would lock their rate but brings no cash for the payroll, so the optimizer leaves it out at this confidence level." },
 ];
 
+/** One line per backend event: what happened and the fields worth showing. */
+function describe(e: ApiEvent): string {
+  const d = e.data as Record<string, unknown>;
+  const pick = (...keys: string[]) => keys.filter((k) => d[k] !== undefined && d[k] !== null).map((k) => `${k}=${typeof d[k] === "object" ? JSON.stringify(d[k]) : d[k]}`).join(" · ");
+  if (e.type.startsWith("approval.")) return pick("id", "action", "tier", "status", "otp_attempts_left");
+  if (e.type.startsWith("bank.")) return pick("receivable_id", "payee", "currency", "amount_clp", "proceeds_clp", "audit_seq");
+  if (e.type === "audit.anchored") return pick("anchor_id", "from_seq", "to_seq", "backend");
+  if (e.type.startsWith("quant.")) return pick("job_id", "message", "error");
+  return pick("step", "tool", "tier", "model", "cost_usd", "status", "on") || JSON.stringify(d).slice(0, 120);
+}
+
 export default function MissionPage() {
   const t = useT();
-  const { approval, notify } = useDesk();
+  const { approval, notify, mode, events, killSwitch: killed, setKillSwitch } = useDesk();
   const [paused, setPaused] = useState(false);
-  const [killed, setKilled] = useState(false);
   const [confirmKill, setConfirmKill] = useState(false);
   const [chat, setChat] = useState<{ who: "out" | "in"; text: string }[]>([
     { who: "out", text: "why the PAE loan over the bank loan?" },
@@ -59,10 +70,10 @@ export default function MissionPage() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-secondary" type="button" disabled={killed} aria-pressed={paused} onClick={() => { setPaused((p) => !p); notify(paused ? "Run resumed" : "Run paused · no new tool calls"); }}>{paused ? "Resume" : "Pause"} <span className="key">P</span></button>
             {killed ? (
-              <button className="btn btn-primary" type="button" onClick={() => { setKilled(false); setPaused(false); notify("Agent re-armed · monitoring every 15m"); }}>Re-arm agent</button>
+              <button className="btn btn-primary" type="button" onClick={() => { setPaused(false); void setKillSwitch(false); }}>Re-arm agent</button>
             ) : confirmKill ? (
               <>
-                <button className="btn btn-danger" type="button" style={{ minHeight: 48 }} onClick={() => { setKilled(true); setConfirmKill(false); notify("Kill switch engaged · all tool calls stopped"); }}>Confirm kill</button>
+                <button className="btn btn-danger" type="button" style={{ minHeight: 48 }} onClick={() => { setConfirmKill(false); void setKillSwitch(true); }}>Confirm kill</button>
                 <button className="btn btn-secondary" type="button" onClick={() => setConfirmKill(false)}>Cancel</button>
               </>
             ) : (
@@ -112,6 +123,30 @@ export default function MissionPage() {
             </tbody>
           </table></div>
         </div>
+
+        {mode === "live" && (
+          <div className="card">
+            <div className="card-h">
+              <span className="h3">Live event stream · SSE</span>
+              <span className="status"><span className="dot" />{events.length} EVENTS</span>
+            </div>
+            <div className="tbl-wrap" style={{ maxHeight: 280, overflowY: "auto" }} aria-live="polite"><table className="tbl">
+              <thead><tr><th>#</th><th>Time</th><th>Source</th><th>Event</th><th>Detail</th></tr></thead>
+              <tbody>
+                {[...events].reverse().map((e) => (
+                  <tr key={e.id}>
+                    <td className="num">{e.id}</td>
+                    <td className="num">{fmtLocal(e.ts, false)}</td>
+                    <td className="mono small">{e.source}</td>
+                    <td className="num">{e.type}</td>
+                    <td className="mono small muted" style={{ wordBreak: "break-all" }}>{describe(e)}</td>
+                  </tr>
+                ))}
+                {events.length === 0 && <tr><td colSpan={5} className="mono small muted">WAITING FOR EVENTS FROM THE AGENT<span className="blink">_</span></td></tr>}
+              </tbody>
+            </table></div>
+          </div>
+        )}
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 12 }}>
           <div className="card">

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "api:types": "openapi-typescript ../contracts/openapi.json -o src/lib/api-types.ts",
     "sync:scenario": "node scripts/sync-scenario.mjs"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "@types/three": "^0.186.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
+    "openapi-typescript": "^7.4.4",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
