@@ -4,7 +4,7 @@
 import { N, S } from "@/lib/scenario";
 
 const W = 900, H = 310, L = 50, R = 860, T = 20, B = 280;
-const Y_MIN = -100, Y_MAX = 600; // the last days of P90 go above 600 and are clipped
+const Y_MIN = -100, Y_MAX = 700; // only the last days of P90 go above 700 and are clipped
 const DAYS = S.fan.dates.length - 1;
 
 export const fx = (d: number) => L + (d / DAYS) * (R - L);

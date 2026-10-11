@@ -98,7 +98,7 @@ export default function FinancingPage() {
 
   const priced = ROWS.filter((r) => r.alone !== null);
   const max = Math.max(...priced.map((r) => r.alone!));
-  const barW = (v: number) => Math.max(4, (v / max) * 300);
+  const barW = (v: number) => Math.max(4, (v / max) * 540);
 
   return (
     <>
@@ -143,12 +143,12 @@ export default function FinancingPage() {
           <div className="card">
             <div className="card-h"><span className="h3">{x.chart}</span><span className="hint">{x.chartHint}</span></div>
             <div className="card-b">
-              <svg viewBox={`0 0 520 ${priced.length * 30 + 10}`} width="100%" role="img" aria-label={`${x.chart}. ${priced.map((r) => `${PRODUCT_SHORT[r.product] ?? r.product}: ${clpM(r.alone!)}`).join("; ")}.`}>
+              <svg viewBox={`0 0 760 ${priced.length * 30 + 10}`} width="100%" role="img" aria-label={`${x.chart}. ${priced.map((r) => `${PRODUCT_SHORT[r.product] ?? r.product}: ${clpM(r.alone!)}`).join("; ")}.`}>
                 {priced.map((r, i) => (
                   <g key={r.product} onClick={() => setFocus(r.product)} style={{ cursor: "pointer" }}>
-                    <text className="ch-axis" x="130" y={i * 30 + 22} textAnchor="end" style={r.selected ? { fill: "var(--accent)", fontWeight: 700 } : undefined}>{PRODUCT_SHORT[r.product] ?? r.product}</text>
-                    <rect x="140" y={i * 30 + 10} width={barW(r.alone!)} height="16" fill={r.selected ? "var(--accent)" : "var(--muted)"} opacity={r.selected ? 1 : 0.45} stroke={focus === r.product ? "var(--text)" : "none"} strokeWidth="2" />
-                    <text className="ch-axis" x={146 + barW(r.alone!)} y={i * 30 + 22}>{(r.alone! / 1e6).toFixed(1)}</text>
+                    <text className="ch-axis" x="150" y={i * 30 + 22} textAnchor="end" style={r.selected ? { fill: "var(--accent)", fontWeight: 700 } : undefined}>{PRODUCT_SHORT[r.product] ?? r.product}</text>
+                    <rect x="160" y={i * 30 + 10} width={barW(r.alone!)} height="16" fill={r.selected ? "var(--accent)" : "var(--muted)"} opacity={r.selected ? 1 : 0.45} stroke={focus === r.product ? "var(--text)" : "none"} strokeWidth="2" />
+                    <text className="ch-axis" x={166 + barW(r.alone!)} y={i * 30 + 22}>{(r.alone! / 1e6).toFixed(1)}</text>
                   </g>
                 ))}
               </svg>
