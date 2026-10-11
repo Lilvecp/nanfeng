@@ -1,0 +1,163 @@
+[
+ {
+  "preset": "Base (after the Shanghai notice)",
+  "overrides": {},
+  "headline": "81% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.8322,
+  "prob_below_buffer_horizon": 0.9767,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -54550868,
+  "plan_cost_clp": 2106329,
+  "default_cost_clp": 3796513,
+  "savings_pct": 0.4452,
+  "plan_actions": [
+   "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE)"
+  ]
+ },
+ {
+  "preset": "Before the notice",
+  "overrides": {
+   "ignore_announced_delays": true
+  },
+  "headline": "13% probability of negative cash within 90 days",
+  "prob_negative_cash_horizon": 0.127,
+  "prob_below_buffer_horizon": 0.153,
+  "crunch_date": null,
+  "min_cash_p10": -8165780,
+  "plan_cost_clp": 618608,
+  "default_cost_clp": 845995,
+  "savings_pct": 0.2688,
+  "plan_actions": [
+   "Factor 32% of INV-2026-109 with Export factoring, non-recourse (bank)"
+  ]
+ },
+ {
+  "preset": "All customers +15 days late",
+  "overrides": {
+   "global_delay_extra_days": 15
+  },
+  "headline": "100% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.9997,
+  "prob_below_buffer_horizon": 0.9998,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -276236105,
+  "plan_cost_clp": 5144640,
+  "default_cost_clp": null,
+  "savings_pct": null,
+  "plan_actions": [
+   "Factor 90% of INV-2026-124 with Export factoring, non-recourse (bank)",
+   "Factor 26% of INV-2026-109 with Export factoring, non-recourse (bank)",
+   "Borrow USD 117,248 for 60 days from Pre-export loan in USD (PAE)",
+   "Borrow USD 106,366 for 60 days from Pre-export loan in USD (PAE)",
+   "Factor 50% of INV-2026-112 with Export factoring, non-recourse (bank)"
+  ]
+ },
+ {
+  "preset": "CNY -5% vs CLP",
+  "overrides": {
+   "cny_shift_pct": -5
+  },
+  "headline": "86% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.8739,
+  "prob_below_buffer_horizon": 0.9821,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -58120154,
+  "plan_cost_clp": 2283240,
+  "default_cost_clp": 4257880,
+  "savings_pct": 0.4638,
+  "plan_actions": [
+   "Borrow USD 142,881 for 60 days from Pre-export loan in USD (PAE)",
+   "Extend 26% of P-10 by 60 days via Confirming (supplier payment extension)"
+  ]
+ },
+ {
+  "preset": "CNY +5% vs CLP",
+  "overrides": {
+   "cny_shift_pct": 5
+  },
+  "headline": "75% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.7803,
+  "prob_below_buffer_horizon": 0.9713,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -50807125,
+  "plan_cost_clp": 2071808,
+  "default_cost_clp": 3728711,
+  "savings_pct": 0.4444,
+  "plan_actions": [
+   "Borrow USD 139,925 for 60 days from Pre-export loan in USD (PAE)"
+  ]
+ },
+ {
+  "preset": "USD -5% vs CLP",
+  "overrides": {
+   "usd_shift_pct": -5
+  },
+  "headline": "89% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.904,
+  "prob_below_buffer_horizon": 0.9862,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -66124559,
+  "plan_cost_clp": 2528136,
+  "default_cost_clp": 4521079,
+  "savings_pct": 0.4408,
+  "plan_actions": [
+   "Borrow USD 172,639 for 60 days from Pre-export loan in USD (PAE)"
+  ]
+ },
+ {
+  "preset": "Cherry price -10%",
+  "overrides": {
+   "cherry_price_pct": -10
+  },
+  "headline": "95% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.951,
+  "prob_below_buffer_horizon": 0.9933,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -72581429,
+  "plan_cost_clp": 2585640,
+  "default_cost_clp": 4646188,
+  "savings_pct": 0.4435,
+  "plan_actions": [
+   "Borrow USD 172,796 for 60 days from Pre-export loan in USD (PAE)",
+   "Factor 2% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+  ]
+ },
+ {
+  "preset": "Cherry price +10%",
+  "overrides": {
+   "cherry_price_pct": 10
+  },
+  "headline": "55% probability of negative cash within 90 days",
+  "prob_negative_cash_horizon": 0.5486,
+  "prob_below_buffer_horizon": 0.9325,
+  "crunch_date": null,
+  "min_cash_p10": -37868508,
+  "plan_cost_clp": 1823108,
+  "default_cost_clp": 3341769,
+  "savings_pct": 0.4544,
+  "plan_actions": [
+   "Borrow USD 90,330 for 60 days from Pre-export loan in USD (PAE)",
+   "Factor 18% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+  ]
+ },
+ {
+  "preset": "30 extra harvest workers",
+  "overrides": {
+   "extra_hires": 30
+  },
+  "headline": "97% probability of negative cash in 19 days (2026-12-30)",
+  "prob_negative_cash_horizon": 0.9737,
+  "prob_below_buffer_horizon": 0.9946,
+  "crunch_date": "2026-12-30",
+  "min_cash_p10": -90497338,
+  "plan_cost_clp": 3248493,
+  "default_cost_clp": 5676445,
+  "savings_pct": 0.4277,
+  "plan_actions": [
+   "Factor 21% of INV-2026-109 with Export factoring, non-recourse (bank)",
+   "Borrow USD 48,839 for 60 days from Pre-export loan in USD (PAE)",
+   "Borrow USD 94,800 for 90 days from Pre-export loan in USD (PAE)",
+   "Factor 2% of INV-2026-118 with Fintech factoring, with recourse (fast onboarding)"
+  ]
+ }
+]

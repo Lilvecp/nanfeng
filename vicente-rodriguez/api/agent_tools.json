@@ -1,0 +1,271 @@
+[
+ {
+  "type": "function",
+  "function": {
+   "name": "forecast_run",
+   "description": "90-day cash forecast with 10,000 Monte Carlo scenarios. Returns the headline (probability of negative cash and crunch date), P10/P50/P90 per day, and which customer or factor drives the risk. Use it whenever a document or event may change future cash, and for what-if questions. Read-only (tier L0). Quote its numbers verbatim; never recompute them.",
+   "parameters": {
+    "type": "object",
+    "required": [
+     "scenario"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "scenario": {
+      "type": "string",
+      "description": "Scenario id, e.g. \"cherry_crisis\"",
+      "default": "cherry_crisis"
+     },
+     "overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Scenario Lab what-ifs. Omit for the current situation.",
+      "properties": {
+       "global_delay_extra_days": {
+        "type": "number",
+        "description": "Every customer pays this many extra days late"
+       },
+       "customer_delay_extra_days": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "number"
+        },
+        "description": "Extra delay per customer id, e.g. {\"C-SHA\": 30}"
+       },
+       "cny_shift_pct": {
+        "type": "number",
+        "description": "CNY moves this % against the peso from today (negative = CNY weaker)"
+       },
+       "usd_shift_pct": {
+        "type": "number",
+        "description": "USD moves this % against the peso from today"
+       },
+       "cherry_price_pct": {
+        "type": "number",
+        "description": "Change in the cherry price of shipments not yet invoiced, %"
+       },
+       "extra_hires": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Extra harvest workers on every payroll"
+       },
+       "hire_monthly_wage_clp": {
+        "type": "number",
+        "description": "Monthly cost per extra worker, CLP (default 750,000)"
+       },
+       "defaulted_customers": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "Customers that stop paying"
+       },
+       "ignore_announced_delays": {
+        "type": "boolean",
+        "description": "Forecast as if announced delays had not happened"
+       }
+      }
+     },
+     "explain": {
+      "type": "boolean",
+      "default": true,
+      "description": "Include the drivers analysis (~1 s more)"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "financing_quote",
+   "description": "Quote every financing product for a cash need: cost in CLP, effective annual cost, term, lead time, requirements and eligibility. Without amount/date it quotes the forecast's own gap. Read-only (L0). For a recommendation use optimize_plan instead.",
+   "parameters": {
+    "type": "object",
+    "required": [
+     "scenario"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "scenario": {
+      "type": "string",
+      "description": "Scenario id, e.g. \"cherry_crisis\"",
+      "default": "cherry_crisis"
+     },
+     "amount_clp": {
+      "type": "number",
+      "description": "Cash needed, CLP"
+     },
+     "need_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the cash is needed (ISO date)"
+     },
+     "need_days": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 30,
+      "description": "For how long"
+     },
+     "overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Scenario Lab what-ifs. Omit for the current situation.",
+      "properties": {
+       "global_delay_extra_days": {
+        "type": "number",
+        "description": "Every customer pays this many extra days late"
+       },
+       "customer_delay_extra_days": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "number"
+        },
+        "description": "Extra delay per customer id, e.g. {\"C-SHA\": 30}"
+       },
+       "cny_shift_pct": {
+        "type": "number",
+        "description": "CNY moves this % against the peso from today (negative = CNY weaker)"
+       },
+       "usd_shift_pct": {
+        "type": "number",
+        "description": "USD moves this % against the peso from today"
+       },
+       "cherry_price_pct": {
+        "type": "number",
+        "description": "Change in the cherry price of shipments not yet invoiced, %"
+       },
+       "extra_hires": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Extra harvest workers on every payroll"
+       },
+       "hire_monthly_wage_clp": {
+        "type": "number",
+        "description": "Monthly cost per extra worker, CLP (default 750,000)"
+       },
+       "defaulted_customers": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "Customers that stop paying"
+       },
+       "ignore_announced_delays": {
+        "type": "boolean",
+        "description": "Forecast as if announced delays had not happened"
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "optimize_plan",
+   "description": "Cheapest financing mix (MILP) that keeps cash above the buffer in `confidence` of the scenarios, compared with the default bank loan, with why each product is in or out. Returns `approval_request`: send it unchanged to POST /approvals so the owner approves exactly this plan (financing is always tier L3: OTP). Takes 3-10 s.",
+   "parameters": {
+    "type": "object",
+    "required": [
+     "scenario"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "scenario": {
+      "type": "string",
+      "description": "Scenario id, e.g. \"cherry_crisis\"",
+      "default": "cherry_crisis"
+     },
+     "confidence": {
+      "type": "number",
+      "minimum": 0.8,
+      "maximum": 0.99,
+      "default": 0.9
+     },
+     "overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Scenario Lab what-ifs. Omit for the current situation.",
+      "properties": {
+       "global_delay_extra_days": {
+        "type": "number",
+        "description": "Every customer pays this many extra days late"
+       },
+       "customer_delay_extra_days": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "number"
+        },
+        "description": "Extra delay per customer id, e.g. {\"C-SHA\": 30}"
+       },
+       "cny_shift_pct": {
+        "type": "number",
+        "description": "CNY moves this % against the peso from today (negative = CNY weaker)"
+       },
+       "usd_shift_pct": {
+        "type": "number",
+        "description": "USD moves this % against the peso from today"
+       },
+       "cherry_price_pct": {
+        "type": "number",
+        "description": "Change in the cherry price of shipments not yet invoiced, %"
+       },
+       "extra_hires": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Extra harvest workers on every payroll"
+       },
+       "hire_monthly_wage_clp": {
+        "type": "number",
+        "description": "Monthly cost per extra worker, CLP (default 750,000)"
+       },
+       "defaulted_customers": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "Customers that stop paying"
+       },
+       "ignore_announced_delays": {
+        "type": "boolean",
+        "description": "Forecast as if announced delays had not happened"
+       }
+      }
+     },
+     "channel": {
+      "type": "string",
+      "default": "WEB",
+      "description": "Channel the approval is requested on (WEB, WHATSAPP)"
+     }
+    }
+   }
+  }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "credit_passport",
+   "description": "Explainable financial-health score (0-100, grade A-E) the SME can share with a lender. Only set consent=true if the owner explicitly agreed to share it; that adds a SHA-256 digest for the audit log. Read-only (L0) without consent; sharing is L2.",
+   "parameters": {
+    "type": "object",
+    "required": [
+     "scenario"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "scenario": {
+      "type": "string",
+      "description": "Scenario id, e.g. \"cherry_crisis\"",
+      "default": "cherry_crisis"
+     },
+     "consent": {
+      "type": "boolean",
+      "default": false
+     }
+    }
+   }
+  }
+ }
+]
