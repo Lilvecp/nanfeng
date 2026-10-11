@@ -18,6 +18,8 @@ const DICT = {
   "tab.summary": { en: "Summary", es: "Resumen", zh: "概览" },
   "tab.detail": { en: "Full detail", es: "Detalle completo", zh: "完整详情" },
   "shell.workspace": { en: "Cherry exporter · Chile", es: "Exportadora de cerezas · Chile", zh: "樱桃出口商 · 智利" },
+  "shell.demoCompany": { en: "Demo company", es: "Empresa de demo", zh: "演示企业" },
+  "shell.demoNote": { en: "Fictional exporter used in the demo. In the real product this is the signed-in company.", es: "Exportadora ficticia de la demo. En el producto real aquí aparece la empresa que inició sesión.", zh: "演示用的虚构出口企业。在正式产品中，这里显示已登录的企业。" },
   "nav.mission": { en: "Mission Control", es: "Mission Control", zh: "任务控制" },
   "nav.approvals": { en: "Approvals", es: "Aprobaciones", zh: "审批" },
   "nav.financing": { en: "Financing", es: "Financiamiento", zh: "融资" },
