@@ -7,11 +7,13 @@ import { N } from "./scenario";
 // 中文 view uses year-month-day dates and 万 for large CLP amounts (lib/scenario.ts formatters).
 const DICT = {
   // shell
-  "nav.cockpit": { en: "Cockpit", es: "Cockpit", zh: "现金驾驶舱" },
+  "nav.cockpit": { en: "Home", es: "Inicio", zh: "首页" },
+  "nav.group.business": { en: "Your business", es: "Tu negocio", zh: "您的业务" },
+  "nav.group.hood": { en: "Under the hood", es: "Detalle técnico", zh: "技术细节" },
   "nav.mission": { en: "Mission Control", es: "Mission Control", zh: "任务控制" },
   "nav.approvals": { en: "Approvals", es: "Aprobaciones", zh: "审批" },
-  "nav.financing": { en: "Financing Arena", es: "Financiamiento", zh: "融资比较" },
-  "nav.scenario": { en: "Scenario Lab", es: "Escenarios", zh: "情景实验室" },
+  "nav.financing": { en: "Financing options", es: "Financiamiento", zh: "融资比较" },
+  "nav.scenario": { en: "What if…", es: "¿Y si…?", zh: "假设分析" },
   "nav.security": { en: "Security", es: "Seguridad", zh: "安全" },
   "nav.channels": { en: "Channels", es: "Canales", zh: "渠道" },
   "nav.documents": { en: "Documents", es: "Documentos", zh: "文件" },

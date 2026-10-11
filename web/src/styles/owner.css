@@ -1,0 +1,67 @@
+/* Owner view: the plain-language cockpit for the SME owner (components/owner-view.tsx). */
+.owner{display:flex;flex-direction:column;gap:16px}
+.owner-eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.owner-hint{font-size:13px;color:var(--muted)}
+.owner-n{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--f-mono);font-size:12px;font-weight:700}
+
+.owner-intro{background:var(--accent);color:var(--accent-ink);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:16px}
+.owner-intro h2{margin:0;font-family:var(--f-display);font-size:22px;font-weight:600}
+.owner-intro ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.owner-intro li{display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
+.owner-intro li span:last-child{opacity:.85}
+.owner-intro .owner-n{background:var(--accent-ink);color:var(--accent)}
+.owner-intro .btn{align-self:flex-start;background:var(--accent-ink);color:var(--accent)}
+
+.owner-hero{border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:6px;border:1px solid var(--line)}
+.owner-hero.risk{background:var(--crit-soft);border-color:transparent}
+.owner-hero.ok{background:var(--ok-soft);border-color:transparent}
+.owner-hero h1{margin:0;font-family:var(--f-display);font-size:clamp(26px,3.6vw,38px);font-weight:600;line-height:1.1;letter-spacing:-.01em}
+.owner-hero.risk h1{color:var(--crit)}
+.owner-hero.ok h1{color:var(--ok)}
+.owner-hero p{margin:0;font-size:clamp(16px,1.6vw,19px);line-height:1.45;max-width:62ch}
+
+.owner-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+.owner-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.owner-card{padding:18px 20px;gap:10px}
+.owner-h{margin:0;font-family:var(--f-display);font-size:18px;font-weight:600}
+.owner-h.big{font-size:22px;line-height:1.2}
+.owner-card p{margin:0;font-size:15px;line-height:1.5}
+
+.owner-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.owner-steps li{display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.45}
+
+.owner-rec{border:2px solid var(--accent)}
+.owner-rec.ok{border-color:var(--ok)}
+.owner-compare{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.owner-compare div{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px}
+.owner-compare i{display:block;height:12px;border-radius:6px}
+.owner-compare b{font-family:var(--f-mono);font-size:13px;white-space:nowrap}
+.owner-save{font-family:var(--f-display);font-size:24px!important;font-weight:600;color:var(--ok)}
+.owner-save span{font-size:16px;color:var(--muted);font-weight:500}
+.owner-cta{min-height:52px;font-size:15px;margin-top:4px}
+.owner-actions{display:flex;gap:8px;flex-wrap:wrap}
+.owner-why{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
+
+.owner-log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.owner-log li{display:grid;grid-template-columns:3.5em minmax(0,1fr);gap:10px;font-size:14px;line-height:1.45}
+
+.owner-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.owner-legend span{display:inline-flex;align-items:center;gap:6px}
+.owner-legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.owner-ch-lbl{font-family:var(--f-body);font-size:13px}
+.owner-ch-axis{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+
+.owner-foot{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;padding-top:4px}
+
+@media (max-width:1100px){.owner-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){
+  .owner-intro ol{grid-template-columns:minmax(0,1fr)}
+  .owner-hero,.owner-intro{padding:18px 16px}
+  .owner-card{padding:16px}
+  .owner-compare div{grid-template-columns:minmax(0,1fr) auto}
+  .owner-compare i{grid-column:1 / -1;grid-row:2}
+}
+
+/* Sidebar groups */
+.nav-group{display:block;padding:14px 10px 4px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.nav-group:first-child{padding-top:4px}

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ForecastChart, ForecastLegend } from "@/components/forecast-chart";
+import { OwnerView, ViewSwitch } from "@/components/owner-view";
 import { Topbar } from "@/components/topbar";
 import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
 import { useLang, useT } from "@/lib/i18n";
-import type { Lang } from "@/lib/prefs";
+import { usePref, type Lang } from "@/lib/prefs";
 import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, clpM, pct, usd } from "@/lib/scenario";
 
 type Answer = { q: Record<Lang, string>; a: Record<Lang, string>; href: string; cta: Record<Lang, string> };
@@ -96,7 +97,23 @@ const TX = {
   },
 };
 
+/** The owner lands on the plain-language view; the full desk is one switch away. */
 export default function CockpitPage() {
+  const view = usePref("view");
+  const t = useT();
+  if (view === "detail") return <CockpitDetail />;
+  return (
+    <>
+      <Topbar>
+        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <ViewSwitch />
+      </Topbar>
+      <div className="content"><OwnerView /></div>
+    </>
+  );
+}
+
+function CockpitDetail() {
   const t = useT();
   const lang = useLang();
   const x = TX[lang];
@@ -120,6 +137,7 @@ export default function CockpitPage() {
         <div className="tick"><span className="l">USD/CLP</span><span className="v">{S.fx.clp_per_usd.toFixed(2)}</span></div>
         <div className="tick"><span className="l">USD/CNY</span><span className="v">{S.fx.cny_per_usd.toFixed(4)}</span></div>
         <span className="status"><span className="dot" />{x.monitoring} · {resolved ? 6 : 5} {x.actions}</span>
+        <ViewSwitch />
       </Topbar>
 
       <div className="content">
