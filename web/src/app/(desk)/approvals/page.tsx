@@ -91,8 +91,8 @@ function OtpInput({ disabled, onChange }: { disabled: boolean; onChange: (code: 
 }
 
 export default function ApprovalsPage() {
-  const t = useT();
   const x = TX[useLang()];
+  const t = useT();
   const { approval, otpAttemptsLeft, rejectReason, history, submitOtp, reject } = useDesk();
   const [code, setCode] = useState("");
   const [otpError, setOtpError] = useState<string | null>(null);
