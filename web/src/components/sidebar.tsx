@@ -40,9 +40,12 @@ export function Sidebar() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
       </div>
-      <div className="workspace">
-        <span className="workspace-mark" aria-hidden="true">HA</span>
-        <span className="workspace-text"><b>Huerto Austral Export SpA</b><span>{t("shell.workspace")}</span></span>
+      <div className="workspace" title={t("shell.demoNote")}>
+        <span className="workspace-eyebrow">{t("shell.demoCompany")}</span>
+        <div className="workspace-row">
+          <span className="workspace-mark" aria-hidden="true">🍒</span>
+          <span className="workspace-text"><b>Huerto Austral</b><span>{t("shell.workspace")}</span></span>
+        </div>
       </div>
       <nav className="nav" aria-label="App">
         {SECTIONS.map((s) => {
