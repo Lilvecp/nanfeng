@@ -20,44 +20,44 @@ type Doc = {
 
 const DOCS: Doc[] = [
   {
-    id: "inv-0871-r", title: "INV-2026-0871-R", meta: "PDF · email · 08:46", kind: "inv", flagged: true, status: { cls: "badge solid crit", label: "Flagged" },
+    id: "inv-118-r", title: "INV-2026-118-R", meta: "PDF · email · 08:46", kind: "inv", flagged: true, status: { cls: "badge solid crit", label: "Flagged" },
     summary: "Look-alike sender and a changed beneficiary. Hidden instruction blocked before it reached the planner.",
     fields: [
-      { k: "issuer", v: "Shanghai Fresh Imports", chk: "ok" },
-      { k: "sender", v: "…-imports.co", chk: "diff", mono: true },
+      { k: "issuer", v: "Shanghai Hongxin Fresh Fruit", chk: "ok" },
+      { k: "sender", v: "…-fruit-import.co", chk: "diff", mono: true },
       { k: "amount", v: "USD 180,000.00", chk: "ok", mono: true },
-      { k: "due_date", v: "2026-08-25", chk: "ok", mono: true },
+      { k: "due_date", v: "2026-12-18", chk: "ok", mono: true },
       { k: "beneficiary", v: "CN ••4412", chk: "diff", mono: true },
       { k: "injection", v: "1 hidden instruction", chk: "blk", cls: "down" },
       { k: "confidence", v: "0.97", chk: "none", mono: true },
     ],
   },
   {
-    id: "notice", title: "Payment delay notice", meta: "EML · 09:08", kind: "notice", status: { cls: "badge acc", label: "Run 0412" },
-    summary: "Triggered run #0412: the importer moves payment of INV-2026-0871 by 45 days.",
+    id: "notice", title: "Payment delay notice", meta: "EML · 10:12", kind: "notice", status: { cls: "badge acc", label: "Run 0412" },
+    summary: "Triggered run #0412: the importer moves payment of INV-2026-118 by 45 days.",
     fields: [
-      { k: "from", v: "finance@shanghaifresh.cn", chk: "ok", mono: true },
-      { k: "invoice", v: "INV-2026-0871", chk: "ok", mono: true },
-      { k: "new_date", v: "2026-10-09 → +45D", chk: "ok", mono: true },
+      { k: "from", v: "finance@hongxinfruit.cn", chk: "ok", mono: true },
+      { k: "invoice", v: "INV-2026-118", chk: "ok", mono: true },
+      { k: "new_date", v: "2026-12-18 → 2027-02-01 (+45D)", chk: "ok", mono: true },
       { k: "confidence", v: "0.99", chk: "none", mono: true },
     ],
   },
   {
-    id: "inv-0871", title: "INV-2026-0871", meta: "PDF · upload · Jun 26", kind: "inv", status: { cls: "badge ok", label: "OCR 14" },
+    id: "inv-118", title: "INV-2026-118", meta: "PDF · upload · Nov 18", kind: "inv", status: { cls: "badge ok", label: "OCR 14" },
     summary: "Original invoice on file. 14 fields extracted; beneficiary CN •••• 0388 is allowlisted.",
     fields: [
-      { k: "issuer", v: "Shanghai Fresh Imports", chk: "ok" },
+      { k: "issuer", v: "Shanghai Hongxin Fresh Fruit", chk: "ok" },
       { k: "amount", v: "USD 180,000.00", chk: "ok", mono: true },
       { k: "beneficiary", v: "CN ••0388", chk: "ok", mono: true },
       { k: "confidence", v: "0.98", chk: "none", mono: true },
     ],
   },
   {
-    id: "stmt-sep", title: "Statement Sep 2026", meta: "CSV · Banco Pacífico", kind: "bank", status: { cls: "badge ok", label: "212 rows" },
+    id: "stmt-sep", title: "Statement Nov 2026", meta: "CSV · Banco Pacífico", kind: "bank", status: { cls: "badge ok", label: "212 rows" },
     summary: "212 transactions reconciled; closing balance matches the ledger.",
     fields: [
       { k: "rows", v: "212", chk: "ok", mono: true },
-      { k: "closing", v: "CLP 142.300.000", chk: "ok", mono: true },
+      { k: "closing", v: "CLP 176.000.000", chk: "ok", mono: true },
       { k: "unmatched", v: "0", chk: "ok", mono: true },
     ],
   },
@@ -67,7 +67,7 @@ const DOCS: Doc[] = [
     fields: [],
   },
   {
-    id: "dus", title: "Export declaration DUS", meta: "JPG · WhatsApp · Oct 8", kind: "notice", status: { cls: "badge crit", label: "OCR fail" },
+    id: "dus", title: "Export declaration DUS", meta: "JPG · WhatsApp · Dec 8", kind: "notice", status: { cls: "badge crit", label: "OCR fail" },
     summary: "ERR OCR_LOW_QUALITY · photo blurred → ask the owner to retake it on WhatsApp.",
     fields: [],
   },
@@ -86,7 +86,7 @@ export default function DocumentsPage() {
   const { notify } = useDesk();
   const [docs, setDocs] = useState(DOCS);
   const [filter, setFilter] = useState<Filter>("all");
-  const [sel, setSel] = useState("inv-0871-r");
+  const [sel, setSel] = useState("inv-118-r");
   const [reported, setReported] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -156,11 +156,11 @@ export default function DocumentsPage() {
           <div className="card">
             <div className="card-h"><span className="h3">Preview · OCR boxes</span><span className="hint">PAGE 1/1</span></div>
             <div className="card-b">
-              {doc.id === "inv-0871-r" ? (
+              {doc.id === "inv-118-r" ? (
                 <div style={{ background: "#F4F4F1", color: "#1A1A1A", padding: 22, display: "flex", flexDirection: "column", gap: 10, fontFamily: "var(--f-body)", fontSize: 12, position: "relative", minHeight: 420 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}><b style={{ fontSize: 15 }}>SHANGHAI FRESH IMPORTS CO.</b><span>INVOICE</span></div>
-                  <span style={{ outline: "2px solid #B93B0B", outlineOffset: 2, alignSelf: "flex-start" }}>billing@shanghaifresh-imports.co</span>
-                  <span>Invoice No. INV-2026-0871-R</span>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}><b style={{ fontSize: 15 }}>SHANGHAI HONGXIN FRESH FRUIT IMPORT CO.</b><span>INVOICE</span></div>
+                  <span style={{ outline: "2px solid #B93B0B", outlineOffset: 2, alignSelf: "flex-start" }}>billing@hongxin-fruit-import.co</span>
+                  <span>Invoice No. INV-2026-118-R</span>
                   <span>Bill to: Huerto Austral Export SpA, Rancagua</span>
                   <div style={{ borderTop: "1px solid #BBB", borderBottom: "1px solid #BBB", padding: "8px 0", display: "flex", justifyContent: "space-between" }}><span>Fresh cherries, 5 kg cases × 9,000</span><span style={{ outline: "2px solid #1F3358", outlineOffset: 2 }}>USD 180,000.00</span></div>
                   <span style={{ outline: "2px solid #B93B0B", outlineOffset: 2, alignSelf: "flex-start" }}>Beneficiary: CN 6222 •••• •••• 4412</span>

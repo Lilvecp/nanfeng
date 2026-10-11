@@ -1,9 +1,10 @@
 "use client";
 
 import { usePref, type Lang } from "./prefs";
+import { N } from "./scenario";
 
-// Key screens are translated (fe-11). Amounts stay in their source currency; the 中文 view uses
-// year-month-day dates, which the mock data already follows.
+// Shell and every desk screen are translated (fe-11). Amounts stay in their source currency; the
+// 中文 view uses year-month-day dates and 万 for large CLP amounts (lib/scenario.ts formatters).
 const DICT = {
   // shell
   "nav.cockpit": { en: "Cockpit", es: "Cockpit", zh: "现金驾驶舱" },
@@ -36,20 +37,24 @@ const DICT = {
   },
   "cockpit.ask": { en: "Ask", es: "Preguntar", zh: "提问" },
   "cockpit.alert.title": { en: "Shanghai importer delayed payment by 45 days", es: "El importador de Shanghái atrasó el pago 45 días", zh: "上海进口商付款延迟45天" },
-  "cockpit.alert.rec": { en: "REC → Partial factoring + CNY forward · saves", es: "REC → Factoring parcial + forward CNY · ahorra", zh: "建议 → 部分保理 + 人民币远期 · 节省" },
+  "cockpit.alert.rec": { en: "REC → 60-day USD pre-export loan (PAE) · saves", es: "REC → Crédito de pre-exportación (PAE) en USD a 60 días · ahorra", zh: "建议 → 60天期美元出口前融资（PAE）· 节省" },
   "cockpit.alert.vs": { en: "vs default bank loan", es: "vs crédito bancario", zh: "（对比银行贷款）" },
   "cockpit.review": { en: "Review plan", es: "Revisar plan", zh: "查看方案" },
   "cockpit.why": { en: "Ask why", es: "¿Por qué?", zh: "为什么" },
   "cockpit.done.title": { en: "Plan approved · executing in sandbox", es: "Plan aprobado · ejecutándose en sandbox", zh: "方案已批准 · 沙盒执行中" },
-  "cockpit.done.sub": { en: "Factoring USD 120,000 + CNY forward · audit hash anchored on FISCO BCOS", es: "Factoring USD 120.000 + forward CNY · hash de auditoría anclado en FISCO BCOS", zh: "保理 120,000 美元 + 人民币远期 · 审计哈希已锚定至 FISCO BCOS" },
-  "cockpit.rejected.title": { en: "Plan rejected · agent preparing FOGAPE loan", es: "Plan rechazado · el agente prepara crédito FOGAPE", zh: "方案被拒 · 代理正在准备 FOGAPE 贷款" },
+  "cockpit.done.sub": {
+    en: `PAE loan USD ${N.loanUsd.toLocaleString("en-US")} · ${N.termDays} days · audit hash anchored on-chain`,
+    es: `Crédito PAE USD ${N.loanUsd.toLocaleString("es-CL")} · ${N.termDays} días · hash de auditoría anclado on-chain`,
+    zh: `PAE 贷款 ${N.loanUsd.toLocaleString("en-US")} 美元 · ${N.termDays}天 · 审计哈希已上链锚定`,
+  },
+  "cockpit.rejected.title": { en: "Plan rejected · agent preparing export factoring", es: "Plan rechazado · el agente prepara factoring de exportación", zh: "方案被拒 · 代理正在准备出口保理" },
   "cockpit.audit": { en: "Open audit log", es: "Ver auditoría", zh: "查看审计日志" },
 
   // approvals
   "approvals.title": { en: "Approval Center", es: "Centro de aprobaciones", zh: "审批中心" },
   "approvals.authorize": { en: "Authorize", es: "Autorizar", zh: "授权" },
   "approvals.otp": { en: "One-time code", es: "Código de un solo uso", zh: "一次性验证码" },
-  "approvals.approve": { en: "Approve USD 120,000", es: "Aprobar USD 120.000", zh: "批准 120,000 美元" },
+  "approvals.approve": { en: `Approve USD ${N.loanUsd.toLocaleString("en-US")}`, es: `Aprobar USD ${N.loanUsd.toLocaleString("es-CL")}`, zh: `批准 ${N.loanUsd.toLocaleString("en-US")} 美元` },
   "approvals.reject": { en: "Reject", es: "Rechazar", zh: "拒绝" },
   "approvals.reason": { en: "Reject · reason (required)", es: "Rechazar · motivo (obligatorio)", zh: "拒绝 · 原因（必填）" },
   "approvals.history": { en: "History", es: "Historial", zh: "历史" },

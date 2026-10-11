@@ -5,20 +5,21 @@ import { useState } from "react";
 import { Topbar } from "@/components/topbar";
 import { useDesk } from "@/lib/desk-state";
 import { useT } from "@/lib/i18n";
+import { N, S, clpFull, clpM, pct, usd } from "@/lib/scenario";
 
 type Step = { n: number; step: string; tool: string; tier: 0 | 1 | 3; model: string; left: number; width: number; latency: string; cost: string };
 
 const STEPS: Step[] = [
-  { n: 1, step: "Read email via OCR", tool: "ocr.extract", tier: 0, model: "Qwen2.5-VL-7B", left: 0, width: 11.2, latency: "2.8s", cost: "0.004" },
+  { n: 1, step: "Read delay notice via OCR", tool: "ocr.extract", tier: 0, model: "Mistral OCR", left: 0, width: 11.2, latency: "2.8s", cost: "0.004" },
   { n: 2, step: "Re-ran 10,000 scenarios", tool: "montecarlo.run", tier: 0, model: "— numerical", left: 12, width: 16.8, latency: "4.2s", cost: "0.000" },
-  { n: 3, step: "Quoted 4 financing options", tool: "bank.quote×4", tier: 1, model: "Qwen3-32B", left: 29.6, width: 24.4, latency: "6.1s", cost: "0.011" },
-  { n: 4, step: "Optimizer selected plan", tool: "optimizer.solve", tier: 0, model: "MILP OR-Tools", left: 54.4, width: 3.6, latency: "0.9s", cost: "0.000" },
+  { n: 3, step: `Quoted ${S.arena.length} financing options`, tool: "bank.quote×4", tier: 1, model: "Qwen3-32B", left: 29.6, width: 24.4, latency: "6.1s", cost: "0.011" },
+  { n: 4, step: "Optimizer selected plan", tool: "optimize_plan", tier: 0, model: "MILP OR-Tools CBC", left: 54.4, width: 3.6, latency: `${S.plan.solveSeconds.toFixed(1)}s`, cost: "0.000" },
 ];
 
 const REPLIES: { match: RegExp; text: string }[] = [
-  { match: /day ?10|día ?10|第10天/i, text: "If Shanghai pays on day 10, P(cash < 0) drops to 9% and the plan shrinks to the CNY forward only. I would still keep the factoring quote warm until the money lands." },
-  { match: /fogape/i, text: "FOGAPE is the cheapest rate (9.6%) but disburses in ~21 days, two days after payroll. I suggest applying now so it is ready for next season." },
-  { match: /forward|cny|hedge/i, text: "The forward locks 0.1404 CNY/USD on ¥1.2M for 60 days. Without it, a 3% CNY move costs about CLP 4.9M." },
+  { match: /on time|a tiempo|day ?10|día ?10|第10天/i, text: `If Shanghai pays on its due date, P(cash < 0) on ${N.crunchDate} drops from ${N.pNeg} to ${pct(S.after.probNegIfOnTime)} and no new financing is needed.` },
+  { match: /fogape/i, text: `FOGAPE has a low rate, but its shortest term is 365 days: interest keeps running long after the gap closes. On its own it would cost ${clpM(S.explanation.find((e) => e.productId.startsWith("FOGAPE"))?.aloneCostClp ?? 0)} vs ${clpM(N.planCost)} for the PAE loan.` },
+  { match: /forward|cny|hedge/i, text: "The CNY invoices are collected in mid-January, after the crunch day. A forward would lock their rate but brings no cash for the payroll, so the optimizer leaves it out at this confidence level." },
 ];
 
 export default function MissionPage() {
@@ -28,8 +29,8 @@ export default function MissionPage() {
   const [killed, setKilled] = useState(false);
   const [confirmKill, setConfirmKill] = useState(false);
   const [chat, setChat] = useState<{ who: "out" | "in"; text: string }[]>([
-    { who: "out", text: "why factoring over the WC loan?" },
-    { who: "in", text: "Loan funds in ~15 business days → day 21, after the D19 gap. Factoring funds in 48h. Forward removes CNY risk on the remaining ¥1.2M." },
+    { who: "out", text: "why the PAE loan over the bank loan?" },
+    { who: "in", text: `Both close the gap, but the PAE loan costs ${clpM(N.planCost)} vs ${clpM(N.defaultCost)} (${N.savingsPct} cheaper) and is repaid in USD with the export proceeds. Bank factoring will not buy ${S.event.invoice} because its buyer already announced a delay.` },
   ]);
   const [q, setQ] = useState("");
   const done = approval === "approved";
@@ -37,7 +38,7 @@ export default function MissionPage() {
   const ask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!q.trim()) return;
-    const reply = REPLIES.find((r) => r.match.test(q))?.text ?? "In the sandbox I answer questions about the Cherry Crisis run: try day 10, FOGAPE or the CNY forward.";
+    const reply = REPLIES.find((r) => r.match.test(q))?.text ?? "In the sandbox I answer questions about the Cherry Crisis run: try “on time”, FOGAPE or the CNY forward.";
     setChat((c) => [...c, { who: "out", text: q }, { who: "in", text: reply }]);
     setQ("");
   };
@@ -47,14 +48,14 @@ export default function MissionPage() {
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">CLP $142.300.000</span></div>
+        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
         <div className="tick"><span className="l">Run</span><span className="v">#0412</span></div>
         <span className="status"><span className={`dot ${status.dot}`} />{status.text}</span>
       </Topbar>
 
       <div className="content">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}><h1 className="h1">{t("nav.mission")}</h1><span className="mono small muted">TRIGGER email:shanghai-fresh · START 09:08:41.032 · ELAPSED 25.1S · COST USD 0.015</span></div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}><h1 className="h1">{t("nav.mission")}</h1><span className="mono small muted">TRIGGER email:shanghai-hongxin · START 10:12:41.032 · ELAPSED 25.1S · COST USD 0.015</span></div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-secondary" type="button" disabled={killed} aria-pressed={paused} onClick={() => { setPaused((p) => !p); notify(paused ? "Run resumed" : "Run paused · no new tool calls"); }}>{paused ? "Resume" : "Pause"} <span className="key">P</span></button>
             {killed ? (
@@ -93,7 +94,7 @@ export default function MissionPage() {
               <tr className={done ? undefined : "pick"}>
                 <td className="num">5</td>
                 <td><b>{done ? "Approved by owner (OTP)" : approval === "rejected" ? "Rejected by owner" : "Awaiting approval"}</b></td>
-                <td className="num">factoring.request</td>
+                <td className="num">loan.request</td>
                 <td><span className="tier t3"><b>L3</b><span>OTP</span></span></td>
                 <td className="num small">—</td>
                 <td><div style={{ position: "relative", height: 12, background: "var(--surface-2)" }}><div style={{ position: "absolute", left: "58.4%", right: done ? "6%" : 0, top: 0, bottom: 0, background: done ? "var(--ok)" : "repeating-linear-gradient(90deg, var(--crit) 0 6px, transparent 6px 9px)" }} /></div></td>
@@ -119,10 +120,10 @@ export default function MissionPage() {
               {done ? <span className="badge ok">Executed</span> : <Link className="btn btn-primary btn-sm" href="/approvals">Open approval <span className="key" style={{ borderColor: "currentColor", color: "inherit" }}>A</span></Link>}
             </div>
             <div className="card-b mono small" style={{ gap: 6 }}>
-              <span><span className="muted">action    </span> factoring.request(amount=USD 120,000, bank=&quot;Banco Pacífico&quot;, env=sandbox)</span>
-              <span><span className="muted">+ hedge    </span> fx.forward(¥1,200,000, tenor=60D)</span>
+              <span><span className="muted">action    </span> loan.request(lender=&quot;{S.approvalRequest.operations[0].params.lender_id}&quot;, amount={usd(N.loanUsd)}, term={N.termDays}D, env=sandbox)</span>
+              <span><span className="muted">cost      </span> {clpM(N.planCost)} vs {clpM(N.defaultCost)} default bank loan</span>
               <span><span className="muted">why L3    </span> new money · counterparty first use this season · &gt; L2 cap CLP 25M</span>
-              <span><span className="muted">notified  </span> WhatsApp 09:09:06 · web 09:09:06</span>
+              <span><span className="muted">notified  </span> WhatsApp 10:15:06 · web 10:15:06</span>
               <span><span className="muted">timeout   </span> 23:41:06 → auto-cancel, no action</span>
             </div>
           </div>
@@ -134,7 +135,7 @@ export default function MissionPage() {
               </div>
               <form className="field" onSubmit={ask}>
                 <label htmlFor="ttmc-ask">Query agent</label>
-                <input id="ttmc-ask" className="input" placeholder="> what if importer pays on day 10?" value={q} onChange={(e) => setQ(e.target.value)} disabled={killed} />
+                <input id="ttmc-ask" className="input" placeholder="> what if Shanghai pays on time?" value={q} onChange={(e) => setQ(e.target.value)} disabled={killed} />
               </form>
             </div>
           </div>
