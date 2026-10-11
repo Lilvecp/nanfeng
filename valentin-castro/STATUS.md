@@ -1,6 +1,6 @@
 # Status · Valentín (R1 + shared frontend) · Oct 11, freeze day
 
-Everything below is on branch **`valentin-castro`** (from `main` at `63742ff`, which already has Vicente's engine). Nothing from the other branches is merged here.
+The web below is on `main`; the R1 documents are on branch **`valentin-castro`**.
 
 ## Done
 
@@ -34,8 +34,7 @@ Everything below is on branch **`valentin-castro`** (from `main` at `63742ff`, w
 
 | Who | What is missing | Why it matters to me |
 |---|---|---|
-| **Camilo** | Merge `andy` (has `camilo-backend`) into `main`; deploy backend + front on our own domain (r3-07, r3-10) | The video and the jury URL need it |
-| **Camilo** | Update `CHERRY_PLAN` in `web/src/lib/desk-state.tsx` (branch `andy`) to the engine's approval request: `op: "loan"`, `lender_id: "LEN-PAE"`, `amount_clp: 140098568`, `term_days: 60` (`vicente-rodriguez/results/cherry_crisis_story.json` → `approval_request`) | In live mode the API still creates "factoring + CNY forward" |
+| **Camilo** | Deploy backend + front on our own domain (r3-07, r3-10) | The video and the jury URL need it |
 | **Camilo** | fe-10 replay against the API (`POST /bank/reset`), fe-14 CNY amounts in the 中文 view, fe-09 real Zavu conversation | Demo Mode and China-ready front |
 | **Camilo** | FISCO BCOS anchoring (today: Sepolia) | Deck slide 7 says "on-chain"; say "FISCO BCOS" only if it lands |
 | **Renato** | No branch on GitHub yet: ingestion → quarantined LLM → planner → tools, Zavu WhatsApp/OTP, ElevenLabs briefing, agent tests, agent section of doc 01 | The "end to end" Must and 40% of the grade; video scenes 3 and 7 show his flow |
@@ -45,12 +44,6 @@ Everything below is on branch **`valentin-castro`** (from `main` at `63742ff`, w
 
 ## Merging this branch
 
-A trial merge with `origin/andy` leaves three small conflicts, all easy:
-
-1. `web/package.json` — keep both scripts (`sync:scenario` and `api:types`).
-2. `web/src/app/(desk)/approvals/page.tsx`, approved message — keep `{x.approvedBody}` (theirs still says factoring + CNY forward), and `mode` is then unused there.
-3. `web/src/components/topbar.tsx` — keep this branch's `Topbar` (section tabs, one row) and their `useDesk` import and `ApiBadge` function; put `<ApiBadge />` first inside `<div className="topbar-ctl">`.
-
-Suggested order: `andy` → `main`, then `vicente-rodriguez` is already in, then `valentin-castro`.
+Done on Oct 11: Camilo merged `camilo-backend` (API, sandbox bank, Sepolia anchoring, live Approvals, Mission Control and Security) into `main` on top of this branch's web, keeping the Simple view, the five sections and the one-row top bar; the top bar now also shows the API / SANDBOX badge. `main` was merged back here, so `web/` is the same on both.
 
 If Vicente re-runs the engine, refresh the web with `cd web && npm run sync:scenario`.
