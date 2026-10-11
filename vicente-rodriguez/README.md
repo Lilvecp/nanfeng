@@ -234,6 +234,24 @@ Known limits that remain (documented in `docs/core-algorithm.md` §5): synthetic
 
 ---
 
+## Battle-plan checklist (R5)
+
+Every task of the battle plan, with where its acceptance criterion is met.
+
+- [x] `r5-01` **Oct 8** · Must — Cherry Crisis scenario numbers + synthetic data generator: 50 exporting SMEs with cherry seasonality (Nov–Feb), customers with delay distributions, costs and debts → `data/scenarios/cherry_crisis.json`, `data/synthetic/smes.json` (50 SMEs), `nanfeng_quant/synthetic.py`
+- [x] `r5-02` **Oct 8** · Must — Real FX data CLP/USD (Banco Central de Chile) and historical USD/CNY for the bootstrap → `data/fx/`, `scripts/fetch_fx.py`
+- [x] `r5-03` **Oct 9** · Must — Catalog of realistic products (factoring, confirming, working capital, FOGAPE, letter of credit, forward) with reference rates → `data/catalog.json` (9 products, + PAE and overdraft), `docs/financial-catalog.md`
+- [x] `r5-04` **Oct 9** · Must — 90-day Monte Carlo: lognormal delay per customer, FX by log-return bootstrap, seasonality → P10/P50/P90, days to crunch, P(cash < 0) → `nanfeng_quant/montecarlo.py`, `fx.py`; `docs/core-algorithm.md` §1
+- [x] `r5-05` **Oct 13** · Should — Market data with sources: SME financing gap, Chile → China exports, payment terms → `docs/market-data.md`
+- [x] `r5-06` **Oct 12** · Should — Backtest (CRPS and interval coverage) with numbers for the docs → `results/backtest_summary.md`
+- [x] `r5-07` **Oct 10** · Must — MILP: minimize total financing cost with cash above a buffer in the P90 scenarios, respecting credit lines, terms and collateral → `nanfeng_quant/optimizer.py`; `docs/core-algorithm.md` §2
+- [x] `r5-08` **Oct 11** · Should — Explainability: which customer or variable causes the crunch and why each option is in or out → `nanfeng_quant/explain.py`; `results/cherry_crisis_summary.md`
+- [x] `r5-09` **Oct 11** · Could — Credit Passport: explainable score shared with a lender, with consent → `nanfeng_quant/credit_passport.py`, `POST /quant/passport`
+- [x] `r5-10` **Oct 13** · Must — NanFeng-Bench: 50 scenarios with a correct answer → success rate, savings vs. default loan, latency → `results/bench_summary.md` (50/50)
+- [x] `r5-11` **Oct 14** · Must — Core algorithm description with formulas, assumptions and results → `docs/core-algorithm.md` (deliverable 01, pending Valentín's English edit)
+
+---
+
 ## Objectives, one by one
 
 ### r5-01 · Cherry Crisis numbers + synthetic data generator (Must)

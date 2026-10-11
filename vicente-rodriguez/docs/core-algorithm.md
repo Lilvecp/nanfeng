@@ -18,6 +18,7 @@ A Chilean cherry exporter pays harvest wages in pesos every month but is paid in
 
 - *Payment delay* of customer c beyond the due date: `D = (1 + m_c)·exp(σ_c·Z) − 1`, floored at 0 and rounded to days, Z ~ N(0,1). m_c is the median delay, σ_c the dispersion (lognormal: right-skewed, a few very late payments). An announced delay ("we will pay 45 days late") is added on top.
 - *Default*: with probability p_c the customer does not pay inside the horizon.
+- *Seasonality*: the cherry season (Nov–Feb) enters through the dated cash calendar itself: weekly shipments peaking in mid-December (each with its consignment advance and a 75-day balance), monthly harvest payrolls that peak in December, and packing/freight costs tied to each shipment. The synthetic generator builds this calendar for each of the 50 SMEs; the Monte Carlo then randomizes when each inflow actually arrives.
 - *FX*: daily log-returns of CLP/USD and CLP/CNY are resampled **jointly** (same historical day for both, so their correlation is kept) with a stationary block bootstrap (Politis & Romano 1994, mean block 10 business days) from the last 5 years of real data (BCCh, FRED). Weekends have no move.
 - *Cherry price*: one factor per path `P = exp(σ_p·Z − σ_p²/2)` (mean 1) multiplies every shipment not yet invoiced.
 - *Parameter uncertainty* (τ = 0.5): the parameters above are estimates, so per path each customer's median delay and dispersion and the price volatility are multiplied by `exp(τ·Z − τ²/2)`.

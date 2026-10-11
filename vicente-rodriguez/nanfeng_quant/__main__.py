@@ -32,6 +32,8 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--seed", type=int, default=7)
     args = ap.parse_args(argv)
+    if hasattr(sys.stdout, "reconfigure"):  # JSON is UTF-8 everywhere (Windows consoles default to cp1252)
+        sys.stdout.reconfigure(encoding="utf-8")
 
     if args.command == "forecast":
         out = tools.forecast_run(args.scenario, args.overrides, seed=args.seed)
