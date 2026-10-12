@@ -127,8 +127,19 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 - **Vicente (quant):** your API is proxied unchanged under `/quant`. For the plan, the front calls `POST /quant/plan/jobs` and gets `quant.plan.*` events.
 - **Front:** one origin for everything; listen to `GET /agent/events` (SSE, supports `Last-Event-ID`) or poll `/agent/events/recent`.
 
+## Security checklist for a public deploy (Andy)
+
+| Variable | Why |
+|---|---|
+| `NANFENG_AGENT_TOKEN` | Long random value, **the same in the backend and the agent service**. Empty = agent routes answer 401 and the agent stops; `change-me` = the backend refuses to start (threat model F6). |
+| `NANFENG_SESSION_SECRET` | Fixed random value. Empty = a new one per process, so every restart signs the owner out. |
+| `NANFENG_OTP_MODE=sms` + `NANFENG_OTP_SECRET` + `ZAVU_API_KEY` + `NANFENG_OWNER_PHONE` | Per-approval codes by SMS instead of the shared demo code (threat model F2). For the video, sandbox mode is fine. |
+| `NANFENG_DEMO` / `NANFENG_OWNER_PASSWORD` | `NANFENG_DEMO=true` shows the demo password on the sign-in screen and enables `POST /bank/reset` (owner only). With `false`, set your own password: the demo one is refused at startup. |
+| `NANFENG_ALLOW_OPEN_AGENT` | Never on a deploy (local development only). |
+
+After the deploy: `cd andy-villarroel/evidence && python build.py --url <backend URL> --out out-live` exports deliverable 06 and re-checks the chain without the backend's code.
+
 ## Not done yet
 
 - FISCO BCOS backend (Sepolia works today for anchoring and the invoice registry). The registry contract is not deployed on Sepolia yet: run `python chain/deploy.py` with the funded anchoring wallet.
 - Single instance: SSE history and plan jobs live in memory (the kill switch is in the database).
-- `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.
