@@ -85,16 +85,16 @@ No outbound message is written by an LLM.
 |---|---|---|---|
 | POST | `/inbound/zavu` | Zavu (`X-Webhook-Token` = `NANFENG_ZAVU_WEBHOOK_SECRET`) or the agent token | a WhatsApp, SMS or email → `handle_document` |
 | POST | `/documents` | owner session (checked with the backend's `/auth/me`) | `{filename, mime, data_base64, source, language}`; PDF, PNG, JPEG, WebP or text, 4 MB max |
-| POST | `/ask` | anyone who can see the cockpit | `{question, run_id?, language}` → `{answer, intent, run_id, model}` |
+| POST | `/ask` | owner session or agent token | `{question, run_id?, language}` → `{answer, intent, run_id, model}` |
 | POST | `/briefing` | owner session | daily cash briefing; `call: false` returns the text without calling |
-| GET | `/runs`, `/runs/{id}` | anyone who can see the cockpit | summaries; one run with its full trace |
+| GET | `/runs`, `/runs/{id}` | owner session or agent token | summaries; one run with its full trace |
 | GET | `/health` | anyone | providers live/offline (never the keys), planner, listener alive |
 
 **Auto-resume.** A background thread follows `GET /agent/events` on the backend (with `Last-Event-ID` on reconnect, exponential backoff). On `approval.approved`, `approval.rejected`, `approval.locked` or `approval.failed` it calls `resume_approval(id)`: the run anchors the audit log and confirms to the owner, with no command. Turn it off with `NANFENG_AGENT_LISTEN=false`.
 
 **"Ask it why".** The question picks an intent (`plan`, `tier`, `alternatives`, `risk`, `blocked`, `did`; ES / EN / 中文 keywords). The answer is a template filled with the run's own tool results: the optimizer's reasons for each product, the forecast headline, the approval's tier, the guard's rules and the call-back number on file. With OpenRouter online the model may rephrase it; the rephrasing is discarded if it contains a number that is not in the draft or the facts.
 
-**For the front (Valentín / Camilo).** Mission Control's "Ask it why" box and the Cockpit's ask bar can call `POST :8200/ask` instead of the canned answers; an "Upload document" button can call `POST :8200/documents` with the owner's bearer token. The agent's steps already arrive on the existing SSE stream.
+**For the front (Valentín / Camilo).** Mission Control's "Ask it why" box and the Cockpit's ask bar can call `POST :8200/ask` instead of the canned answers; an "Upload document" button can call `POST :8200/documents`; all of them take the owner's bearer token. The agent's steps already arrive on the existing SSE stream.
 
 ## Error handling
 

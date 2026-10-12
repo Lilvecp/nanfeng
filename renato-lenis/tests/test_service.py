@@ -36,12 +36,13 @@ def test_zavu_webhook_needs_the_token(api):
     assert api.post("/inbound/zavu", json=payload, headers={"Authorization": "Bearer wrong"}).status_code == 401
 
 
-def test_zavu_webhook_runs_the_agent(api, client):
+def test_zavu_webhook_runs_the_agent(api, client, owner):
     payload = {"channel": "email", "from": "ap@hongxin-fruit.example", "text": fixtures.SHANGHAI_NOTICE}
     run = api.post("/inbound/zavu", json=payload, headers=AGENT).json()
     assert run["status"] == "awaiting_approval"
     assert run["approvals"][0]["tier"] == 3
-    trace = api.get(f"/runs/{run['run_id']}").json()["trace"]
+    assert api.get(f"/runs/{run['run_id']}").status_code == 401  # traces are the owner's
+    trace = api.get(f"/runs/{run['run_id']}", headers=owner).json()["trace"]
     assert "optimize_plan" in [s["tool"] for s in trace]
 
 
@@ -53,7 +54,7 @@ def test_owner_decision_on_the_stream_resumes_the_run(api, svc, client, owner):
     # The listener feeds every SSE event to handle_event; replay the stream the backend produced.
     for e in client.get("/agent/events/recent", params={"limit": 500}).json():
         svc.handle_event(e)
-    after = api.get(f"/runs/{run['run_id']}").json()
+    after = api.get(f"/runs/{run['run_id']}", headers=owner).json()
     assert after["status"] == "completed"
     assert after["approvals"][0]["status"] == "approved"
     assert "anchor_audit" in [s["tool"] for s in after["trace"]]
@@ -88,23 +89,24 @@ def test_pdf_text_layer_carries_what_the_page_hides():
     assert "CL-BANCOPACIFICO-0099155301" in layer
 
 
-def test_ask_explains_the_plan_with_tool_numbers(api):
-    assert "Todavía" in api.post("/ask", json={"question": "¿por qué?"}).json()["answer"]
+def test_ask_explains_the_plan_with_tool_numbers(api, owner):
+    assert api.post("/ask", json={"question": "¿por qué?"}).status_code == 401
+    assert "Todavía" in api.post("/ask", headers=owner, json={"question": "¿por qué?"}).json()["answer"]
     api.post("/inbound/zavu", json={"channel": "email", "text": fixtures.SHANGHAI_NOTICE}, headers=AGENT)
 
-    why = api.post("/ask", json={"question": "¿Por qué elegiste el crédito PAE?", "language": "es"}).json()
+    why = api.post("/ask", headers=owner, json={"question": "¿Por qué elegiste el crédito PAE?", "language": "es"}).json()
     assert why["intent"] == "plan" and "CLP 2,1M" in why["answer"] and "45%" in why["answer"]
-    tier = api.post("/ask", json={"question": "Why do I need an OTP code?", "language": "en"}).json()
+    tier = api.post("/ask", headers=owner, json={"question": "Why do I need an OTP code?", "language": "en"}).json()
     assert tier["intent"] == "tier" and "L3" in tier["answer"] and "never approve" in tier["answer"]
-    alt = api.post("/ask", json={"question": "为什么不用保理？", "language": "zh"}).json()
+    alt = api.post("/ask", headers=owner, json={"question": "为什么不用保理？", "language": "zh"}).json()
     assert alt["intent"] == "alternatives" and "Export factoring" in alt["answer"]
-    risk = api.post("/ask", json={"question": "what is the cash risk", "language": "en"}).json()
+    risk = api.post("/ask", headers=owner, json={"question": "what is the cash risk", "language": "en"}).json()
     assert "81%" in risk["answer"]
 
 
-def test_ask_explains_a_block(api, agent):
+def test_ask_explains_a_block(api, agent, owner):
     agent.handle_document(fixtures.bec_invoice())
-    out = api.post("/ask", json={"question": "¿Por qué bloqueaste la factura?"}).json()
+    out = api.post("/ask", headers=owner, json={"question": "¿Por qué bloqueaste la factura?"}).json()
     assert out["intent"] == "blocked" and "bank-change" in out["answer"] and "+56229876543" in out["answer"]
 
 

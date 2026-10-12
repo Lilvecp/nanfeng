@@ -2,9 +2,9 @@
 
     POST /inbound/zavu     Zavu webhook: a WhatsApp, SMS or email reaches the owner → the agent runs
     POST /documents        the cockpit uploads a PDF or photo (owner session)
-    POST /ask              "Ask it why" in Mission Control
-    POST /briefing         daily cash briefing (cron or the cockpit)
-    GET  /runs, /runs/{id} what the agent did
+    POST /ask              "Ask it why" in Mission Control (owner)
+    POST /briefing         daily cash briefing (owner)
+    GET  /runs, /runs/{id} what the agent did (owner)
     GET  /health           providers live/offline, never the keys
 
 A background listener follows the backend's SSE stream and resumes a paused run the moment the owner
@@ -141,6 +141,14 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
             raise HTTPException(401, {"error": "owner_login_required", "detail": "Sign in as the owner"})
         return "owner"
 
+    def require_reader(authorization: str = Header(default="")) -> str:
+        """Run traces hold amounts, document ids and call-back numbers, and /ask can spend LLM budget:
+        the owner's session, or the agent token for internal callers."""
+        token = settings.agent_token
+        if token and hmac.compare_digest(authorization.removeprefix("Bearer ").strip(), token):
+            return "agent"
+        return require_owner(authorization)
+
     def require_webhook(authorization: str = Header(default=""), x_webhook_token: str = Header(default="")) -> str:
         """Zavu signs with the shared webhook secret; the agent token is also accepted (tests, relays).
         With neither configured (local dev) the route is open, like the backend's agent routes."""
@@ -184,18 +192,18 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
         with svc.lock:
             return svc.agent.handle_document(Document(ocr, source=body.source, text_layer=layer), body.language).summary()
 
-    @app.get("/runs")
+    @app.get("/runs", dependencies=[Depends(require_reader)])
     def runs(limit: int = 20):
         return [r.summary() for r in list(svc.agent.runs.values())[-min(limit, 100):]][::-1]
 
-    @app.get("/runs/{run_id}")
+    @app.get("/runs/{run_id}", dependencies=[Depends(require_reader)])
     def run(run_id: str):
         r = svc.agent.runs.get(run_id)
         if r is None:
             raise HTTPException(404, "unknown run")
         return {**r.summary(), "trace": r.steps}
 
-    @app.post("/ask")
+    @app.post("/ask", dependencies=[Depends(require_reader)])
     def ask(body: AskIn):
         runs = svc.agent.runs
         target = runs.get(body.run_id) if body.run_id else next(
