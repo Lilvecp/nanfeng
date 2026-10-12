@@ -34,6 +34,8 @@ jobs:
           python-version: "3.12"
       - run: pip install -e ".[dev]"
       - run: pytest -q
+      - name: Red team regression (r4-06)
+        run: python ../andy-villarroel/redteam/run.py --backend . --label ci --min-stopped 41
       - name: OpenAPI contract is up to date
         run: |
           python -m app.main ../contracts/openapi.json

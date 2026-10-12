@@ -10,7 +10,7 @@ from .bank import BankError
 from .config import get_settings
 from .db import SessionLocal
 from .events import broker
-from .routers import agent, approvals, audit as audit_router, bank as bank_router, quant
+from .routers import agent, approvals, audit as audit_router, bank as bank_router, privacy, quant, security
 
 VERSION = "0.1.0"
 
@@ -22,6 +22,7 @@ async def lifespan(app: FastAPI):
     if get_settings().seed_on_startup:
         with SessionLocal() as db:
             seed.seed(db)
+            seed.seed_security(db)
     yield
 
 
@@ -53,7 +54,8 @@ def health():
                 "anchor_backend": get_settings().anchor_backend}
 
 
-for r in (bank_router.router, approvals.router, audit_router.router, agent.router, quant.router):
+for r in (bank_router.router, approvals.router, audit_router.router, agent.router, quant.router, security.router,
+          privacy.router):
     app.include_router(r)
 
 

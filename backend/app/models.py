@@ -101,3 +101,37 @@ class Anchor(Base):
     backend: Mapped[str] = mapped_column(String(16))
     tx_hash: Mapped[str | None] = mapped_column(String(80), nullable=True)
     explorer_url: Mapped[str | None] = mapped_column(String(300), nullable=True)
+
+
+class OtpChallenge(Base):
+    """One live OTP per L3 approval (r4-05). Only an HMAC of the code is stored, never the code."""
+
+    __tablename__ = "otp_challenges"
+    approval_id: Mapped[str] = mapped_column(ForeignKey("approvals.id"), primary_key=True)
+    code_hash: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    sends: Mapped[int] = mapped_column(Integer, default=1)
+    sent_to: Mapped[str] = mapped_column(String(32), default="")  # masked phone
+    delivery_id: Mapped[str] = mapped_column(String(80), default="")
+
+
+class PayeeProfile(Base):
+    """What we know about a payee besides its account: used to spot look-alike senders (r4-04)."""
+
+    __tablename__ = "payee_profiles"
+    payee_id: Mapped[str] = mapped_column(ForeignKey("payees.id"), primary_key=True)
+    tax_id: Mapped[str] = mapped_column(String(32), default="")
+    email_domain: Mapped[str] = mapped_column(String(120), default="")
+    phone: Mapped[str] = mapped_column(String(32), default="")  # call-back number on file
+
+
+class PayeeAccount(Base):
+    """Every bank account a payee has had, so an account change is visible (BEC, r4-04)."""
+
+    __tablename__ = "payee_accounts"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    payee_id: Mapped[str] = mapped_column(ForeignKey("payees.id"))
+    bank_account: Mapped[str] = mapped_column(String(64))
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    source: Mapped[str] = mapped_column(String(64), default="")  # seed | owner-approved:<approval id>

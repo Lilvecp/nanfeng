@@ -192,6 +192,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/approvals/{approval_id}/otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send the owner a new code (SMS mode) */
+        post: operations["resend_code_approvals__approval_id__otp_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/approvals/{approval_id}/approve": {
         parameters: {
             query?: never;
@@ -220,6 +237,23 @@ export interface paths {
         put?: never;
         /** Reject */
         post: operations["reject_approvals__approval_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Active policy: tier limits and rules the engine applies */
+        get: operations["get_policy_policy_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -451,6 +485,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/security/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Guard: scan a document's raw text before any LLM */
+        post: operations["scan_security_scan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/check-payee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** BEC: compare a document's issuer, domain and bank account with master data */
+        post: operations["check_payee_security_check_payee_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/privacy/mask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replace personal data with placeholders before an LLM call */
+        post: operations["mask_privacy_mask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -560,6 +645,7 @@ export interface components {
             kind: string;
             /**
              * Actor
+             * @description Label only: the entry is recorded as agent:<label>
              * @default security
              */
             actor: string;
@@ -626,20 +712,68 @@ export interface components {
             /** Fee Pct */
             fee_pct: number;
         };
+        /** MaskIn */
+        MaskIn: {
+            /** Text */
+            text: string;
+        };
+        /** MaskOut */
+        MaskOut: {
+            /** Text */
+            text: string;
+            /**
+             * Mapping
+             * @description Keep it in the backend; never send it to the LLM
+             */
+            mapping: {
+                [key: string]: string;
+            };
+        };
         /** Operation */
         Operation: {
             /**
              * Op
              * @enum {string}
              */
-            op: "payment" | "fx_convert" | "factoring" | "loan" | "forward";
+            op: "payment" | "fx_convert" | "factoring" | "loan" | "forward" | "payee_bank_change";
             /**
              * Params
-             * @description Arguments of the sandbox operation, e.g. payment: {payee_id, amount, currency, reference}; factoring: {receivable_id, lender_id?, share?}; loan: {lender_id, amount_clp, term_days}; forward: {currency, notional, tenor_days}; fx_convert: {from_currency, to_currency, amount}
+             * @description Arguments of the sandbox operation, e.g. payment: {payee_id, amount, currency, reference}; factoring: {receivable_id, lender_id?, share?}; loan: {lender_id, amount_clp, term_days}; forward: {currency, notional, tenor_days}; fx_convert: {from_currency, to_currency, amount}; payee_bank_change: {payee_id, bank_account, verified_by} (always L3)
              */
             params: {
                 [key: string]: unknown;
             };
+        };
+        /** PayeeCheckIn */
+        PayeeCheckIn: {
+            /** Doc Id */
+            doc_id: string;
+            /**
+             * Source
+             * @default upload
+             */
+            source: string;
+            /**
+             * Issuer Name
+             * @default
+             */
+            issuer_name: string;
+            /**
+             * Tax Id
+             * @default
+             */
+            tax_id: string;
+            /**
+             * Sender Domain
+             * @description From the mail headers, never the body
+             * @default
+             */
+            sender_domain: string;
+            /**
+             * Bank Account
+             * @default
+             */
+            bank_account: string;
         };
         /** PayeeOut */
         PayeeOut: {
@@ -681,6 +815,55 @@ export interface components {
              * @default WEB
              */
             channel: string;
+        };
+        /** ScanIn */
+        ScanIn: {
+            /** Doc Id */
+            doc_id: string;
+            /**
+             * Source
+             * @default upload
+             */
+            source: string;
+            /**
+             * Ocr Text
+             * @description Mistral OCR of the rendered pages
+             */
+            ocr_text: string;
+            /**
+             * Text Layer
+             * @description PDF text layer, if any
+             */
+            text_layer?: string | null;
+        };
+        /** SecurityVerdict */
+        SecurityVerdict: {
+            /** Doc Id */
+            doc_id: string;
+            /**
+             * Verdict
+             * @enum {string}
+             */
+            verdict: "clean" | "suspicious" | "malicious";
+            /** Rules */
+            rules: string[];
+            /**
+             * Details
+             * @default {}
+             */
+            details: {
+                [key: string]: unknown;
+            };
+            /** Payee Id */
+            payee_id?: string | null;
+            /** Verify By */
+            verify_by?: {
+                [key: string]: string;
+            } | null;
+            /** Alerted Via */
+            alerted_via?: string | null;
+            /** Audit Seq */
+            audit_seq?: number | null;
         };
         /** TransactionOut */
         TransactionOut: {
@@ -1015,10 +1198,43 @@ export interface operations {
             };
         };
     };
-    approve_approvals__approval_id__approve_post: {
+    resend_code_approvals__approval_id__otp_post: {
         parameters: {
             query?: never;
             header?: never;
+            path: {
+                approval_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_approvals__approval_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
             path: {
                 approval_id: string;
             };
@@ -1053,7 +1269,9 @@ export interface operations {
     reject_approvals__approval_id__reject_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path: {
                 approval_id: string;
             };
@@ -1085,6 +1303,26 @@ export interface operations {
             };
         };
     };
+    get_policy_policy_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     kill_switch_state_policy_kill_switch_get: {
         parameters: {
             query?: never;
@@ -1108,7 +1346,9 @@ export interface operations {
     set_kill_switch_policy_kill_switch_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1544,6 +1784,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    scan_security_scan_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityVerdict"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_payee_security_check_payee_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayeeCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SecurityVerdict"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mask_privacy_mask_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaskOut"];
                 };
             };
             /** @description Validation Error */

@@ -80,7 +80,7 @@ def test_kill_switch_blocks_everything(client):
 
 def test_insufficient_funds_fails_cleanly(client):
     a = client.post("/approvals", json={"action": "huge payroll", "operations": [{
-        "op": "payment", "params": {"payee_id": "PAY-PAYROLL", "amount": 999_000_000}}]}).json()
+        "op": "payment", "params": {"payee_id": "PAY-PAYROLL", "amount": 300_000_000}}]}).json()
     r = client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).json()
     assert r["status"] == "failed" and r["note"].startswith("insufficient_funds")
     assert clp_balance(client) == OPENING

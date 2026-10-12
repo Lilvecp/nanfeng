@@ -26,7 +26,10 @@ def entries(after_seq: int = 0, kind: str | None = None, limit: int = 200, db: S
 @router.post("/entries", response_model=AuditEntryOut, status_code=201,
              summary="Append an entry (policy engine, security guard, agent)")
 def append(body: AuditAppendIn, db: Session = Depends(get_db), _: str = Depends(require_agent)):
-    entry = audit.append(db, body.actor, body.kind, body.payload)
+    # Whoever calls this holds the agent token, so the entry is the agent's: the body only adds a label.
+    # Otherwise the agent could log entries as "owner" (threat model F7).
+    label = body.actor.strip().lower()
+    entry = audit.append(db, "agent" if label in ("", "agent") else f"agent:{label[:40]}", body.kind, body.payload)
     broker.publish("audit.appended", {"seq": entry.seq, "kind": entry.kind, "hash": entry.hash})
     return entry
 

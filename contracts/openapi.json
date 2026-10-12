@@ -391,6 +391,46 @@
         }
       }
     },
+    "/approvals/{approval_id}/otp": {
+      "post": {
+        "tags": [
+          "approvals"
+        ],
+        "summary": "Send the owner a new code (SMS mode)",
+        "operationId": "resend_code_approvals__approval_id__otp_post",
+        "parameters": [
+          {
+            "name": "approval_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Approval Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/approvals/{approval_id}/approve": {
       "post": {
         "tags": [
@@ -406,6 +446,16 @@
             "schema": {
               "type": "string",
               "title": "Approval Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
             }
           }
         ],
@@ -459,6 +509,16 @@
               "type": "string",
               "title": "Approval Id"
             }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
           }
         ],
         "requestBody": {
@@ -495,6 +555,26 @@
         }
       }
     },
+    "/policy": {
+      "get": {
+        "tags": [
+          "approvals",
+          "policy"
+        ],
+        "summary": "Active policy: tier limits and rules the engine applies",
+        "operationId": "get_policy_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/policy/kill-switch": {
       "get": {
         "tags": [
@@ -521,15 +601,27 @@
         ],
         "summary": "Set Kill Switch",
         "operationId": "set_kill_switch_policy_kill_switch_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/KillSwitchIn"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1113,6 +1205,165 @@
           }
         }
       }
+    },
+    "/security/scan": {
+      "post": {
+        "tags": [
+          "security"
+        ],
+        "summary": "Guard: scan a document's raw text before any LLM",
+        "operationId": "scan_security_scan_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityVerdict"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/security/check-payee": {
+      "post": {
+        "tags": [
+          "security"
+        ],
+        "summary": "BEC: compare a document's issuer, domain and bank account with master data",
+        "operationId": "check_payee_security_check_payee_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayeeCheckIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecurityVerdict"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/mask": {
+      "post": {
+        "tags": [
+          "privacy"
+        ],
+        "summary": "Replace personal data with placeholders before an LLM call",
+        "operationId": "mask_privacy_mask_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaskIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1381,6 +1632,7 @@
           "actor": {
             "type": "string",
             "title": "Actor",
+            "description": "Label only: the entry is recorded as agent:<label>",
             "default": "security"
           },
           "payload": {
@@ -1541,6 +1793,42 @@
         ],
         "title": "LenderOut"
       },
+      "MaskIn": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "MaskIn"
+      },
+      "MaskOut": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "mapping": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Mapping",
+            "description": "Keep it in the backend; never send it to the LLM"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "mapping"
+        ],
+        "title": "MaskOut"
+      },
       "Operation": {
         "properties": {
           "op": {
@@ -1550,7 +1838,8 @@
               "fx_convert",
               "factoring",
               "loan",
-              "forward"
+              "forward",
+              "payee_bank_change"
             ],
             "title": "Op"
           },
@@ -1558,7 +1847,7 @@
             "additionalProperties": true,
             "type": "object",
             "title": "Params",
-            "description": "Arguments of the sandbox operation, e.g. payment: {payee_id, amount, currency, reference}; factoring: {receivable_id, lender_id?, share?}; loan: {lender_id, amount_clp, term_days}; forward: {currency, notional, tenor_days}; fx_convert: {from_currency, to_currency, amount}"
+            "description": "Arguments of the sandbox operation, e.g. payment: {payee_id, amount, currency, reference}; factoring: {receivable_id, lender_id?, share?}; loan: {lender_id, amount_clp, term_days}; forward: {currency, notional, tenor_days}; fx_convert: {from_currency, to_currency, amount}; payee_bank_change: {payee_id, bank_account, verified_by} (always L3)"
           }
         },
         "type": "object",
@@ -1567,6 +1856,51 @@
           "params"
         ],
         "title": "Operation"
+      },
+      "PayeeCheckIn": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Doc Id"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Source",
+            "default": "upload"
+          },
+          "issuer_name": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Issuer Name",
+            "default": ""
+          },
+          "tax_id": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Tax Id",
+            "default": ""
+          },
+          "sender_domain": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Sender Domain",
+            "description": "From the mail headers, never the body",
+            "default": ""
+          },
+          "bank_account": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Bank Account",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_id"
+        ],
+        "title": "PayeeCheckIn"
       },
       "PayeeOut": {
         "properties": {
@@ -1665,6 +1999,139 @@
           "reason"
         ],
         "title": "RejectIn"
+      },
+      "ScanIn": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Doc Id",
+            "examples": [
+              "DOC-0042"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Source",
+            "default": "upload",
+            "examples": [
+              "email",
+              "whatsapp",
+              "sms",
+              "upload"
+            ]
+          },
+          "ocr_text": {
+            "type": "string",
+            "maxLength": 200000,
+            "title": "Ocr Text",
+            "description": "Mistral OCR of the rendered pages"
+          },
+          "text_layer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Layer",
+            "description": "PDF text layer, if any"
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_id",
+          "ocr_text"
+        ],
+        "title": "ScanIn"
+      },
+      "SecurityVerdict": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "title": "Doc Id"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "clean",
+              "suspicious",
+              "malicious"
+            ],
+            "title": "Verdict"
+          },
+          "rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Rules"
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details",
+            "default": {}
+          },
+          "payee_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payee Id"
+          },
+          "verify_by": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verify By"
+          },
+          "alerted_via": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alerted Via"
+          },
+          "audit_seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Seq"
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_id",
+          "verdict",
+          "rules"
+        ],
+        "title": "SecurityVerdict"
       },
       "TransactionOut": {
         "properties": {
