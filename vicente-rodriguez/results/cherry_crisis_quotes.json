@@ -11,7 +11,7 @@
    "requirements": "Invoice to an insured or creditworthy foreign buyer; assignment notified to the debtor. A non-recourse factor does not buy an invoice whose debtor has already announced a delay.",
    "eligible": true,
    "reason": "eligible",
-   "rate_reference": "Public Chilean ranges 2026: non-recourse 1.5%-2.2%/month, with recourse 1.2%-1.8%/month (chita.cl, simpli.cl); low end because the buyer is insured",
+   "rate_reference": "Public Chilean ranges 2026: non-recourse 1.5%-2.2%/month, with recourse 1.2%-1.8%/month (portalinnova.cl, 2026-05-25); 0.89%-2.5%/month by payer risk (chita.cl, 2026-03-09). Low end because the buyer is insured",
    "amount_clp": 55594430.873377316,
    "cost_clp": 844862.5535065033,
    "term_days": 19,
@@ -96,7 +96,7 @@
    "requirements": "Online onboarding; funds in 24 h. With recourse: if the buyer has not paid 30 days after the expected date, the exporter repays the advance.",
    "eligible": true,
    "reason": "eligible",
-   "rate_reference": "Fintech rate cards 2026 (Xepelin 0.5%-1.8%, GoCapital 0.6%-2.0%, Crecer 0.8%-2.2% per month; portalinnova.cl)",
+   "rate_reference": "With-recourse factoring 1.2%-1.8%/month (portalinnova.cl, 2026-05-25); 0.89%-2.5%/month by payer risk (chita.cl, 2026-03-09). Upper end because a fintech charges for speed and buys delayed invoices",
    "amount_clp": 55594430.873377316,
    "cost_clp": 1714161.6185958008,
    "term_days": 39,
@@ -167,7 +167,7 @@
    "requirements": "Only receivables backed by a confirmed documentary letter of credit.",
    "eligible": false,
    "reason": "every eligible invoice is collected before the need date",
-   "rate_reference": "Bank trade-finance price lists (SOFR + spread, converted to a monthly discount)"
+   "rate_reference": "3-month CME Term SOFR 4.04% (2026-10-09) + 6.2% spread = 10.2%/yr. LC discounting usually costs SOFR + 1.5%-3%, so this is high on purpose: it can only make a plan that uses it look worse"
   }
  ],
  "catalog_status": "REFERENCE VALUES, NOT QUOTES. Lenders are fictional. Loan rates are anchored to the CMF interest-rate certificate 09/2026 (bank averages for August 2026) and set below the market average on purpose, so the savings we report against the bank loan are conservative. Factoring rates come from public Chilean rate ranges. See docs/financial-catalog.md for every source.",
