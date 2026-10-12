@@ -89,7 +89,7 @@ export default function DesignSystemPage() {
       <div className="card" style={{ gridColumn: "1 / -1" }}><div className="card-h"><span className="h3">Alerts</span></div><div className="card-b">
         <div className="alert crit"><span className="ic">CRIT</span><span><b>CASH &lt; 0 IN 19D</b> · P=0.81 · 10,000 paths</span></div>
         <div className="alert warn"><span className="ic">WARN</span><span><b>CNY EXPOSURE</b> · ¥1,200,000 unhedged 60D</span></div>
-        <div className="alert ok"><span className="ic">OK</span><span><b>CHAIN VERIFIED</b> · FISCO BCOS #8,412,077</span></div>
+        <div className="alert ok"><span className="ic">OK</span><span><b>CHAIN VERIFIED</b> · Sepolia 0x51b8…09d4</span></div>
       </div></div>
       <div className="card" style={{ gridColumn: "span 2" }}><div className="card-h"><span className="h3">Chart · fan</span><div className="legend"><span><i className="sw" style={{ background: "var(--chart-band-2)" }}></i>P25–75</span><span><i className="sw" style={{ background: "var(--chart-band)" }}></i>P10–90</span><span><i className="sw" style={{ background: "var(--chart-1)", height: "2px" }}></i>P50</span><span><i className="sw" style={{ borderTop: "1px dashed var(--brass)", height: "0" }}></i>BUFFER</span><span><i className="sw" style={{ background: "var(--crit)" }}></i>DAY 19</span></div></div>
         <div className="card-b"><svg viewBox="0 0 900 310" width="100%" role="img" aria-label="Fan chart style sample">

@@ -44,7 +44,7 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 3. 10:14 — 9 products checked, 7 quotes; the optimizer picks a **60-day USD pre-export loan of USD 142,400**.
 4. 10:15 — WhatsApp to the owner: cost, reason, "APPROVE / WHY". Approval needs a 6-digit SMS code (L3).
 5. Executed in the sandbox, hash-chained, anchored on-chain. **CLP 2.1M instead of CLP 3.8M** — 45% cheaper.
-6. 10:31 — a "supplier" invoice with a changed bank account and a hidden instruction: **blocked**, owner warned on another channel.
+6. Earlier that morning, 08:47 — a "supplier" invoice with a changed bank account and a hidden instruction: **blocked**, owner warned on another channel.
 
 ## 5 · How it works: the LLM never calculates
 

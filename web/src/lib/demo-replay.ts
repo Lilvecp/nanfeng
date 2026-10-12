@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ApiError, api, type DemoAgentStep } from "./api";
-import { CHERRY_PLAN, SANDBOX_OTP, useDesk } from "./desk-state";
+import { CHERRY_PLAN, useDesk } from "./desk-state";
 import { N, S, SHORT_CUSTOMER, clpFull, usd } from "./scenario";
 
 // Demo Mode replay (fe-10, Camilo): Valentín's Demo page shows the six steps; this makes each one
@@ -10,7 +10,8 @@ import { N, S, SHORT_CUSTOMER, clpFull, usd } from "./scenario";
 // - Live API: POST /demo/step/n does the work on the backend (reset, the approval request through
 //   the policy engine, execution in the sandbox bank, the on-chain anchor) and the SSE stream
 //   carries it to Mission Control, Approvals, Security or a phone in another window.
-// - No backend: the same steps drive the local desk state (reset, approve), still fully offline.
+// - No backend: nothing to do here; the Demo page itself restarts and finishes the local desk
+//   (resetDemo / finishDemo), still fully offline.
 // Runs only when the viewer plays or picks a step, never on page load, and always in order.
 
 const eligible = S.arena.filter((a) => a.covers_need).length;
@@ -44,14 +45,14 @@ const AGENT_STEPS: Record<number, DemoAgentStep[]> = {
 export type ReplayStatus = { live: boolean; state: "idle" | "running" | "ok" | "error"; message?: string };
 
 export function useDemoReplay(step: number, playing: boolean): ReplayStatus {
-  const { mode, resetDemo, submitOtp } = useDesk();
+  const { mode } = useDesk();
   const [status, setStatus] = useState<ReplayStatus>({ live: false, state: "idle" });
   const done = useRef(0); // highest step already played in this take
   const chain = useRef<Promise<void>>(Promise.resolve());
   const prev = useRef({ step, playing });
-  const ctx = useRef({ mode, resetDemo, submitOtp });
+  const live = useRef(mode === "live");
   useEffect(() => {
-    ctx.current = { mode, resetDemo, submitOtp };
+    live.current = mode === "live";
   });
 
   useEffect(() => {
@@ -67,25 +68,21 @@ export function useDemoReplay(step: number, playing: boolean): ReplayStatus {
     for (const n of todo) {
       chain.current = chain.current.then(async () => {
         if (n <= done.current) return;
-        const { mode: m, resetDemo: reset, submitOtp: approve } = ctx.current;
-        const live = m === "live";
-        setStatus({ live, state: "running" });
+        if (!live.current) {
+          done.current = n; // offline: the Demo page drives the local desk itself
+          return;
+        }
+        setStatus({ live: true, state: "running" });
         try {
-          if (live) {
-            await api.demo.step(n, { agent_steps: AGENT_STEPS[n], plan: n === 4 || n === 5 ? CHERRY_PLAN : undefined });
-          } else if (n === 1) {
-            await reset();
-          } else if (n === 5) {
-            await approve(SANDBOX_OTP);
-          }
+          await api.demo.step(n, { agent_steps: AGENT_STEPS[n], plan: n === 4 || n === 5 ? CHERRY_PLAN : undefined });
           done.current = n;
-          setStatus({ live, state: "ok" });
+          setStatus({ live: true, state: "ok" });
         } catch (err) {
           const message = err instanceof ApiError
             ? err.status === 401 ? "Sign in as the owner to replay on the live API"
               : typeof err.detail === "string" ? err.detail : (err.detail as { detail?: string })?.detail ?? `HTTP ${err.status}`
             : "Backend unreachable";
-          setStatus({ live, state: "error", message });
+          setStatus({ live: true, state: "error", message });
         }
       });
     }

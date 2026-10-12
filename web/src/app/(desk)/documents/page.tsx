@@ -217,7 +217,7 @@ export default function DocumentsPage() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(300px, 1fr) minmax(0, 1fr) minmax(300px, 1fr)", gap: 12, alignItems: "start" }}>
-          <div className="card">
+          <div className="card" data-guide="doc-inbox">
             <div className="card-h"><span className="h3">{x.inbox}</span><span className="hint">{x.newest}</span></div>
             <div className="tbl-wrap"><table className="tbl"><tbody>
               {shown.map((d) => (
@@ -230,7 +230,7 @@ export default function DocumentsPage() {
             </tbody></table></div>
           </div>
 
-          <div className="card">
+          <div className="card" data-guide="doc-preview">
             <div className="card-h"><span className="h3">{x.preview}</span><span className="hint">{x.page}</span></div>
             <div className="card-b">
               {doc.id === "inv-118-r" ? (
@@ -254,7 +254,7 @@ export default function DocumentsPage() {
             </div>
           </div>
 
-          <div className="card" style={{ borderColor: doc.flagged ? "var(--crit)" : undefined }}>
+          <div className="card" data-guide="doc-extract" style={{ borderColor: doc.flagged ? "var(--crit)" : undefined }}>
             <div className="card-h" style={{ background: doc.flagged ? "var(--crit-soft)" : undefined }}>
               <span className="h3" style={{ color: doc.flagged ? "var(--crit)" : undefined }}>{doc.flagged ? x.quarantined : x.extracted}</span>
             </div>

@@ -1,8 +1,9 @@
 "use client";
 
 import { N, S, usd } from "./scenario";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { API_URL, ApiError, api, useEventStream, type ApiEvent, type Approval, type ApprovalCreate } from "./api";
+import { useLang } from "./i18n";
 
 // Front-end state for the Cherry Crisis desk. Two modes with the same shape:
 // - "live": NEXT_PUBLIC_API_URL is set and the backend answers; approvals, OTP, kill switch and
@@ -16,9 +17,66 @@ export type PlanId = string; // quant product id, e.g. "PAE-USD"
 export const DEFAULT_PLAN: PlanId = "PAE-USD";
 const APPROVED_ACTION = `pae.loan ${N.termDays}D`;
 const APPROVED_AMOUNT = usd(N.loanUsd);
-const NEXT_BEST = "export factoring";
+
+// Notices the desk shows after an action, in the viewer's language.
+const TOASTS = {
+  en: {
+    approved: "Plan approved · executed in the sandbox · audit hash anchored",
+    failed: "Execution failed",
+    retry: "Backend unreachable · try again",
+    rejected: "Rejected · the agent is preparing the next-cheapest option (export factoring)",
+    rejectFail: "Backend unreachable · rejection not saved",
+    killFail: "Backend unreachable · kill switch not changed",
+    killOn: "Kill switch engaged · all tool calls stopped",
+    killOff: "Agent re-armed · monitoring every 15 minutes",
+    resetFail: "Backend unreachable · reset only applied locally",
+    reset: "Sandbox reset · Cherry Crisis at 10:13",
+    planOk: "Recommended plan selected",
+    planChanged: "Plan changed · approval request updated",
+    signInReject: "Sign in as the owner to reject",
+    signInKill: "Sign in as the owner to change the kill switch",
+    wrongCode: "Wrong or missing code · kill switch stays on",
+  },
+  es: {
+    approved: "Plan aprobado · ejecutado en el sandbox · hash de auditoría anclado",
+    failed: "La ejecución falló",
+    retry: "Sin conexión con el servidor · inténtalo de nuevo",
+    rejected: "Rechazado · el agente prepara la siguiente opción más barata (factoring de exportación)",
+    rejectFail: "Sin conexión con el servidor · el rechazo no se guardó",
+    killFail: "Sin conexión con el servidor · el freno no cambió",
+    killOn: "Freno de emergencia activado · el agente no ejecuta nada",
+    killOff: "Agente reactivado · vigila cada 15 minutos",
+    resetFail: "Sin conexión con el servidor · el reinicio solo se aplicó aquí",
+    reset: "Demo reiniciada · Cherry Crisis a las 10:13",
+    planOk: "Plan recomendado seleccionado",
+    planChanged: "Plan cambiado · solicitud de aprobación actualizada",
+    signInReject: "Inicia sesión como dueño para rechazar",
+    signInKill: "Inicia sesión como dueño para cambiar el freno de emergencia",
+    wrongCode: "Código incorrecto o vacío · el freno sigue activado",
+  },
+  zh: {
+    approved: "方案已批准 · 已在沙盒执行 · 审计哈希已上链",
+    failed: "执行失败",
+    retry: "无法连接服务器 · 请重试",
+    rejected: "已拒绝 · 代理正在准备下一个最便宜的方案（出口保理）",
+    rejectFail: "无法连接服务器 · 拒绝未保存",
+    killFail: "无法连接服务器 · 紧急停止未更改",
+    killOn: "紧急停止已启动 · 代理不再执行任何操作",
+    killOff: "代理已恢复 · 每15分钟监控一次",
+    resetFail: "无法连接服务器 · 仅在本地重置",
+    reset: "演示已重置 · Cherry Crisis 10:13",
+    planOk: "已选择推荐方案",
+    planChanged: "方案已更改 · 审批请求已更新",
+    signInReject: "请以企业主身份登录后再拒绝",
+    signInKill: "请以企业主身份登录后再更改紧急停止",
+    wrongCode: "验证码错误或为空 · 紧急停止保持开启",
+  },
+};
 
 export const SANDBOX_OTP = "482913";
+
+/** What the sandbox bank and the audit chain return when the plan runs (Approvals, Home, Security). */
+export const SANDBOX_RECEIPT = { ref: "PAE-14240", time: "10:16", seq: 1043, hash: "c90e…77b2", tx: "0x7d3a…e21c", block: "Sepolia #7,291,604" };
 
 export type ApiMode = "checking" | "live" | "sandbox";
 export type OtpResult = { status: "ok" | "mismatch" | "locked" | "cancelled"; attemptsLeft: number };
@@ -69,10 +127,46 @@ type DeskState = {
   /** Turning it off on the live API needs the owner's one-time code (L3). Returns false if refused. */
   setKillSwitch: (on: boolean, otp?: string) => Promise<boolean>;
   resetDemo: () => Promise<void>;
+  /** Demo Mode reached its last step: the sandbox desk shows the plan approved everywhere. */
+  finishDemo: () => void;
   notify: (msg: string) => void;
 };
 
 const Ctx = createContext<DeskState | null>(null);
+
+// Sandbox decisions survive a reload or a direct link for the rest of the visit (sessionStorage),
+// so a refresh in the middle of the demo does not send the desk back to 10:13.
+type Saved = { approval: "pending" | "approved" | "rejected"; attempts: number; reason: string };
+const SAVED_KEY = "nanfeng.sandbox";
+const SAVED_DEFAULT: Saved = { approval: "pending", attempts: 3, reason: "" };
+const savedListeners = new Set<() => void>();
+const readSaved = () => {
+  try {
+    return window.sessionStorage.getItem(SAVED_KEY) ?? "";
+  } catch {
+    return "";
+  }
+};
+function writeSaved(v: Saved | null) {
+  try {
+    if (v) window.sessionStorage.setItem(SAVED_KEY, JSON.stringify(v));
+    else window.sessionStorage.removeItem(SAVED_KEY);
+  } catch {
+    // storage blocked: the decision lasts until reload
+  }
+  savedListeners.forEach((l) => l());
+}
+function parseSaved(raw: string): Saved {
+  try {
+    return raw ? { ...SAVED_DEFAULT, ...(JSON.parse(raw) as Partial<Saved>) } : SAVED_DEFAULT;
+  } catch {
+    return SAVED_DEFAULT;
+  }
+}
+const subscribeSaved = (cb: () => void) => {
+  savedListeners.add(cb);
+  return () => savedListeners.delete(cb);
+};
 
 const pad = (n: number) => String(n).padStart(2, "0");
 /** API timestamps are UTC; show them in the viewer's local time like the rest of the desk. */
@@ -104,12 +198,23 @@ function liveStatus(a: Approval | null): ApprovalStatus {
 }
 
 export function DeskStateProvider({ children }: { children: React.ReactNode }) {
+  const T = TOASTS[useLang()];
   const [mode, setMode] = useState<ApiMode>(API_URL ? "checking" : "sandbox");
-  const [approval, setApproval] = useState<ApprovalStatus>("pending");
-  const [otpAttemptsLeft, setAttempts] = useState(3);
-  const [rejectReason, setRejectReason] = useState("");
+  const savedRaw = useSyncExternalStore(subscribeSaved, readSaved, () => "");
+  const saved = useMemo(() => parseSaved(savedRaw), [savedRaw]);
+  const [checking, setChecking] = useState(false);
+  const approval: ApprovalStatus = checking ? "verifying" : saved.approval;
+  const otpAttemptsLeft = saved.attempts;
+  const rejectReason = saved.reason;
   const [plan, setPlan] = useState<PlanId>(DEFAULT_PLAN);
-  const [history, setHistory] = useState(INITIAL_HISTORY);
+  const history = useMemo<HistoryRow[]>(() => {
+    if (saved.approval === "pending") return INITIAL_HISTORY;
+    const approved = saved.approval === "approved";
+    return [
+      { time: "2026-12-11 10:15", id: "APR-0412", action: APPROVED_ACTION, tier: 3, amount: APPROVED_AMOUNT, decision: approved ? "approved" : "rejected", channel: approved ? "WEB+OTP" : "WEB", note: approved ? "Cherry Crisis plan" : `"${saved.reason}"` },
+      ...INITIAL_HISTORY,
+    ];
+  }, [saved]);
   const [toast, setToast] = useState<string | null>(null);
   // live mode
   const [live, setLive] = useState<Approval | null>(null);
@@ -182,13 +287,13 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
           const a = await api.approvals.approve(live.id, code);
           setLive(a);
           await refresh();
-          notify(a.status === "approved" ? "Plan approved · executed in sandbox · hash anchored" : `Execution failed · ${a.note}`);
+          notify(a.status === "approved" ? T.approved : `${T.failed} · ${a.note}`);
           return { status: "ok", attemptsLeft: a.otp_attempts_left };
         } catch (err) {
           if (signInCancelled(err)) return { status: "cancelled", attemptsLeft: live.otp_attempts_left };
           const left = err instanceof ApiError ? ((err.detail as { attempts_left?: number })?.attempts_left ?? 0) : live.otp_attempts_left;
           setLive((a) => (a ? { ...a, otp_attempts_left: left, status: left <= 0 ? "locked" : a.status } : a));
-          if (!(err instanceof ApiError)) notify("Backend unreachable · try again");
+          if (!(err instanceof ApiError)) notify(T.retry);
           return { status: err instanceof ApiError && err.status === 423 ? "locked" : "mismatch", attemptsLeft: left };
         } finally {
           setVerifying(false);
@@ -197,21 +302,18 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
 
       if (otpAttemptsLeft <= 0) return { status: "locked", attemptsLeft: 0 };
       if (code !== SANDBOX_OTP) {
-        setAttempts((n) => n - 1);
+        writeSaved({ ...saved, attempts: otpAttemptsLeft - 1 });
         return { status: otpAttemptsLeft - 1 <= 0 ? "locked" : "mismatch", attemptsLeft: otpAttemptsLeft - 1 };
       }
-      setApproval("verifying");
+      setChecking(true);
       verifyTimer.current = setTimeout(() => {
-        setApproval("approved");
-        setHistory((h) => [
-          { time: "2026-12-11 10:15", id: "APR-0412", action: APPROVED_ACTION, tier: 3, amount: APPROVED_AMOUNT, decision: "approved", channel: "WEB+OTP", note: "Cherry Crisis plan" },
-          ...h,
-        ]);
-        notify("Plan approved · executing in sandbox · hash anchored");
+        setChecking(false);
+        writeSaved({ ...saved, approval: "approved" });
+        notify(T.approved);
       }, 1400);
       return { status: "ok", attemptsLeft: otpAttemptsLeft };
     },
-    [mode, live, otpAttemptsLeft, notify, refresh],
+    [mode, live, otpAttemptsLeft, saved, notify, refresh, T],
   );
 
   const reject = useCallback(
@@ -220,29 +322,24 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
         try {
           setLive(await api.approvals.reject(live.id, reason));
           await refresh();
-          notify("Rejected · agent is preparing the next-cheapest option (FOGAPE)");
+          notify(T.rejected);
         } catch (err) {
-          notify(signInCancelled(err) ? "Sign in as the owner to reject" : "Backend unreachable · rejection not saved");
+          notify(signInCancelled(err) ? T.signInReject : T.rejectFail);
         }
         return;
       }
-      setApproval("rejected");
-      setRejectReason(reason);
-      setHistory((h) => [
-        { time: "2026-12-11 10:15", id: "APR-0412", action: APPROVED_ACTION, tier: 3, amount: APPROVED_AMOUNT, decision: "rejected", channel: "WEB", note: `"${reason}"` },
-        ...h,
-      ]);
-      notify(`Rejected · agent is preparing the next-cheapest option (${NEXT_BEST})`);
+      writeSaved({ ...saved, approval: "rejected", reason });
+      notify(T.rejected);
     },
-    [mode, live, notify, refresh],
+    [mode, live, saved, notify, refresh, T],
   );
 
   const choosePlan = useCallback(
     (p: PlanId) => {
       setPlan(p);
-      notify(p === DEFAULT_PLAN ? "Recommended plan selected" : "Plan changed · approval request updated");
+      notify(p === DEFAULT_PLAN ? T.planOk : T.planChanged);
     },
-    [notify],
+    [notify, T],
   );
 
   const setKillSwitch = useCallback(
@@ -251,25 +348,21 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
         try {
           setKill((await api.killSwitch.set(on, otp)).on);
         } catch (err) {
-          notify(signInCancelled(err) ? "Sign in as the owner to change the kill switch"
-            : err instanceof ApiError && err.status !== 401 && !on ? "Wrong or missing code · kill switch stays on"
-            : "Backend unreachable · kill switch not changed");
+          notify(signInCancelled(err) ? T.signInKill : err instanceof ApiError && err.status !== 401 && !on ? T.wrongCode : T.killFail);
           return false;
         }
       } else setKill(on);
-      notify(on ? "Kill switch engaged · all tool calls stopped" : "Agent re-armed · monitoring every 15m");
+      notify(on ? T.killOn : T.killOff);
       return true;
     },
-    [mode, notify],
+    [mode, notify, T],
   );
 
   const resetDemo = useCallback(async () => {
     clearTimeout(verifyTimer.current);
-    setApproval("pending");
-    setAttempts(3);
-    setRejectReason("");
+    setChecking(false);
+    writeSaved(null);
     setPlan(DEFAULT_PLAN);
-    setHistory(INITIAL_HISTORY);
     if (mode === "live") {
       resetting.current = true;
       try {
@@ -278,14 +371,18 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
         setEvents([]);
         await refresh(true);
       } catch {
-        notify("Backend unreachable · reset only applied locally");
+        notify(T.resetFail);
         return;
       } finally {
         resetting.current = false;
       }
     }
-    notify("Sandbox reset · Cherry Crisis at 10:13");
-  }, [mode, notify, refresh]);
+    notify(T.reset);
+  }, [mode, notify, refresh, T]);
+
+  const finishDemo = useCallback(() => {
+    if (mode !== "live") writeSaved({ ...SAVED_DEFAULT, approval: "approved" });
+  }, [mode]);
 
   const isLive = mode === "live";
   const value = useMemo<DeskState>(
@@ -305,9 +402,10 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       choosePlan,
       setKillSwitch,
       resetDemo,
+      finishDemo,
       notify,
     }),
-    [mode, isLive, verifying, live, approval, otpAttemptsLeft, rejectReason, plan, liveHistory, history, events, killSwitch, toast, submitOtp, reject, choosePlan, setKillSwitch, resetDemo, notify],
+    [mode, isLive, verifying, live, approval, otpAttemptsLeft, rejectReason, plan, liveHistory, history, events, killSwitch, toast, submitOtp, reject, choosePlan, setKillSwitch, resetDemo, finishDemo, notify],
   );
 
   return (

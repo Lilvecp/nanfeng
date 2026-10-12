@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
 import { useCrisisNumbers } from "@/lib/desk-state";
 import { useT } from "@/lib/i18n";
+import { rememberTab, useSectionHrefs } from "@/lib/last-tab";
 import { SECTIONS, sectionOf } from "@/lib/sections";
 
 // Line icons in the spirit of SF Symbols (16px, 1.6 stroke).
@@ -15,7 +16,7 @@ const ICONS: Record<string, React.ReactNode> = {
   bars: <path d="M4 20h16M7 20v-7M12 20V6M17 20v-10" />,
   chat: <path d="M4 5h12v9H9l-4 3v-3H4zM18 9h2v8h-2v3l-3-3h-4" />,
   shield: <><path d="M12 3l7 3v6c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z" /><path d="M9 12l2 2 4-4" /></>,
-  gear: <><circle cx="12" cy="12" r="3" /><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8" /></>,
+  gear: <><path d="M18.69 9.93 L20.87 10.48 L20.87 13.52 L18.69 14.07 L18.19 15.27 L19.35 17.20 L17.20 19.35 L15.27 18.19 L14.07 18.69 L13.52 20.87 L10.48 20.87 L9.93 18.69 L8.73 18.19 L6.80 19.35 L4.65 17.20 L5.81 15.27 L5.31 14.07 L3.13 13.52 L3.13 10.48 L5.31 9.93 L5.81 8.73 L4.65 6.80 L6.80 4.65 L8.73 5.81 L9.93 5.31 L10.48 3.13 L13.52 3.13 L14.07 5.31 L15.27 5.81 L17.20 4.65 L19.35 6.80 L18.19 8.73Z" /><circle cx="12" cy="12" r="3" /></>,
 };
 
 const Icon = ({ name }: { name: string }) => (
@@ -29,6 +30,8 @@ export function Sidebar() {
   const [open, setOpen] = useState(false);
   const inDemo = pathname === "/demo";
   const current = sectionOf(pathname);
+  const hrefs = useSectionHrefs();
+  useEffect(() => rememberTab(pathname), [pathname]);
 
   return (
     <aside className={`side${open ? " open" : ""}`} style={{ viewTransitionName: "desk-side" }}>
@@ -51,7 +54,7 @@ export function Sidebar() {
         {SECTIONS.map((s) => {
           const on = current?.href === s.href;
           return (
-            <Link key={s.href} className={on ? "on" : undefined} href={s.href} onClick={() => setOpen(false)} aria-current={on ? "page" : undefined}>
+            <Link key={s.href} className={on ? "on" : undefined} href={hrefs[s.href] ?? s.href} onClick={() => setOpen(false)} aria-current={on ? "page" : undefined}>
               <Icon name={s.icon} />
               {t(s.key)}
               {s.href === "/approvals" && pendingCount > 0 && <span className="count">{pendingCount}</span>}
