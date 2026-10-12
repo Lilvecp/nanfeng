@@ -56,13 +56,11 @@ def chain(monkeypatch):
     from web3 import Web3
     from web3.providers.eth_tester import EthereumTesterProvider
 
-    from chain.deploy import deploy
-
     w3 = Web3(EthereumTesterProvider())
     wallet = Account.create()
     w3.eth.send_transaction({"from": w3.eth.accounts[0], "to": wallet.address, "value": w3.to_wei(1, "ether")})
     anchoring.set_web3(w3)
-    address = deploy(w3, wallet.key.hex())
+    address = registry.deploy(w3, wallet.key.hex())
     s = get_settings()
     monkeypatch.setattr(s, "registry_backend", "evm")
     monkeypatch.setattr(s, "invoice_registry_address", address)

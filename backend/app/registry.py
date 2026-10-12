@@ -116,6 +116,21 @@ def register(db: Session, receivable_id: str, financing: str) -> InvoiceRegistra
     return reg
 
 
+def deploy(w3, private_key: str) -> str:
+    """Deploys the InvoiceRegistry contract from `private_key`'s wallet and returns its address."""
+    acct = w3.eth.account.from_key(private_key)
+    factory = w3.eth.contract(abi=ARTIFACT["abi"], bytecode=ARTIFACT["bytecode"])
+    tx = factory.constructor().build_transaction({
+        "from": acct.address, "chainId": w3.eth.chain_id,
+        "nonce": w3.eth.get_transaction_count(acct.address, "pending"),
+    })
+    tx_hash = w3.eth.send_raw_transaction(acct.sign_transaction(tx).raw_transaction)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
+    if receipt["status"] != 1:
+        raise RuntimeError(f"Deployment failed: {tx_hash.to_0x_hex()}")
+    return receipt["contractAddress"]
+
+
 def receipt(reg: InvoiceRegistration) -> dict:
     return {"fingerprint": reg.fingerprint, "backend": reg.backend, "contract_address": reg.contract_address,
             "tx_hash": reg.tx_hash, "explorer_url": reg.explorer_url}

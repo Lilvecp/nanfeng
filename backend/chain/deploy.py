@@ -14,22 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app import anchoring  # noqa: E402
 from app.config import get_settings  # noqa: E402
-from app.registry import ARTIFACT  # noqa: E402
-
-
-def deploy(w3, private_key: str) -> str:
-    acct = w3.eth.account.from_key(private_key)
-    factory = w3.eth.contract(abi=ARTIFACT["abi"], bytecode=ARTIFACT["bytecode"])
-    tx = factory.constructor().build_transaction({
-        "from": acct.address, "chainId": w3.eth.chain_id,
-        "nonce": w3.eth.get_transaction_count(acct.address, "pending"),
-    })
-    tx_hash = w3.eth.send_raw_transaction(acct.sign_transaction(tx).raw_transaction)
-    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=300)
-    if receipt["status"] != 1:
-        raise RuntimeError(f"Deployment failed: {tx_hash.to_0x_hex()}")
-    return receipt["contractAddress"]
-
+from app.registry import deploy  # noqa: E402
 
 if __name__ == "__main__":
     s = get_settings()
@@ -37,4 +22,5 @@ if __name__ == "__main__":
         sys.exit("Set NANFENG_EVM_RPC_URL and NANFENG_EVM_PRIVATE_KEY first")
     address = deploy(anchoring.web3(), s.evm_private_key)
     print(f"InvoiceRegistry deployed at {address}")
-    print(f"NANFENG_REGISTRY_BACKEND=evm\nNANFENG_INVOICE_REGISTRY_ADDRESS={address}")
+    print("NANFENG_REGISTRY_BACKEND=evm")
+    print(f"NANFENG_INVOICE_REGISTRY_ADDRESS={address}")
