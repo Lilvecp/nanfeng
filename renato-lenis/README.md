@@ -28,6 +28,13 @@ python3 -m venv .venv && .venv/bin/pip install -e "../backend[dev]" -e ".[dev,se
 .venv/bin/python -m nanfeng_agent cherry          # CLI, against a running backend (+ quant profile)
 ```
 
+## Merged and red-teamed by Andy (Oct 12)
+
+- **PR #4 (`renato-agent`) was merged into `main` as it was.** Nothing in the branch was changed: no commits were pushed to `renato-agent`, and no conflicts came up. Merge commit `41bc42e`. Before merging, the merged tree was tested against the current `main` (owner sign-in, red team gate at 43): backend 95 passed, agent 55 passed, red team 43/43, OpenAPI contract unchanged. CI on `main` passed all four jobs.
+- **Added [`tests/test_redteam_via_agent.py`](tests/test_redteam_via_agent.py)** (Andy's r4-06 work; no agent code changed). It replays the red team's 12 document attacks (PI-01 … PI-12) through `Agent.handle_document`, injected into the clean Cartonera invoice so that only the guard and the quarantine can stop them. A control test checks that the same invoice without the attack is paid (L2), so an agent that blocks everything would not pass.
+- **Result: no attack moves money.** The guard flags all 12: 4 are `malicious` and the run is blocked with nothing extracted; 8 are `suspicious`, so extraction continues with typed fields only and the agent neither pays nor creates an approval. That matches `andy-villarroel/anti-injection-design.md` (suspicious → typed fields; anything citing the document goes to L3).
+- **If this test fails after a change to the agent**, an injected document got further than it should. Check the guard verdict and what the planner did with a `suspicious` document before you relax the test. The attacks live in `andy-villarroel/redteam/attacks.py` (ask Andy).
+
 ## Tasks
 
 - [ ] `r2-01` **Oct 8** · Must — **Accounts and API keys** for OpenRouter, Mistral, Zavu and ElevenLabs with spending limits; keys only in Camilo's secret manager.
