@@ -114,3 +114,12 @@ def test_briefing_needs_the_owner(api, owner):
     assert api.post("/briefing", json={"language": "en"}).status_code == 401
     out = api.post("/briefing", json={"language": "en"}, headers=owner).json()
     assert "Good morning" in out["text"]
+
+
+def test_webhook_fails_closed_without_credentials(agent):
+    from nanfeng_agent.config import Settings
+    agent.settings = Settings(backend_url="http://testserver", agent_token="", zavu_webhook_secret="")
+    with TestClient(create_app(AgentService(agent), listen=False)) as c:
+        r = c.post("/inbound/zavu", json={"channel": "email", "text": fixtures.SHANGHAI_NOTICE})
+    assert r.status_code == 503
+    assert agent.runs == {}

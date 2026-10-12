@@ -151,10 +151,10 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
 
     def require_webhook(authorization: str = Header(default=""), x_webhook_token: str = Header(default="")) -> str:
         """Zavu signs with the shared webhook secret; the agent token is also accepted (tests, relays).
-        With neither configured (local dev) the route is open, like the backend's agent routes."""
+        Fails closed: with neither configured, nobody can feed documents to the agent."""
         secret, token = settings.zavu_webhook_secret, settings.agent_token
         if not secret and not token:
-            return "open"
+            raise HTTPException(503, "webhook not configured: set NANFENG_ZAVU_WEBHOOK_SECRET or NANFENG_AGENT_TOKEN")
         if secret and x_webhook_token and hmac.compare_digest(x_webhook_token, secret):
             return "zavu"
         if token and hmac.compare_digest(authorization.removeprefix("Bearer ").strip(), token):
