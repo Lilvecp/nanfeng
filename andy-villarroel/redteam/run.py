@@ -63,7 +63,8 @@ def main() -> None:
         for atk in attacks.ATTACKS:
             with SessionLocal() as db:
                 seed.reset(db)
-            approvals._kill_switch["on"] = False
+            if hasattr(approvals, "_kill_switch"):  # older backends kept it in memory; newer ones in the DB
+                approvals._kill_switch["on"] = False  # (cleared by seed.reset)
             outbox.clear()
             try:
                 stopped, evidence = atk.fn(attacks.Ctx(client, outbox, AGENT_TOKEN, OWNER_PASSWORD))

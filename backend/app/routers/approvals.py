@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import anchoring, audit, auth, bank, bec, otp, policy, sanctions
+from .. import anchoring, audit, auth, bank, bec, otp, policy, sanctions, state
 from ..config import get_settings
 from ..db import get_db
 from ..events import broker
@@ -15,7 +15,6 @@ from ..security import is_agent, require_agent
 
 router = APIRouter(tags=["approvals"])
 
-_kill_switch = {"on": False}
 
 
 def _get(db: Session, approval_id: str) -> Approval:
@@ -70,7 +69,7 @@ def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Dep
     # The decision and the execution it allows must see the same history (cumulative limits).
     with policy.lock:
         now = utcnow()
-        decision = policy.decide(checks, policy.load_history(db, now), now, _kill_switch["on"])
+        decision = policy.decide(checks, policy.load_history(db, now), now, state.kill_switch_on(db))
         n = (db.scalar(select(func.count()).select_from(Approval)) or 0) + 1
         appr = Approval(
             id=f"{'APR' if decision.tier == 3 else 'AUT'}-{n:04d}", action=body.action,
@@ -148,7 +147,7 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
         raise HTTPException(409, f"Approval is {appr.status}")
-    if _kill_switch["on"]:
+    if state.kill_switch_on(db):
         raise HTTPException(423, "Kill switch is on")
     if "VOICE" in body.channel.upper():
         audit.append(db, "security", "approval.voice_refused", {"approval_id": appr.id, "channel": body.channel})
@@ -199,13 +198,13 @@ def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
 
 
 @router.get("/policy", tags=["policy"], summary="Active policy: tier limits and rules the engine applies")
-def get_policy():
-    return {**policy.POLICY, "kill_switch": _kill_switch["on"]}
+def get_policy(db: Session = Depends(get_db)):
+    return {**policy.POLICY, "kill_switch": state.kill_switch_on(db)}
 
 
 @router.get("/policy/kill-switch", tags=["policy"])
-def kill_switch_state():
-    return _kill_switch
+def kill_switch_state(db: Session = Depends(get_db)):
+    return {"on": state.kill_switch_on(db)}
 
 
 @router.post("/policy/kill-switch/otp", tags=["policy"], dependencies=[Depends(auth.require_owner)],
@@ -237,7 +236,7 @@ def set_kill_switch(body: KillSwitchIn, db: Session = Depends(get_db), authoriza
             audit.append(db, "owner", "policy.kill_switch_otp_failed", {"reason": check})
             raise HTTPException(410 if check == "expired" else 403, {"error": f"otp_{check}"})
     actor = "owner" if owner else "agent"
-    _kill_switch["on"] = body.on
-    audit.append(db, actor, "policy.kill_switch", {"on": body.on})
+    state.set_kill_switch(db, body.on)
+    audit.append(db, actor, "policy.kill_switch", {"on": body.on})  # commits the flag with its audit entry
     broker.publish("policy.kill_switch", {"on": body.on, "by": actor})
-    return _kill_switch
+    return {"on": state.kill_switch_on(db)}

@@ -15,7 +15,6 @@ from fastapi.testclient import TestClient  # noqa: E402
 from app import auth, seed  # noqa: E402
 from app.db import SessionLocal  # noqa: E402
 from app.main import app  # noqa: E402
-from app.routers import approvals  # noqa: E402
 
 
 OWNER_PASSWORD = os.environ["NANFENG_OWNER_PASSWORD"]
@@ -28,7 +27,6 @@ def client():
     with TestClient(app) as c:
         with SessionLocal() as db:
             seed.reset(db)
-        approvals._kill_switch["on"] = False
         auth._failures.clear()
         token = c.post("/auth/login", json={"password": OWNER_PASSWORD}).json()["token"]
         c.headers["Authorization"] = f"Bearer {token}"

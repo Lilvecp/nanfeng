@@ -78,3 +78,21 @@ def test_demo_password_is_only_shown_in_demo_builds_that_use_it(anon, monkeypatc
     assert anon.get("/auth/config").json() == {"demo_password": DEMO_OWNER_PASSWORD}
     monkeypatch.setattr(get_settings(), "demo", False)
     assert auth.demo_hint() is None
+
+
+def test_kill_switch_survives_a_restart(client):
+    """It lives in the database: a restart, a deploy or a sleeping host never turns it off."""
+    from fastapi.testclient import TestClient
+
+    from app.db import SessionLocal
+    from app.main import app
+    from app.state import kill_switch_on
+
+    client.post("/policy/kill-switch", json={"on": True})
+    with TestClient(app) as restarted:  # lifespan runs again, as after a restart
+        assert restarted.get("/policy/kill-switch").json() == {"on": True}
+        assert restarted.get("/policy").json()["kill_switch"] is True
+        r = restarted.post("/approvals", json=PLAN, headers=client.headers).json()
+        assert r["status"] == "blocked"
+    with SessionLocal() as db:  # what any other backend instance would read
+        assert kill_switch_on(db) is True
