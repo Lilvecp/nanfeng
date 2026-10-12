@@ -19,7 +19,7 @@ Feature freeze: **Sunday Oct 11, 23:59 (Chile)**. After the freeze nothing new g
 | After the plan | Cash above the buffer in 96% of 10,000 scenarios · 2% probability of negative cash |
 | Credit Passport | 34 (E) → 67 (B) |
 | Benchmark | NanFeng-Bench 50/50 cases · −41% average financing cost vs default loan |
-| Red team | 4/43 attacks stopped before → 41/43 after |
+| Red team | 4/43 attacks stopped before → 43/43 after |
 
 Decided on Oct 11: the web, deck and video use the engine's plan (PAE loan). The earlier "partial factoring + CNY forward, CLP 4.1M cheaper" story is retired everywhere.
 
