@@ -6,7 +6,7 @@ import { Topbar } from "@/components/topbar";
 import { DEFAULT_PLAN, useDesk } from "@/lib/desk-state";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
-import { N, PRODUCT_SHORT, S, clpM, pct, usd } from "@/lib/scenario";
+import { N, S, clpM, pct, productShort, usd } from "@/lib/scenario";
 
 // Product names come from the quant catalog in English; these are the ES / 中文 labels.
 const PRODUCT_NAME: Record<string, Record<Exclude<Lang, "en">, string>> = {
@@ -21,15 +21,7 @@ const PRODUCT_NAME: Record<string, Record<Exclude<Lang, "en">, string>> = {
   "Letter of credit discounting": { es: "Descuento de carta de crédito", zh: "信用证贴现" },
 };
 const pname = (p: string, lang: Lang) => (lang === "en" ? p : PRODUCT_NAME[p]?.[lang] ?? p);
-const SHORT: Record<string, Record<Exclude<Lang, "en">, string>> = {
-  "Pre-export loan in USD (PAE)": { es: "Crédito PAE (USD)", zh: "PAE 贷款（美元）" },
-  "Export factoring, non-recourse (bank)": { es: "Factoring (banco)", zh: "保理（银行）" },
-  "Fintech factoring, with recourse (fast onboarding)": { es: "Factoring (fintech)", zh: "保理（金融科技）" },
-  "Confirming (supplier payment extension)": { es: "Confirming", zh: "Confirming" },
-  "Working capital loan (default bank credit)": { es: "Crédito bancario", zh: "银行贷款" },
-  "FOGAPE-guaranteed working capital loan": { es: "Crédito FOGAPE", zh: "FOGAPE 贷款" },
-};
-const sname = (p: string, lang: Lang) => (lang === "en" ? PRODUCT_SHORT[p] ?? p : SHORT[p]?.[lang] ?? PRODUCT_SHORT[p] ?? p);
+const sname = productShort;
 
 // ES / 中文 versions of the engine's reasons and requirements (English comes from the engine as is).
 const NOTE: Record<string, Record<Exclude<Lang, "en">, string>> = {
@@ -153,7 +145,7 @@ export default function FinancingPage() {
 
       <div className="content">
         <h1 className="h1">{t("nav.financing")}</h1>
-        <div className="card">
+        <div className="card" data-guide="fin-options">
           <div className="card-h"><span className="h3">{x.book}</span><span className="hint">{x.hint}</span></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>#</th><th>{x.option}</th><th>{x.lender}</th><th className="r">{x.eac}</th><th className="r">{x.quote}</th><th className="r">{x.term}</th><th className="r">{x.alone}</th></tr></thead>
@@ -183,10 +175,10 @@ export default function FinancingPage() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1fr)", gap: 12 }}>
-          <div className="card">
+          <div className="card" data-guide="fin-chart">
             <div className="card-h"><span className="h3">{x.chart}</span><span className="hint">{x.chartHint}</span></div>
             <div className="card-b">
-              <svg viewBox={`0 0 760 ${priced.length * 30 + 10}`} width="100%" role="img" aria-label={`${x.chart}. ${priced.map((r) => `${PRODUCT_SHORT[r.product] ?? r.product}: ${clpM(r.alone!)}`).join("; ")}.`}>
+              <svg viewBox={`0 0 760 ${priced.length * 30 + 10}`} width="100%" role="img" aria-label={`${x.chart}. ${priced.map((r) => `${sname(r.product, lang)}: ${clpM(r.alone!)}`).join("; ")}.`}>
                 {priced.map((r, i) => (
                   <g key={r.product} onClick={() => setFocus(r.product)} style={{ cursor: "pointer" }}>
                     <text className="ch-axis" x="150" y={i * 30 + 22} textAnchor="end" style={r.selected ? { fill: "var(--accent)", fontWeight: 700 } : undefined}>{sname(r.product, lang)}</text>
@@ -198,7 +190,7 @@ export default function FinancingPage() {
               <span className="mono small muted">{x.source}</span>
             </div>
           </div>
-          <div className="card">
+          <div className="card" data-guide="fin-why">
             <div className="card-h">
               <span className="h3">{x.why}</span>
               {approval === "approved" ? (

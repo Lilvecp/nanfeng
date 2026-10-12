@@ -74,6 +74,42 @@ export const PRODUCT_SHORT: Record<string, string> = {
   "Letter of credit discounting": "LC discounting",
 };
 
+const PRODUCT_SHORT_L: Record<string, Record<Exclude<Lang, "en">, string>> = {
+  "Pre-export loan in USD (PAE)": { es: "Crédito PAE (USD)", zh: "PAE 贷款（美元）" },
+  "Export factoring, non-recourse (bank)": { es: "Factoring (banco)", zh: "保理（银行）" },
+  "Fintech factoring, with recourse (fast onboarding)": { es: "Factoring (fintech)", zh: "保理（金融科技）" },
+  "Confirming (supplier payment extension)": { es: "Confirming", zh: "Confirming" },
+  "Working capital loan (default bank credit)": { es: "Crédito bancario", zh: "银行贷款" },
+  "FOGAPE-guaranteed working capital loan": { es: "Crédito FOGAPE", zh: "FOGAPE 贷款" },
+  "Credit line / overdraft": { es: "Línea de crédito", zh: "信用额度" },
+  "CNY forward (sell CNY, cash-settled)": { es: "Forward CNY", zh: "人民币远期" },
+  "Letter of credit discounting": { es: "Descuento de carta de crédito", zh: "信用证贴现" },
+};
+/** Short product label in the view language. */
+export const productShort = (p: string, lang: Lang = "en") =>
+  lang === "en" ? PRODUCT_SHORT[p] ?? p : PRODUCT_SHORT_L[p]?.[lang] ?? PRODUCT_SHORT[p] ?? p;
+
+/** CLP in yuan for the 中文 view, at the scenario's BCCh / FRED rate: "约 1.4 万元" · "约 162 万元". */
+export function cny(clp: number) {
+  const y = Math.abs(clp) / S.fx.clp_per_cny;
+  if (y >= 1e4) return `约 ${num(y / 1e4, "zh", y >= 1e6 ? 0 : 1)} 万元`;
+  return `约 ${num(Math.round(y), "zh")} 元`;
+}
+
+const PRESET_NAME: Record<string, Record<Lang, string>> = {
+  "Base (after the Shanghai notice)": { en: "Base · after the Shanghai notice", es: "Base · tras el aviso de Shanghái", zh: "基准 · 上海通知之后" },
+  "Before the notice": { en: "Before the notice", es: "Antes del aviso", zh: "通知之前" },
+  "All customers +15 days late": { en: "All customers +15 days late", es: "Todos los clientes +15 días", zh: "所有客户再延迟15天" },
+  "CNY -5% vs CLP": { en: "CNY −5% vs CLP", es: "CNY −5% vs CLP", zh: "人民币兑比索 −5%" },
+  "CNY +5% vs CLP": { en: "CNY +5% vs CLP", es: "CNY +5% vs CLP", zh: "人民币兑比索 +5%" },
+  "USD -5% vs CLP": { en: "USD −5% vs CLP", es: "USD −5% vs CLP", zh: "美元兑比索 −5%" },
+  "Cherry price -10%": { en: "Cherry price −10%", es: "Precio de la cereza −10%", zh: "樱桃价格 −10%" },
+  "Cherry price +10%": { en: "Cherry price +10%", es: "Precio de la cereza +10%", zh: "樱桃价格 +10%" },
+  "30 extra harvest workers": { en: "30 extra harvest workers", es: "30 temporeros más", zh: "增加30名采收工人" },
+};
+/** Scenario Lab preset name in the view language. */
+export const presetName = (preset: string, lang: Lang = "en") => PRESET_NAME[preset]?.[lang] ?? preset;
+
 /** Customer short names for tight spots. */
 export const SHORT_CUSTOMER = "Shanghai Hongxin";
 export const SHORT_CUSTOMER_ZH = "上海鸿信";

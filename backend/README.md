@@ -48,6 +48,10 @@ Approve, reject, resend a code, the kill switch and `POST /bank/reset` are owner
 - Demo builds use the public password `huerto-demo-2026` and show it on the sign-in screen (`GET /auth/config`). With `NANFENG_DEMO=false` the backend refuses to start on that password.
 - Reads (`/bank/*`, `/audit/*`, `/approvals` GET, the SSE stream) stay public for now (F11).
 
+## Demo Mode replay (fe-10)
+
+`POST /demo/step/{1..6}` (owner, demo builds only) makes each Cherry Crisis step really happen, so every open screen follows the video over SSE: **1** resets the sandbox · **2–3** publish the forecast and quotes · **4** creates the approval request through the policy engine · **5** approves it with the sandbox code (executes in the bank, anchors on-chain) · **6** closes the run. Agent steps carry `source: "agent-replay"`. The cockpit's Demo page calls it as it plays (`web/src/lib/demo-replay.ts`); without a backend the same steps drive the local desk state. In SMS OTP mode step 5 refuses (the owner approves with the texted code).
+
 ## How money moves
 
 Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations, e.g. factoring + forward):

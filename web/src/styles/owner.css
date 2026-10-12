@@ -126,3 +126,33 @@
 .close-x:hover{background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text)}
 @keyframes owner-in{from{opacity:0;transform:translateY(-4px)}}
 @media (prefers-reduced-motion:reduce){.owner-alert{animation:none}}
+
+/* Execution receipt (Approvals, Home after approval) */
+.receipt{border:1px solid var(--line);border-radius:12px;background:var(--surface-2,var(--bg));padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.receipt.compact{margin-top:6px}
+.receipt-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.receipt-h a{text-transform:none;letter-spacing:0;font-family:var(--f-body,inherit);font-size:13px;color:var(--accent);font-weight:600;text-decoration:none}
+.receipt dl{margin:0;display:flex;flex-direction:column;gap:6px}
+.receipt dl > div{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:10px;font-size:13.5px;align-items:baseline}
+.receipt dt{color:var(--muted)}
+.receipt dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.receipt s{text-decoration-thickness:1px}
+@media (max-width:560px){.receipt dl > div{grid-template-columns:minmax(0,1fr)}}
+
+/* Demo Mode: chart + one panel per step */
+.demo-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(320px,1fr);gap:12px;align-items:stretch}
+.demo-stage{display:flex;flex-direction:column;gap:12px;padding:18px;animation:demo-in .35s ease both}
+.demo-big{font-family:var(--f-mono);font-size:clamp(36px,5vw,56px);font-weight:700;line-height:1}
+.demo-mail{margin:0;padding:12px 14px;border-left:3px solid var(--accent);background:var(--surface-2);font-size:14px;line-height:1.6}
+.demo-kv{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.demo-kv dt{font-size:12px;color:var(--muted)}
+.demo-kv dd{margin:2px 0 0;font-weight:700;font-size:15px}
+.demo-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.demo-bars li{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px}
+.demo-bars i{display:block;height:10px;border-radius:5px;background:var(--line-2)}
+.demo-bars li.on{font-weight:700}
+.demo-bars li.on i{background:var(--ok)}
+.demo-chat{display:flex;flex-direction:column;gap:8px}
+@keyframes demo-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.demo-stage{animation:none}}
+@media (max-width:900px){.demo-grid{grid-template-columns:minmax(0,1fr)}}

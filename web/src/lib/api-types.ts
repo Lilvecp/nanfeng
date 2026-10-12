@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/demo/step/{n}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Play one Cherry Crisis step for real (owner, demo builds only) */
+        post: operations["play_step_demo_step__n__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/bank/accounts": {
         parameters: {
             query?: never;
@@ -758,6 +775,47 @@ export interface components {
             /** Hash */
             hash: string;
         };
+        /**
+         * DemoAgentStep
+         * @description One agent step the replay puts on the live stream (what Mission Control shows).
+         */
+        DemoAgentStep: {
+            /** Step */
+            step: string;
+            /** Tool */
+            tool: string;
+            /**
+             * Tier
+             * @default 0
+             */
+            tier: number;
+            /**
+             * Model
+             * @default
+             */
+            model: string;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Latency S
+             * @default 0
+             */
+            latency_s: number;
+            /**
+             * Detail
+             * @default
+             */
+            detail: string;
+        };
+        /** DemoStepIn */
+        DemoStepIn: {
+            /** Agent Steps */
+            agent_steps?: components["schemas"]["DemoAgentStep"][];
+            plan?: components["schemas"]["ApprovalCreate"] | null;
+        };
         /** EventIn */
         EventIn: {
             /** Type */
@@ -1130,6 +1188,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    play_step_demo_step__n__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string;
+            };
+            path: {
+                n: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoStepIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

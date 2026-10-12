@@ -190,7 +190,7 @@
 .demo-step.now{background:#A3122E;color:#FFFFFF;font-weight:700}
 .demo-step i{font-style:normal}
 .ctl{width:40px;height:40px;border:1px solid #3A4250;background:transparent;color:#F3F3EF;display:grid;place-items:center;cursor:pointer;border-radius:2px}
-.ctl.main{background:#A3122E;color:#FFFFFF;border-color:#A3122E}
+.ctl.ctl-main{background:#A3122E;color:#FFFFFF;border-color:#A3122E}
 
 /* ===== v2 · "Private desk" adapted to Ant Group / Miaoxiang cues =====
    cinematic deep-navy chrome, pill controls, softer rounded cards,
@@ -303,7 +303,7 @@
 .vcard.open::before{background:#C9A866}
 .demo-bar{border-top-color:#C9A866}
 .demo-step.now{background:#F3F3EF;color:#14171C}
-.ctl.main{background:#F3F3EF;color:#14171C;border-color:#F3F3EF}
+.ctl.ctl-main{background:#F3F3EF;color:#14171C;border-color:#F3F3EF}
 .lp-top .btn-cherry,.cine .btn-cherry{background:#A9BEE6;color:#0E1116}
 
 /* ===== v5 · Private bank look: light porcelain chrome, white sidebar, navy only as accent ===== */

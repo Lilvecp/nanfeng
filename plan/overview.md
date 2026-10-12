@@ -13,11 +13,11 @@ Behind it are three things almost no team will have together: probabilistic fore
 | Time | Event |
 |------|-------|
 | 08:00 | Huerto Austral Export SpA (fictional) receives its cash briefing by voice, in Spanish, with ElevenLabs. |
+| 08:47 (alert) | A "supplier" invoice arrives with a changed bank account and a hidden instruction. NanFeng blocks it and alerts the owner by SMS. |
 | 10:12 | The Shanghai importer emails that it will pay USD 180,000 45 days late. Mistral OCR reads the notice. |
 | 10:13 (alert) | NanFeng re-runs 10,000 scenarios: 81% probability of negative cash in 19 days, right at harvest payroll. |
 | 10:14 | Checks 9 products (7 quotes) and the MILP picks a 60-day USD pre-export loan (PAE) of USD 142,400: CLP 2.1M vs CLP 3.8M for the default bank loan (45% cheaper). |
 | 10:15 | WhatsApp to the owner via Zavu: summary, cost, why. Approves with OTP (level L3). Executed in the sandbox and the hash goes on-chain. |
-| 10:31 (alert) | A "supplier" invoice arrives with a changed bank account and a hidden instruction. NanFeng blocks it and alerts through another channel. |
 
 _Numbers come from the quant engine's run (`vicente-rodriguez/results/cherry_crisis_story.json`); see [valentin-castro/scope-moscow.md](../valentin-castro/scope-moscow.md)._
 

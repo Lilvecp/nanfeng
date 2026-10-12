@@ -1,0 +1,54 @@
+/* NanFeng guide: sail button, first-visit tour (spotlight + bubble) and help panel. Uses the
+   desk tokens so it follows light / dark; motion is short and switched off for reduced motion. */
+
+.guide-fab{position:fixed;right:20px;bottom:20px;z-index:60;width:52px;height:52px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);box-shadow:0 6px 20px rgba(10,20,40,.18);display:grid;place-items:center;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+.guide-fab:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(10,20,40,.22)}
+.guide-fab:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.guide-fab.fresh::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);animation:guide-ring 1.8s ease-out infinite}
+.guide-fab-dot{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:var(--cherry);border:2px solid var(--surface)}
+
+.guide-layer{position:fixed;inset:0;z-index:70}
+.guide-dim{position:fixed;inset:0;background:rgba(8,16,30,.5)}
+.guide-spot{position:fixed;border-radius:10px;box-shadow:0 0 0 9999px rgba(8,16,30,.5);outline:2px solid var(--accent);outline-offset:0;transition:top .35s ease,left .35s ease,width .35s ease,height .35s ease;pointer-events:none}
+
+.guide-bubble{position:fixed;width:min(360px,calc(100vw - 32px));background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px rgba(8,16,30,.28);padding:18px 18px 14px 18px;display:flex;flex-direction:column;gap:8px;transition:top .35s ease,left .35s ease}
+.guide-avatar{position:absolute;top:-20px;left:16px;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid var(--line-2);display:grid;place-items:center;box-shadow:0 4px 12px rgba(8,16,30,.15)}
+.guide-avatar.moving{animation:guide-sail .65s ease}
+.guide-bubble.hello{width:min(420px,calc(100vw - 32px));padding:40px 24px 18px;text-align:center;align-items:center}
+.guide-bubble.hello .guide-avatar{top:-34px;left:50%;margin-left:-34px;width:68px;height:68px;animation:guide-hello .9s ease}
+.guide-bubble.hello .guide-title{font-size:21px}
+.guide-bubble.hello .guide-actions{width:100%}
+.guide-count{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-left:46px;min-height:16px}
+.guide-title{margin:4px 0 0;font-family:var(--f-display);font-size:18px;font-weight:600;line-height:1.25}
+.guide-body{margin:0;font-size:14px;line-height:1.5;color:var(--text)}
+.guide-dots{display:flex;gap:5px;margin-top:2px}
+.guide-dots i{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.guide-dots i.on{background:var(--accent);width:16px;border-radius:3px}
+.guide-actions{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+
+.guide-panel{position:fixed;right:20px;bottom:84px;z-index:60;width:min(340px,calc(100vw - 32px));background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px rgba(8,16,30,.24);padding:16px;display:flex;flex-direction:column;gap:10px;animation:guide-pop .18s ease}
+.guide-panel-h{display:flex;align-items:center;gap:8px;font-size:14px}
+.guide-tip{position:fixed;right:20px;bottom:84px;z-index:60;width:min(340px,calc(100vw - 32px));background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-left:3px solid var(--accent);border-radius:12px;box-shadow:0 14px 34px rgba(8,16,30,.22);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start;animation:guide-pop .2s ease}
+.guide-tip .guide-actions{grid-column:1 / -1;margin-top:2px}
+.guide-nudge{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;background:var(--cherry-soft);font-size:13px;font-weight:600;flex-wrap:wrap}
+
+@keyframes guide-ring{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+@keyframes guide-sail{0%{transform:translate(-10px,6px) rotate(-8deg)}60%{transform:translate(2px,-3px) rotate(3deg)}100%{transform:none}}
+@keyframes guide-hello{0%{transform:translateY(14px) scale(.6) rotate(-12deg);opacity:0}55%{transform:translateY(-6px) scale(1.06) rotate(4deg);opacity:1}100%{transform:none}}
+@keyframes guide-pop{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
+
+@media (max-width:640px){
+  .guide-fab{right:14px;bottom:14px;width:48px;height:48px}
+  .guide-panel{right:16px;bottom:72px}
+}
+@media (prefers-reduced-motion:reduce){
+  .guide-fab.fresh::after,.guide-avatar.moving,.guide-panel,.guide-tip,.guide-bubble.hello .guide-avatar{animation:none}
+  .guide-spot,.guide-bubble,.guide-fab{transition:none}
+}
+
+/* notices (toasts) sit left of the sail button instead of under it */
+body:has(.guide-fab) .toast{right:88px}
+@media (max-width:640px){body:has(.guide-fab) .toast{right:76px;left:16px;max-width:none}}
+
+/* room under the last card so the sail button never covers content */
+.shell .main{padding-bottom:84px}
