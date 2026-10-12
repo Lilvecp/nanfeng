@@ -105,7 +105,7 @@ The security modules (policy engine, OTP, document guard, BEC checks, PII maskin
 
 | Asset | License | Where |
 |---|---|---|
-| IBM Plex Sans, IBM Plex Sans Condensed | SIL Open Font License 1.1 | Web (via `next/font`, served from our own origin) and design mockups |
+| IBM Plex Sans, IBM Plex Sans Condensed | SIL Open Font License 1.1 | Web (woff2 files committed in `web/src/fonts`, served from our own origin) and design mockups |
 | JetBrains Mono | SIL Open Font License 1.1 | Web and design mockups |
 | `earth-night.jpg`, `earth-topology.png` (three-globe examples, NASA imagery) | Public domain (NASA) | Globe textures |
 | NanFeng logo (Sail) and all UI design | Ours | `web/src/components/logo.tsx`, `design/private-desk/` |

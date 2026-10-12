@@ -60,7 +60,7 @@ export default function DesignSystemPage() {
       <div className="card"><div className="card-h"><span className="h3">Body · IBM Plex Sans</span></div><div className="card-b"><span style={{ fontSize: "15px" }}>Shanghai Hongxin will pay 45 days late. Plan ready.</span><span className="hint">400/500/600 · 14px base · OFL</span></div></div>
       <div className="card"><div className="card-h"><span className="h3">Numeric · JetBrains Mono</span></div><div className="card-b"><span className="num" style={{ fontSize: "18px", fontWeight: "700" }}>CLP $176.000.000</span><span className="num" style={{ fontSize: "18px", fontWeight: "700" }}>USD 180,000.00 · ¥1,200,000</span><span className="num muted small">2026年10月09日 09:14:06</span></div></div>
     </section>
-    <div className="alert" style={{ fontFamily: "var(--f-mono)", fontSize: "12px" }}><span className="ic" style={{ background: "var(--accent)" }}>SELF-HOST</span><span>All fonts OFL, shipped as subset woff2 from our own origin. CJK: Noto Sans SC self-hosted. No third-party font CDN in production.</span></div>
+    <div className="alert" style={{ fontFamily: "var(--f-mono)", fontSize: "12px" }}><span className="ic" style={{ background: "var(--accent)" }}>SELF-HOST</span><span>All fonts OFL, shipped as subset woff2 from our own origin (src/fonts). CJK uses the system font (PingFang SC, Microsoft YaHei, Noto Sans SC). No third-party font CDN, at build time or in production.</span></div>
 
     <section style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" }}>
       <div className="card"><div className="card-h"><span className="h3">Buttons</span></div><div className="card-b" style={{ flexDirection: "row", flexWrap: "wrap" }}>
