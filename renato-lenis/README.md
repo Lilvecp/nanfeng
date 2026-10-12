@@ -17,7 +17,7 @@
 
 The agent lives in [`nanfeng_agent/`](nanfeng_agent) and is documented in [`docs/agent.md`](docs/agent.md) (r2-11). It runs as a service on :8200 (`docker compose up`, service `agent`): Zavu webhook, document uploads, "ask it why", the daily briefing, and a listener that resumes a paused run as soon as the owner approves in the cockpit. 49 tests run against the real backend (CI job "Agent tests"), and the whole Cherry Crisis was run live with the backend, the quant engine and Mistral OCR.
 
-Still open: **r2-01** for OpenRouter, Zavu and ElevenLabs (Mistral is live with a USD 10 limit). Their code is written and tested against mocked APIs; each needs its key, then one live run. Every provider is optional: without a key the agent uses deterministic stand-ins, so the demo and CI never depend on a paid API. Handoff to the front: the cockpit's "Ask it why" and an upload button can call the service (see the doc).
+Still open: **r2-01** for Zavu and ElevenLabs. Mistral (USD 10 limit) and OpenRouter (USD 5 limit) are live: a full Cherry Crisis run with the LLM planner (Claude Sonnet 5.5) and the quarantined extractor (Mistral Small) costs about USD 0.02. Their code is written and tested against mocked APIs; each needs its key, then one live run. Every provider is optional: without a key the agent uses deterministic stand-ins, so the demo and CI never depend on a paid API. Handoff to the front: the cockpit's "Ask it why" and an upload button can call the service (see the doc).
 
 ```sh
 cd renato-lenis

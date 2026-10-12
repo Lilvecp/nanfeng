@@ -68,16 +68,6 @@ class IngestResult:
     steps: list[dict[str, Any]]
 
 
-def _unmask(fields: dict[str, Any], mapping: dict[str, str]) -> dict[str, Any]:
-    out = {}
-    for k, v in fields.items():
-        if isinstance(v, str):
-            for token, value in mapping.items():
-                v = v.replace(token, value)
-        out[k] = v
-    return out
-
-
 def _check_payee(doc: Document, fields: dict[str, Any], backend: Backend, step) -> Verdict:
     t0 = time.monotonic()
     try:
@@ -124,7 +114,7 @@ def ingest(doc: Document, backend: Backend, router: ModelRouter | None = None) -
     if router is not None and router.online:
         masked = backend.post("/privacy/mask", {"text": doc.ocr_text})
         text, mapping = masked["text"], masked["mapping"]
-    fields_doc, meta = quarantine.extract(text, router)
+    fields_doc, meta = quarantine.extract(text, router, mapping)
     if fields_doc is None:
         guard = Verdict(verdict="suspicious", rules=guard.rules + ["extraction-rejected"])
         step("Quarantined extraction", "quarantine.extract", t0, model=meta.get("model", ""),
@@ -132,11 +122,7 @@ def ingest(doc: Document, backend: Backend, router: ModelRouter | None = None) -
         pi = PlannerInput(doc_id=doc.doc_id, provenance=provenance, fields={}, guard=guard,
                           payee_check=Verdict(verdict="skipped"), extraction="rejected")
         return IngestResult(pi, steps)
-    fields = _unmask(fields_doc.model_dump(mode="json", exclude_none=True), mapping)
-    try:  # unmasked values must still satisfy the schema
-        fields = quarantine.validate(fields).model_dump(mode="json", exclude_none=True)
-    except ValueError:
-        fields = fields_doc.model_dump(mode="json", exclude_none=True)
+    fields = fields_doc.model_dump(mode="json", exclude_none=True)
     step("Quarantined extraction", "quarantine.extract", t0, model=meta.get("model", ""),
          cost_usd=meta.get("cost_usd", 0.0),
          detail=f"{fields.get('doc_type')} · {fields.get('currency', '')} {fields.get('amount', '')}".strip())

@@ -74,8 +74,25 @@ def validate(raw: dict) -> ExtractedDoc:
     return ExtractedDoc.model_validate(raw)
 
 
-def extract(text: str, router: ModelRouter | None = None) -> tuple[ExtractedDoc | None, dict]:
-    """Returns (fields or None, meta). None means the output failed validation: treat as suspicious."""
+def unmask(raw: dict, mapping: dict[str, str]) -> dict:
+    """Put our masked values back before validation. Models often drop the ⟦ ⟧ around a placeholder
+    (RUT_1), so both spellings are replaced. Only placeholders from our own mapping are touched."""
+    out = {}
+    for key, value in raw.items():
+        if isinstance(value, str):
+            for token, real in mapping.items():
+                value = value.replace(token, real)
+                bare = token.strip("⟦⟧")
+                if bare:
+                    value = re.sub(rf"\b{re.escape(bare)}\b", real, value)
+        out[key] = value
+    return out
+
+
+def extract(text: str, router: ModelRouter | None = None,
+            mapping: dict[str, str] | None = None) -> tuple[ExtractedDoc | None, dict]:
+    """Returns (fields or None, meta). None means the output failed validation: treat as suspicious.
+    `mapping` comes from /privacy/mask: the model saw placeholders, the fields get the real values."""
     if router is not None and router.online:
         boundary = secrets.token_hex(4)
         messages = [{"role": "system", "content": system_prompt(boundary)},
@@ -87,7 +104,10 @@ def extract(text: str, router: ModelRouter | None = None) -> tuple[ExtractedDoc 
         meta = {"extractor": "quarantined-llm", "model": out.model, "cost_usd": out.cost_usd,
                 "latency_s": out.latency_s}
         try:
-            return validate(out.json()), meta
+            raw = out.json()
+            if not isinstance(raw, dict):
+                raise ValueError("not an object")
+            return validate(unmask(raw, mapping or {})), meta
         except (ValueError, ValidationError) as exc:
             return None, {**meta, "rejected": exc.__class__.__name__}
     return _offline(text, "offline")

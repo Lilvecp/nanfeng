@@ -82,6 +82,7 @@ SYSTEM = """You are NanFeng's planner, the autonomous CFO of a Chilean fruit exp
 You receive typed facts about one event (never the document text) and return the tool calls to run,
 in order, as JSON: {"steps": [{"tool": "<name>", "args": {...}, "when": "" | "at_risk"}]}.
 Rules: numbers come only from tools; money tools only use ids and amounts present in the facts;
+quant tools use exactly the scenario given in the facts (what-ifs go in "overrides");
 "at_risk" steps run only if the forecast shows a cash risk; at most 8 steps. JSON only."""
 
 
@@ -108,14 +109,14 @@ class LLMPlanner:
         except (Offline, RouterError, ValueError, KeyError, TypeError) as exc:
             rule_plan.note = f"llm plan unavailable ({exc.__class__.__name__}); rules used"
             return rule_plan
-        problem = check(steps, pi)
+        problem = check(steps, pi, scenario)
         if problem:
             rule_plan.note = f"llm plan rejected ({problem}); rules used"
             return rule_plan
         return Plan(steps, self.name, model=out.model, cost_usd=out.cost_usd)
 
 
-def check(steps: list[PlannedStep], pi: PlannerInput) -> str:
+def check(steps: list[PlannedStep], pi: PlannerInput, scenario: str = "cherry_crisis") -> str:
     """Empty string if the plan is acceptable, else the first problem."""
     known_ids = {v for v in (pi.payee_check.payee_id, pi.fields.get("invoice_number")) if v}
     known_ids |= {c.contact_id for c in CUSTOMERS if c.id == pi.customer_id}
@@ -130,6 +131,8 @@ def check(steps: list[PlannedStep], pi: PlannerInput) -> str:
             args = tool.args.model_validate(s.args)
         except ValidationError:
             return f"bad arguments for {s.tool}"
+        if getattr(args, "scenario", scenario) != scenario:
+            return f"{s.tool}.scenario={args.scenario} is not the company's scenario"
         for key in ("payee_id", "receivable_id", "contact_id"):
             value = getattr(args, key, None)
             if value and value not in known_ids:

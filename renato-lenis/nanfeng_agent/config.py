@@ -45,7 +45,7 @@ class Settings:
     models: dict[str, list[str]] = field(default_factory=lambda: {
         "classify": ["mistralai/mistral-small-3.2-24b-instruct", "google/gemini-2.5-flash"],
         "extract": ["mistralai/mistral-small-3.2-24b-instruct", "google/gemini-2.5-flash"],
-        "plan": ["anthropic/claude-sonnet-4.5", "openai/gpt-4.1", "google/gemini-2.5-pro"],
+        "plan": ["anthropic/claude-sonnet-5.5", "anthropic/claude-sonnet-4.5", "openai/gpt-4.1"],
     })
     elevenlabs_voice_id: str = "21m00Tcm4TlvDq8IkWam"
     # Hard caps per run (OWASP LLM10).

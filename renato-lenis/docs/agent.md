@@ -92,7 +92,7 @@ No outbound message is written by an LLM.
 
 **Auto-resume.** A background thread follows `GET /agent/events` on the backend (with `Last-Event-ID` on reconnect, exponential backoff). On `approval.approved`, `approval.rejected`, `approval.locked` or `approval.failed` it calls `resume_approval(id)`: the run anchors the audit log and confirms to the owner, with no command. Turn it off with `NANFENG_AGENT_LISTEN=false`.
 
-**"Ask it why".** The question picks an intent (`plan`, `tier`, `alternatives`, `risk`, `blocked`, `did`; ES / EN / 中文 keywords). The answer is a template filled with the run's own tool results: the optimizer's reasons for each product, the forecast headline, the approval's tier, the guard's rules and the call-back number on file. With OpenRouter online the model may rephrase it; the rephrasing is discarded if it contains a number that is not in the draft or the facts.
+**"Ask it why".** The question picks an intent (`plan`, `tier`, `alternatives`, `risk`, `blocked`, `did`; ES / EN / 中文 keywords). The answer is a template filled with the run's own tool results: the optimizer's reasons for each product, the forecast headline, the approval's tier, the guard's rules and the call-back number on file. No LLM rewrites the answer: in a live run a model gave a plausible but false reason, and no check can catch that reliably.
 
 **For the front (Valentín / Camilo).** Mission Control's "Ask it why" box and the Cockpit's ask bar can call `POST :8200/ask` instead of the canned answers; an "Upload document" button can call `POST :8200/documents`; all of them take the owner's bearer token. The agent's steps already arrive on the existing SSE stream.
 
@@ -134,6 +134,6 @@ Backend + quant engine + agent service on one machine, Mistral OCR live:
 
 ## Not done yet
 
-- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 10:31 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter, Zavu and ElevenLabs are written and tested against mocked APIs; they need their keys with spending limits, then one live run each.
+- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 10:31 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. Zavu and ElevenLabs are written and tested against mocked APIs; they need their keys, then one live run each.
 - **Front wiring:** the cockpit still shows canned answers in "Ask it why" and has no upload button; the endpoints above are ready for it.
 - **LangGraph:** the battle plan listed it. The orchestrator is a plain, explicit state machine instead (fewer dependencies, every transition in one file, easy to test). Swapping it in later does not change the tools or the channel layer.

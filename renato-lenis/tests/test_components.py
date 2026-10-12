@@ -253,3 +253,19 @@ def test_voice_synthesizes_with_elevenlabs_then_calls():
     d = v.send(msg)
     assert d.channel == "voice" and msg.audio == b"ID3audio"
     assert calls == [("/v1/text-to-speech/voice1", "ek", "eleven_multilingual_v2")]
+
+
+def test_masked_placeholder_is_restored_before_validation():
+    """Live bug: the model returned the RUT placeholder without its brackets ("RUT_1")."""
+    raw = {k: None for k in quarantine.SCHEMA["required"]} | {
+        "doc_type": "invoice", "issuer_tax_id": "RUT_1", "amount": "820000", "currency": "CLP"}
+    r = ModelRouter("k", {"extract": ["m"]}, client=openrouter({"m": raw}))
+    doc, _ = quarantine.extract("Factura · RUT ⟦RUT_1⟧", r, {"⟦RUT_1⟧": "76.123.456-7"})
+    assert doc is not None and doc.issuer_tax_id == "76.123.456-7"
+
+
+def test_check_rejects_an_invented_scenario():
+    """Live bug: the planner asked the quant engine for a scenario that does not exist."""
+    step = PlannedStep("forecast_run", {"scenario": "sha_delay_45d"})
+    assert "scenario" in check([step], _pi(), "cherry_crisis")
+    assert check([PlannedStep("forecast_run", {"scenario": "cherry_crisis"})], _pi(), "cherry_crisis") == ""

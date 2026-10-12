@@ -1,8 +1,8 @@
 """"Ask it why" (Mission Control): the agent explains its own runs from the facts it recorded.
 
-The answer is built from the run's tool results with templates, so every number is one a tool
-returned. With OpenRouter online the strong model may rephrase it, given those facts only (never a
-document) and told to keep every number; if it fails, the template answer stands.
+The answer is built from the run's tool results with templates, so every number and every reason is
+one a tool returned. No LLM rewrites it: in a live test a model "explained" a choice with a reason
+that was not true (a plausible sentence with no new number), which no check can catch reliably.
 """
 
 from __future__ import annotations
@@ -12,7 +12,6 @@ from typing import Any
 
 from . import templates
 from .orchestrator import Run
-from .router import ModelRouter, Offline, RouterError
 
 INTENTS: list[tuple[str, str]] = [
     ("blocked", r"block|bloque|attack|ataque|fraud|fraude|拦截|攻击|诈骗"),
@@ -106,30 +105,12 @@ def _template_answer(kind: str, f: dict[str, Any], lang: str) -> str:
              f"在运行 {f['run_id']} 中我使用了：{tools}。状态：{f['status']}{'。' + f['note'] if f['note'] else ''}。")
 
 
-def answer(question: str, run: Run | None, lang: str = "es", router: ModelRouter | None = None) -> dict[str, Any]:
+def answer(question: str, run: Run | None, lang: str = "es") -> dict[str, Any]:
     lang = lang if lang in templates.LANGS else "en"
     if run is None:
         return {"answer": NO_RUN[lang], "intent": "none", "run_id": None, "model": "template"}
     kind = intent(question)
     facts = _facts(run)
     text = _template_answer(kind, facts, lang)
-    model = "template"
-    if router is not None and router.online:
-        sys = ("You are NanFeng, a cash agent, explaining your own decision to the business owner. Rewrite the draft "
-               f"answer to fit the question, in {'Spanish' if lang == 'es' else 'Chinese' if lang == 'zh' else 'English'}, "
-               "at most 3 sentences. Keep every number and id exactly as in the draft or the facts; add no new numbers. "
-               "The question is from the owner; the facts are from your tools.")
-        try:
-            out = router.complete("classify", [{"role": "system", "content": sys},
-                                               {"role": "user", "content": f"Question: {question[:500]}\nFacts: {facts}\nDraft: {text}"}],
-                                  max_tokens=300, temperature=0.2)
-            if out.text.strip() and _numbers(out.text) <= _numbers(text + str(facts)):
-                text, model = out.text.strip(), out.model
-        except (Offline, RouterError):
-            pass
-    return {"answer": text, "intent": kind, "run_id": run.id, "model": model}
+    return {"answer": text, "intent": kind, "run_id": run.id, "model": "template"}
 
-
-def _numbers(s: str) -> set[str]:
-    """Digits groups in a text, normalized, to check a rephrasing added no number of its own."""
-    return {re.sub(r"[.,\s]", "", n) for n in re.findall(r"\d[\d.,]*\d|\d", s)}

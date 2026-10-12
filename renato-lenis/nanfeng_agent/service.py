@@ -208,7 +208,7 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
         runs = svc.agent.runs
         target = runs.get(body.run_id) if body.run_id else next(
             (r for r in reversed(list(runs.values())) if r.kind == "document"), None)
-        return explain.answer(body.question, target, body.language, svc.agent.router)
+        return explain.answer(body.question, target, body.language)
 
     @app.post("/briefing", dependencies=[Depends(require_owner)])
     def briefing(body: BriefingIn):
