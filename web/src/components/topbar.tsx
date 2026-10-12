@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { OwnerAccount } from "@/components/owner-login";
 import { useDesk } from "@/lib/desk-state";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
 import { sectionOf } from "@/lib/sections";
@@ -76,6 +77,7 @@ export function Topbar({ children, controls = true, lead }: { children?: React.R
       {controls && (
         <div className="topbar-ctl">
           <ApiBadge />
+          <OwnerAccount />
           <LangSwitch />
           <ThemeToggle />
         </div>

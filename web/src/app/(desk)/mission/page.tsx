@@ -39,6 +39,9 @@ export default function MissionPage() {
   const { approval, notify, mode, events, killSwitch: killed, setKillSwitch } = useDesk();
   const [paused, setPaused] = useState(false);
   const [confirmKill, setConfirmKill] = useState(false);
+  // Re-arming on the live API is L3: the owner types the one-time code (sandbox code 482913).
+  const [rearm, setRearm] = useState(false);
+  const [rearmCode, setRearmCode] = useState("");
   const [chat, setChat] = useState<{ who: "out" | "in"; text: string }[]>([
     { who: "out", text: "why the PAE loan over the bank loan?" },
     { who: "in", text: `Both close the gap, but the PAE loan costs ${clpM(N.planCost)} vs ${clpM(N.defaultCost)} (${N.savingsPct} cheaper) and is repaid in USD with the export proceeds. Bank factoring will not buy ${S.event.invoice} because its buyer already announced a delay.` },
@@ -70,7 +73,20 @@ export default function MissionPage() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-secondary" type="button" disabled={killed} aria-pressed={paused} onClick={() => { setPaused((p) => !p); notify(paused ? "Run resumed" : "Run paused · no new tool calls"); }}>{paused ? "Resume" : "Pause"} <span className="key">P</span></button>
             {killed ? (
-              <button className="btn btn-primary" type="button" onClick={() => { setPaused(false); void setKillSwitch(false); }}>Re-arm agent</button>
+              mode === "live" && rearm ? (
+                <form style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }} onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (await setKillSwitch(false, rearmCode)) { setRearm(false); setPaused(false); }
+                  setRearmCode("");
+                }}>
+                  <input className="input mono" style={{ width: 120 }} inputMode="numeric" pattern="\d{6}" maxLength={6} placeholder="OTP" aria-label="One-time code to re-arm the agent"
+                    value={rearmCode} onChange={(e) => setRearmCode(e.target.value.replace(/\D/g, ""))} autoFocus />
+                  <button className="btn btn-primary" type="submit" disabled={rearmCode.length !== 6}>Re-arm with code</button>
+                  <button className="btn btn-secondary" type="button" onClick={() => { setRearm(false); setRearmCode(""); }}>Cancel</button>
+                </form>
+              ) : (
+                <button className="btn btn-primary" type="button" onClick={() => { if (mode === "live") setRearm(true); else { setPaused(false); void setKillSwitch(false); } }}>Re-arm agent</button>
+              )
             ) : confirmKill ? (
               <>
                 <button className="btn btn-danger" type="button" style={{ minHeight: 48 }} onClick={() => { setConfirmKill(false); void setKillSwitch(true); }}>Confirm kill</button>

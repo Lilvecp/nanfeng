@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { components } from "./api-types";
+import { getToken, requestLogin, setToken } from "./owner-session";
 
 // Typed client for the NanFeng backend. Types come from contracts/openapi.json (npm run api:types).
 // Without NEXT_PUBLIC_API_URL, or when the backend is down, the desk falls back to its local sandbox.
@@ -23,32 +24,56 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(method: "GET" | "POST", path: string, body?: unknown): Promise<T> {
+type Opts = { auth?: "prompt" | "silent" };
+
+async function request<T>(method: "GET" | "POST", path: string, body?: unknown, opts: Opts = {}, retried = false): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers["content-type"] = "application/json";
+  if (token) headers.authorization = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${path}`, {
     method,
-    headers: body === undefined ? undefined : { "content-type": "application/json" },
+    headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
   });
-  const data = res.headers.get("content-type")?.includes("json") ? await res.json() : await res.text();
+  const data = res.headers.get("content-type")?.includes("json") ? await res.json() : res.status === 204 ? null : await res.text();
+  // Owner-only route without a valid session: ask the owner to sign in, then try once more.
+  if (res.status === 401 && !path.startsWith("/auth/")) {
+    if (token) setToken("");
+    if (opts.auth !== "silent" && !retried) {
+      try {
+        await requestLogin();
+      } catch {
+        throw new ApiError(401, (data as { detail?: unknown })?.detail ?? data);
+      }
+      return request<T>(method, path, body, opts, true);
+    }
+  }
   if (!res.ok) throw new ApiError(res.status, (data as { detail?: unknown })?.detail ?? data);
   return data as T;
 }
 
 const get = <T,>(path: string) => request<T>("GET", path);
-const post = <T,>(path: string, body: unknown = {}) => request<T>("POST", path, body);
+const post = <T,>(path: string, body: unknown = {}, opts: Opts = {}) => request<T>("POST", path, body, opts);
 
 export const api = {
   health: () => get<{ status: string; version: string; audit_head_seq: number }>("/health"),
+  auth: {
+    login: (password: string) => post<{ token: string; expires_at: number }>("/auth/login", { password }),
+    logout: () => post<null>("/auth/logout"),
+    config: () => get<{ demo_password: string | null }>("/auth/config"),
+  },
   approvals: {
     list: (status?: string) => get<Approval[]>(`/approvals${status ? `?status=${status}` : ""}`),
-    create: (body: ApprovalCreate) => post<Approval>("/approvals", body),
+    // silent: on page load the cockpit only creates the demo plan if it may; it never pops the sign-in.
+    create: (body: ApprovalCreate) => post<Approval>("/approvals", body, { auth: "silent" }),
     approve: (id: string, otp: string, channel = "WEB+OTP") => post<Approval>(`/approvals/${id}/approve`, { otp, channel }),
     reject: (id: string, reason: string) => post<Approval>(`/approvals/${id}/reject`, { reason, channel: "WEB" }),
   },
   killSwitch: {
     get: () => get<{ on: boolean }>("/policy/kill-switch"),
-    set: (on: boolean) => post<{ on: boolean }>("/policy/kill-switch", { on }),
+    set: (on: boolean, otp?: string) => post<{ on: boolean }>("/policy/kill-switch", otp ? { on, otp } : { on }),
   },
   audit: {
     entries: (afterSeq = 0, limit = 1000) => get<AuditEntry[]>(`/audit/entries?after_seq=${afterSeq}&limit=${limit}`),

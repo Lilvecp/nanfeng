@@ -1,3 +1,4 @@
+import { OwnerLogin } from "@/components/owner-login";
 import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
 
@@ -8,6 +9,7 @@ export default function DeskLayout({ children }: LayoutProps<"/">) {
       <main className="main">
         <PageTransition>{children}</PageTransition>
       </main>
+      <OwnerLogin />
     </div>
   );
 }

@@ -125,7 +125,7 @@ export default function ApprovalsPage() {
       return;
     }
     const r = await submitOtp(value);
-    if (r.status === "ok") setOtpError(null);
+    if (r.status === "ok" || r.status === "cancelled") setOtpError(null);
     else {
       setOtpError(r.status === "locked" || r.attemptsLeft <= 0 ? "ERR OTP_LOCKED · REQUEST A NEW CODE" : `ERR OTP_MISMATCH · ${r.attemptsLeft} ATTEMPTS LEFT`);
       setCode("");
