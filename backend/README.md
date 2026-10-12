@@ -7,6 +7,7 @@ API gateway for the cockpit and the agent. FastAPI + Postgres (SQLite locally). 
 | Sandbox Bank: accounts, transactions, receivables, payees, lenders, FX, JSONL log export | `/bank` | r3-04 |
 | Approval Center: policy tier, OTP approval, reject with reason, kill switch | `/approvals`, `/policy` | r3-03 (+ Andy) |
 | Audit log: hash chain, verify, Merkle anchors, inclusion proofs | `/audit` | r3-05 |
+| Invoice registry against double financing (local or on-chain contract) | `/registry` | r3-06 |
 | Agent event stream (SSE) for Mission Control + publish endpoint for the agent | `/agent/events` | r3-03 |
 | Vicente's quant engine, same paths as his contract, plus background plan jobs | `/quant` | r3-02 |
 
@@ -106,6 +107,17 @@ Non-clean verdicts are hash-chained (`security.flagged`, `security.attack_blocke
 - If the chain refuses (no funds, RPC down) the approval still executes, `audit.anchor_failed` goes out on SSE and the next anchor covers those entries.
 - `local` keeps roots in the DB only (tests, offline demo). FISCO BCOS would be one more backend in `app/anchoring.py`.
 
+## Invoice registry against double financing (r3-06)
+
+Before the bank pays out on an invoice (factoring, letter-of-credit discounting), it registers the invoice's fingerprint, `keccak256("NANFENG-INVOICE-V1|<issuer tax id>|110|<folio>")` (110 = SII electronic export invoice). Only the hash is stored: no amount, customer or name.
+
+- `NANFENG_REGISTRY_BACKEND=local` (default): fingerprints in the `invoice_registrations` table, next to the `financed_by` guard.
+- `NANFENG_REGISTRY_BACKEND=evm`: also in the `InvoiceRegistry` contract (`chain/InvoiceRegistry.sol`, compiled ABI and bytecode in `app/data/invoice_registry.json`). The bank reads the registry first (`lookup`, an `eth_call`), so an invoice another financier already registered is refused with `already_financed` before any money moves; then it sends `register`, which reverts for anyone who tries the same invoice again. If the chain cannot be read the factoring is refused (`registry_unavailable`): no check, no payout. `NANFENG_REGISTRY_WAIT_RECEIPT_S=30` also waits for the registration to be mined before paying out.
+- Deploy once with the anchoring wallet: `python chain/deploy.py`, then set `NANFENG_INVOICE_REGISTRY_ADDRESS`. Re-compile after changing the contract with `python chain/compile.py` (needs `py-solc-x`; EVM version london, so it also runs on older EVM chains such as FISCO BCOS).
+- `GET /registry` (backend, contract, chain id) · `GET /registry/invoices` · `GET /registry/invoices/{id}` (fingerprint, our record and the on-chain entry, `valid` when they match). The factoring result carries `registry` (fingerprint, tx hash, explorer link).
+- Demo builds add the sandbox's genesis hash to the identity, so Demo Mode's reset starts with a clean registry; a real deploy (`NANFENG_DEMO=false`) uses the bare invoice identity, which any financier holding the invoice can recompute.
+- Scope: the PAE loan in the Cherry Crisis plan is not tied to one invoice in the sandbox, so it is not registered; factoring and LC discounting are.
+
 ## For the rest of the team
 
 - **Renato (agent):** publish each step with `POST /agent/events` (`{type: "agent.step", data: {tool, tier, model, cost_usd, status}}`) and propose actions with `POST /approvals`. Send `Authorization: Bearer $NANFENG_AGENT_TOKEN`.
@@ -115,6 +127,6 @@ Non-clean verdicts are hash-chained (`security.flagged`, `security.attack_blocke
 
 ## Not done yet
 
-- FISCO BCOS backend (Sepolia works today). The on-chain invoice registry (r3-06) is still off-chain only (`financed_by`).
+- FISCO BCOS backend (Sepolia works today for anchoring and the invoice registry). The registry contract is not deployed on Sepolia yet: run `python chain/deploy.py` with the funded anchoring wallet.
 - Single instance: SSE history and plan jobs live in memory (the kill switch is in the database).
 - `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.

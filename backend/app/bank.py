@@ -9,7 +9,7 @@ from decimal import Decimal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import audit
+from . import audit, registry
 from .events import broker
 from .models import Account, Lender, Payee, PayeeAccount, Receivable, Transaction
 from .seed import FX_RATES, LENDER_TERMS
@@ -110,12 +110,17 @@ def factoring(db: Session, receivable_id: str, lender_id: str = "LEN-FACTOR",
     face_clp = to_clp(float(inv.amount) * share, inv.currency)
     fee = round(face_clp * float(lender.fee_pct) + _fixed_fee(lender.id), 2)
     proceeds = round(face_clp * float(lender.advance_pct) - fee, 2)
+    try:  # invoice registry (r3-06): before any money moves, so a refused registration pays nothing
+        reg = registry.register(db, inv.id, f"{lender.id}:factoring")
+    except registry.RegistryError as exc:
+        raise BankError(exc.code, exc.message, exc.status) from exc
     inv.financed_by = f"{lender.id}:factoring"
     tx = _move(db, _account(db, "CLP"), proceeds, "factoring", lender.name, inv.id)
     return _finish(db, actor, "factoring", {
         "transaction_id": tx.id, "receivable_id": inv.id, "lender_id": lender.id, "share": share,
         "face_value_clp": face_clp, "advance_pct": float(lender.advance_pct), "fee_clp": fee,
         "proceeds_clp": proceeds, "amount_clp": face_clp, "annual_rate": float(lender.annual_rate),
+        "registry": registry.receipt(reg),
     })
 
 

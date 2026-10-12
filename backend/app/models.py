@@ -103,6 +103,21 @@ class Anchor(Base):
     explorer_url: Mapped[str | None] = mapped_column(String(300), nullable=True)
 
 
+class InvoiceRegistration(Base):
+    """Invoice registry against double financing (r3-06): one row per financed invoice, keyed by its
+    fingerprint. In "evm" mode the same fingerprint is registered in the InvoiceRegistry contract."""
+
+    __tablename__ = "invoice_registrations"
+    fingerprint: Mapped[str] = mapped_column(String(66), primary_key=True)
+    receivable_id: Mapped[str] = mapped_column(String(32))
+    financing: Mapped[str] = mapped_column(String(64))  # "<lender id>:<operation>"
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    backend: Mapped[str] = mapped_column(String(16))
+    contract_address: Mapped[str | None] = mapped_column(String(42), nullable=True)
+    tx_hash: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    explorer_url: Mapped[str | None] = mapped_column(String(300), nullable=True)
+
+
 class OtpChallenge(Base):
     """One live OTP per L3 approval (r4-05). Only an HMAC of the code is stored, never the code."""
 

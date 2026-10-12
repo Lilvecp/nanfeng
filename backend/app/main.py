@@ -10,7 +10,7 @@ from .bank import BankError
 from .config import DEMO_OWNER_PASSWORD, get_settings
 from .db import SessionLocal
 from .events import broker
-from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, demo, privacy, quant, security
+from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, demo, privacy, quant, security, registry as registry_router
 
 VERSION = "0.1.0"
 
@@ -58,7 +58,7 @@ def health():
 
 
 for r in (auth_router.router, demo.router, bank_router.router, approvals.router, audit_router.router, agent.router, quant.router, security.router,
-          privacy.router):
+          privacy.router, registry_router.router):
     app.include_router(r)
 
 
