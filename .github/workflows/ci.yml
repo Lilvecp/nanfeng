@@ -41,6 +41,20 @@ jobs:
           python -m app.main ../contracts/openapi.json
           git diff --exit-code ../contracts/openapi.json
 
+  agent:
+    name: Agent tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: renato-lenis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e "../backend[dev]" -e ".[dev]"
+      - run: pytest -q
+
   web:
     name: Web lint and build
     runs-on: ubuntu-latest
