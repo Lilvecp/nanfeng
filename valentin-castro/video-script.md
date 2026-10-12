@@ -25,7 +25,7 @@ Delivery: **MP4 attached to the UDD email** (or a host that opens from Mainland 
 - [ ] Clear the browser's site data first so the welcome card and the Simple view show (the app remembers the view and the welcome per browser).
 
 - [ ] Reset the sandbox before each take (top bar "Reset sandbox" or Demo Mode reset).
-- [ ] Decide the OTP mode with Andy: sandbox code `482913` only works when `NANFENG_OTP_MODE` is not `sms`. For the video use the sandbox code, or record the SMS on a real phone.
+- [x] OTP mode (decided with Andy): **record the video with `NANFENG_OTP_MODE=sandbox`** and the code `482913`, so the Demo tour approves on its own (in `sms` mode step 5 refuses). The public URL keeps `NANFENG_OTP_MODE=sms` (threat model F2). Say on screen that the real build texts a per-approval code.
 - [ ] Hide the bookmarks bar and notifications; cursor highlight on.
 - [ ] Export MP4 (H.264, ≤ 5:00), check the file opens without internet.
 - [ ] Captures for the deck: Home in Summary and Full detail (before/after), Financing → Options and What if…, Approvals in 中文, Messages → Conversations, Security → Protection.
