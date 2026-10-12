@@ -76,7 +76,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 | Quarantined extraction | The agent's document reader returns typed fields only; the planner never sees raw text (`renato-lenis/nanfeng_agent/quarantine.py`) |
 | Secrets | `.env` git-ignored, gitleaks in CI, testnet-only anchor wallet, spend limits per provider |
 | Machine callers | Agent routes fail closed when no agent token is configured; the `.env.example` placeholder is refused at startup; anchoring needs the agent token or the owner session, so nobody else can spend the anchoring wallet (threat model F6, F13) |
-| Compliance | Ley 21.719, PIPL, CAC generative AI measures: [privacy-compliance.md](privacy-compliance.md). The AI-generated label for Chinese importers is planned, not built |
+| Compliance | Ley 21.719, PIPL, CAC generative AI measures: [privacy-compliance.md](privacy-compliance.md); every message to an importer is labelled AI-generated in its language (CAC labelling measures; `renato-lenis/tests/test_ai_label.py`) |
 
 ## 5. Known risks (honest list)
 
