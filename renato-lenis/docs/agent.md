@@ -51,9 +51,9 @@ Every step is published to Mission Control as `agent.step` (`POST /agent/events`
 | `financing_quote` | L0 | `POST /quant/quote` | Financing Arena |
 | `optimize_plan` | L0 | `POST /quant/plan/jobs` + poll | the MILP; returns `approval_request` |
 | `propose_plan` | via approvals | `POST /approvals` | posts the MILP's `approval_request` untouched (added to the battle-plan list so the plan reaches the owner exactly as optimized) |
-| `send_collection` | L1 | channel hub | `contact_id` + `receivable_id` only; text from the template |
+| `send_collection` | L1 | channel hub | `contact_id` + `receivable_id` only; the invoice must belong to that contact's company (checked against the bank, since the number comes from a document); text from the template |
 | `schedule_payment` | via approvals | `POST /approvals` | `payee_id` + amount; **no bank account parameter exists** |
-| `request_factoring` | via approvals | `POST /approvals` | always L3 in the policy |
+| `request_factoring` | via approvals | `POST /approvals` | always L3 in the policy; never chosen by the LLM planner (financing comes from the optimizer) |
 | `anchor_audit` | L0 | `POST /audit/anchor` | after an approval executes |
 
 No tool takes a phone number, an email address, a bank account or free text for a person. A test asserts it.
@@ -109,6 +109,7 @@ No outbound message is written by an LLM.
 | Step cap (12) or spend cap (USD 0.50) reached | run `halted` |
 | Backend or quant error in a tool | step `failed` in the trace, run `failed` with the reason |
 | A channel fails | next channel the contact has; every attempt is in the outbox |
+| A notification tool refuses (e.g. an invoice of another customer) | step `failed` in the trace, the run goes on: the cash plan still reaches the owner |
 | Plan job longer than 90 s | tool fails with 504; the cockpit's Demo Mode still has the precomputed plan |
 | Approval `locked` / `failed` / `blocked` | run `failed`, trace says why |
 

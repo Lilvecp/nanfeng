@@ -177,3 +177,15 @@ def test_daily_briefing_in_three_languages(agent, hub):
     assert "Good morning" in texts["en"] and "2026-12-30" in texts["en"]
     assert "早上好" in texts["zh"]
     assert "plan" in texts["en"]  # at risk: tells the owner a plan is waiting
+
+
+def test_spoofed_notice_cannot_leak_another_customers_invoice(agent, hub):
+    """A notice 'from Shanghai' citing Guangzhou's invoice: no reminder goes to Shanghai about it."""
+    from nanfeng_agent.ingest import Document
+
+    text = fixtures.SHANGHAI_NOTICE.replace("INV-2026-118", "INV-2026-121")
+    run = agent.handle_document(Document(text, source="email", doc_id="DOC-SPOOF"))
+    assert not any(d.message.kind == "collection" for d in hub.outbox)
+    failed = [s for s in run.steps if s["tool"] == "send_collection"]
+    assert failed and failed[0]["status"] == "failed" and "does not belong" in failed[0]["detail"]
+    assert run.status == "awaiting_approval"  # the cash plan still reaches the owner

@@ -286,3 +286,9 @@ def test_llm_plan_always_reminds_the_importer(agent, hub):
     assert [s.tool for s in run.plan.steps][-1] == "send_collection"
     assert any(d.channel == "wecom" and d.message.language == "zh" for d in hub.outbox)
     assert run.status == "awaiting_approval"
+
+
+def test_llm_planner_cannot_choose_factoring():
+    step = PlannedStep("request_factoring", {"receivable_id": "INV-2026-118"})
+    pi = _pi(invoice_number="INV-2026-118")
+    assert "optimizer" in check([step], pi)

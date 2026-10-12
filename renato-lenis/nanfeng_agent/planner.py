@@ -130,7 +130,10 @@ def required(plan: Plan, pi: PlannerInput) -> Plan:
 
 
 def check(steps: list[PlannedStep], pi: PlannerInput, scenario: str = "cherry_crisis") -> str:
-    """Empty string if the plan is acceptable, else the first problem."""
+    """Empty string if the plan is acceptable, else the first problem.
+
+    Ids from the document (invoice_number) are only hints: the tools re-check them against the bank
+    (send_collection refuses an invoice of another customer)."""
     known_ids = {v for v in (pi.payee_check.payee_id, pi.fields.get("invoice_number")) if v}
     known_ids |= {c.contact_id for c in CUSTOMERS if c.id == pi.customer_id}
     amount = pi.fields.get("amount")
@@ -152,6 +155,7 @@ def check(steps: list[PlannedStep], pi: PlannerInput, scenario: str = "cherry_cr
                 return f"{s.tool}.{key}={value} is not in the facts"
         if s.tool == "schedule_payment" and (amount is None or abs(float(amount) - args.amount) > 0.005):
             return "payment amount differs from the document"
-        if s.tool == "request_factoring" and args.receivable_id not in known_ids:
-            return "factoring an invoice not in the facts"
+        if s.tool == "request_factoring":
+            # Financing is the optimizer's choice (propose_plan), never an id lifted from a document.
+            return "factoring is proposed by the optimizer, not the LLM planner"
     return ""

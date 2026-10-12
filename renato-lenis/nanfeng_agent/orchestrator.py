@@ -201,7 +201,12 @@ class Agent:
                     self._trace(run, {"step": step.tool, "tool": step.tool, "status": "skipped",
                                       "detail": "forecast shows no cash risk"})
                     continue
-                self._tool(run, step.tool, step.args)
+                try:
+                    self._tool(run, step.tool, step.args)
+                except ToolError:
+                    if TOOLS[step.tool].tier != 1:
+                        raise
+                    continue  # a refused notification (already in the trace) never stops the money flow
                 if step.tool == "forecast_run" and self._at_risk(run) and run.planner_input.customer_id:
                     self._notify_owner(run, "alert", **self._alert_slots(run))
                 if step.tool == "optimize_plan":

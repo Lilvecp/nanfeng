@@ -21,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from . import templates
 from .backend import Backend, BackendError
 from .channels import ChannelHub, OutboundMessage
-from .contacts import CONTACTS, Contact
+from .contacts import CONTACTS, Contact, match_customer
 
 
 @dataclass
@@ -164,6 +164,10 @@ def send_collection(ctx: RunContext, a: CollectionArgs) -> dict[str, Any]:
     inv = next((r for r in ctx.backend.get("/bank/receivables") if r["id"] == a.receivable_id), None)
     if inv is None:
         raise ToolError(f"unknown receivable {a.receivable_id}")
+    # The invoice number comes from an untrusted document: never tell one customer about another's invoice.
+    owner_of_invoice = match_customer(inv["customer"])
+    if owner_of_invoice is None or owner_of_invoice.contact_id != contact.id:
+        raise ToolError(f"{a.receivable_id} does not belong to {contact.id}'s company")
     lang = a.language or contact.language
     text = templates.render("collection", lang, customer=inv["customer"].replace(" (fictional)", ""),
                             invoice=inv["id"], amount=templates.money(inv["amount"], inv["currency"], lang),
