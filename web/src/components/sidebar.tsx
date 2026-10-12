@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
 import { useCrisisNumbers } from "@/lib/desk-state";
 import { useT } from "@/lib/i18n";
+import { rememberTab, useSectionHrefs } from "@/lib/last-tab";
 import { SECTIONS, sectionOf } from "@/lib/sections";
 
 // Line icons in the spirit of SF Symbols (16px, 1.6 stroke).
@@ -29,6 +30,8 @@ export function Sidebar() {
   const [open, setOpen] = useState(false);
   const inDemo = pathname === "/demo";
   const current = sectionOf(pathname);
+  const hrefs = useSectionHrefs();
+  useEffect(() => rememberTab(pathname), [pathname]);
 
   return (
     <aside className={`side${open ? " open" : ""}`} style={{ viewTransitionName: "desk-side" }}>
@@ -51,7 +54,7 @@ export function Sidebar() {
         {SECTIONS.map((s) => {
           const on = current?.href === s.href;
           return (
-            <Link key={s.href} className={on ? "on" : undefined} href={s.href} onClick={() => setOpen(false)} aria-current={on ? "page" : undefined}>
+            <Link key={s.href} className={on ? "on" : undefined} href={hrefs[s.href] ?? s.href} onClick={() => setOpen(false)} aria-current={on ? "page" : undefined}>
               <Icon name={s.icon} />
               {t(s.key)}
               {s.href === "/approvals" && pendingCount > 0 && <span className="count">{pendingCount}</span>}
