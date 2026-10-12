@@ -210,6 +210,23 @@ def test_plan_output_is_ready_for_the_backend():
     assert again["source"].get("cached") and again["optimal"]["total_cost_clp"] == out["optimal"]["total_cost_clp"]
 
 
+def test_sandbox_seed_prices_loans_like_the_engine():
+    """The bank charges what the plan says: fixed fee and stamp tax travel in the seed (PAE: CLP 120,000)."""
+    out = tools.optimize_plan("cherry_crisis", explain=False)
+    lenders = {l["id"]: l for l in tools.sandbox_seed()["lenders"]}
+    assert lenders["LEN-PAE"]["fee_fixed_clp"] == 120000 and lenders["LEN-PAE"]["stamp_tax"] is None
+    assert lenders["LEN-ANDINO"]["stamp_tax"] == {"monthly": 0.00066, "cap": 0.008}
+    assert lenders["LEN-OVERDRAFT"]["stamp_tax"] == {"flat": 0.00332}
+    for action, op in zip(out["optimal"]["actions"], out["approval_request"]["operations"]):
+        if op["op"] != "loan":
+            continue
+        lender, amount, term = lenders[op["params"]["lender_id"]], op["params"]["amount_clp"], op["params"]["term_days"]
+        stamp = lender["stamp_tax"] or {}
+        stamp_pct = stamp.get("flat", min(stamp.get("monthly", 0) * max(1, -(-term // 30)), stamp.get("cap", 0)))
+        bank_cost = amount * (lender["fee_pct"] + stamp_pct + lender["annual_rate"] * term / 365) + lender["fee_fixed_clp"]
+        assert abs(bank_cost - action["cost_clp"]) < 1000, (op, bank_cost, action["cost_clp"])
+
+
 def test_agent_tool_specs_match_tools():
     names = {s["function"]["name"] for s in tools.TOOL_SPECS}
     assert names == set(tools.TOOLS)

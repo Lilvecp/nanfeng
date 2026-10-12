@@ -17,7 +17,7 @@ from . import audit
 from .db import Base, engine
 from .models import Account, Lender, Payee, PayeeAccount, PayeeProfile, Receivable
 
-SEED = json.loads((Path(__file__).parent / "data" / "sandbox_seed.json").read_text())
+SEED = json.loads((Path(__file__).parent / "data" / "sandbox_seed.json").read_text(encoding="utf-8"))
 
 COMPANY = SEED["company"]
 ACCOUNTS = [(a["id"], a["name"], a["currency"], a["balance"]) for a in SEED["accounts"]]
@@ -25,6 +25,10 @@ RECEIVABLES = [(r["id"], r["customer"], r["currency"], r["amount"], date.fromiso
                 r["factoring_eligible"]) for r in SEED["receivables"]]
 LENDERS = [(x["id"], x["name"], x["product"], x["annual_rate"], x["advance_pct"], x["fee_pct"]) for x in SEED["lenders"]]
 FX_RATES = SEED["fx_rates_clp"]  # CLP per unit, the engine's spot for this scenario
+# Fixed fee per operation and stamp tax, as the engine prices them. Read from the seed rather than
+# stored on Lender, so databases created before these fields existed need no migration.
+LENDER_TERMS = {x["id"]: {"fee_fixed_clp": x.get("fee_fixed_clp", 0), "stamp_tax": x.get("stamp_tax")}
+                for x in SEED["lenders"]}
 
 PAYEES = [
     ("PAY-CARTONERA", "Cartonera Sur Ltda. (fictional)", "CL-BANCOANDINO-0042117", True),

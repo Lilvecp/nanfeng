@@ -257,8 +257,17 @@ def sandbox_seed(scenario: str | dict[str, Any] = "cherry_crisis") -> dict[str, 
             rate = p.get("rate_monthly", 0) * 12 if p.kind != "forward" else 0.0
             advance = p.get("advance_rate", 1.0)
         fee = p.get("spread_pct", 0.0) if p.kind == "forward" else p.get("fee_pct", 0.0)
+        # The fixed fee per operation and the stamp tax are part of the engine's cost, so the bank
+        # needs them too or its executed cost misses them (the PAE's CLP 120,000 fee, for one).
+        if not p.get("stamp_tax"):
+            stamp = None
+        elif p.get("stamp_tax_flat") is not None:
+            stamp = {"flat": p.stamp_tax_flat}
+        else:
+            stamp = {"monthly": catalog.market["stamp_tax_monthly"], "cap": catalog.market["stamp_tax_cap"]}
         lenders.append({"id": sb["lender_id"], "name": f"{catalog.lenders[p.lender_id]['name']} · {p.name}",
                         "product": ptype, "annual_rate": round(rate, 6), "advance_pct": advance, "fee_pct": fee,
+                        "fee_fixed_clp": p.get("fee_fixed_clp", 0), "stamp_tax": stamp,
                         "catalog_product_id": p.id})
     return _clean({
         "company": f"{company.name} (fictional)" if "fictional" not in company.name else company.name,
