@@ -71,8 +71,8 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 
 | Chile | China | Every market |
 |---|---|---|
-| **Ley 21.719**: personal data masked before any AI model; every automated money decision is explained and reviewable; new debt or a new payee waits for the owner (L3) | **PIPL**: no profiling of individuals in China; no personal data exported out of China | **AML**: structuring detection + sanctions screening (synthetic list, real matching) |
-| Data minimisation: the AI that reads documents returns typed fields only | Cross-border data: only what the trade contract needs, sent by the importer itself | **Double financing**: every invoice is registered before it is financed |
+| **Ley 21.719**: personal data masked before any AI model; every automated money decision is explained and reviewable; new debt or a new payee waits for the owner (L3) | **PIPL**: no profiling of individuals in China; no personal data exported out of China; only what the trade contract needs | **AML**: structuring detection + sanctions screening (synthetic list, real matching) |
+| Data minimisation: the AI that reads documents returns typed fields only | **CAC AI labelling**: every message to an importer says 由AI生成 (AI-generated) | **Double financing**: every invoice is registered before it is financed |
 
 - Security of the data: HTTPS only; one-time codes stored as HMAC, never in plain text; tamper-evident audit log anchored on-chain.
 - Say it plainly: sanctions list is synthetic; production loads OFAC / UN lists.
