@@ -25,7 +25,7 @@ Daily log: [progress-2026-10-10.md](progress-2026-10-10.md)
 | r4-04 BEC anti-fraud + guard | [`backend/app/bec.py`](../backend/app/bec.py), [`backend/app/guard.py`](../backend/app/guard.py), [`backend/app/routers/security.py`](../backend/app/routers/security.py) |
 | r4-05 Step-up OTP | [`backend/app/otp.py`](../backend/app/otp.py) · tests in [`backend/tests/test_otp.py`](../backend/tests/test_otp.py) |
 | r4-07 Privacy and compliance | [privacy-compliance.md](privacy-compliance.md) · [`backend/app/privacy.py`](../backend/app/privacy.py), [`backend/app/sanctions.py`](../backend/app/sanctions.py) |
-| r4-06 Red team | [redteam/](redteam/) · [results](redteam/results/REPORT.md): 4/43 → 41/43 stopped |
+| r4-06 Red team | [redteam/](redteam/) · [results](redteam/results/REPORT.md): 4/43 → 43/43 stopped |
 | r4-08 / r4-11 Regulatory slide, China compliance | [privacy-compliance.md](privacy-compliance.md#regulatory-slide-deck-r4-08) |
 | r4-09 Security Self-Assessment (05) | [security-self-assessment.md](security-self-assessment.md) |
 | r4-10 Execution evidence (06) | [evidence/](evidence/) · [sample run](evidence/out/SUMMARY.md); live export from the deployed backend pending with Camilo |

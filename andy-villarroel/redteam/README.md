@@ -2,7 +2,7 @@
 
 43 attacks against the real NanFeng API, run in process on a freshly reset sandbox each time, judged by **outcome**: did money move without the owner, did a poisoned document pass as clean, did a secret leak?
 
-**Result: 4/43 stopped before → 41/43 stopped after.** Full table: [results/REPORT.md](results/REPORT.md).
+**Result: 4/43 stopped before → 43/43 stopped after.** Full table: [results/REPORT.md](results/REPORT.md).
 
 ## Run it
 
@@ -34,5 +34,5 @@ A missing endpoint in the "before" version counts as "no defense", because in th
 ## Honest limits
 
 - **The same person wrote the guard and the attacks.** The document attacks are a regression suite, not proof of robustness. Next: a blind set written by the rest of the team, and promptfoo / garak against Renato's agent once the LLM pipeline is wired (the guard is one layer; the policy engine and OTP are what must hold).
-- The two open attacks (**API-02**, **API-03**) need owner authentication on the public API (threat model F1). They are declared in the Security Self-Assessment.
+- **API-02** and **API-03** were the last two open; they are stopped since the owner sign-in landed (threat model F1). CI now fails if any of the 43 attacks gets through.
 - Attacks run against the sandbox bank, not a real bank API.
