@@ -68,7 +68,7 @@
     "http": 201,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-12T22:56:44.269693Z",
+      "created_at": "2026-10-12T23:07:35.891736Z",
       "decided_at": null,
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
@@ -116,8 +116,8 @@
     "http": 200,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-12T22:56:44.269693",
-      "decided_at": "2026-10-12T22:56:44.278223Z",
+      "created_at": "2026-10-12T23:07:35.891736",
+      "decided_at": "2026-10-12T23:07:35.912955Z",
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
         {
@@ -150,9 +150,145 @@
           "proceeds_clp": 139558272.3,
           "annual_rate": 0.068,
           "audit_seq": 8,
-          "audit_hash": "10fe6622fa6c3c9c3f8b36a9dbca459006a4a7dee54f84f6a9d5eb71ecfca1ce"
+          "audit_hash": "26d42feaead12f2704fd269b38c55b65cddce9ed13df52fae8492b1fa77471dc"
         }
       ]
+    }
+  },
+  {
+    "time": "10:20",
+    "what": "Agent proposes factoring half of INV-2026-109 (L3)",
+    "http": 201,
+    "result": {
+      "id": "APR-0002",
+      "created_at": "2026-10-12T23:07:35.923021Z",
+      "decided_at": null,
+      "action": "factoring INV-2026-109",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "pending",
+      "otp_attempts_left": 3,
+      "channel": "WEB",
+      "explanation": "",
+      "note": "Factoring always needs the owner's approval",
+      "results": null
+    }
+  },
+  {
+    "time": "10:20",
+    "what": "Owner approves; the invoice is registered before the bank pays out",
+    "http": 200,
+    "result": {
+      "id": "APR-0002",
+      "created_at": "2026-10-12T23:07:35.923021",
+      "decided_at": "2026-10-12T23:07:35.962440Z",
+      "action": "factoring INV-2026-109",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "approved",
+      "otp_attempts_left": 3,
+      "channel": "WA+OTP",
+      "explanation": "",
+      "note": "Factoring always needs the owner's approval",
+      "results": [
+        {
+          "transaction_id": 2,
+          "receivable_id": "INV-2026-109",
+          "lender_id": "LEN-FACTOR",
+          "share": 0.5,
+          "face_value_clp": 73788000.0,
+          "advance_pct": 0.85,
+          "fee_clp": 244470.0,
+          "proceeds_clp": 62475330.0,
+          "amount_clp": 73788000.0,
+          "annual_rate": 0.18,
+          "registry": {
+            "fingerprint": "0x66f4ed34271881fd9a5687d5a14143905c02b73ce102682816d70f2f645d1213",
+            "backend": "local",
+            "contract_address": null,
+            "tx_hash": null,
+            "explorer_url": null
+          },
+          "audit_seq": 13,
+          "audit_hash": "e37f4e5ebda6ed1bf46c9115b997b204386efcbfa1732fb1afb215e2da4ec58c"
+        }
+      ]
+    }
+  },
+  {
+    "time": "10:21",
+    "what": "Same invoice offered to another lender (double financing)",
+    "http": 201,
+    "result": {
+      "id": "APR-0003",
+      "created_at": "2026-10-12T23:07:35.969984Z",
+      "decided_at": null,
+      "action": "factor INV-2026-109 again elsewhere",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "lender_id": "LEN-FINTECH",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "pending",
+      "otp_attempts_left": 3,
+      "channel": "WEB",
+      "explanation": "",
+      "note": "Factoring always needs the owner's approval",
+      "results": null
+    }
+  },
+  {
+    "time": "10:21",
+    "what": "Even with the owner's code, the registry refuses it and no money moves",
+    "http": 200,
+    "result": {
+      "id": "APR-0003",
+      "created_at": "2026-10-12T23:07:35.969984",
+      "decided_at": "2026-10-12T23:07:35.977558Z",
+      "action": "factor INV-2026-109 again elsewhere",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "lender_id": "LEN-FINTECH",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "failed",
+      "otp_attempts_left": 3,
+      "channel": "WA+OTP",
+      "explanation": "",
+      "note": "already_financed: INV-2026-109 was already financed by LEN-FACTOR:factoring",
+      "results": []
     }
   },
   {
@@ -160,9 +296,9 @@
     "what": "Agent tries to split a CLP 30M supplier payment in two",
     "http": 201,
     "result": {
-      "id": "AUT-0002",
-      "created_at": "2026-10-12T22:56:44.282863Z",
-      "decided_at": "2026-10-12T22:56:44.283963Z",
+      "id": "AUT-0004",
+      "created_at": "2026-10-12T23:07:35.983552Z",
+      "decided_at": "2026-10-12T23:07:35.985776Z",
       "action": "pay Cartonera 1/2",
       "operations": [
         {
@@ -182,7 +318,7 @@
       "note": "Within the L2 limits",
       "results": [
         {
-          "transaction_id": 2,
+          "transaction_id": 3,
           "payee_id": "PAY-CARTONERA",
           "payee": "Cartonera Sur Ltda. (fictional)",
           "bank_account": "•••• 2117",
@@ -190,8 +326,8 @@
           "currency": "CLP",
           "amount_clp": 15000000.0,
           "reference": "",
-          "audit_seq": 11,
-          "audit_hash": "87f9aa0bdf17a0f1a710a4d6222d522277a60c353c6d79f5038942a248fc5356"
+          "audit_seq": 19,
+          "audit_hash": "0a3ab80a98da0e65d3062a8ebfed2034dba3061ec78d090ade951d4c24f98f85"
         }
       ]
     }
@@ -201,8 +337,8 @@
     "what": "Second half",
     "http": 201,
     "result": {
-      "id": "APR-0003",
-      "created_at": "2026-10-12T22:56:44.286413Z",
+      "id": "APR-0005",
+      "created_at": "2026-10-12T23:07:35.990627Z",
       "decided_at": null,
       "action": "pay Cartonera 2/2",
       "operations": [
@@ -256,11 +392,11 @@
     "what": "Agent anchors everything still pending",
     "http": 201,
     "result": {
-      "id": 2,
-      "created_at": "2026-10-12T22:56:44.292678Z",
-      "from_seq": 10,
-      "to_seq": 15,
-      "merkle_root": "9c5b9872f0d11774b614f3766e7cc44db1810129c39d1a87e403691fae789fd6",
+      "id": 3,
+      "created_at": "2026-10-12T23:07:36.002432Z",
+      "from_seq": 15,
+      "to_seq": 23,
+      "merkle_root": "ff3c1b3777b350e16c902b2633ec517506747f0122abe5136fa3403adcb14481",
       "backend": "local",
       "tx_hash": null,
       "explorer_url": null
