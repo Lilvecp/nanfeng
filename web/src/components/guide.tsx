@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SailMark } from "@/components/logo";
 import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
+import { useDirector } from "@/lib/director";
 import { GUIDE_UI, guideContent, markHelloSeen, markTourSeen, setAutoTours, setGuideOn, useAutoTours, useGuideOn, useHelloSeen, useTourSeen, type GuideStep } from "@/lib/guide";
 import { useLang } from "@/lib/i18n";
 import { usePref } from "@/lib/prefs";
@@ -160,6 +161,7 @@ export function Guide() {
   const lang = useLang();
   const ui = GUIDE_UI[lang];
   const on = useGuideOn();
+  const touringDemo = useDirector().active; // the demo tour owns the screen while it runs
   const intro = usePref("intro");
   const view = usePref("view");
   // Home has two views with different parts, so each gets its own tour.
@@ -254,7 +256,7 @@ export function Guide() {
     fab.current?.focus({ preventScroll: true });
   }, [key, setTouring, auto, notify, ui]);
 
-  if (on !== true || NO_GUIDE.has(pathname)) return null;
+  if (on !== true || NO_GUIDE.has(pathname) || touringDemo) return null;
   const nudge = pendingCount > 0 && pathname !== "/approvals";
 
   return (

@@ -164,6 +164,12 @@ export default function DocumentsPage() {
   const [docs, setDocs] = useState(DOCS);
   const [filter, setFilter] = useState<Filter>("all");
   const [sel, setSel] = useState("inv-118-r");
+  // The demo tour opens a given document (components/director.tsx).
+  useEffect(() => {
+    const open = (e: Event) => setSel(String((e as CustomEvent).detail));
+    window.addEventListener("nanfeng:select-doc", open);
+    return () => window.removeEventListener("nanfeng:select-doc", open);
+  }, []);
   const [reported, setReported] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);

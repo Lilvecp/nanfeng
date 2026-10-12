@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { OwnerChart } from "@/components/owner-view";
 import { Receipt } from "@/components/receipt";
+import { TourButton } from "@/components/director";
 import { Topbar } from "@/components/topbar";
 import { useDemoReplay } from "@/lib/demo-replay";
 import { SANDBOX_OTP, useDesk } from "@/lib/desk-state";
@@ -224,7 +225,10 @@ export default function DemoPage() {
         <span className={`badge${replay.state === "error" ? " crit" : replay.live ? " ok" : ""}`} title={replay.message} role="status">
           {replay.state === "error" ? replay.message : replay.live ? u.synced : u.offline}{replay.state === "running" ? " …" : ""}
         </span>
-        <Link href="/cockpit" className="btn btn-secondary btn-sm" style={{ marginLeft: "auto" }}>{u.exit}</Link>
+        <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <TourButton />
+          <Link href="/cockpit" className="btn btn-secondary btn-sm">{u.exit}</Link>
+        </span>
       </Topbar>
       <div className="content" style={{ flex: 1 }}>
         <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>

@@ -1,3 +1,4 @@
+import { Director } from "@/components/director";
 import { Guide } from "@/components/guide";
 import { OwnerLogin } from "@/components/owner-login";
 import { PageTransition } from "@/components/page-transition";
@@ -11,6 +12,7 @@ export default function DeskLayout({ children }: LayoutProps<"/">) {
         <PageTransition>{children}</PageTransition>
       </main>
       <Guide />
+      <Director />
       <OwnerLogin />
     </div>
   );

@@ -16,7 +16,7 @@ import { N, S, SHORT_CUSTOMER, clpFull, usd } from "./scenario";
 
 const eligible = S.arena.filter((a) => a.covers_need).length;
 
-const AGENT_STEPS: Record<number, DemoAgentStep[]> = {
+export const AGENT_STEPS: Record<number, DemoAgentStep[]> = {
   1: [
     { step: "Read the importer's email (OCR)", tool: "ocr.extract", model: "Mistral OCR", latency_s: 2.8, cost_usd: 0.004,
       detail: `${SHORT_CUSTOMER}: ${S.event.invoice} ${usd(N.overdueUsd)} paid ${N.delayDays} days late` },
