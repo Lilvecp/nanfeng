@@ -66,6 +66,7 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 - BEC: changed bank account + look-alike domain → block, call-back number, alert on another channel.
 - **Red team: 43 attacks, 4 stopped before → 43/43 after**; CI fails if a single one gets through. The same document attacks also run through the agent: none moves money.
 - Audit log: hash chain + Merkle root anchored on-chain (Sepolia today; FISCO BCOS if Camilo lands it).
+- **Say (Andy, 1:00):** "We assume the AI will be fooled, so it never decides. A rules engine outside the model sets the level; new money or a new beneficiary waits for the owner's one-time code, and a cloned voice can never approve. At 08:47 a fake supplier invoice changed the bank account and hid an instruction: blocked, and the owner was told on another channel. We attacked our own system forty-three ways; all forty-three are stopped, and the build fails if one ever gets through. Every step is hashed and anchored on-chain, so nobody, not even us, can rewrite what happened."
 
 ## 8 · Compliance: built to be trusted with a company's money
 
