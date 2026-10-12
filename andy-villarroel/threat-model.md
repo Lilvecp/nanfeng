@@ -73,7 +73,7 @@ flowchart LR
 | R1 | Owner denies approving | B5 | Audit entry with channel + OTP result, anchored | Done |
 | R2 | Agent writes security entries in someone else's name | B3 | Actor derived from the token | **Done** (F7) |
 | I1 | Personal data sent to LLM providers | B1 | `POST /privacy/mask` before any LLM call | **Done** (r4-07); Renato must call it |
-| I2 | Ledger exfiltrated through a collection message | B3 | `send_collection` only to `contact_id`, templated | Designed (r4-03) |
+| I2 | Ledger exfiltrated through a collection message | B3 | `send_collection` only to `contact_id`, templated; an invoice is only sent to its own customer | **Done** (Renato, `tools.py`) |
 | I3 | API key leaked in the public repo | — | `.env` git-ignored, gitleaks in CI, spend limits | Done (Camilo) |
 | D1 | Attacker burns the OTP attempts of a pending approval | B4 | 3 attempts then `locked`; owner re-requests | Lockout works; strangers are stopped by the owner session (F1) |
 | D2 | Cost exhaustion through a loop of LLM calls | B3 | Max steps per run, spend limits | r2 (Renato) |
@@ -107,13 +107,14 @@ flowchart LR
 | F3 | High | Split payments and cumulative spend were not checked: each operation was evaluated alone. | old `backend/app/policy.py` | Policy engine with request total, structuring, 24 h / 30 d limits, velocity, L3 caps | Andy · **fixed** (r4-02) |
 | F4 | Medium | Front and back disagreed on limits (L2 CLP 25M on screen, 10M in the backend). | `web/src/app/(desk)/settings/page.tsx:10` vs old policy | Engine uses the Settings values; `GET /policy` is the source of truth for the front | Andy · **fixed**; front to read `GET /policy` (Camilo) |
 | F5 | Medium | A payee has one bank account and no history, so an account change cannot be detected. | `backend/app/models.py` (`Payee`) | `payee_accounts` history, `payee_profiles`, `/security/check-payee` | Andy · **fixed** |
-| F6 | Medium | Agent token check is open when the token is empty; `.env.example` ships `change-me`. | `backend/app/security.py:11` | Refuse to start outside dev with an empty or default token | Camilo · before deploy |
+| F6 | Medium | Agent token check is open when the token is empty; `.env.example` ships `change-me`. | `backend/app/security.py:11` | Fail closed: no token = 401 (`NANFENG_ALLOW_OPEN_AGENT=true` for local dev only); the `change-me` placeholder is refused at startup | Andy · **fixed** (Oct 12) |
 | F7 | Medium | `POST /audit/entries` takes `actor` from the request body, so the agent can log entries as `owner`. | `backend/app/routers/audit.py` | Actor recorded as `agent[:label]` | Andy · **fixed** |
 | F8 | Low | Policy decisions and executions could race between concurrent requests. | `backend/app/routers/approvals.py` | One lock around decide + execute (single instance) | Andy · **fixed** |
-| F9 | Medium | Kill switch lives in memory: a restart silently turns the agent back on (fails open). | `backend/app/routers/approvals.py:20` | Persist it; on startup with unknown state, start ON | Camilo · Oct 11 |
-| F10 | Low | Kill switch only stops money operations, not the agent's other steps. | `backend/app/routers/approvals.py` | Orchestrator checks it before every step | Renato · r2-04 |
+| F9 | Medium | Kill switch lives in memory: a restart silently turns the agent back on (fails open). | `backend/app/routers/approvals.py:20` | Stored in the database (`app_state`); a restart keeps it on | Camilo · **fixed** (`74528af`) |
+| F10 | Low | Kill switch only stops money operations, not the agent's other steps. | `backend/app/routers/approvals.py` | Orchestrator checks it before every step and halts the run (`renato-lenis/nanfeng_agent/orchestrator.py`, tested mid-run) | Renato · **fixed** |
 | F11 | Low | Read endpoints (`/audit/entries`, `/bank/*`) are public. Fine with synthetic data, not with real data. | routers | Owner session on reads once F1 lands | Camilo · after freeze |
 | F12 | Medium | Every payment wrote the payee's full bank account into the public audit log (red team EX-04). | `backend/app/bank.py` | Last four digits only | Andy · **fixed** |
+| F13 | Medium | `POST /audit/anchor` was open to anyone, and every anchor writes a new `audit.anchored` entry, so there was always something pending: an anonymous caller could send unlimited transactions from the anchoring wallet (found Oct 12: 5 anonymous calls, 5 anchors). | `backend/app/routers/audit.py` | Agent token or owner session required | Andy · **fixed** (Oct 12) |
 
 ## Residual risks we will declare (deliverable 05)
 
