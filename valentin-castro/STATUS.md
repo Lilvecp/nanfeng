@@ -20,12 +20,13 @@ The web below is on `main`; the R1 documents are on branch **`valentin-castro`**
 | — | **Simple view for the owner** (default on Home): plain-language status, what happened, a cash chart with the payroll day, one recommendation with cost vs bank loan and an approve button, what NanFeng did today, a 3-step welcome on first visit; switch to the Detailed view keeps the full desk. Sidebar grouped into “Your business” and “Under the hood”. Approvals opens with a plain summary. EN / ES / 中文 | `web/src/components/owner-view.tsx`, `web/src/styles/owner.css` |
 | — | **Navigation and layout cleanup**: 5 sections (Home, Approvals, Financing, Messages, Security) with related screens as tabs inside them, Settings at the bottom of the sidebar, one-row top bar, company card in the sidebar; checked on desktop, laptop and 390 px phones (no page overflows), light and dark. Security shows the real red team (41/43) | `web/src/lib/sections.ts`, `web/src/components/sidebar.tsx`, `web/src/components/topbar.tsx` |
 | — | Landing: globe story, final CTA and benchmark (50/50 · −41% · 41/43) with real figures | `web/src/app/page.tsx`, `web/src/components/` |
+| fe-11 | Every screen in EN / ES / 中文, including the landing, Protection, Agent activity, Settings, charts and notices; key amounts also in yuan in the 中文 view | all of `web/src` |
+| — | **Review fixes (Oct 11)**: sandbox approval survives a reload; execution receipt after approving (reference, risk 81% → 2%, Credit Passport 34 E → 67 B, audit hash); owner WhatsApp follows the approval state; the ask box answers what-ifs from the engine's runs; Demo Mode shows one panel per step and leaves the desk approved; live countdowns; "anchored on FISCO BCOS" replaced by "Sepolia testnet today, FISCO BCOS next"; the guide stops opening tours once dismissed and stays on the sail button | `web/src/lib/desk-state.tsx`, `web/src/components/receipt.tsx`, `web/src/app/(desk)/demo` |
 
 `npm run lint` and `npm run build` pass. Checked in the browser: Cockpit, Financing, Scenario Lab, Approvals (EN and 中文).
 
 ## Still mine
 
-- [ ] fe-11: Settings and the technical screens (Protection, Agent activity) are still English-only; toasts (`desk-state` notify) too. Messages (Conversations, Documents) is done: the owner's WhatsApp follows the view language, the importer's WeCom stays in Chinese.
 - [ ] fe-12 (with Camilo): loading/error states and an accessibility pass.
 - [ ] r1-08 final English edit (Oct 16) · r1-12 China access test (Oct 16) · fe-13 record the video (Oct 15) · r1-09 send the UDD email (Oct 18).
 - [ ] Deck slides themselves (outline is ready; due Oct 14).
