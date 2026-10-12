@@ -38,6 +38,14 @@ class Settings(BaseSettings):
     evm_rpc_url: str = ""
     evm_private_key: str = ""  # testnet-only wallet; never a key that holds real funds
     evm_explorer_tx_url: str = "https://sepolia.etherscan.io/tx"
+    # Invoice registry against double financing (r3-06). "local" = fingerprints in our DB only;
+    # "evm" = InvoiceRegistry contract at invoice_registry_address (deploy: python chain/deploy.py),
+    # same RPC and wallet as anchoring. In "evm" mode factoring fails closed if the chain is unreachable.
+    registry_backend: str = "local"
+    invoice_registry_address: str = ""
+    registry_wait_receipt_s: float = 0  # >0: wait for the registration to be mined before paying out
+    # Fictional tax id (RUT) of the demo exporter: part of each invoice's fingerprint.
+    issuer_tax_id: str = "76.543.210-3"
     seed_on_startup: bool = True
     # Owner sign-in (threat model F1). Sessions are HMAC-signed; empty secret = random per process.
     owner_password: str = DEMO_OWNER_PASSWORD

@@ -624,6 +624,39 @@
   "after_plan": {
    "score": 67.2,
    "grade": "B"
+  },
+  "method": "Heuristic scorecard v1: expert weights and linear bands, not fitted to repayment data. To calibrate with a lender's portfolio (logistic regression of default on the six factors).",
+  "weight_robustness": {
+   "n": 10000,
+   "seed": 0,
+   "v1": {
+    "before": 33.5,
+    "after": 67.2
+   },
+   "perturbed": {
+    "after_better_share": 1.0,
+    "before_p5_p95": [
+     20.1,
+     48.1
+    ],
+    "after_p5_p95": [
+     55.0,
+     77.9
+    ],
+    "grade_up_share": 0.9983
+   },
+   "any": {
+    "after_better_share": 1.0,
+    "before_p5_p95": [
+     14.5,
+     66.0
+    ],
+    "after_p5_p95": [
+     37.4,
+     81.6
+    ],
+    "grade_up_share": 0.8333
+   }
   }
  },
  "explanation": [

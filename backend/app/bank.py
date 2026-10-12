@@ -9,12 +9,26 @@ from decimal import Decimal
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import audit
+from . import audit, registry
 from .events import broker
 from .models import Account, Lender, Payee, PayeeAccount, Receivable, Transaction
-from .seed import FX_RATES
+from .seed import FX_RATES, LENDER_TERMS
 
 ACCOUNT_BY_CCY = {"CLP": "ACC-CLP", "USD": "ACC-USD", "CNY": "ACC-CNY"}
+
+
+def _fixed_fee(lender_id: str) -> float:
+    return float(LENDER_TERMS.get(lender_id, {}).get("fee_fixed_clp", 0))
+
+
+def _stamp_pct(lender_id: str, term_days: int) -> float:
+    """Chilean stamp tax as the engine charges it: flat for sight credits, else per month or fraction, capped."""
+    stamp = LENDER_TERMS.get(lender_id, {}).get("stamp_tax")
+    if not stamp:
+        return 0.0
+    if "flat" in stamp:
+        return float(stamp["flat"])
+    return min(float(stamp["monthly"]) * max(1, -(-term_days // 30)), float(stamp["cap"]))
 
 
 class BankError(Exception):
@@ -94,14 +108,19 @@ def factoring(db: Session, receivable_id: str, lender_id: str = "LEN-FACTOR",
     if not inv.factoring_eligible or not 0 < share <= 1:
         raise BankError("not_eligible", f"{inv.id} cannot be factored with share {share}")
     face_clp = to_clp(float(inv.amount) * share, inv.currency)
-    fee = round(face_clp * float(lender.fee_pct), 2)
+    fee = round(face_clp * float(lender.fee_pct) + _fixed_fee(lender.id), 2)
     proceeds = round(face_clp * float(lender.advance_pct) - fee, 2)
+    try:  # invoice registry (r3-06): before any money moves, so a refused registration pays nothing
+        reg = registry.register(db, inv.id, f"{lender.id}:factoring")
+    except registry.RegistryError as exc:
+        raise BankError(exc.code, exc.message, exc.status) from exc
     inv.financed_by = f"{lender.id}:factoring"
     tx = _move(db, _account(db, "CLP"), proceeds, "factoring", lender.name, inv.id)
     return _finish(db, actor, "factoring", {
         "transaction_id": tx.id, "receivable_id": inv.id, "lender_id": lender.id, "share": share,
         "face_value_clp": face_clp, "advance_pct": float(lender.advance_pct), "fee_clp": fee,
         "proceeds_clp": proceeds, "amount_clp": face_clp, "annual_rate": float(lender.annual_rate),
+        "registry": registry.receipt(reg),
     })
 
 
@@ -111,13 +130,15 @@ def loan(db: Session, lender_id: str, amount_clp: float, term_days: int, actor: 
         raise BankError("not_found", "Loan lender not found", 404)
     if amount_clp <= 0 or term_days <= 0:
         raise BankError("invalid_amount", "Amount and term must be positive")
-    fee = round(amount_clp * float(lender.fee_pct), 2)
+    fee = round(amount_clp * float(lender.fee_pct) + _fixed_fee(lender.id), 2)
+    stamp = round(amount_clp * _stamp_pct(lender.id, term_days), 2)
     interest = round(amount_clp * float(lender.annual_rate) * term_days / 365, 2)
-    tx = _move(db, _account(db, "CLP"), amount_clp - fee, "loan", lender.name, f"{lender.product}-{term_days}d")
+    proceeds = round(amount_clp - fee - stamp, 2)
+    tx = _move(db, _account(db, "CLP"), proceeds, "loan", lender.name, f"{lender.product}-{term_days}d")
     return _finish(db, actor, "loan", {
         "transaction_id": tx.id, "lender_id": lender.id, "product": lender.product, "amount_clp": amount_clp,
-        "term_days": term_days, "fee_clp": fee, "interest_clp": interest, "cost_clp": fee + interest,
-        "proceeds_clp": amount_clp - fee, "annual_rate": float(lender.annual_rate),
+        "term_days": term_days, "fee_clp": fee, "stamp_tax_clp": stamp, "interest_clp": interest,
+        "cost_clp": round(fee + stamp + interest, 2), "proceeds_clp": proceeds, "annual_rate": float(lender.annual_rate),
     })
 
 

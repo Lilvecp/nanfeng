@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 
 MAGIC = b"NANFENG1"
 _lock = threading.Lock()  # one anchor at a time: keeps seq ranges and wallet nonces in order
+wallet_lock = _lock  # the invoice registry (registry.py) sends from the same wallet
 _w3 = None
 
 

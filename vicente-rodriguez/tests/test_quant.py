@@ -117,6 +117,14 @@ def test_credit_passport(cherry, cherry_res):
     assert 0 <= no["score"] <= 100 and "digest_sha256" not in no
     assert len(yes["digest_sha256"]) == 64
     assert sum(f["points"] for f in no["factors"]) == pytest.approx(no["score"], abs=0.5)
+    assert no["method"].startswith("Heuristic")  # weights are expert choices, and the passport says so
+
+
+def test_passport_improvement_does_not_depend_on_the_weights():
+    cp = tools.optimize_plan("cherry_crisis", explain=False)["credit_passport"]
+    rob = cp["weight_robustness"]
+    assert rob["v1"] == {"before": cp["before"]["score"], "after": cp["after_plan"]["score"]}
+    assert rob["any"]["after_better_share"] == 1.0 and rob["perturbed"]["grade_up_share"] > 0.95
 
 
 def test_tool_call_returns_json():
@@ -159,6 +167,31 @@ def test_loans_offer_several_terms_and_quote_picks_shortest_that_covers(catalog)
     assert wc.terms() == [30, 60, 90, 180]
     assert catalog.loan_unit_cost(wc, 30) < catalog.loan_unit_cost(wc, 180)
     assert catalog.stamp_tax(30) == pytest.approx(catalog.product_stamp(wc, 30))
+
+
+def test_every_credit_rate_is_under_the_legal_maximum(catalog):
+    """CMF certificate 09/2026: each credit product's rate stays under the TMC of every ticket it can
+    write. Tickets are capped at the bracket edge (5,000 UF in CLP, 2,000 UF in foreign currency)."""
+    uf = catalog.market["uf_clp"]
+    for p in catalog.products:
+        if p.kind in ("factoring", "forward"):
+            continue  # factoring is a sale of credits (Ley 19.983); a forward is not a credit
+        rate = p.get("rate_annual", p.get("rate_monthly", 0) * 12) + p.get("guarantee_fee_annual", 0.0)
+        assert rate < p.legal_max_rate_annual, p.id
+        biggest = min(p.max_ticket(), p.get("max_amount_clp", math.inf)) / uf
+        bracket_edge = 2000 if p.currencies == ["USD"] else 5000
+        assert biggest <= bracket_edge or p.id == "PAE-USD", (p.id, biggest)  # PAE is under 8.67% above 2,000 UF too
+
+
+def test_needs_above_the_ticket_take_several_operations(cherry, cherry_res, catalog):
+    from nanfeng_quant.catalog import financing_quote
+    from nanfeng_quant.optimizer import build_levers
+    wc = catalog.product("WC-BANK")
+    q = next(r for r in financing_quote(cherry, catalog, 300e6, 25, 40) if r["product_id"] == "WC-BANK")
+    assert q["loans"] == 2 and q["cost_clp"] == pytest.approx(300e6 * catalog.loan_unit_cost(wc, 60) + 2 * wc.fee_fixed_clp)
+    levers = build_levers(cherry, catalog, cherry_res, np.arange(50), [25, 35])
+    wc_levers = [lv for lv in levers if lv.product.id == "WC-BANK"]
+    assert wc_levers and all(lv.ub * lv.meta["clp_per_unit"] <= wc.max_ticket() for lv in wc_levers)
 
 
 def test_non_recourse_factor_refuses_invoice_with_announced_delay(cherry, catalog):
@@ -208,6 +241,23 @@ def test_plan_output_is_ready_for_the_backend():
     assert out["savings_pct"] > 0
     again = tools.optimize_plan("cherry_crisis", explain=False)
     assert again["source"].get("cached") and again["optimal"]["total_cost_clp"] == out["optimal"]["total_cost_clp"]
+
+
+def test_sandbox_seed_prices_loans_like_the_engine():
+    """The bank charges what the plan says: fixed fee and stamp tax travel in the seed (PAE: CLP 120,000)."""
+    out = tools.optimize_plan("cherry_crisis", explain=False)
+    lenders = {l["id"]: l for l in tools.sandbox_seed()["lenders"]}
+    assert lenders["LEN-PAE"]["fee_fixed_clp"] == 120000 and lenders["LEN-PAE"]["stamp_tax"] is None
+    assert lenders["LEN-ANDINO"]["stamp_tax"] == {"monthly": 0.00066, "cap": 0.008}
+    assert lenders["LEN-OVERDRAFT"]["stamp_tax"] == {"flat": 0.00332}
+    for action, op in zip(out["optimal"]["actions"], out["approval_request"]["operations"]):
+        if op["op"] != "loan":
+            continue
+        lender, amount, term = lenders[op["params"]["lender_id"]], op["params"]["amount_clp"], op["params"]["term_days"]
+        stamp = lender["stamp_tax"] or {}
+        stamp_pct = stamp.get("flat", min(stamp.get("monthly", 0) * max(1, -(-term // 30)), stamp.get("cap", 0)))
+        bank_cost = amount * (lender["fee_pct"] + stamp_pct + lender["annual_rate"] * term / 365) + lender["fee_fixed_clp"]
+        assert abs(bank_cost - action["cost_clp"]) < 1000, (op, bank_cost, action["cost_clp"])
 
 
 def test_agent_tool_specs_match_tools():

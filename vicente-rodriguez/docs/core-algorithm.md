@@ -70,7 +70,18 @@ USD loans (pre-export loan, PAE) are drawn and repaid in USD, so their cash effe
 
 ## 3. Credit Passport
 
-Transparent scorecard: six factors (90-day probability of negative cash, buffer in months of payroll, customer concentration (HHI), weighted customer delay, debt service / inflows, foreign-currency share), each mapped linearly to 0–100 between fixed "best" and "worst" values and weighted (30/15/20/15/10/10). Every factor reports value, sub-score and points, so a lender can recompute it. It can be scored on the cash paths **after** a plan: Huerto Austral goes from **34 (E) to 67 (B)** with the recommended plan. With the SME's consent a SHA-256 digest of the passport is produced (anchored on-chain by the audit log). Weights are expert choices (v1), to be calibrated with lender data.
+Transparent scorecard: six factors (90-day probability of negative cash, buffer in months of payroll, customer concentration (HHI), weighted customer delay, debt service / inflows, foreign-currency share), each mapped linearly to 0–100 between fixed "best" and "worst" values and weighted (30/15/20/15/10/10). Every factor reports value, sub-score and points, so a lender can recompute it. It can be scored on the cash paths **after** a plan: Huerto Austral goes from **34 (E) to 67 (B)** with the recommended plan. With the SME's consent a SHA-256 digest of the passport is produced (anchored on-chain by the audit log).
+
+**The weights and bands are heuristic, not calibrated**, and every passport says so (`method`). Calibrating them means regressing real repayment or default outcomes on the six factors (e.g. a logistic regression on a lender's SME portfolio); we have no such data and our companies are synthetic, so fitting the weights to them would be circular. What we can show is that the conclusion does not hang on the weights: the sub-scores do not depend on them, so we re-score Huerto Austral under 10,000 random weightings (`weight_robustness`, in every `optimize_plan` response). With weights within about ±50% of v1, the score goes from 20–48 (P5–P95) before the plan to 55–78 after, and the grade improves in 99.8% of draws; with **any** weighting of the six factors (uniform Dirichlet), the score after the plan is higher in **100%** of draws and the grade improves in 83%.
+
+| Factor | Weight | Sub-score 100 at | Sub-score 0 at | Why these anchors |
+|---|---|---|---|---|
+| Liquidity: P(cash < 0) in 90 days | 30% | 0% | 60% | The forecast itself; 60% means default is the likely outcome |
+| Buffer: median minimum cash, months of payroll | 15% | 2 months | 0 | Two payrolls of slack is a common lender comfort level |
+| Customer concentration (HHI of inflows) | 20% | 0.20 (≈ 5 equal customers) | 0.70 (one dominant customer) | Concentration is the classic SME exporter risk |
+| Weighted customer delay | 15% | 0 days | 30 days | 30 days late doubles the legal 30-day term |
+| Debt service / inflows | 10% | 5% | 40% | Above ~40% most inflows go to lenders |
+| Foreign-currency share of inflows | 10% | 30% | 100% | FX exposure, partly hedgeable, so a lower weight |
 
 ## 4. Validation
 

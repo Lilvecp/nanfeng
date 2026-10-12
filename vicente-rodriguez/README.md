@@ -49,7 +49,7 @@ The LLM never computes a number: it calls these tools and quotes them. That is b
 | r5-04 | Oct 9 | Must | 90-day Monte Carlo | ✅ Done — tails fixed (D13) | `nanfeng_quant/montecarlo.py`, `fx.py` |
 | r5-07 | Oct 10 | Must | MILP optimizer | ✅ Done — fair comparison, realistic product rules, 2 s budget | `nanfeng_quant/optimizer.py` |
 | r5-08 | Oct 11 | Should | Explainability | ✅ Done | `nanfeng_quant/explain.py` |
-| r5-09 | Oct 11 | Could | Credit Passport | ✅ Done (v1 weights; before/after plan) | `nanfeng_quant/credit_passport.py` |
+| r5-09 | Oct 11 | Could | Credit Passport | ✅ Done (heuristic v1 weights, declared; robust to any weighting; before/after plan) | `nanfeng_quant/credit_passport.py` |
 | r5-06 | Oct 12 | Should | Forecast backtest (CRPS, coverage) | ✅ Done — coverage now nominal under misspecification | `nanfeng_quant/backtest.py`, `results/backtest_summary.md` |
 | r5-05 | Oct 13 | Should | Market data with sources | ✅ Done — re-checked 2026-10-10, 2025/26 season | `docs/market-data.md` |
 | r5-10 | Oct 13 | Must | NanFeng-Bench (50 scenarios) | ✅ Done | `nanfeng_quant/bench.py`, `results/bench_summary.md` |
@@ -74,7 +74,7 @@ Tests: `28 passed` (`pytest`). Bench 50/50.
 | 7 | **The backend and front used different numbers** (FX 940/132, opening cash 175.5M, lender terms, a "factoring + forward" plan, payroll CLP 38.5M on 2026-10-28, …). | `GET /quant/sandbox/seed`, `approval_request` in every plan, and `results/cherry_crisis_story.json` with every number in EN/ES/中文. See D2–D5 and the table of front fixes below. | One story everywhere once teammates pull them in. |
 | 8 | No machine-readable tool schemas for the agent. | `api/agent_tools.json` (OpenAI/OpenRouter format), `GET /quant/tools`, `tools.call` returns errors as JSON instead of raising. | Renato can wire the tools directly. |
 | 9 | The Cash Cockpit's "after the plan" chart had no data behind it. | `optimize_plan` returns `after_plan.fan_chart` and probabilities; Credit Passport before/after. | Front can draw the "resolved" overlay from real numbers (2.5% after the plan). |
-| 10 | Stamp-tax exemption of the PAE was unverified; the "60% paid late" figure had a weak source; cherry figures were a season old. | PAE exempt confirmed (DL 3.475 art. 24 no. 11, SII Ord. 2402/2016); replaced by Bolsa de Productos (63% of SME invoice value paid late, 44 days average); 2025/26 season (USD 2.6 bn, 87% to China). | `docs/market-data.md` ready for the deck. |
+| 10 | Stamp-tax exemption of the PAE was unverified; the "60% paid late" figure had a weak source; cherry figures were a season old. | PAE exempt confirmed (DL 3.475 art. 24 no. 11, SII Ord. 2402/2016); replaced by Bolsa de Productos (63% of SME invoice value paid after 30 days, Q3 2024 report; 44 days average); 2025/26 season (USD 2.6 bn, 87% to China). | `docs/market-data.md` ready for the deck. |
 
 ---
 
@@ -96,15 +96,15 @@ Each decision says why and what you need to do. If you disagree, tell me and I r
 
 **D7 · Demo Mode reads `GET /quant/demo/story`** (fe-10): it has every number of the scenario, the plan, the Financing Arena rows, the Scenario Lab presets (each with its plan cost), the approval request, and EN/ES/中文 strings for the alert, the plan and the OTP prompt. The fan charts are in `/quant/demo/forecast → fan_chart` (before the plan) and `/quant/demo/plan → after_plan.fan_chart` (after it). No computation, no network.
 
-**D8 · FX history stays on mindicador.cl** (a free mirror of the BCCh's official "dólar observado"; the BDE API needs a registered account and returns the same series). Cite "Banco Central de Chile" as the source. USD/CNY is FRED (public domain).
+**D8 · FX history stays on mindicador.cl** (a free mirror of the BCCh's official "dólar observado"; the BDE API needs a registered account and returns the same series). Cite "Banco Central de Chile" as the source. USD/CNY is FRED (public domain). Terms of use read on 2026-10-12: the BCCh allows reuse citing it as owner, mindicador.cl has no terms of its own, the Fed's H.10 data is public domain and FRED asks for its citation and no implied endorsement (`docs/market-data.md`, *Terms of use*).
 
-**D9 · Catalog rates are "reference rates", not quotes.** They are anchored to the CMF certificate 09/2026 and public ranges, and the bank loan is deliberately below the market average. Say "reference rates" in the deck, never "quotes". Lenders are fictional.
+**D9 · Catalog rates are "reference rates", not quotes.** They are anchored to the CMF certificate 09/2026 and public ranges, and the bank loan is deliberately below the market average. Say "reference rates" in the deck, never "quotes". Lenders are fictional. Re-verified on 2026-10-12, including the legal maximum rate (TMC) for every ticket a product can write: four products now cap each operation at the bracket edge (`max_ticket_clp`), which changes no published number (`docs/financial-catalog.md`, *Rate verification*).
 
 **D10 · The CNY forward is out of the pitch story.** It stays in the catalog and the Financing Arena as a hedging option (roadmap / policy setting).
 
 **D11 · Scenario Lab:** live sliders call `/quant/forecast` (0.1–0.5 s); "re-plan" calls `/quant/plan`. Hires default to CLP 750,000/month per harvest worker (`hire_monthly_wage_clp`); the front's "0–5 hires at CLP 1.4M" barely moves a CLP 238M payroll — use 0–50 workers.
 
-**D12 · Credit Passport weights are v1.** Present as "v1, to calibrate with lender data". Show it moving **34 (E) → 67 (B)** with the plan.
+**D12 · Credit Passport weights are heuristic (v1), and the passport says so (`method`).** Present it as "a transparent heuristic score, to calibrate with a lender's repayment data". Show it moving **34 (E) → 67 (B)** with the plan, and if asked about the weights: under any weighting of the six factors the score after the plan is higher (10,000 random weightings, `weight_robustness`).
 
 **D13 · Forecast uncertainty τ = 0.5, systemic share ρ = 0.6**, chosen on the backtest (coverage nominal under misspecification, conservative otherwise).
 
@@ -228,9 +228,16 @@ Everything in my scope that could be done without a human is done. What remains 
 | 2 | Wire the tools into the orchestrator (D6, r2-09) | Renato | His code |
 | 3 | Have a native reader check the ES and 中文 strings in `story.strings` before the video | Valentín | Plan rule (risks.md) |
 | 4 | English edit of `docs/core-algorithm.md` | Valentín (r1-08) | Plan rule |
-| 5 | Before quoting "63% of invoice value paid late", open the Bolsa de Productos ranking itself | Valentín / me | Only press reports were reachable |
+| 5 | Update the deck line: "63% of what SMEs invoice **to large companies** is paid **after the 30-day legal limit**" with the footnote *Bolsa de Productos / ASECH, Ranking de Pagadores Q3 2024* | Valentín | Slide 2; the figure is now confirmed at the primary source (`docs/market-data.md`) |
 
-Known limits that remain (documented in `docs/core-algorithm.md` §5): synthetic companies (no real ledgers to calibrate τ, ρ and the Credit Passport weights), reference rates instead of lender quotes, no loan prepayment, no per-shipment price noise.
+Known limits that remain (documented in `docs/core-algorithm.md` §5): synthetic companies (no real ledgers to calibrate τ, ρ and the Credit Passport weights, which are therefore declared heuristic), reference rates instead of lender quotes, no loan prepayment, no per-shipment price noise.
+
+### Data-and-sources checklist (closed 2026-10-12)
+
+- [x] **63% late payments:** found in the primary source, Bolsa de Productos / ASECH *Ranking de Pagadores* Q3 2024 (62.99% of the amount SMEs invoice to large companies is paid after 30 days). The two press links we cited did not contain it; replaced. The 44-day average is the Jul 2025–Jun 2026 ranking (trade press). → `docs/market-data.md`
+- [x] **Rates of the 9 products:** re-checked against CMF certificate 09/2026, Term SOFR and 2026 factoring ranges, plus the legal maximum rate for every ticket; factoring and LC source notes corrected; ticket caps added where a big ticket would exceed the legal maximum (no published number changes). → `docs/financial-catalog.md`, `test_every_credit_rate_is_under_the_legal_maximum`
+- [x] **Credit Passport weights:** declared heuristic in code, API output (`method`) and docs, with the rationale for every band; robustness to the weights measured instead of a fake calibration. → `docs/core-algorithm.md` §3
+- [x] **Terms of use of mindicador.cl and FRED:** read and quoted; we comply (attribution, one-off download, no implied endorsement). → `docs/market-data.md`, `LICENSES.md`
 
 ---
 
@@ -282,7 +289,7 @@ Minimizes total financing cost so that cash stays above the buffer in 90% of sce
 
 ### r5-09 · Credit Passport (Could)
 
-Six-factor transparent scorecard (value, sub-score, weight, points per factor); SHA-256 digest with consent for on-chain anchoring. Huerto Austral: **34/100 (E) today, 67/100 (B) with the plan.**
+Six-factor transparent scorecard (value, sub-score, weight, points per factor); SHA-256 digest with consent for on-chain anchoring. Huerto Austral: **34/100 (E) today, 67/100 (B) with the plan.** Weights are heuristic and labeled so; the improvement holds under any weighting (`weight_robustness`).
 
 ### r5-06 · Backtest (Should)
 
@@ -290,7 +297,7 @@ See `results/backtest_summary.md` and `docs/core-algorithm.md` §4: FX intervals
 
 ### r5-05 · Market data (Should)
 
-`docs/market-data.md` (re-checked 2026-10-10): cherry exports USD 2.6 bn FOB in 2025/26, ~87% to China; SMEs paid in 44 days on average, 63% of invoice value paid late; banks charge SMEs 20.06%/yr on average (CMF); MSME finance gap USD 5.7 trillion (IFC).
+`docs/market-data.md` (re-checked 2026-10-10, 63% traced to the primary report on 2026-10-12): cherry exports USD 2.6 bn FOB in 2025/26, ~87% to China; SMEs paid in 44 days on average, 63% of what they invoice to large companies paid after 30 days (Bolsa de Productos, Q3 2024); banks charge SMEs 20.06%/yr on average (CMF); MSME finance gap USD 5.7 trillion (IFC).
 
 ### r5-10 · NanFeng-Bench (Must)
 

@@ -169,3 +169,6 @@ def test_cherry_crisis_pae_loan_from_the_quant_plan(client):
     r = done["results"][0]
     assert done["status"] == "approved" and r["lender_id"] == "LEN-PAE" and r["annual_rate"] == 0.068
     assert clp_balance(client) == OPENING + r["proceeds_clp"]
+    # Same cost as the engine's plan (CLP 2,106,329): 0.3% + the CLP 120,000 fixed fee, no stamp tax (exempt)
+    assert r["fee_clp"] == round(140098568 * 0.003 + 120000, 2) and r["stamp_tax_clp"] == 0
+    assert abs(r["cost_clp"] - 2106329) < 5

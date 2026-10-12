@@ -67,6 +67,7 @@
   }
  ],
  "summary": "Score 34/100 (grade E). Weakest factor: probability of negative cash within 90 days (monte carlo, no new financing) = 0.8322.",
+ "method": "Heuristic scorecard v1: expert weights and linear bands, not fitted to repayment data. To calibrate with a lender's portfolio (logistic regression of default on the six factors).",
  "consent": true,
  "shareable": true,
  "synthetic": true,

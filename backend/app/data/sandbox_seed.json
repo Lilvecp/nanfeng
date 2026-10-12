@@ -86,6 +86,8 @@
    "annual_rate": 0.18,
    "advance_pct": 0.85,
    "fee_pct": 0.0025,
+   "fee_fixed_clp": 60000,
+   "stamp_tax": null,
    "catalog_product_id": "FACT-BANK"
   },
   {
@@ -95,6 +97,8 @@
    "annual_rate": 0.21,
    "advance_pct": 0.9,
    "fee_pct": 0.005,
+   "fee_fixed_clp": 0,
+   "stamp_tax": null,
    "catalog_product_id": "FACT-FINTECH"
   },
   {
@@ -104,6 +108,8 @@
    "annual_rate": 0.102,
    "advance_pct": 0.95,
    "fee_pct": 0.002,
+   "fee_fixed_clp": 120000,
+   "stamp_tax": null,
    "catalog_product_id": "LC-DISC"
   },
   {
@@ -113,6 +119,11 @@
    "annual_rate": 0.132,
    "advance_pct": 1.0,
    "fee_pct": 0.0015,
+   "fee_fixed_clp": 0,
+   "stamp_tax": {
+    "monthly": 0.00066,
+    "cap": 0.008
+   },
    "catalog_product_id": "CONF-BANK"
   },
   {
@@ -122,6 +133,11 @@
    "annual_rate": 0.14,
    "advance_pct": 1.0,
    "fee_pct": 0.005,
+   "fee_fixed_clp": 150000,
+   "stamp_tax": {
+    "monthly": 0.00066,
+    "cap": 0.008
+   },
    "catalog_product_id": "WC-BANK"
   },
   {
@@ -131,6 +147,11 @@
    "annual_rate": 0.115,
    "advance_pct": 1.0,
    "fee_pct": 0.003,
+   "fee_fixed_clp": 100000,
+   "stamp_tax": {
+    "monthly": 0.00066,
+    "cap": 0.008
+   },
    "catalog_product_id": "FOGAPE"
   },
   {
@@ -140,6 +161,8 @@
    "annual_rate": 0.068,
    "advance_pct": 1.0,
    "fee_pct": 0.003,
+   "fee_fixed_clp": 120000,
+   "stamp_tax": null,
    "catalog_product_id": "PAE-USD"
   },
   {
@@ -149,6 +172,10 @@
    "annual_rate": 0.252,
    "advance_pct": 1.0,
    "fee_pct": 0.0,
+   "fee_fixed_clp": 0,
+   "stamp_tax": {
+    "flat": 0.00332
+   },
    "catalog_product_id": "OVERDRAFT"
   },
   {
@@ -158,6 +185,8 @@
    "annual_rate": 0.0,
    "advance_pct": 1.0,
    "fee_pct": 0.0035,
+   "fee_fixed_clp": 0,
+   "stamp_tax": null,
    "catalog_product_id": "FWD-CNY"
   }
  ],
