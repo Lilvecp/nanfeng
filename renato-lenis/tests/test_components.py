@@ -269,3 +269,20 @@ def test_check_rejects_an_invented_scenario():
     step = PlannedStep("forecast_run", {"scenario": "sha_delay_45d"})
     assert "scenario" in check([step], _pi(), "cherry_crisis")
     assert check([PlannedStep("forecast_run", {"scenario": "cherry_crisis"})], _pi(), "cherry_crisis") == ""
+
+
+def test_llm_plan_always_reminds_the_importer(agent, hub):
+    """The LLM planner may skip the reminder; a customer's late-payment notice always gets one."""
+    fields = {k: None for k in quarantine.SCHEMA["required"]} | {
+        "doc_type": "payment_notice", "issuer_name": "Shanghai Hongxin Fresh Fruit Import Co.",
+        "invoice_number": "INV-2026-118", "currency": "USD", "amount": "180000", "new_due_date": "2027-02-01"}
+    plan = {"steps": [{"tool": "forecast_run", "args": {"scenario": "cherry_crisis"}},
+                      {"tool": "optimize_plan", "args": {"scenario": "cherry_crisis"}, "when": "at_risk"},
+                      {"tool": "propose_plan", "args": {}, "when": "at_risk"}]}
+    agent.router = ModelRouter("k", {"extract": ["m"], "plan": ["p"]}, client=openrouter({"m": fields, "p": plan}))
+    agent.planner = LLMPlanner(agent.router)
+    run = agent.handle_document(fixtures.shanghai_notice())
+    assert run.plan.planner == "llm" and "collection reminder added" in run.plan.note
+    assert [s.tool for s in run.plan.steps][-1] == "send_collection"
+    assert any(d.channel == "wecom" and d.message.language == "zh" for d in hub.outbox)
+    assert run.status == "awaiting_approval"

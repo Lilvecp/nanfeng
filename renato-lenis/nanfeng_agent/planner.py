@@ -113,7 +113,20 @@ class LLMPlanner:
         if problem:
             rule_plan.note = f"llm plan rejected ({problem}); rules used"
             return rule_plan
-        return Plan(steps, self.name, model=out.model, cost_usd=out.cost_usd)
+        return required(Plan(steps, self.name, model=out.model, cost_usd=out.cost_usd), pi)
+
+
+def required(plan: Plan, pi: PlannerInput) -> Plan:
+    """Steps the business always wants, whatever the LLM chose: when a customer announces a late
+    payment, the importer gets a reminder of the invoice in their language (L1, template only)."""
+    f = pi.fields
+    if (f.get("doc_type") == "payment_notice" and pi.customer_id and f.get("invoice_number")
+            and not any(s.tool == "send_collection" for s in plan.steps)):
+        cust = next(c for c in CUSTOMERS if c.id == pi.customer_id)
+        plan.steps.append(PlannedStep("send_collection", {"contact_id": cust.contact_id,
+                                                          "receivable_id": f["invoice_number"]}))
+        plan.note = (plan.note + "; " if plan.note else "") + "collection reminder added"
+    return plan
 
 
 def check(steps: list[PlannedStep], pi: PlannerInput, scenario: str = "cherry_crisis") -> str:
