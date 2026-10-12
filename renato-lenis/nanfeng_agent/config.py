@@ -36,6 +36,7 @@ class Settings:
     zavu_api_key: str = ""
     elevenlabs_api_key: str = ""
     zavu_url: str = "https://api.zavu.dev/v1/messages"
+    zavu_webhook_secret: str = ""
     owner_phone: str = ""
     owner_language: str = "es"
     cockpit_url: str = "http://localhost:3000"
@@ -73,6 +74,7 @@ class Settings:
             zavu_api_key=_env("ZAVU_API_KEY") or _env("NANFENG_ZAVU_API_KEY"),
             elevenlabs_api_key=_env("ELEVENLABS_API_KEY"),
             zavu_url=_env("NANFENG_ZAVU_URL", base.zavu_url),
+            zavu_webhook_secret=_env("NANFENG_ZAVU_WEBHOOK_SECRET"),
             owner_phone=_env("NANFENG_OWNER_PHONE"),
             owner_language=_env("NANFENG_OWNER_LANGUAGE", base.owner_language),
             cockpit_url=_env("NANFENG_COCKPIT_URL", base.cockpit_url),

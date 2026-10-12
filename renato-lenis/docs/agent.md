@@ -38,6 +38,9 @@ Every step is published to Mission Control as `agent.step` (`POST /agent/events`
 | `templates.py` | r2-07 | Every outbound message, ES / EN / 中文, typed slots |
 | `contacts.py` | r2-06 | Master data for recipients (synthetic) |
 | `inbound.py` | r2-07 | Zavu webhook payload → `Document` (sender from the envelope, never the body) |
+| `service.py` | r2-09 | HTTP service (:8200): Zavu webhook, uploads, runs, "ask it why", briefing; SSE listener that resumes runs |
+| `explain.py` | r2-09 | "Ask it why": answers from the run's recorded tool results |
+| `pdfgen.py` | r2-10 | The 10:31 fake invoice as a real PDF (hidden white-on-white instruction) for tests and evidence |
 
 ## Tools
 
@@ -74,6 +77,25 @@ No outbound message is written by an LLM.
 
 `python -m nanfeng_agent cherry` plays it against a running backend.
 
+## Service (r2-09)
+
+`uvicorn nanfeng_agent.service:app --port 8200`, or `docker compose up` (service `agent`).
+
+| Method | Path | Who | What |
+|---|---|---|---|
+| POST | `/inbound/zavu` | Zavu (`X-Webhook-Token` = `NANFENG_ZAVU_WEBHOOK_SECRET`) or the agent token | a WhatsApp, SMS or email → `handle_document` |
+| POST | `/documents` | owner session (checked with the backend's `/auth/me`) | `{filename, mime, data_base64, source, language}`; PDF, PNG, JPEG, WebP or text, 4 MB max |
+| POST | `/ask` | anyone who can see the cockpit | `{question, run_id?, language}` → `{answer, intent, run_id, model}` |
+| POST | `/briefing` | owner session | daily cash briefing; `call: false` returns the text without calling |
+| GET | `/runs`, `/runs/{id}` | anyone who can see the cockpit | summaries; one run with its full trace |
+| GET | `/health` | anyone | providers live/offline (never the keys), planner, listener alive |
+
+**Auto-resume.** A background thread follows `GET /agent/events` on the backend (with `Last-Event-ID` on reconnect, exponential backoff). On `approval.approved`, `approval.rejected`, `approval.locked` or `approval.failed` it calls `resume_approval(id)`: the run anchors the audit log and confirms to the owner, with no command. Turn it off with `NANFENG_AGENT_LISTEN=false`.
+
+**"Ask it why".** The question picks an intent (`plan`, `tier`, `alternatives`, `risk`, `blocked`, `did`; ES / EN / 中文 keywords). The answer is a template filled with the run's own tool results: the optimizer's reasons for each product, the forecast headline, the approval's tier, the guard's rules and the call-back number on file. With OpenRouter online the model may rephrase it; the rephrasing is discarded if it contains a number that is not in the draft or the facts.
+
+**For the front (Valentín / Camilo).** Mission Control's "Ask it why" box and the Cockpit's ask bar can call `POST :8200/ask` instead of the canned answers; an "Upload document" button can call `POST :8200/documents` with the owner's bearer token. The agent's steps already arrive on the existing SSE stream.
+
 ## Error handling
 
 | Situation | Behavior |
@@ -101,9 +123,17 @@ No outbound message is written by an LLM.
 
 `python -m nanfeng_agent status` prints which are live, never the keys. Models are overridable with `NANFENG_MODEL_PLAN`, `NANFENG_MODEL_EXTRACT`, `NANFENG_MODEL_CLASSIFY` (comma-separated, in fallback order).
 
+## Verified live (Oct 12)
+
+Backend + quant engine + agent service on one machine, Mistral OCR live:
+
+1. `POST /inbound/zavu` with the Shanghai notice → forecast 81% → MILP plan (4 s) → `APR-0001`, L3, pending.
+2. The owner approves in the backend with the OTP → the listener resumes the run by itself → anchor → confirmation.
+3. `POST /ask` "¿Por qué elegiste el PAE?" → the plan, CLP 2,1M vs 3,8M, 45% cheaper, 96% of 10,000 scenarios.
+4. `POST /documents` with the real 10:31 PDF → Mistral OCR → `hidden-text`, `doc-instruction`, `bank-change` → blocked, no approval.
+
 ## Not done yet
 
-- **Real keys (r2-01):** the code paths for OpenRouter, Mistral OCR, Zavu and ElevenLabs are written and tested against mocked APIs only. They need the keys with spending limits, then one live run each.
-- **Zavu inbound webhook endpoint:** `inbound.from_zavu` maps the payload; it still needs a route in the backend (or a small service) to receive it.
-- **Live run with the quant engine:** the tests replay Vicente's committed results; a full run needs `docker compose --profile quant up`.
+- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 10:31 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter, Zavu and ElevenLabs are written and tested against mocked APIs; they need their keys with spending limits, then one live run each.
+- **Front wiring:** the cockpit still shows canned answers in "Ask it why" and has no upload button; the endpoints above are ready for it.
 - **LangGraph:** the battle plan listed it. The orchestrator is a plain, explicit state machine instead (fewer dependencies, every transition in one file, easy to test). Swapping it in later does not change the tools or the channel layer.
