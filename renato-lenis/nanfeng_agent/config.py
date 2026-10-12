@@ -57,8 +57,8 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
-        here = Path.cwd()
-        load_dotenv(here / ".env", here.parent / ".env")
+        here, repo = Path.cwd(), Path(__file__).resolve().parents[2]
+        load_dotenv(here / ".env", here.parent / ".env", repo / ".env")
 
         def models(role: str, default: list[str]) -> list[str]:
             raw = _env(f"NANFENG_MODEL_{role.upper()}")
