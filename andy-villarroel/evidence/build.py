@@ -148,6 +148,12 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
                 "invoices": c.get("/registry/invoices").json() if reg.status_code == 200 else []}
     dump("registry.json", registry)
     checked, broken = recheck_chain(entries)
+    tamper = None
+    if loans := [e for e in entries if e["kind"] == "bank.loan"]:
+        forged = json.loads(json.dumps(entries))
+        target = next(e for e in forged if e["seq"] == loans[0]["seq"])
+        target["payload"]["amount_clp"] += 1
+        tamper = (loans[0]["seq"], recheck_chain(forged)[1])
     proofs_ok = [recheck_proof(p) for p in proofs]
 
     kinds: dict[str, int] = {}
@@ -167,6 +173,8 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
              f"- Anchors read back from the chain: **{sum(1 for x in on_chain if x.get('valid'))}/{len(on_chain)}** match"
              + ("" if on_chain else " (local anchoring in this run: no transactions)")
              + "".join(f"\n  - anchor {x['anchor_id']}: valid={x.get('valid')} {x.get('explorer_url', '')}" for x in on_chain),
+             (f"- Tamper test: add CLP 1 to the loan in entry {tamper[0]} and the recomputed chain breaks at "
+              f"seq **{tamper[1]}**" if tamper else "- Tamper test: no loan in this export"),
              f"- Invoice registry ({(registry['backend'] or {}).get('backend', 'n/a')}): "
              f"**{len(registry['invoices'])}** invoices registered against double financing: `registry.json`",
              "", "## Audit entries by kind", "", "| Kind | Count |", "|------|-------|"]

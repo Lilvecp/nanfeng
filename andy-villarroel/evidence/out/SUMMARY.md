@@ -4,9 +4,9 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 
 - Audit entries: **24**, hash chain valid: **True**
 - Anchors: **3** (local)
-  - seq 1–9 root `f5a0c7b702cae214…`
-  - seq 10–14 root `50ccd8df80b18042…`
-  - seq 15–23 root `e66969d52ccd613f…`
+  - seq 1–9 root `e8631000574d5dad…`
+  - seq 10–14 root `a432b563c1be4475…`
+  - seq 15–23 root `d4cbb5ced9009834…`
 - Merkle inclusion proofs for 5 key entries (approvals executed, attacks blocked): `proofs.json`
 
 ## Checked here, without the backend's code
@@ -14,6 +14,7 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 - Hash chain recomputed from the published formula: **24/24** entries match
 - Merkle proofs recomputed from leaf to anchored root: **5/5** valid
 - Anchors read back from the chain: **0/0** match (local anchoring in this run: no transactions)
+- Tamper test: add CLP 1 to the loan in entry 8 and the recomputed chain breaks at seq **8**
 - Invoice registry (local): **1** invoices registered against double financing: `registry.json`
 
 ## Audit entries by kind
@@ -58,4 +59,4 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 | 10:35 | Owner stops the agent (kill switch on) | 200 | kill switch on=True |
 | 10:35 | Agent tries to turn the kill switch back off | 403 | Only the owner can turn the kill switch off |
 | 10:35 | Anonymous caller tries to turn it off | 401 | owner_login_required |
-| 10:40 | Agent anchors everything still pending | 201 | e66969d52ccd613fa85f948009183b6a223fa3eebc7ff91fe0f4a09098bc |
+| 10:40 | Agent anchors everything still pending | 201 | d4cbb5ced9009834b9c63ae2c6a3405927ae51dbcee573b01df08d7f09a4 |
