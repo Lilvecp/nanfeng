@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ForecastChart } from "@/components/forecast-chart";
 import { Topbar } from "@/components/topbar";
+import { useDemoReplay } from "@/lib/demo-replay";
 import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, usd } from "@/lib/scenario";
@@ -15,9 +16,9 @@ const LABELS: Record<Lang, string[]> = {
   zh: ["延迟", "预测", "报价", "方案", "批准", "补足"],
 };
 const UI = {
-  en: { cash: "Cash", exit: "Exit demo", step: "STEP", delayed: `Delayed +${N.delayDays}D`, plan: "Plan", run: "RUN CHERRY CRISIS", searching: "SEARCHING…", pae: "PAE LOAN", executed: "EXECUTED", pNeg: `P(cash<0) · ${N.crunchDay}D` },
-  es: { cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `P(caja<0) · ${N.crunchDay}D` },
-  zh: { cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金<0概率 · ${N.crunchDay}天` },
+  en: { cash: "Cash", exit: "Exit demo", step: "STEP", delayed: `Delayed +${N.delayDays}D`, plan: "Plan", run: "RUN CHERRY CRISIS", searching: "SEARCHING…", pae: "PAE LOAN", executed: "EXECUTED", pNeg: `P(cash<0) · ${N.crunchDay}D`, synced: "LIVE · SYNCED WITH BACKEND", offline: "OFFLINE REPLAY" },
+  es: { cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `P(caja<0) · ${N.crunchDay}D`, synced: "EN VIVO · SINCRONIZADO", offline: "REPLAY SIN RED" },
+  zh: { cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金<0概率 · ${N.crunchDay}天`, synced: "实时 · 已与后端同步", offline: "离线回放" },
 };
 const LENDERS = new Set(S.arena.map((a) => a.lender)).size;
 const CAPTIONS: Record<Lang, string[]> = {
@@ -51,6 +52,8 @@ export default function DemoPage() {
   const lang = useLang();
   const [step, setStep] = useState(1);
   const [playing, setPlaying] = useState(false);
+  // Each step really happens (backend when live, shared desk state offline), so other screens follow.
+  const replay = useDemoReplay(step, playing);
 
   useEffect(() => {
     if (!playing) return;
@@ -88,6 +91,9 @@ export default function DemoPage() {
       <Topbar controls={false}>
         <div className="tick"><span className="l">{u.cash}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
         <span className="status"><span className="dot crit blink" />DEMO · CHERRY CRISIS · {u.step} {step}/6</span>
+        <span className={`badge${replay.state === "error" ? " crit" : replay.live ? " ok" : ""}`} title={replay.message} role="status">
+          {replay.state === "error" ? replay.message : replay.live ? u.synced : u.offline}{replay.state === "running" ? " …" : ""}
+        </span>
         <Link href="/cockpit" className="btn btn-secondary btn-sm" style={{ marginLeft: "auto" }}>{u.exit}</Link>
       </Topbar>
       <div className="content" style={{ flex: 1 }}>

@@ -164,7 +164,13 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
   useEventStream(mode === "live", (e) => {
     setEvents((list) => (list.some((x) => x.id === e.id) ? list : [...list, e].slice(-60)));
     if (e.type.startsWith("approval.")) refresh().catch(() => {});
-    if (e.type === "sandbox.reset" && !resetting.current) refresh(true).catch(() => {});
+    if (e.type === "sandbox.reset" && !resetting.current) {
+      // A reset from the Demo Mode replay starts a clean take: no request until its "plan" step.
+      const byDemo = e.data.by === "demo";
+      setKill(false);
+      if (byDemo) setEvents([e]);
+      refresh(!byDemo).catch(() => {});
+    }
     if (e.type === "policy.kill_switch") setKill(Boolean(e.data.on));
   });
 

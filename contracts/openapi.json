@@ -160,6 +160,66 @@
         }
       }
     },
+    "/demo/step/{n}": {
+      "post": {
+        "tags": [
+          "demo"
+        ],
+        "summary": "Play one Cherry Crisis step for real (owner, demo builds only)",
+        "operationId": "play_step_demo_step__n__post",
+        "parameters": [
+          {
+            "name": "n",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "N"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoStepIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/bank/accounts": {
       "get": {
         "tags": [
@@ -1900,6 +1960,74 @@
           "hash"
         ],
         "title": "AuditEntryOut"
+      },
+      "DemoAgentStep": {
+        "properties": {
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "tool": {
+            "type": "string",
+            "title": "Tool"
+          },
+          "tier": {
+            "type": "integer",
+            "title": "Tier",
+            "default": 0
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": ""
+          },
+          "cost_usd": {
+            "type": "number",
+            "title": "Cost Usd",
+            "default": 0
+          },
+          "latency_s": {
+            "type": "number",
+            "title": "Latency S",
+            "default": 0
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "tool"
+        ],
+        "title": "DemoAgentStep",
+        "description": "One agent step the replay puts on the live stream (what Mission Control shows)."
+      },
+      "DemoStepIn": {
+        "properties": {
+          "agent_steps": {
+            "items": {
+              "$ref": "#/components/schemas/DemoAgentStep"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Agent Steps"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApprovalCreate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "DemoStepIn"
       },
       "EventIn": {
         "properties": {

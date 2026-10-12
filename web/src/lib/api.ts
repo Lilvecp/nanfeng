@@ -13,6 +13,7 @@ export type ApprovalCreate = S["ApprovalCreate"];
 export type AuditEntry = S["AuditEntryOut"];
 export type Anchor = S["AnchorOut"];
 export type Account = S["AccountOut"];
+export type DemoAgentStep = { step: string; tool: string; tier?: number; model?: string; cost_usd?: number; latency_s?: number; detail?: string };
 export type ChainCheck = { valid: boolean; entries: number; broken_at_seq: number | null; head?: string };
 export type ApiEvent = { id: number; type: string; ts: string; source: string; data: Record<string, unknown> };
 
@@ -80,6 +81,11 @@ export const api = {
     verify: () => get<ChainCheck>("/audit/verify"),
     anchors: () => get<Anchor[]>("/audit/anchors"),
     anchor: () => post<Anchor>("/audit/anchor"),
+  },
+  demo: {
+    // Demo Mode replay (owner, demo builds): the step really happens on the backend.
+    step: (n: number, body: { agent_steps?: DemoAgentStep[]; plan?: ApprovalCreate }) =>
+      post<{ step: number; approval?: { id: string; status: string } }>(`/demo/step/${n}`, body),
   },
   bank: {
     accounts: () => get<Account[]>("/bank/accounts"),

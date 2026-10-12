@@ -169,3 +169,20 @@ class SecurityVerdict(BaseModel):
     verify_by: dict[str, str] | None = None
     alerted_via: str | None = None
     audit_seq: int | None = None
+
+
+class DemoAgentStep(BaseModel):
+    """One agent step the replay puts on the live stream (what Mission Control shows)."""
+    step: str
+    tool: str
+    tier: int = 0
+    model: str = ""
+    cost_usd: float = 0
+    latency_s: float = 0
+    detail: str = ""
+
+
+class DemoStepIn(BaseModel):
+    agent_steps: list[DemoAgentStep] = Field(default_factory=list, max_length=12)
+    # Step 4: the MILP's plan as the quant engine writes it (web/src/data/cherry-crisis.json approvalRequest).
+    plan: ApprovalCreate | None = None

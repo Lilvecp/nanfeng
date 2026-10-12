@@ -10,7 +10,7 @@ from .bank import BankError
 from .config import DEMO_OWNER_PASSWORD, get_settings
 from .db import SessionLocal
 from .events import broker
-from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, privacy, quant, security
+from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, demo, privacy, quant, security
 
 VERSION = "0.1.0"
 
@@ -57,7 +57,7 @@ def health():
                 "anchor_backend": get_settings().anchor_backend}
 
 
-for r in (auth_router.router, bank_router.router, approvals.router, audit_router.router, agent.router, quant.router, security.router,
+for r in (auth_router.router, demo.router, bank_router.router, approvals.router, audit_router.router, agent.router, quant.router, security.router,
           privacy.router):
     app.include_router(r)
 
