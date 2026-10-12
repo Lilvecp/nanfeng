@@ -175,7 +175,7 @@ function CockpitDetail() {
         </div>
 
         {alertClosed ? null : approval === "approved" ? (
-          <div className="alert ok" style={{ alignItems: "center", flexWrap: "wrap" }}>
+          <div data-guide="det-alert" className="alert ok" style={{ alignItems: "center", flexWrap: "wrap" }}>
             <span className="ic">OK</span>
             <div style={{ flex: "1 1 480px", display: "flex", flexDirection: "column", gap: 2 }}>
               <b style={{ fontSize: 15 }}>{t("cockpit.done.title")}</b>
@@ -185,7 +185,7 @@ function CockpitDetail() {
             <CloseButton onClick={() => setDismissed(`detail-${approval}`)} />
           </div>
         ) : (
-          <div className="alert crit" style={{ alignItems: "center", flexWrap: "wrap" }}>
+          <div data-guide="det-alert" className="alert crit" style={{ alignItems: "center", flexWrap: "wrap" }}>
             <span className="ic">CRIT</span>
             <div style={{ flex: "1 1 480px", display: "flex", flexDirection: "column", gap: 2 }}>
               <b style={{ fontSize: 15 }}>{approval === "rejected" ? t("cockpit.rejected.title") : t("cockpit.alert.title")}</b>
@@ -199,7 +199,7 @@ function CockpitDetail() {
           </div>
         )}
 
-        <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+        <div className="card" data-guide="det-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
           <div className="kpi"><span className="kpi-l">{x.pNeg}</span><span className="kpi-v" style={{ color: resolved ? "var(--ok)" : "var(--crit)" }}>{pNeg}</span><span className="mono small muted">{resolved ? x.fromAfter : x.fromBefore}</span></div>
           <div className="kpi"><span className="kpi-l">{x.crunch}</span><span className="kpi-v">{resolved ? x.cleared : `D${N.crunchDay}`}</span><span className="mono small muted">{resolved ? x.crunchDone : x.crunchSub}</span></div>
           <div className="kpi"><span className="kpi-l">{x.delayed}</span><span className="kpi-v">{usd(N.overdueUsd, lang)}</span><span className="mono small muted">{lang === "zh" ? SHORT_CUSTOMER_ZH : SHORT_CUSTOMER} · {RECEIVABLE.id}</span></div>
@@ -207,12 +207,12 @@ function CockpitDetail() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2.2fr) minmax(300px, 1fr)", gap: 12 }}>
-          <div className="card">
+          <div className="card" data-guide="det-chart">
             <div className="card-h"><span className="h3">{x.forecast}</span><ForecastLegend resolved={resolved} /></div>
             <div className="card-b"><ForecastChart resolved={resolved} /><span className="mono small muted">{S.source}</span></div>
           </div>
 
-          <div className="card">
+          <div className="card" data-guide="det-tape">
             <div className="card-h"><span className="h3">{x.tape}</span><span className="badge solid crit">{x.threats}</span></div>
             <div className="tbl-wrap"><table className="tbl">
               <tbody>
@@ -232,7 +232,7 @@ function CockpitDetail() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" data-guide="det-blotter">
           <div className="card-h"><span className="h3">{x.blotter}</span><span className="hint">{x.blotterHint}</span></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>{x.inv}</th><th>{x.importer}</th><th>{x.market}</th><th className="r">{x.amount}</th><th className="r">{x.due}</th><th className="r">{x.delay}</th><th>{x.action}</th></tr></thead>

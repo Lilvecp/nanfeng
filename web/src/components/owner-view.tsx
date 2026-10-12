@@ -284,7 +284,7 @@ export function OwnerView() {
       </header>
 
       {!alertClosed && (
-        <section className={`owner-alert ${resolved ? "ok" : "risk"}`} role="status">
+        <section className={`owner-alert ${resolved ? "ok" : "risk"}`} role="status" data-guide="home-status">
           <span className="owner-alert-ic" aria-hidden="true">{resolved ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg> : "!"}</span>
           <div className="owner-alert-txt">
             <b>{head.title}</b>
@@ -304,7 +304,7 @@ export function OwnerView() {
               </ol>
             </section>
           )}
-          <section className="card owner-card">
+          <section className="card owner-card" data-guide="home-chart">
             <h2 className="owner-h">{c.chart.title}</h2>
             <span className="owner-hint">{c.chart.hint}</span>
             <SimpleChart resolved={resolved} c={c.chart} lang={lang} />
@@ -318,20 +318,20 @@ export function OwnerView() {
 
         <div className="owner-col">
           {resolved ? (
-            <section className="card owner-card owner-rec ok">
+            <section className="card owner-card owner-rec ok" data-guide="home-next">
               <span className="owner-eyebrow">{c.next.eyebrow}</span>
               <h2 className="owner-h big">{c.next.title}</h2>
               <ol className="owner-steps">{c.next.items.map((s, i) => <li key={s}><span className="owner-n">{i + 1}</span><span>{s}</span></li>)}</ol>
             </section>
           ) : rejected ? (
-            <section className="card owner-card owner-rec">
+            <section className="card owner-card owner-rec" data-guide="home-next">
               <span className="owner-eyebrow">{c.rej.eyebrow}</span>
               <h2 className="owner-h big">{c.rej.title}</h2>
               <p>{c.rej.body}</p>
               <Link className="btn btn-primary owner-cta" href="/financing">{c.rej.cta}</Link>
             </section>
           ) : (
-            <section className="card owner-card owner-rec">
+            <section className="card owner-card owner-rec" data-guide="home-next">
               <span className="owner-eyebrow">{c.rec.eyebrow}</span>
               <h2 className="owner-h big">{c.rec.title}</h2>
               <p>{c.rec.body}</p>
@@ -350,7 +350,7 @@ export function OwnerView() {
             </section>
           )}
 
-          <section className="card owner-card">
+          <section className="card owner-card" data-guide="home-agent">
             <h2 className="owner-h">{c.agent.title}</h2>
             <ul className="owner-log">
               {[...c.agent.items, ...(resolved ? [["10:16", c.done.title] as [string, string]] : [])]

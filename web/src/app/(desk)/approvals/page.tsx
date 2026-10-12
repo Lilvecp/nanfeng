@@ -144,10 +144,10 @@ export default function ApprovalsPage() {
       <div className="content">
         <h1 className="h1">{t("approvals.title")}</h1>
         {pending && !plainClosed && (
-          <div className="owner-alert risk"><span className="owner-alert-ic" aria-hidden="true">i</span><div className="owner-alert-txt"><span>{x.plain}</span></div><CloseButton onClick={() => setDismissed("approvals-plain")} /></div>
+          <div className="owner-alert risk" data-guide="appr-plain"><span className="owner-alert-ic" aria-hidden="true">i</span><div className="owner-alert-txt"><span>{x.plain}</span></div><CloseButton onClick={() => setDismissed("approvals-plain")} /></div>
         )}
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(360px, 1fr)", gap: 12, alignItems: "start" }}>
-          <div className="card">
+          <div className="card" data-guide="appr-request">
             <div className="card-h">
               <span className="h3">{pending || approval === "verifying" ? "Pending" : approval === "approved" ? "Approved" : "Rejected"} · {approvalId}</span>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -173,7 +173,7 @@ export default function ApprovalsPage() {
             </div>
           </div>
 
-          <div className="card" style={{ borderColor: approval === "approved" ? "var(--ok)" : approval === "rejected" ? "var(--crit)" : "var(--accent)" }}>
+          <div className="card" data-guide="appr-authorize" style={{ borderColor: approval === "approved" ? "var(--ok)" : approval === "rejected" ? "var(--crit)" : "var(--accent)" }}>
             <div className="card-h" style={{ background: approval === "approved" ? "var(--ok-soft)" : approval === "rejected" ? "var(--crit-soft)" : "var(--accent-soft)" }}>
               <span className="h3" style={{ color: "var(--text)" }}>{t("approvals.authorize")}</span>
               <span className="hint">SMS → +56 9 •••• 4127</span>
@@ -219,7 +219,7 @@ export default function ApprovalsPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" data-guide="appr-history">
           <div className="card-h">
             <span className="h3">{t("approvals.history")}</span>
             <div className="seg" role="group" aria-label="Filter">

@@ -77,7 +77,7 @@ export default function MissionPage() {
                 <button className="btn btn-secondary" type="button" onClick={() => setConfirmKill(false)}>Cancel</button>
               </>
             ) : (
-              <button className="btn btn-danger" type="button" style={{ minHeight: 48, padding: "0 20px" }} onClick={() => setConfirmKill(true)}>
+              <button data-guide="agent-kill" className="btn btn-danger" type="button" style={{ minHeight: 48, padding: "0 20px" }} onClick={() => setConfirmKill(true)}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" /></svg>Kill switch <span className="key" style={{ borderColor: "currentColor", color: "inherit" }}>⇧K</span>
               </button>
             )}
@@ -88,7 +88,7 @@ export default function MissionPage() {
           <div className="alert crit"><span className="ic">STOP</span><span className="small">Kill switch engaged. The agent cannot call any tool until it is re-armed. Pending approvals stay frozen; nothing executes.</span></div>
         )}
 
-        <div className="card">
+        <div className="card" data-guide="agent-trace">
           <div className="card-h"><span className="h3">Execution trace · waterfall</span><div className="legend"><span><i className="sw" style={{ background: "var(--ok)" }} />DONE</span><span><i className="sw" style={{ background: "var(--crit)" }} />WAITING ON OWNER</span></div></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>#</th><th>Step</th><th>Tool</th><th>Tier</th><th>Model</th><th style={{ width: "32%" }}>0s ─────────── 12.5s ─────────── 25s</th><th className="r">Latency</th><th className="r">Cost USD</th></tr></thead>
@@ -125,7 +125,7 @@ export default function MissionPage() {
         </div>
 
         {mode === "live" && (
-          <div className="card">
+          <div className="card" data-guide="agent-live">
             <div className="card-h">
               <span className="h3">Live event stream · SSE</span>
               <span className="status"><span className="dot" />{events.length} EVENTS</span>
@@ -162,7 +162,7 @@ export default function MissionPage() {
               <span><span className="muted">timeout   </span> 23:41:06 → auto-cancel, no action</span>
             </div>
           </div>
-          <div className="card">
+          <div className="card" data-guide="agent-ask">
             <div className="card-h"><span className="h3">Ask why</span></div>
             <div className="card-b">
               <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 260, overflowY: "auto" }} aria-live="polite">

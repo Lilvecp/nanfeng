@@ -79,7 +79,7 @@ export default function ScenarioPage() {
           <Link className="btn btn-primary" href="/financing">{x.price}</Link>
         </div>
 
-        <div className="card">
+        <div className="card" data-guide="wif-presets">
           <div className="card-h"><span className="h3">{x.presets}</span></div>
           <div className="card-b">
             <div className="chips" role="group" aria-label={x.presets}>
@@ -90,7 +90,7 @@ export default function ScenarioPage() {
           </div>
         </div>
 
-        <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+        <div className="card" data-guide="wif-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
           <div className="kpi"><span className="kpi-l">{x.pNeg}</span><span className="kpi-v" style={{ color: color(p.probNeg90d) }}>{pct(p.probNeg90d)}</span><span className="mono small muted">{headline(p.headline, lang)}</span></div>
           <div className="kpi"><span className="kpi-l">{x.pBuf}</span><span className="kpi-v">{pct(p.probBelowBuffer90d)}</span></div>
           <div className="kpi"><span className="kpi-l">{x.plan}</span><span className="kpi-v">{clpM(p.planCostClp, lang)}</span></div>
@@ -98,7 +98,7 @@ export default function ScenarioPage() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2.2fr) minmax(300px, 1fr)", gap: 12 }}>
-          <div className="card">
+          <div className="card" data-guide="wif-chart">
             <div className="card-h"><span className="h3">{x.chart}</span></div>
             <div className="card-b">
               <svg viewBox={`0 0 640 ${PRESETS.length * 30 + 30}`} width="100%" role="img" aria-label={`${x.chart}. ${PRESETS.map((q) => `${name(q, "en")}: ${pct(q.probNeg90d)}`).join("; ")}.`}>
@@ -118,7 +118,7 @@ export default function ScenarioPage() {
               </svg>
             </div>
           </div>
-          <div className="card">
+          <div className="card" data-guide="wif-table">
             <div className="card-h"><span className="h3">{x.table}</span></div>
             <div className="tbl-wrap"><table className="tbl">
               <thead><tr><th>{x.metric}</th><th className="r">{x.base}</th><th className="r">{x.scen}</th></tr></thead>

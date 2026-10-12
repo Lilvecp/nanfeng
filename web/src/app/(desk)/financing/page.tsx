@@ -153,7 +153,7 @@ export default function FinancingPage() {
 
       <div className="content">
         <h1 className="h1">{t("nav.financing")}</h1>
-        <div className="card">
+        <div className="card" data-guide="fin-options">
           <div className="card-h"><span className="h3">{x.book}</span><span className="hint">{x.hint}</span></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr><th>#</th><th>{x.option}</th><th>{x.lender}</th><th className="r">{x.eac}</th><th className="r">{x.quote}</th><th className="r">{x.term}</th><th className="r">{x.alone}</th></tr></thead>
@@ -183,7 +183,7 @@ export default function FinancingPage() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 1fr)", gap: 12 }}>
-          <div className="card">
+          <div className="card" data-guide="fin-chart">
             <div className="card-h"><span className="h3">{x.chart}</span><span className="hint">{x.chartHint}</span></div>
             <div className="card-b">
               <svg viewBox={`0 0 760 ${priced.length * 30 + 10}`} width="100%" role="img" aria-label={`${x.chart}. ${priced.map((r) => `${PRODUCT_SHORT[r.product] ?? r.product}: ${clpM(r.alone!)}`).join("; ")}.`}>
@@ -198,7 +198,7 @@ export default function FinancingPage() {
               <span className="mono small muted">{x.source}</span>
             </div>
           </div>
-          <div className="card">
+          <div className="card" data-guide="fin-why">
             <div className="card-h">
               <span className="h3">{x.why}</span>
               {approval === "approved" ? (

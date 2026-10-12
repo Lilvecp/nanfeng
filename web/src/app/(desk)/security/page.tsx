@@ -119,7 +119,7 @@ export default function SecurityPage() {
       <div className="content">
         <h1 className="h1"><TabTitle k="tab.protection" /></h1>
 
-        <div className="card" style={{ borderColor: reviewed ? "var(--line)" : "var(--crit)" }}>
+        <div className="card" data-guide="sec-blocked" style={{ borderColor: reviewed ? "var(--line)" : "var(--crit)" }}>
           <div className="card-h" style={{ background: reviewed ? undefined : "var(--crit-soft)" }}>
             <span className="h3" style={{ color: "var(--crit)" }}>SEC-0038 · Blocked · 08:47:12</span>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><span className="badge solid crit">Blocked</span><span className="badge">Owner notified · SMS 08:47:15</span>{reviewed && <span className="badge ok">Reviewed</span>}</div>
@@ -161,7 +161,7 @@ export default function SecurityPage() {
               </tbody>
             </table></div>
           </div>
-          <div className="card">
+          <div className="card" data-guide="sec-permissions">
             <div className="card-h"><span className="h3">Permission matrix</span><Link className="small mono" href="/settings">EDIT LIMITS →</Link></div>
             <div className="tbl-wrap"><table className="tbl">
               <thead><tr><th>Capability</th><th className="r">L0</th><th className="r">L1</th><th className="r">L2</th><th className="r">L3</th></tr></thead>
@@ -177,7 +177,7 @@ export default function SecurityPage() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" data-guide="sec-audit">
           <div className="card-h">
             <span className="h3">Audit chain · sha256 · {live ? (live.onChain ? "Sepolia testnet anchors" : "local anchors") : "FISCO BCOS anchors"}</span>
             <button className="btn btn-secondary btn-sm" type="button" disabled={verify === "running"} onClick={runVerify}>

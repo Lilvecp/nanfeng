@@ -5,6 +5,8 @@ import { STORAGE_KEY } from "./prefs-boot";
 
 // Viewer preferences kept in localStorage. Server render always uses the defaults;
 // useSyncExternalStore swaps in the stored value right after hydration without a mismatch error.
+// The Home view (Summary / Full detail) lasts for the visit only (sessionStorage): coming back to
+// Home keeps the tab you chose, and a new visit starts again on the owner's plain Summary.
 
 export type Lang = "en" | "es" | "zh";
 export type Theme = "light" | "dark";
@@ -17,9 +19,11 @@ type Key = keyof typeof DEFAULTS;
 
 const listeners = new Set<() => void>();
 
+const store = (key: Key) => (key === "view" ? window.sessionStorage : window.localStorage);
+
 function read<K extends Key>(key: K): (typeof DEFAULTS)[K] {
   try {
-    const v = window.localStorage.getItem(STORAGE_KEY[key]);
+    const v = store(key).getItem(STORAGE_KEY[key]);
     if (key === "lang" && (v === "en" || v === "es" || v === "zh")) return v as (typeof DEFAULTS)[K];
     if (key === "theme" && (v === "light" || v === "dark")) return v as (typeof DEFAULTS)[K];
     if (key === "view" && (v === "simple" || v === "detail")) return v as (typeof DEFAULTS)[K];
@@ -41,7 +45,7 @@ function subscribe(cb: () => void) {
 
 export function setPref<K extends Key>(key: K, value: (typeof DEFAULTS)[K]) {
   try {
-    window.localStorage.setItem(STORAGE_KEY[key], value);
+    store(key).setItem(STORAGE_KEY[key], value);
   } catch {
     // ignore
   }

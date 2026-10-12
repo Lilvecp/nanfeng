@@ -134,7 +134,7 @@ export default function ChannelsPage() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 16, alignItems: "flex-start" }}>
           <figure style={{ margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             <figcaption className="small" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}><b>{x.owner}</b><span className="badge acc">{x.replay}</span><span className="muted">{x.ownerNote}</span></figcaption>
-            <div className="phone"><div className="phone-screen" style={{ background: "var(--bg)" }} lang={lang === "zh" ? "zh-CN" : lang}>
+            <div className="phone" data-guide="msg-owner"><div className="phone-screen" style={{ background: "var(--bg)" }} lang={lang === "zh" ? "zh-CN" : lang}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">NanFeng CFO</b><span className="mono small muted" style={{ fontSize: 10 }}>{x.verified}</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
                 {ownerThread(lang).map((b, i) => (
@@ -146,7 +146,7 @@ export default function ChannelsPage() {
 
           <figure style={{ margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             <figcaption className="small" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}><b>{x.importer}</b><span className="badge warn">{x.simulated}</span><span className="muted">{x.importerNote}</span></figcaption>
-            <div className="phone"><div className="phone-screen" style={{ background: "var(--bg)" }} lang="zh-CN">
+            <div className="phone" data-guide="msg-importer"><div className="phone-screen" style={{ background: "var(--bg)" }} lang="zh-CN">
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">Huerto Austral · 应收账款</b><span className="small muted" style={{ fontSize: 11 }}>由南风代发 · 模拟</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
                 <span className="mono small muted" style={{ alignSelf: "center", fontSize: 11 }}>2026年12月11日 10:20</span>
@@ -158,7 +158,7 @@ export default function ChannelsPage() {
           </figure>
 
           <div style={{ flex: "1 1 360px", display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
-            <div className="card">
+            <div className="card" data-guide="msg-voice">
               <div className="card-h">
                 <span className="h3">{x.call}</span>
                 <div className="seg" role="group" aria-label={x.transcriptLang}>
