@@ -35,6 +35,35 @@ const L = {
   sandbox: { en: "NANFENG 南风 · SOUTH WIND · SANDBOX DEMO — NO REAL FUNDS MOVE", es: "NANFENG 南风 · VIENTO DEL SUR · DEMO SANDBOX — NO SE MUEVE DINERO REAL", zh: "南风 NANFENG · 沙盒演示 — 不涉及真实资金" },
 } satisfies Record<string, Record<Lang, string>>;
 
+const HOW: { n: Record<Lang, string>; h: Record<Lang, string>; p: Record<Lang, string>; href: string; link: Record<Lang, string> }[] = [
+  {
+    n: { en: "01 · PREDICT", es: "01 · PREDECIR", zh: "01 · 预测" },
+    h: { en: "Monte Carlo cash forecast", es: "Pronóstico de caja Monte Carlo", zh: "蒙特卡洛现金预测" },
+    p: { en: "P10 / P50 / P90 over 90 days, refreshed whenever an email, invoice or bank statement changes the picture.", es: "P10 / P50 / P90 a 90 días, recalculado cada vez que un correo, una factura o una cartola cambia el panorama.", zh: "90天 P10 / P50 / P90 预测，每当邮件、发票或银行流水改变情况时自动更新。" },
+    href: "/cockpit", link: { en: "Cash Cockpit", es: "Inicio", zh: "首页" },
+  },
+  {
+    n: { en: "02 · DECIDE", es: "02 · DECIDIR", zh: "02 · 决策" },
+    h: { en: "Optimizer picks the cheapest financing", es: "El optimizador elige el financiamiento más barato", zh: "优化器选出成本最低的融资" },
+    p: { en: "Pre-export loans, factoring, FOGAPE guarantees, credit lines and CNY forwards, ranked by cost, timing and gap coverage.", es: "Créditos de pre-exportación, factoring, garantías FOGAPE, líneas de crédito y forwards en CNY, ordenados por costo, plazo y cobertura de la brecha.", zh: "出口前融资、保理、FOGAPE 担保、信用额度和人民币远期，按成本、时效和缺口覆盖排序。" },
+    href: "/financing", link: { en: "Financing", es: "Financiamiento", zh: "融资" },
+  },
+  {
+    n: { en: "03 · ACT", es: "03 · ACTUAR", zh: "03 · 执行" },
+    h: { en: "Executes with owner approval", es: "Ejecuta con la aprobación del dueño", zh: "经企业主批准后执行" },
+    p: { en: "Tiered permissions; a six-digit code for anything that moves money; every step written to an audit chain.", es: "Permisos por niveles; un código de seis dígitos para todo lo que mueve plata; cada paso queda en una cadena de auditoría.", zh: "分级权限；任何资金操作都需六位验证码；每一步都写入审计链。" },
+    href: "/approvals", link: { en: "Approvals", es: "Aprobaciones", zh: "审批" },
+  },
+];
+
+const TEAM: [string, Record<Lang, string>][] = [
+  ["Valentín", { en: "Lead · product", es: "Líder · producto", zh: "负责人 · 产品" }],
+  ["Renato", { en: "AI agent", es: "Agente de IA", zh: "AI 代理" }],
+  ["Camilo", { en: "Full-stack · blockchain", es: "Full-stack · blockchain", zh: "全栈 · 区块链" }],
+  ["Andy", { en: "Security · compliance", es: "Seguridad · cumplimiento", zh: "安全 · 合规" }],
+  ["Vicente", { en: "Quant · forecasting", es: "Cuantitativo · pronóstico", zh: "量化 · 预测" }],
+];
+
 export default function LandingPage() {
   const t = useT();
   const lang = useLang();
@@ -58,7 +87,7 @@ export default function LandingPage() {
               <Link className="pill-cherry" href="/demo">{t("lp.cta.demo")}</Link>
               <a className="pill-out" href="#how">{t("lp.cta.how")}</a>
             </div>
-            <a className="scroll-hint" href="#story" aria-label="Scroll to the story">
+            <a className="scroll-hint" href="#story" aria-label={lang === "es" ? "Bajar a la historia" : lang === "zh" ? "查看故事" : "Scroll to the story"}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </a>
           </div>
@@ -84,9 +113,9 @@ export default function LandingPage() {
       <section id="how" className="lp-section alt"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 48 }}>
         <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><span className="eyebrow" style={{ textAlign: "center", color: "var(--brass)" }}>{t("lp.nav.how")}</span><h2 className="lp-h">{l("howH")}</h2></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 20 }}>
-          <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">01 · PREDICT</span><h3 className="h2" style={{ fontSize: 24 }}>Monte Carlo cash forecast</h3><p className="muted" style={{ margin: 0 }}>P10 / P50 / P90 over 90 days, refreshed whenever an email, invoice or bank statement changes the picture.</p><Link className="mono small" href="/cockpit">Cash Cockpit →</Link></div></div>
-          <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">02 · DECIDE</span><h3 className="h2" style={{ fontSize: 24 }}>Optimizer picks the cheapest financing</h3><p className="muted" style={{ margin: 0 }}>Pre-export loans, factoring, FOGAPE guarantees, credit lines and CNY forwards — ranked by cost, timing and gap coverage.</p><Link className="mono small" href="/financing">Financing Arena →</Link></div></div>
-          <div className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">03 · ACT</span><h3 className="h2" style={{ fontSize: 24 }}>Executes with owner approval</h3><p className="muted" style={{ margin: 0 }}>Tiered permissions; a six-digit code for anything that moves money; every step written to an audit chain.</p><Link className="mono small" href="/approvals">Approval Center →</Link></div></div>
+          {HOW.map((h) => (
+            <div key={h.href} className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">{h.n[lang]}</span><h3 className="h2" style={{ fontSize: 24 }}>{h.h[lang]}</h3><p className="muted" style={{ margin: 0 }}>{h.p[lang]}</p><Link className="mono small" href={h.href}>{h.link[lang]} →</Link></div></div>
+          ))}
         </div>
       </div></section>
 
@@ -113,7 +142,7 @@ export default function LandingPage() {
         <span className="eyebrow" style={{ color: "var(--brass)" }}>{t("lp.nav.team")}</span>
         <h2 className="lp-h" data-reveal style={{ fontSize: 34 }}>{l("teamH")}</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-          {["Valentín", "Renato", "Camilo", "Andy", "Vicente"].map((n) => <span key={n} data-reveal className="chip" style={{ borderRadius: 999, padding: "10px 22px", fontSize: 14 }}>{n}</span>)}
+          {TEAM.map(([n, role]) => <span key={n} data-reveal className="chip" style={{ borderRadius: 999, padding: "10px 22px", fontSize: 14, display: "inline-flex", gap: 8, alignItems: "baseline" }}><b>{n}</b><span className="muted small">{role[lang]}</span></span>)}
         </div>
       </div></section>
 

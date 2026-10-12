@@ -18,7 +18,7 @@ export const GUIDE_UI: Record<Lang, Record<string, string>> = {
   en: {
     name: "Guide", open: "Open the guide", close: "Close the guide", next: "Next", back: "Back", done: "Done",
     skip: "Skip tour", step: "Step", of: "of", tour: "Show me around", off: "Turn off the guide",
-    offToast: "Guide turned off. You can turn it back on in Settings.", pending: "A decision is waiting for you",
+    offToast: "Guide turned off. You can turn it back on in Settings.", laterToast: "Tours paused. Tap the sail in the corner whenever you want one.", pending: "A decision is waiting for you",
     openApprovals: "Open approvals", settingsTitle: "Guide",
     settingsBody: "A short tour the first time you open each screen, then help whenever you tap the sail button.",
     on: "On", offLabel: "Off", replay: "Show all tours again", replayed: "Tours reset: they will play again on each screen.",
@@ -34,7 +34,7 @@ export const GUIDE_UI: Record<Lang, Record<string, string>> = {
   es: {
     name: "Guía", open: "Abrir la guía", close: "Cerrar la guía", next: "Siguiente", back: "Atrás", done: "Listo",
     skip: "Saltar recorrido", step: "Paso", of: "de", tour: "Muéstrame la pantalla", off: "Desactivar la guía",
-    offToast: "Guía desactivada. Puedes volver a activarla en Ajustes.", pending: "Hay una decisión esperándote",
+    offToast: "Guía desactivada. Puedes volver a activarla en Ajustes.", laterToast: "No te mostraré más recorridos. Toca el velero de la esquina cuando quieras uno.", pending: "Hay una decisión esperándote",
     openApprovals: "Ir a aprobaciones", settingsTitle: "Guía",
     settingsBody: "Un recorrido corto la primera vez que abres cada pantalla y ayuda cuando tocas el botón del velero.",
     on: "Activada", offLabel: "Desactivada", replay: "Volver a ver los recorridos", replayed: "Recorridos reiniciados: se mostrarán de nuevo en cada pantalla.",
@@ -50,7 +50,7 @@ export const GUIDE_UI: Record<Lang, Record<string, string>> = {
   zh: {
     name: "向导", open: "打开向导", close: "关闭向导", next: "下一步", back: "上一步", done: "完成",
     skip: "跳过导览", step: "第", of: "/", tour: "带我看看", off: "关闭向导",
-    offToast: "向导已关闭，可在设置中重新开启。", pending: "有一项决定等您处理",
+    offToast: "向导已关闭，可在设置中重新开启。", laterToast: "导览已暂停。需要时点击右下角的帆船即可。", pending: "有一项决定等您处理",
     openApprovals: "前往审批", settingsTitle: "向导",
     settingsBody: "首次打开每个页面时进行简短导览，之后点击帆船按钮即可随时获得帮助。",
     on: "开启", offLabel: "关闭", replay: "重新播放全部导览", replayed: "导览已重置，将在每个页面重新播放。",
@@ -393,35 +393,37 @@ export function useHelloSeen(): boolean {
   return useSyncExternalStore(subscribe, readHello, () => true);
 }
 
-// "Not now" only postpones: the tour comes back in the next visit (new browser session).
-const SNOOZE = "nanfeng.guide.later.";
+// Once the viewer skips a tour or says "Not now", no tour opens on its own again; the sail button
+// keeps them one tap away. "See the tours again" in Settings turns them back on.
+const KEY_AUTO = "nanfeng.guide.auto";
 
-function readSnoozed(): string {
+function readAuto() {
   try {
-    return Object.keys(window.sessionStorage).filter((k) => k.startsWith(SNOOZE)).join("|");
+    return window.localStorage.getItem(KEY_AUTO) !== "off";
   } catch {
-    return "";
+    return true;
   }
 }
 
-export function snoozeTour(key: string) {
+export function setAutoTours(on: boolean) {
   try {
-    window.sessionStorage.setItem(SNOOZE + key, "1");
+    if (on) window.localStorage.removeItem(KEY_AUTO);
+    else window.localStorage.setItem(KEY_AUTO, "off");
   } catch {
     // ignore
   }
   emit();
 }
 
-export function useTourSnoozed(key: string): boolean {
-  const all = useSyncExternalStore(subscribe, readSnoozed, () => "");
-  return all.split("|").includes(SNOOZE + key);
+export function useAutoTours(): boolean {
+  return useSyncExternalStore(subscribe, readAuto, () => false);
 }
 
 export function resetTours() {
   try {
     window.localStorage.removeItem(KEY_SEEN);
     window.localStorage.removeItem(KEY_HELLO);
+    window.localStorage.removeItem(KEY_AUTO);
   } catch {
     // ignore
   }

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Topbar } from "@/components/topbar";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
-import { S, clpFull, clpM, pct } from "@/lib/scenario";
+import { S, clpFull, clpM, pct, presetName } from "@/lib/scenario";
 
 // Every preset is a full run of the quant engine (10,000-path Monte Carlo + MILP), precomputed so
 // the lab answers instantly and offline. Free-form what-ifs go to /quant once the API is connected.
@@ -13,18 +13,7 @@ const PRESETS = S.scenarioLab;
 type Preset = (typeof PRESETS)[number];
 const BASE = PRESETS[0];
 
-const NAME: Record<string, Record<Lang, string>> = {
-  "Base (after the Shanghai notice)": { en: "Base · after the Shanghai notice", es: "Base · tras el aviso de Shanghái", zh: "基准 · 上海通知之后" },
-  "Before the notice": { en: "Before the notice", es: "Antes del aviso", zh: "通知之前" },
-  "All customers +15 days late": { en: "All customers +15 days late", es: "Todos los clientes +15 días", zh: "所有客户再延迟15天" },
-  "CNY -5% vs CLP": { en: "CNY −5% vs CLP", es: "CNY −5% vs CLP", zh: "人民币兑比索 −5%" },
-  "CNY +5% vs CLP": { en: "CNY +5% vs CLP", es: "CNY +5% vs CLP", zh: "人民币兑比索 +5%" },
-  "USD -5% vs CLP": { en: "USD −5% vs CLP", es: "USD −5% vs CLP", zh: "美元兑比索 −5%" },
-  "Cherry price -10%": { en: "Cherry price −10%", es: "Precio de la cereza −10%", zh: "樱桃价格 −10%" },
-  "Cherry price +10%": { en: "Cherry price +10%", es: "Precio de la cereza +10%", zh: "樱桃价格 +10%" },
-  "30 extra harvest workers": { en: "30 extra harvest workers", es: "30 temporeros más", zh: "增加30名采收工人" },
-};
-const name = (p: Preset, lang: Lang) => NAME[p.preset]?.[lang] ?? p.preset;
+const name = (p: Preset, lang: Lang) => presetName(p.preset, lang);
 
 // The engine writes headlines and plan actions in English; these patterns give the ES / 中文 copy.
 function headline(h: string, lang: Lang) {
@@ -47,10 +36,10 @@ function action(a: string, lang: Lang) {
 }
 
 const TX = {
-  en: { mode: "Mode", sim: "SIMULATION · NO EXECUTION", presets: "Scenarios", price: "Price financing", pNeg: "P(cash<0) · 90D", pBuf: "P(below buffer)", plan: "Plan cost", save: "Saved vs bank loan", none: "no bank-only plan",
+  en: { mode: "Mode", sim: "SIMULATION · NO EXECUTION", presets: "Scenarios", price: "Price financing", pNeg: "Chance of negative cash · 90 days", pBuf: "P(below buffer)", plan: "Plan cost", save: "Saved vs bank loan", none: "no bank-only plan",
     chart: "Probability of negative cash · every scenario", table: "Base → scenario", metric: "Metric", base: "Base", scen: "Scen", low: "P10 low point", crunch: "Crunch date", actions: "Optimizer plan for this scenario",
     note: "Simulation only: nothing here executes. Each scenario is a full 10,000-path Monte Carlo and MILP run of the quant engine." },
-  es: { mode: "Modo", sim: "SIMULACIÓN · NO EJECUTA", presets: "Escenarios", price: "Cotizar financiamiento", pNeg: "P(caja<0) · 90D", pBuf: "P(bajo el colchón)", plan: "Costo del plan", save: "Ahorro vs crédito", none: "sin plan solo con crédito",
+  es: { mode: "Modo", sim: "SIMULACIÓN · NO EJECUTA", presets: "Escenarios", price: "Cotizar financiamiento", pNeg: "Prob. de caja negativa · 90 días", pBuf: "P(bajo el colchón)", plan: "Costo del plan", save: "Ahorro vs crédito", none: "sin plan solo con crédito",
     chart: "Probabilidad de caja negativa · todos los escenarios", table: "Base → escenario", metric: "Métrica", base: "Base", scen: "Esc.", low: "Mínimo P10", crunch: "Día crítico", actions: "Plan del optimizador para este escenario",
     note: "Solo simulación: nada se ejecuta. Cada escenario es una corrida completa del motor quant (Monte Carlo de 10.000 caminos y MILP)." },
   zh: { mode: "模式", sim: "仅模拟 · 不执行", presets: "情景", price: "融资报价", pNeg: "90天内现金<0概率", pBuf: "低于安全垫概率", plan: "方案成本", save: "比银行贷款节省", none: "无仅用银行贷款的方案",

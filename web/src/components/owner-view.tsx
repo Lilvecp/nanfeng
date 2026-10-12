@@ -8,7 +8,8 @@ import { useDesk } from "@/lib/desk-state";
 import { setDismissed, useDismissed } from "@/lib/dismiss";
 import { useLang, useT } from "@/lib/i18n";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
-import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, dayOf, longDate, outOf10, pesos, usd } from "@/lib/scenario";
+import { Receipt } from "@/components/receipt";
+import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, cny, dayOf, longDate, outOf10, pesos, usd } from "@/lib/scenario";
 
 // The owner's view of the desk: what is happening, what NanFeng recommends and one decision, in
 // plain words. Every number still comes from the quant engine (lib/scenario.ts); the full desk with
@@ -18,6 +19,8 @@ const crunch = (lang: Lang) => longDate(N.crunchDate, lang);
 const in10 = outOf10(S.after.probNegByCrunch); // 8
 const covered = Math.round(S.plan.coverage * 100); // 96
 const repay = longDate(S.plan.maturity ?? N.crunchDate, "en");
+/** Pesos, plus the yuan equivalent in the 中文 view. */
+const amt = (v: number, lang: Lang) => (lang === "zh" ? `${pesos(v, "zh")}（${cny(v)}）` : pesos(v, lang));
 
 type Copy = {
   today: string;
@@ -62,7 +65,7 @@ const COPY: Record<Lang, Copy> = {
     whatSteps: [
       `${SHORT_CUSTOMER}, your buyer in Shanghai, says it will pay ${usd(N.overdueUsd)} ${N.delayDays} days late.`,
       `On ${crunch("en")} you pay ${pesos(N.payroll)} in harvest wages.`,
-      `Without that payment you would be about ${pesos(S.need.amount_clp)} short that day.`,
+      `To get through that day safely you need to cover about ${pesos(S.need.amount_clp)}.`,
     ],
     chart: { title: "Money in your bank, day by day", hint: "Most likely path and its probable range, from 10,000 simulations", you: "Your cash", range: "Probable range", broke: "No money", payroll: "Payroll", after: "With the plan", before: "Without the plan" },
     rec: {
@@ -107,7 +110,7 @@ const COPY: Record<Lang, Copy> = {
       title: "Bienvenido a NanFeng, tu gerente de finanzas",
       steps: [
         ["Vigilamos tu caja todos los días", "Tu saldo en el banco, las facturas que te deben tus clientes y cada cuenta que tienes que pagar."],
-        ["Te avisamos antes de que falte plata", "Y buscamos la forma más barata de cubrir el hoyo, comparando todas las opciones del mercado."],
+        ["Te avisamos antes de que falte plata", "Y buscamos la forma más barata de cubrir el faltante, comparando todas las opciones del mercado."],
         ["Nada se hace sin tu OK", "Apruebas con un código por WhatsApp o aquí. NanFeng nunca mueve plata por su cuenta."],
       ],
       ok: "Entendido",
@@ -119,7 +122,7 @@ const COPY: Record<Lang, Copy> = {
     whatSteps: [
       `${SHORT_CUSTOMER}, tu cliente en Shanghái, avisó que pagará ${usd(N.overdueUsd, "es")} con ${N.delayDays} días de atraso.`,
       `El ${crunch("es")} pagas ${pesos(N.payroll, "es")} en sueldos de la cosecha.`,
-      `Sin ese pago te faltarían unos ${pesos(S.need.amount_clp, "es")} ese día.`,
+      `Para pasar ese día con tranquilidad necesitas cubrir unos ${pesos(S.need.amount_clp, "es")}.`,
     ],
     chart: { title: "Tu plata en el banco, día a día", hint: "Lo más probable y su rango, según 10.000 simulaciones", you: "Tu caja", range: "Rango probable", broke: "Sin plata", payroll: "Sueldos", after: "Con el plan", before: "Sin el plan" },
     rec: {
@@ -131,7 +134,7 @@ const COPY: Record<Lang, Copy> = {
       safe: `Con esto, tu caja queda segura en ${covered} de cada 100 escenarios.`,
       approve: "Aprobar con código", why: "¿Por qué esta opción?", all: "Ver las 9 opciones",
       reasons: [
-        `Es la más barata de las ${S.arena.length} opciones que cubren el hoyo a tiempo.`,
+        `Es la más barata de las ${S.arena.length} opciones que cubren el faltante a tiempo.`,
         "La plata llega el mismo día de los sueldos, no semanas después.",
         `La devuelves en dólares cuando te paguen tus clientes, a más tardar el ${longDate(S.plan.maturity ?? N.crunchDate, "es")}.`,
         "No se puede hacer factoring de esta factura: el banco no compra una factura cuyo cliente ya avisó que pagará tarde.",
@@ -145,7 +148,7 @@ const COPY: Record<Lang, Copy> = {
         ["08:00", "Te mandó el resumen de caja de la mañana por voz."],
         ["08:47", "Bloqueó una factura que intentaba cambiar la cuenta bancaria de un proveedor."],
         ["10:12", "Leyó el aviso de atraso de Shanghái."],
-        ["10:14", `Comparó ${S.explanation.length} formas de financiar el hoyo.`],
+        ["10:14", `Comparó ${S.explanation.length} formas de cubrir el faltante.`],
         ["10:20", "Le pidió a tu cliente, en chino, que confirme la nueva fecha de pago."],
       ],
     },
@@ -170,13 +173,13 @@ const COPY: Record<Lang, Copy> = {
       ok: "知道了",
     },
     pending: { title: "您的现金需要关注。", sub: (lang) => `${crunch(lang)}有十分之${in10}的可能无法足额发放采收工资。` },
-    done: { title: "已完成，工资已有保障。", sub: `贷款已在您批准后申请。与普通银行贷款相比，您节省了${pesos(N.savings, "zh")}。` },
+    done: { title: "已完成，工资已有保障。", sub: `贷款已在您批准后申请。与普通银行贷款相比，您节省了${amt(N.savings, "zh")}。` },
     rejected: { title: "您拒绝了该方案。", sub: "南风正在准备次优方案。在您做出选择之前，现金仍有风险。" },
     what: "发生了什么",
     whatSteps: [
       `您的上海买家${SHORT_CUSTOMER_ZH}通知将延迟${N.delayDays}天支付 ${usd(N.overdueUsd, "zh")}。`,
-      `${crunch("zh")}您需要支付${pesos(N.payroll, "zh")}的采收工资。`,
-      `没有这笔货款，当天将短缺约${pesos(S.need.amount_clp, "zh")}。`,
+      `${crunch("zh")}您需要支付${amt(N.payroll, "zh")}的采收工资。`,
+      `为安全度过当天，需要补足约${amt(S.need.amount_clp, "zh")}。`,
     ],
     chart: { title: "您的银行存款，逐日变化", hint: "基于10,000次模拟的最可能走势及其范围", you: "您的现金", range: "可能范围", broke: "资金耗尽", payroll: "发薪日", after: "采用方案后", before: "未采用方案" },
     rec: {
@@ -184,7 +187,7 @@ const COPY: Record<Lang, Copy> = {
       title: "申请美元出口前融资",
       body: `银行于${crunch("zh")}向您贷款 ${usd(N.loanUsd, "zh")}，您在${N.termDays}天内用出口货款偿还。`,
       ours: "此贷款", bank: "普通银行贷款",
-      save: `节省${pesos(N.savings, "zh")}`,
+      save: `节省${amt(N.savings, "zh")}`,
       safe: `采用后，100个情景中有${covered}个现金安全。`,
       approve: "输入验证码批准", why: "为什么选这个？", all: "查看全部9个方案",
       reasons: [
@@ -223,8 +226,14 @@ export function ViewSwitch() {
   );
 }
 
-function SimpleChart({ resolved, c, lang }: { resolved: boolean; c: Copy["chart"]; lang: Lang }) {
-  const f = resolved ? S.fan.afterPlan : S.fan.after;
+/** The owner's cash chart with its labels, for Demo Mode. */
+export function OwnerChart({ stage }: { stage: "before" | "after" | "resolved" }) {
+  const lang = useLang();
+  return <SimpleChart resolved={stage === "resolved"} before={stage === "before"} c={COPY[lang].chart} lang={lang} />;
+}
+
+function SimpleChart({ resolved, before = false, c, lang }: { resolved: boolean; before?: boolean; c: Copy["chart"]; lang: Lang }) {
+  const f = resolved ? S.fan.afterPlan : before ? S.fan.before : S.fan.after;
   const px = fx(N.crunchDay);
   const tag = `${c.payroll} · ${longDate(N.crunchDate, lang)}`;
   const ticks = [S.asOf, "2027-01-01", "2027-02-01", "2027-03-01"].filter((d) => dayOf(d) <= 90);
@@ -239,7 +248,7 @@ function SimpleChart({ resolved, c, lang }: { resolved: boolean; c: Copy["chart"
       <line x1={px} x2={px} y1="20" y2="280" stroke={resolved ? "var(--ok)" : "var(--crit)"} strokeDasharray="3 3" />
       <rect x={px + 6} y="22" width={tag.length * (lang === "zh" ? 13 : 7.4) + 22} height="22" rx="11" fill={resolved ? "var(--ok)" : "var(--crit)"} />
       <text x={px + 17} y="37" className="owner-ch-lbl" style={{ fill: "#FFFFFF", fontWeight: 700 }}>{tag}</text>
-      {!resolved && <circle cx={px} cy={fy(S.fan.after.p50[N.crunchDay])} r="6" fill="var(--crit)" />}
+      {!resolved && !before && <circle cx={px} cy={fy(S.fan.after.p50[N.crunchDay])} r="6" fill="var(--crit)" />}
       {[0, 200, 400, 600].map((v) => (
         <text key={v} x="42" y={fy(v) + 4} textAnchor="end" className="owner-ch-axis">{v === 0 ? "0" : `${v}M`}</text>
       ))}
@@ -322,6 +331,7 @@ export function OwnerView() {
               <span className="owner-eyebrow">{c.next.eyebrow}</span>
               <h2 className="owner-h big">{c.next.title}</h2>
               <ol className="owner-steps">{c.next.items.map((s, i) => <li key={s}><span className="owner-n">{i + 1}</span><span>{s}</span></li>)}</ol>
+              <Receipt compact />
             </section>
           ) : rejected ? (
             <section className="card owner-card owner-rec" data-guide="home-next">
@@ -336,8 +346,8 @@ export function OwnerView() {
               <h2 className="owner-h big">{c.rec.title}</h2>
               <p>{c.rec.body}</p>
               <div className="owner-compare" role="img" aria-label={`${c.rec.ours} ${pesos(N.planCost, lang)} · ${c.rec.bank} ${pesos(N.defaultCost, lang)}`}>
-                <div><span>{c.rec.ours}</span><i style={{ width: `${ratio * 100}%`, background: "var(--ok)" }} /><b>{pesos(N.planCost, lang)}</b></div>
-                <div><span>{c.rec.bank}</span><i style={{ width: "100%", background: "var(--line-2)" }} /><b>{pesos(N.defaultCost, lang)}</b></div>
+                <div><span>{c.rec.ours}</span><i style={{ width: `${ratio * 100}%`, background: "var(--ok)" }} /><b>{amt(N.planCost, lang)}</b></div>
+                <div><span>{c.rec.bank}</span><i style={{ width: "100%", background: "var(--line-2)" }} /><b>{amt(N.defaultCost, lang)}</b></div>
               </div>
               <p className="owner-save">{c.rec.save} <span>({N.savingsPct})</span></p>
               <p className="owner-hint">{c.rec.safe}</p>

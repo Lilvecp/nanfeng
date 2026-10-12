@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SailMark } from "@/components/logo";
 import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
-import { GUIDE_UI, guideContent, markHelloSeen, markTourSeen, setGuideOn, snoozeTour, useGuideOn, useHelloSeen, useTourSeen, useTourSnoozed, type GuideStep } from "@/lib/guide";
+import { GUIDE_UI, guideContent, markHelloSeen, markTourSeen, setAutoTours, setGuideOn, useAutoTours, useGuideOn, useHelloSeen, useTourSeen, type GuideStep } from "@/lib/guide";
 import { useLang } from "@/lib/i18n";
 import { usePref } from "@/lib/prefs";
 
@@ -66,7 +66,12 @@ function Tour({ steps: pageSteps, hello, onClose }: { steps: GuideStep[]; hello:
   useEffect(() => {
     const el = findTarget(step.target);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+    // Scroll the page itself (scrollIntoView also scrolls clipped ancestors and shifts the layout).
+    const r = el?.getBoundingClientRect();
+    if (r && (r.top < 70 || r.bottom > window.innerHeight - 40)) {
+      const top = window.scrollY + r.top - Math.max(80, (window.innerHeight - r.height) / 2);
+      window.scrollTo({ top: Math.max(0, top), behavior: reduce ? "auto" : "smooth" });
+    }
     let frame = 0;
     let prev = "";
     const update = () => {
@@ -160,7 +165,7 @@ export function Guide() {
   // Home has two views with different parts, so each gets its own tour.
   const key = pathname === "/cockpit" && view === "detail" ? "/cockpit#detail" : pathname;
   const seen = useTourSeen(key);
-  const snoozed = useTourSnoozed(key);
+  const auto = useAutoTours();
   const helloSeen = useHelloSeen();
   const { notify, approval, killSwitch, events } = useDesk();
   const { pendingCount } = useCrisisNumbers();
@@ -180,7 +185,7 @@ export function Guide() {
   const steps = page?.steps;
   // On Home the owner's welcome card goes first; the tour waits until it is closed.
   const blocked = key === "/cockpit" && intro !== "seen";
-  const autoStart = on === true && !!steps && !seen && !snoozed && !blocked && !NO_GUIDE.has(pathname);
+  const autoStart = on === true && auto && !!steps && !seen && !blocked && !NO_GUIDE.has(pathname);
 
   // Short tips when something worth knowing happens, so the owner knows where to look next.
   type Tip = { text: string; href?: string; cta?: string };
@@ -189,7 +194,8 @@ export function Guide() {
   const [lastApproval, setLastApproval] = useState(approval);
   if (approval !== lastApproval) {
     setLastApproval(approval);
-    if (approval === "approved") setTip({ text: ui.tipApproved, href: "/security", cta: ui.ctaSecurity });
+    // Only a decision taken now: after a reload the saved state also "changes" from pending.
+    if (approval === "approved" && lastApproval === "verifying") setTip({ text: ui.tipApproved, href: "/security", cta: ui.ctaSecurity });
     else if (approval === "rejected") setTip({ text: ui.tipRejected, href: "/financing", cta: ui.ctaFinancing });
   }
   const [lastKill, setLastKill] = useState(killSwitch);
@@ -238,14 +244,15 @@ export function Guide() {
 
   const endTour = useCallback((why: CloseReason) => {
     setTouring(false);
-    if (why === "later") {
-      snoozeTour(key); // back on the next visit
-    } else {
-      markTourSeen(key);
-      markHelloSeen();
+    markTourSeen(key);
+    markHelloSeen();
+    // Skipping or "Not now" means the viewer does not want tours popping up: stop them everywhere.
+    if (why !== "done" && auto) {
+      setAutoTours(false);
+      notify(ui.laterToast);
     }
     fab.current?.focus({ preventScroll: true });
-  }, [key, setTouring]);
+  }, [key, setTouring, auto, notify, ui]);
 
   if (on !== true || NO_GUIDE.has(pathname)) return null;
   const nudge = pendingCount > 0 && pathname !== "/approvals";
@@ -284,7 +291,7 @@ export function Guide() {
       {!touring && (
         <button
           ref={fab}
-          className={`guide-fab${!seen && steps ? " fresh" : ""}`}
+          className={`guide-fab${auto && !seen && steps ? " fresh" : ""}`}
           type="button"
           aria-label={panel ? ui.close : ui.open}
           aria-expanded={panel}

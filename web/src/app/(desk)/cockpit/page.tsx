@@ -10,7 +10,7 @@ import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
 import { setDismissed, useDismissed } from "@/lib/dismiss";
 import { useLang, useT } from "@/lib/i18n";
 import { usePref, type Lang } from "@/lib/prefs";
-import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, clpM, pct, usd } from "@/lib/scenario";
+import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, clpM, cny, longDate, pct, presetName, usd } from "@/lib/scenario";
 
 type Answer = { q: Record<Lang, string>; a: Record<Lang, string>; href: string; cta: Record<Lang, string> };
 
@@ -64,16 +64,68 @@ const ANSWERS: Answer[] = [
 ];
 
 const FALLBACK: Record<Lang, string> = {
-  en: "In the sandbox NanFeng answers the suggested questions. Free-form questions go to the planner agent once it is connected.",
-  es: "En el sandbox NanFeng responde las preguntas sugeridas. Las preguntas libres irán al agente planificador cuando esté conectado.",
-  zh: "在沙盒中，南风可回答建议的问题。自由提问将在规划代理接入后开放。",
+  en: "In the sandbox NanFeng answers the suggested questions and what-ifs about payment dates, the yuan, the dollar, cherry prices and extra workers. Other questions go to the planner agent once it is connected.",
+  es: "En el sandbox NanFeng responde las preguntas sugeridas y los “¿y si…?” sobre fechas de pago, el yuan, el dólar, el precio de la cereza y más temporeros. Las demás preguntas irán al agente planificador cuando esté conectado.",
+  zh: "在沙盒中，南风可回答建议的问题，以及关于付款日期、人民币、美元、樱桃价格和增加工人的假设问题。其他问题将在规划代理接入后开放。",
 };
+
+// What-ifs typed in the box, answered from the quant engine's precomputed runs (Scenario Lab).
+const LAB = Object.fromEntries(S.scenarioLab.map((p) => [p.preset, p]));
+const has = (t: string, ...words: string[]) => words.some((w) => t.includes(w));
+const down = (t: string) => has(t, "baja", "cae", "caída", "drop", "fall", "down", "weaker", "-", "−", "跌", "下降", "贬");
+const up = (t: string) => has(t, "sube", "alza", "rise", "up", "stronger", "+", "涨", "上升", "升值");
+
+function whatIf(raw: string, lang: Lang): Answer | null {
+  const t = raw.toLowerCase();
+  const preset = (key: string): Answer => {
+    const p = LAB[key];
+    const prob = pct(p.probNeg90d);
+    const cost = p.planCostClp ? clpM(p.planCostClp, lang) : "—";
+    const nm = presetName(key, lang);
+    return {
+      q: { en: raw, es: raw, zh: raw },
+      a: {
+        en: `${nm}: ${prob} chance of negative cash within 90 days (base: ${pct(LAB[S.scenarioLab[0].preset].probNeg90d)}). The optimizer's plan would cost ${cost}. Full 10,000-path run of the quant engine.`,
+        es: `${nm}: ${prob} de probabilidad de caja negativa en 90 días (base: ${pct(LAB[S.scenarioLab[0].preset].probNeg90d)}). El plan del optimizador costaría ${cost}. Corrida completa del motor quant con 10.000 caminos.`,
+        zh: `${nm}：90天内现金为负的概率为${prob}（基准：${pct(LAB[S.scenarioLab[0].preset].probNeg90d)}）。优化方案成本为${cost}${p.planCostClp ? `（${cny(p.planCostClp)}）` : ""}。量化引擎完整运行10,000条路径。`,
+      },
+      href: "/scenario",
+      cta: { en: "Open What if…", es: "Abrir ¿Y si…?", zh: "打开假设分析" },
+    };
+  };
+  // "What if Shanghai pays on day 10 / on time?" — any payment before payroll day works like paying on time.
+  const day = t.match(/(?:d[ií]a|day|第)\s*(\d{1,2})/);
+  const onTime = has(t, "a tiempo", "on time", "按时", "准时");
+  if (day || onTime) {
+    const d = day ? Number(day[1]) : 0;
+    if (onTime || d < N.crunchDay) {
+      const when = { en: day ? `on day ${d}` : "on time", es: day ? `el día ${d}` : "a tiempo", zh: day ? `在第${d}天` : "按时" };
+      return {
+        q: { en: raw, es: raw, zh: raw },
+        a: {
+          en: `If ${SHORT_CUSTOMER} pays ${when.en}, the USD 180,000 arrives before the payroll on ${longDate(N.crunchDate)} (day ${N.crunchDay}). The engine's on-time run puts the risk at ${pct(S.after.probNegIfOnTime)} instead of ${N.pNeg}: you would not need the loan.`,
+          es: `Si ${SHORT_CUSTOMER} paga ${when.es}, los USD 180.000 llegan antes de los sueldos del ${longDate(N.crunchDate, "es")} (día ${N.crunchDay}). Con pago a tiempo el motor da un riesgo de ${pct(S.after.probNegIfOnTime)} en vez de ${N.pNeg}: no necesitarías el crédito.`,
+          zh: `如果${SHORT_CUSTOMER_ZH}${when.zh}付款，18万美元将在${longDate(N.crunchDate, "zh")}（第${N.crunchDay}天）发薪前到账。按时付款情景下风险为${pct(S.after.probNegIfOnTime)}，而不是${N.pNeg}：您无需贷款。`,
+        },
+        href: "/scenario",
+        cta: { en: "Open What if…", es: "Abrir ¿Y si…?", zh: "打开假设分析" },
+      };
+    }
+    return preset(S.scenarioLab[0].preset);
+  }
+  if (has(t, "todos los clientes", "all customers", "所有客户", "+15", "15 días", "15 days", "15天")) return preset("All customers +15 days late");
+  if (has(t, "cny", "yuan", "rmb", "人民币")) return preset(down(t) ? "CNY -5% vs CLP" : "CNY +5% vs CLP");
+  if (has(t, "usd", "dólar", "dolar", "dollar", "美元")) return preset("USD -5% vs CLP");
+  if (has(t, "cereza", "cherry", "cherries", "樱桃")) return preset(up(t) && !down(t) ? "Cherry price +10%" : "Cherry price -10%");
+  if (has(t, "temporer", "trabajador", "worker", "contrat", "hire", "工人")) return preset("30 extra harvest workers");
+  return null;
+}
 
 const TX = {
   en: {
     monitoring: "AGENT MONITORING", actions: "ACTIONS TODAY", pNeg: `P(cash<0) · ${N.crunchDay}D`, fromAfter: `▼ from ${N.pNeg} · 10:15`, fromBefore: `▲ from ${N.pNegBefore} before the notice`,
     crunch: "Crunch day", crunchSub: `P50 low ${clpM(S.after.minCashP50Clp)} · payroll ${clpM(N.payroll)}`, crunchDone: `buffer held in ${N.coverage} of paths`, cleared: "CLEARED",
-    delayed: `Delayed +${N.delayDays}D`, passport: "Credit Passport", passportSub: "explainable score for lenders",
+    delayed: `Delayed +${N.delayDays}D`, passport: "Credit Passport", passportSub: "explainable score for lenders", from: "from",
     forecast: "Cash forecast · 90D · CLP M · MC 10,000", tape: "Agent tape", threats: "2 threats blocked today", openMission: "Open Mission Control",
     blotter: "Receivables", blotterHint: "sorted by due date", inv: "Invoice", importer: "Importer", market: "Market", amount: "Amount", due: "Due", delay: "Announced delay", action: "Action",
     pending: "Plan pending", financed: "Bridged by PAE", monitor: "Monitor", lc: "LC-backed",
@@ -82,7 +134,7 @@ const TX = {
   es: {
     monitoring: "AGENTE MONITOREANDO", actions: "ACCIONES HOY", pNeg: `P(caja<0) · ${N.crunchDay}D`, fromAfter: `▼ desde ${N.pNeg} · 10:15`, fromBefore: `▲ desde ${N.pNegBefore} antes del aviso`,
     crunch: "Día crítico", crunchSub: `Mínimo P50 ${clpM(S.after.minCashP50Clp, "es")} · nómina ${clpM(N.payroll, "es")}`, crunchDone: `colchón respetado en ${N.coverage} de los escenarios`, cleared: "DESPEJADO",
-    delayed: `Atrasado +${N.delayDays}D`, passport: "Credit Passport", passportSub: "puntaje explicable para prestamistas",
+    delayed: `Atrasado +${N.delayDays}D`, passport: "Credit Passport", passportSub: "puntaje explicable para prestamistas", from: "desde",
     forecast: "Pronóstico de caja · 90D · CLP M · MC 10.000", tape: "Bitácora del agente", threats: "2 amenazas bloqueadas hoy", openMission: "Abrir Mission Control",
     blotter: "Cuentas por cobrar", blotterHint: "por fecha de vencimiento", inv: "Factura", importer: "Importador", market: "Mercado", amount: "Monto", due: "Vence", delay: "Atraso avisado", action: "Acción",
     pending: "Plan pendiente", financed: "Cubierta con PAE", monitor: "Vigilar", lc: "Con carta de crédito",
@@ -91,7 +143,7 @@ const TX = {
   zh: {
     monitoring: "代理监控中", actions: "项今日操作", pNeg: `现金<0 概率 · ${N.crunchDay}天`, fromAfter: `▼ 原为 ${N.pNeg} · 10:15`, fromBefore: `▲ 通知前为 ${N.pNegBefore}`,
     crunch: "危机日", crunchSub: `P50 最低 ${clpM(S.after.minCashP50Clp, "zh")} · 工资 ${clpM(N.payroll, "zh")}`, crunchDone: `${N.coverage} 的情景保持安全垫`, cleared: "已解除",
-    delayed: `延迟 +${N.delayDays}天`, passport: "信用护照", passportSub: "面向贷款方的可解释评分",
+    delayed: `延迟 +${N.delayDays}天`, passport: "信用护照", passportSub: "面向贷款方的可解释评分", from: "原为",
     forecast: "现金预测 · 90天 · 百万智利比索 · 蒙特卡洛 10,000", tape: "代理记录", threats: "今日拦截2次威胁", openMission: "打开任务控制",
     blotter: "应收账款", blotterHint: "按到期日排序", inv: "发票", importer: "进口商", market: "市场", amount: "金额", due: "到期日", delay: "已通知延迟", action: "操作",
     pending: "方案待批", financed: "已由 PAE 过桥", monitor: "监控", lc: "信用证担保",
@@ -125,7 +177,7 @@ function CockpitDetail() {
   const [answer, setAnswer] = useState<Answer | "fallback" | null>(null);
 
   const ask = (text: string) => {
-    const hit = ANSWERS.find((a) => Object.values(a.q).some((q) => q.toLowerCase() === text.trim().toLowerCase()));
+    const hit = ANSWERS.find((a) => Object.values(a.q).some((q) => q.toLowerCase() === text.trim().toLowerCase())) ?? whatIf(text, lang);
     setQuestion(text);
     setAnswer(hit ?? (text.trim() ? "fallback" : null));
   };
@@ -186,7 +238,7 @@ function CockpitDetail() {
           </div>
         ) : (
           <div data-guide="det-alert" className="alert crit" style={{ alignItems: "center", flexWrap: "wrap" }}>
-            <span className="ic">CRIT</span>
+            <span className="ic">{lang === "es" ? "ALERTA" : lang === "zh" ? "警报" : "CRIT"}</span>
             <div style={{ flex: "1 1 480px", display: "flex", flexDirection: "column", gap: 2 }}>
               <b style={{ fontSize: 15 }}>{approval === "rejected" ? t("cockpit.rejected.title") : t("cockpit.alert.title")}</b>
               <span className="mono small">{t("cockpit.alert.rec")} <b className="up">{clpM(N.savings, lang)}</b> ({N.savingsPct}) {t("cockpit.alert.vs")}</span>
@@ -203,13 +255,13 @@ function CockpitDetail() {
           <div className="kpi"><span className="kpi-l">{x.pNeg}</span><span className="kpi-v" style={{ color: resolved ? "var(--ok)" : "var(--crit)" }}>{pNeg}</span><span className="mono small muted">{resolved ? x.fromAfter : x.fromBefore}</span></div>
           <div className="kpi"><span className="kpi-l">{x.crunch}</span><span className="kpi-v">{resolved ? x.cleared : `D${N.crunchDay}`}</span><span className="mono small muted">{resolved ? x.crunchDone : x.crunchSub}</span></div>
           <div className="kpi"><span className="kpi-l">{x.delayed}</span><span className="kpi-v">{usd(N.overdueUsd, lang)}</span><span className="mono small muted">{lang === "zh" ? SHORT_CUSTOMER_ZH : SHORT_CUSTOMER} · {RECEIVABLE.id}</span></div>
-          <div className="kpi"><span className="kpi-l">{x.passport}</span><span className="kpi-v">{resolved ? `${Math.round(S.passport.after_plan.score)} ${S.passport.after_plan.grade}` : `${Math.round(S.passport.before.score)} ${S.passport.before.grade}`}</span><span className="mono small muted">{resolved ? `▲ from ${Math.round(S.passport.before.score)} ${S.passport.before.grade}` : x.passportSub}</span></div>
+          <div className="kpi"><span className="kpi-l">{x.passport}</span><span className="kpi-v">{resolved ? `${Math.round(S.passport.after_plan.score)} ${S.passport.after_plan.grade}` : `${Math.round(S.passport.before.score)} ${S.passport.before.grade}`}</span><span className="mono small muted">{resolved ? `▲ ${x.from} ${Math.round(S.passport.before.score)} ${S.passport.before.grade}` : x.passportSub}</span></div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2.2fr) minmax(300px, 1fr)", gap: 12 }}>
           <div className="card" data-guide="det-chart">
-            <div className="card-h"><span className="h3">{x.forecast}</span><ForecastLegend resolved={resolved} /></div>
-            <div className="card-b"><ForecastChart resolved={resolved} /><span className="mono small muted">{S.source}</span></div>
+            <div className="card-h"><span className="h3">{x.forecast}</span><ForecastLegend resolved={resolved} lang={lang} /></div>
+            <div className="card-b"><ForecastChart resolved={resolved} lang={lang} /><span className="mono small muted">{S.source}</span></div>
           </div>
 
           <div className="card" data-guide="det-tape">
@@ -244,7 +296,7 @@ function CockpitDetail() {
                     <td className="num">{r.id}</td>
                     <td>{r.customer}</td>
                     <td>{r.country}</td>
-                    <td className="r num">{r.currency === "CNY" ? "¥" : "USD "}{r.amount.toLocaleString("en-US")}</td>
+                    <td className="r num">{r.currency === "CNY" ? "¥" : "USD "}{r.amount.toLocaleString(lang === "es" ? "es-CL" : "en-US")}</td>
                     <td className="r num">{r.due_date}</td>
                     <td className={`r num${hit ? " down" : ""}`}>{"announced_delay_days" in r && r.announced_delay_days ? `+${r.announced_delay_days}D` : "—"}</td>
                     <td>

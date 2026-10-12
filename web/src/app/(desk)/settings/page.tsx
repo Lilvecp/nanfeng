@@ -15,6 +15,48 @@ const clp = (n: number) => "CLP " + n.toLocaleString("es-CL");
 const parse = (s: string) => Number(s.replace(/\D/g, "")) || 0;
 const snake = (n: number) => n.toLocaleString("en-US").replace(/,/g, "_");
 
+const TX = {
+  en: {
+    policy: "Policy", unsaved: (n: number) => `${n} UNSAVED CHANGE${n > 1 ? "S" : ""} · CODE REQUIRED`, discard: "Discard", save: "Save with code",
+    otpBody: "Policy changes are L3. Enter the code sent to +56 9 •••• 4127", sandbox: "sandbox", confirm: "Confirm", cancel: "Cancel",
+    errLine: `ERR > CREDIT LINE ${clp(CREDIT_LINE)}`, errL2: "ERR L2 MUST BE ≤ L3", errMonth: "ERR MONTH < PER ACTION", errOtp: "WRONG CODE", saved: (v: number) => `Policy v${v} saved · change logged in the audit chain`,
+    limits: "Spending limits by tier", above: "ABOVE LIMIT → NEXT TIER", cols: ["Tier", "Per action", "Per month", "Scope"],
+    l1Limit: "CLP 0 · no payments", l1Scope: "Reminders, quotes", l2Scope: "Allowlisted payees · FX ≤ ¥500k", l3Scope: "Any, with owner code", perAction: "per action", perMonth: "per month",
+    allow: "Beneficiary allowlist", add: "+ Add (L3)", addToast: "Adding a payee is L3: owner code + call-back. Available once the bank API is connected.", payCols: ["Name", "Bank", "Account", "Currency", "Added"], remove: "Remove",
+    removed: (n: string) => `${n} removed · the agent can no longer pay it`, noPayees: "NO PAYEES → THE AGENT CAN DRAFT BUT NEVER PAY",
+    approvalCh: "Approval channels", waOtp: "WhatsApp + SMS code", webAuth: "Web + authenticator", voice: "Voice (blocked by policy)",
+    languages: "Languages", owner: "Owner", importers: "Importers",
+    connected: "Connected channels", up: "Up", sim: "Simulated", connect: "Connect", roadmap: "LINE and KakaoTalk adapters are on the roadmap", bankApi: "Banco Pacífico API", bankSandbox: "Sandbox",
+    diff: (dirty: boolean) => `policy.diff · ${dirty ? "unsaved" : "clean"}`,
+  },
+  es: {
+    policy: "Política", unsaved: (n: number) => `${n} CAMBIO${n > 1 ? "S" : ""} SIN GUARDAR · REQUIERE CÓDIGO`, discard: "Descartar", save: "Guardar con código",
+    otpBody: "Cambiar la política es L3. Escribe el código enviado al +56 9 •••• 4127", sandbox: "sandbox", confirm: "Confirmar", cancel: "Cancelar",
+    errLine: `ERROR > LÍNEA DE CRÉDITO ${clp(CREDIT_LINE)}`, errL2: "ERROR: L2 DEBE SER ≤ L3", errMonth: "ERROR: EL MES ES MENOR QUE POR ACCIÓN", errOtp: "CÓDIGO INCORRECTO", saved: (v: number) => `Política v${v} guardada · el cambio quedó en la cadena de auditoría`,
+    limits: "Límites de gasto por nivel", above: "SOBRE EL LÍMITE → SIGUIENTE NIVEL", cols: ["Nivel", "Por acción", "Por mes", "Alcance"],
+    l1Limit: "CLP 0 · sin pagos", l1Scope: "Recordatorios, cotizaciones", l2Scope: "Cuentas autorizadas · FX ≤ ¥500k", l3Scope: "Cualquiera, con código del dueño", perAction: "por acción", perMonth: "por mes",
+    allow: "Cuentas autorizadas", add: "+ Agregar (L3)", addToast: "Agregar una cuenta es L3: código del dueño + llamada de verificación. Disponible al conectar la API del banco.", payCols: ["Nombre", "Banco", "Cuenta", "Moneda", "Agregada"], remove: "Quitar",
+    removed: (n: string) => `${n} quitada · el agente ya no puede pagarle`, noPayees: "SIN CUENTAS → EL AGENTE PUEDE PREPARAR PERO NUNCA PAGAR",
+    approvalCh: "Canales de aprobación", waOtp: "WhatsApp + código SMS", webAuth: "Web + autenticador", voice: "Voz (bloqueada por política)",
+    languages: "Idiomas", owner: "Dueño", importers: "Importadores",
+    connected: "Canales conectados", up: "Activo", sim: "Simulado", connect: "Conectar", roadmap: "Los adaptadores de LINE y KakaoTalk están en el roadmap", bankApi: "API Banco Pacífico", bankSandbox: "Sandbox",
+    diff: (dirty: boolean) => `policy.diff · ${dirty ? "sin guardar" : "sin cambios"}`,
+  },
+  zh: {
+    policy: "策略", unsaved: (n: number) => `${n} 项未保存更改 · 需要验证码`, discard: "放弃", save: "输入验证码保存",
+    otpBody: "修改策略属于 L3。请输入发送至 +56 9 •••• 4127 的验证码", sandbox: "沙盒", confirm: "确认", cancel: "取消",
+    errLine: `错误：超过授信额度 ${clp(CREDIT_LINE)}`, errL2: "错误：L2 必须 ≤ L3", errMonth: "错误：月度限额小于单笔限额", errOtp: "验证码错误", saved: (v: number) => `策略 v${v} 已保存 · 更改已写入审计链`,
+    limits: "各级支出限额", above: "超过限额 → 升至下一级", cols: ["级别", "单笔", "每月", "范围"],
+    l1Limit: "CLP 0 · 不可付款", l1Scope: "提醒、报价", l2Scope: "白名单收款方 · 外汇 ≤ ¥500k", l3Scope: "任何操作，需企业主验证码", perAction: "单笔", perMonth: "每月",
+    allow: "收款方白名单", add: "+ 添加（L3）", addToast: "添加收款方属于 L3：需企业主验证码并回电核实。接入银行 API 后开放。", payCols: ["名称", "银行", "账户", "币种", "添加日期"], remove: "移除",
+    removed: (n: string) => `已移除 ${n} · 代理无法再向其付款`, noPayees: "无收款方 → 代理只能起草，永远无法付款",
+    approvalCh: "审批渠道", waOtp: "WhatsApp + 短信验证码", webAuth: "网页 + 身份验证器", voice: "语音（策略禁止）",
+    languages: "语言", owner: "企业主", importers: "进口商",
+    connected: "已连接渠道", up: "正常", sim: "模拟", connect: "连接", roadmap: "LINE 和 KakaoTalk 适配器已列入路线图", bankApi: "Banco Pacífico API", bankSandbox: "沙盒",
+    diff: (dirty: boolean) => `policy.diff · ${dirty ? "未保存" : "无更改"}`,
+  },
+};
+
 type Payee = { name: string; bank: string; acct: string; ccy: string; added: string };
 const PAYEES: Payee[] = [
   { name: "Cartonera Sur Ltda.", bank: "Banco Pacífico", acct: "•••• 2210", ccy: "CLP", added: "2026-03-02" },
@@ -24,6 +66,7 @@ const PAYEES: Payee[] = [
 
 export default function SettingsPage() {
   const t = useT();
+  const x = TX[useLang()];
   const { notify } = useDesk();
   const [saved, setSaved] = useState(SAVED);
   const [draft, setDraft] = useState<Record<LimitKey, string>>(() => Object.fromEntries(Object.entries(SAVED).map(([k, v]) => [k, clp(v)])) as Record<LimitKey, string>);
@@ -36,9 +79,9 @@ export default function SettingsPage() {
   const values = Object.fromEntries(Object.entries(draft).map(([k, v]) => [k, parse(v)])) as Record<LimitKey, number>;
   const changed = (Object.keys(values) as LimitKey[]).filter((k) => values[k] !== saved[k]);
   const errors: Partial<Record<LimitKey, string>> = {};
-  if (values.l3Action > CREDIT_LINE) errors.l3Action = `ERR > CREDIT LINE ${clp(CREDIT_LINE)}`;
-  if (values.l2Action > values.l3Action) errors.l2Action = "ERR L2 MUST BE ≤ L3";
-  if (values.l2Action > values.l2Month) errors.l2Month = "ERR MONTH < PER ACTION";
+  if (values.l3Action > CREDIT_LINE) errors.l3Action = x.errLine;
+  if (values.l2Action > values.l3Action) errors.l2Action = x.errL2;
+  if (values.l2Action > values.l2Month) errors.l2Month = x.errMonth;
   const hasErrors = Object.keys(errors).length > 0;
 
   const input = (k: LimitKey, label: string) => (
@@ -56,7 +99,7 @@ export default function SettingsPage() {
   const confirmSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.replace(/\D/g, "") !== SANDBOX_OTP) {
-      setOtpErr("ERR OTP_MISMATCH");
+      setOtpErr(x.errOtp);
       return;
     }
     setSaved(values);
@@ -64,32 +107,32 @@ export default function SettingsPage() {
     setOtpOpen(false);
     setOtp("");
     setOtpErr(null);
-    notify(`Policy v${version + 1} saved · change logged in the audit chain`);
+    notify(x.saved(version + 1));
   };
 
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">Policy</span><span className="v">v{version} · 2026-10-{version > 14 ? "09" : "07"}</span></div>
-        {changed.length > 0 && <span className="status"><span className="dot warn" />{changed.length} UNSAVED CHANGE{changed.length > 1 ? "S" : ""} · OTP REQUIRED</span>}
+        <div className="tick"><span className="l">{x.policy}</span><span className="v">v{version} · 2026-10-{version > 14 ? "09" : "07"}</span></div>
+        {changed.length > 0 && <span className="status"><span className="dot warn" />{x.unsaved(changed.length)}</span>}
       </Topbar>
 
       <div className="content">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <h1 className="h1">{t("nav.settings")}</h1>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="btn btn-secondary" type="button" disabled={changed.length === 0} onClick={discard}>Discard</button>
-            <button className="btn btn-primary" type="button" disabled={changed.length === 0 || hasErrors} onClick={() => setOtpOpen(true)}>Save with OTP <span className="key" style={{ borderColor: "currentColor", color: "inherit" }}>⌘S</span></button>
+            <button className="btn btn-secondary" type="button" disabled={changed.length === 0} onClick={discard}>{x.discard}</button>
+            <button className="btn btn-primary" type="button" disabled={changed.length === 0 || hasErrors} onClick={() => setOtpOpen(true)}>{x.save} <span className="key" style={{ borderColor: "currentColor", color: "inherit" }}>⌘S</span></button>
           </div>
         </div>
 
         {otpOpen && (
           <form className="alert warn" style={{ alignItems: "center", flexWrap: "wrap" }} onSubmit={confirmSave}>
             <span className="ic">OTP</span>
-            <label htmlFor="set-otp" className="small" style={{ flex: "1 1 260px" }}>Policy changes are L3. Enter the code sent to +56 9 •••• 4127 (sandbox: <b className="mono">{SANDBOX_OTP}</b>).</label>
+            <label htmlFor="set-otp" className="small" style={{ flex: "1 1 260px" }}>{x.otpBody} ({x.sandbox}: <b className="mono">{SANDBOX_OTP}</b>).</label>
             <input id="set-otp" className={`input${otpErr ? " err" : ""}`} inputMode="numeric" autoComplete="one-time-code" style={{ width: 140 }} value={otp} onChange={(e) => { setOtp(e.target.value); setOtpErr(null); }} />
-            <button className="btn btn-primary btn-sm" type="submit">Confirm</button>
-            <button className="btn btn-secondary btn-sm" type="button" onClick={() => setOtpOpen(false)}>Cancel</button>
+            <button className="btn btn-primary btn-sm" type="submit">{x.confirm}</button>
+            <button className="btn btn-secondary btn-sm" type="button" onClick={() => setOtpOpen(false)}>{x.cancel}</button>
             {otpErr && <span className="hint err" role="alert">{otpErr}</span>}
           </form>
         )}
@@ -97,44 +140,44 @@ export default function SettingsPage() {
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.6fr) minmax(320px, 1fr)", gap: 12, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div className="card">
-              <div className="card-h"><span className="h3">Spending limits by tier</span><span className="hint">ABOVE LIMIT → NEXT TIER</span></div>
+              <div className="card-h"><span className="h3">{x.limits}</span><span className="hint">{x.above}</span></div>
               <div className="tbl-wrap"><table className="tbl">
-                <thead><tr><th>Tier</th><th>Per action</th><th>Per month</th><th>Scope</th></tr></thead>
+                <thead><tr>{x.cols.map((c) => <th key={c}>{c}</th>)}</tr></thead>
                 <tbody>
-                  <tr><td><span className="tier t1"><b>L1</b><span>DRAFT</span></span></td><td className="mono small muted">CLP 0 · no payments</td><td className="mono small muted">—</td><td className="small">Reminders, quotes</td></tr>
-                  <tr><td><span className="tier t2"><b>L2</b><span>ACT</span></span></td><td>{input("l2Action", "L2 per action")}</td><td>{input("l2Month", "L2 per month")}</td><td className="small">Allowlisted payees · FX ≤ ¥500k</td></tr>
-                  <tr><td><span className="tier t3"><b>L3</b><span>OTP</span></span></td><td>{input("l3Action", "L3 per action")}</td><td>{input("l3Month", "L3 per month")}</td><td className="small">Any, with owner OTP</td></tr>
+                  <tr><td><span className="tier t1"><b>L1</b><span>DRAFT</span></span></td><td className="mono small muted">{x.l1Limit}</td><td className="mono small muted">—</td><td className="small">{x.l1Scope}</td></tr>
+                  <tr><td><span className="tier t2"><b>L2</b><span>ACT</span></span></td><td>{input("l2Action", `L2 ${x.perAction}`)}</td><td>{input("l2Month", `L2 ${x.perMonth}`)}</td><td className="small">{x.l2Scope}</td></tr>
+                  <tr><td><span className="tier t3"><b>L3</b><span>OTP</span></span></td><td>{input("l3Action", `L3 ${x.perAction}`)}</td><td>{input("l3Month", `L3 ${x.perMonth}`)}</td><td className="small">{x.l3Scope}</td></tr>
                 </tbody>
               </table></div>
             </div>
 
             <div className="card">
-              <div className="card-h"><span className="h3">Beneficiary allowlist · {payees.length}</span><button className="btn btn-secondary btn-sm" type="button" onClick={() => notify("Adding a payee is L3: owner OTP + call-back. Available once the bank API is connected.")}>+ Add (L3)</button></div>
+              <div className="card-h"><span className="h3">{x.allow} · {payees.length}</span><button className="btn btn-secondary btn-sm" type="button" onClick={() => notify(x.addToast)}>{x.add}</button></div>
               <div className="tbl-wrap"><table className="tbl">
-                <thead><tr><th>Name</th><th>Bank</th><th>Account</th><th>Ccy</th><th>Added</th><th /></tr></thead>
+                <thead><tr>{x.payCols.map((c) => <th key={c}>{c}</th>)}<th /></tr></thead>
                 <tbody>
                   {payees.map((p) => (
-                    <tr key={p.name}><td>{p.name}</td><td>{p.bank}</td><td className="num">{p.acct}</td><td className="num">{p.ccy}</td><td className="num">{p.added}</td><td className="r"><button className="btn btn-ghost btn-sm" type="button" onClick={() => { setPayees((ps) => ps.filter((x) => x !== p)); notify(`${p.name} removed · agent can no longer pay it`); }}>Remove</button></td></tr>
+                    <tr key={p.name}><td>{p.name}</td><td>{p.bank}</td><td className="num">{p.acct}</td><td className="num">{p.ccy}</td><td className="num">{p.added}</td><td className="r"><button className="btn btn-ghost btn-sm" type="button" onClick={() => { setPayees((ps) => ps.filter((q) => q !== p)); notify(x.removed(p.name)); }}>{x.remove}</button></td></tr>
                   ))}
-                  {payees.length === 0 && <tr><td colSpan={6} className="mono small muted">NO PAYEES → AGENT CAN DRAFT BUT NEVER PAY</td></tr>}
+                  {payees.length === 0 && <tr><td colSpan={6} className="mono small muted">{x.noPayees}</td></tr>}
                 </tbody>
               </table></div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
               <div className="card">
-                <div className="card-h"><span className="h3">Approval channels</span></div>
+                <div className="card-h"><span className="h3">{x.approvalCh}</span></div>
                 <div className="card-b">
-                  <label style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 40 }} className="small"><input type="checkbox" defaultChecked style={{ width: 18, height: 18, accentColor: "var(--accent)" }} />WhatsApp + SMS OTP</label>
-                  <label style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 40 }} className="small"><input type="checkbox" defaultChecked style={{ width: 18, height: 18, accentColor: "var(--accent)" }} />Web + authenticator</label>
-                  <label style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 40 }} className="small muted"><input type="checkbox" disabled style={{ width: 18, height: 18 }} />Voice (blocked by policy)</label>
+                  <label style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 40 }} className="small"><input type="checkbox" defaultChecked style={{ width: 18, height: 18, accentColor: "var(--accent)" }} />{x.waOtp}</label>
+                  <label style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 40 }} className="small"><input type="checkbox" defaultChecked style={{ width: 18, height: 18, accentColor: "var(--accent)" }} />{x.webAuth}</label>
+                  <label style={{ display: "flex", gap: 10, alignItems: "center", minHeight: 40 }} className="small muted"><input type="checkbox" disabled style={{ width: 18, height: 18 }} />{x.voice}</label>
                 </div>
               </div>
               <div className="card">
-                <div className="card-h"><span className="h3">Languages</span></div>
+                <div className="card-h"><span className="h3">{x.languages}</span></div>
                 <div className="card-b">
-                  <div className="field"><label htmlFor="tts-lo">Owner</label><select id="tts-lo" className="input" defaultValue="ES-CL"><option>ES-CL</option><option>EN</option><option>ZH-CN</option></select></div>
-                  <div className="field"><label htmlFor="tts-li">Importers</label><select id="tts-li" className="input" defaultValue="zh"><option value="zh">ZH-CN · formal · 2026年10月09日</option><option value="en">EN</option></select></div>
+                  <div className="field"><label htmlFor="tts-lo">{x.owner}</label><select id="tts-lo" className="input" defaultValue="ES-CL"><option>ES-CL</option><option>EN</option><option>ZH-CN</option></select></div>
+                  <div className="field"><label htmlFor="tts-li">{x.importers}</label><select id="tts-li" className="input" defaultValue="zh"><option value="zh">ZH-CN · formal · 2026年10月09日</option><option value="en">EN</option></select></div>
                 </div>
               </div>
             </div>
@@ -143,17 +186,17 @@ export default function SettingsPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <GuideSettings />
             <div className="card">
-              <div className="card-h"><span className="h3">Connected channels</span></div>
+              <div className="card-h"><span className="h3">{x.connected}</span></div>
               <div className="tbl-wrap"><table className="tbl"><tbody>
-                <tr><td>WhatsApp Business</td><td className="r"><span className="badge ok">Up</span></td></tr>
-                <tr><td>SMS gateway</td><td className="r"><span className="badge ok">Up</span></td></tr>
-                <tr><td>WeCom</td><td className="r"><span className="badge warn">Sim</span></td></tr>
-                <tr><td>LINE · KakaoTalk</td><td className="r"><button className="btn btn-secondary btn-sm" type="button" onClick={() => notify("LINE and KakaoTalk adapters are on the roadmap")}>Connect</button></td></tr>
-                <tr><td>Banco Pacífico API</td><td className="r"><span className="badge crit">Token exp</span></td></tr>
+                <tr><td>WhatsApp Business</td><td className="r"><span className="badge ok">{x.up}</span></td></tr>
+                <tr><td>SMS gateway</td><td className="r"><span className="badge ok">{x.up}</span></td></tr>
+                <tr><td>WeCom</td><td className="r"><span className="badge warn">{x.sim}</span></td></tr>
+                <tr><td>LINE · KakaoTalk</td><td className="r"><button className="btn btn-secondary btn-sm" type="button" onClick={() => notify(x.roadmap)}>{x.connect}</button></td></tr>
+                <tr><td>{x.bankApi}</td><td className="r"><span className="badge acc">{x.bankSandbox}</span></td></tr>
               </tbody></table></div>
             </div>
             <div className="card">
-              <div className="card-h"><span className="h3">policy.diff · {changed.length ? "unsaved" : "clean"}</span></div>
+              <div className="card-h"><span className="h3">{x.diff(changed.length > 0)}</span></div>
               <div className="card-b mono small" style={{ gap: 2, lineHeight: 1.6 }}>
                 {(Object.keys(POLICY_KEY) as LimitKey[]).map((k) =>
                   changed.includes(k) ? (

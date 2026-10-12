@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Topbar } from "@/components/topbar";
-import { SANDBOX_OTP } from "@/lib/desk-state";
+import { SANDBOX_OTP, useDesk, type ApprovalStatus } from "@/lib/desk-state";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { N, RECEIVABLE, S, clpM, longDate, pesos, usd } from "@/lib/scenario";
@@ -30,8 +30,22 @@ const fmt = (s: number) => `00:${String(Math.floor(s)).padStart(2, "0")}`;
 
 type Bubble = { who: "in" | "out"; text: React.ReactNode; t: string; tone?: "crit" | "ok" };
 
-// The owner's WhatsApp thread, in the owner's language (the language of the view).
-function ownerThread(lang: Lang): Bubble[] {
+const REJECTED: Record<Lang, string> = {
+  en: "Plan rejected on the web. I am preparing the next-cheapest option (export factoring) and will ask you again.",
+  es: "Plan rechazado en la web. Estoy preparando la siguiente opción más barata (factoring de exportación) y te vuelvo a preguntar.",
+  zh: "方案已在网页上被拒绝。我正在准备次优方案（出口保理），稍后再请您确认。",
+};
+
+// The owner's WhatsApp thread, in the owner's language, as far as the approval has gone: before the
+// decision it ends at the "why" answer; the code and the execution appear once the plan is approved.
+function ownerThread(lang: Lang, approval: ApprovalStatus): Bubble[] {
+  const all = fullThread(lang);
+  if (approval === "approved") return all;
+  if (approval === "rejected") return [...all.slice(0, 4), { who: "in", t: "10:16", text: REJECTED[lang] }];
+  return all.slice(0, 4);
+}
+
+function fullThread(lang: Lang): Bubble[] {
   const date = longDate(N.crunchDate, lang);
   if (lang === "es") return [
     { who: "in", tone: "crit", t: "10:13", text: <><b className="down">ALERTA</b> Shanghai Hongxin pagará {usd(N.overdueUsd, "es")} con {N.delayDays} días de atraso. Hay {N.pNeg} de probabilidad de quedar sin caja el {date} (sueldos {pesos(N.payroll, "es")}).</> },
@@ -98,6 +112,7 @@ export default function ChannelsPage() {
   const t = useT();
   const lang = useLang();
   const x = TX[lang];
+  const { approval } = useDesk();
   const [picked, setPicked] = useState<Lang | null>(null);
   const tl = picked ?? lang;
   const [pos, setPos] = useState(12);
@@ -137,7 +152,7 @@ export default function ChannelsPage() {
             <div className="phone" data-guide="msg-owner"><div className="phone-screen" style={{ background: "var(--bg)" }} lang={lang === "zh" ? "zh-CN" : lang}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">NanFeng CFO</b><span className="mono small muted" style={{ fontSize: 10 }}>{x.verified}</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
-                {ownerThread(lang).map((b, i) => (
+                {ownerThread(lang, approval).map((b, i) => (
                   <div key={i} className={`bubble ${b.who}`} style={b.tone ? { borderColor: b.tone === "crit" ? "var(--crit)" : "var(--ok)" } : undefined}>{b.text}<span className="t">{b.t}</span></div>
                 ))}
               </div>
@@ -193,7 +208,7 @@ export default function ChannelsPage() {
                 <thead><tr>{x.cols.map((c) => <th key={c}>{c}</th>)}</tr></thead>
                 <tbody>
                   <tr><td className="num">10:20</td><td>WeCom</td><td>{x.to.importer}</td><td className="num">中文</td><td><span className="badge warn">{x.st.simulated}</span></td></tr>
-                  <tr><td className="num">10:16</td><td>SMS</td><td>{x.to.otp}</td><td className="num">—</td><td><span className="badge ok">{x.st.delivered}</span></td></tr>
+                  {approval === "approved" && <tr><td className="num">10:16</td><td>SMS</td><td>{x.to.otp}</td><td className="num">—</td><td><span className="badge ok">{x.st.delivered}</span></td></tr>}
                   <tr><td className="num">10:15</td><td>WhatsApp</td><td>{x.to.owner}</td><td className="num">{ownerLang}</td><td><span className="badge ok">{x.st.read}</span></td></tr>
                   <tr><td className="num">10:13</td><td>{lang === "es" ? "Voz" : lang === "zh" ? "语音" : "Voice"}</td><td>{x.to.owner}</td><td className="num">{ownerLang}</td><td><span className="badge ok">{x.st.played}</span></td></tr>
                   <tr><td className="num">—</td><td>LINE</td><td>—</td><td className="num">—</td><td><span className="badge">{x.st.off}</span></td></tr>
