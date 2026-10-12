@@ -87,16 +87,16 @@ flowchart LR
 
 | Id | Risk | How NanFeng handles it | Status |
 |----|------|------------------------|--------|
-| LLM01 | Prompt injection | Quarantined LLM with typed output, spotlighting, guard, policy outside the LLM | Policy done; rest designed |
+| LLM01 | Prompt injection | Quarantined LLM with typed output, spotlighting, guard, policy outside the LLM | **Done**: guard + quarantine with a random boundary per document (`renato-lenis/nanfeng_agent/quarantine.py`) + policy; 21 attacks through the agent, none moves money |
 | LLM02 | Sensitive information disclosure | PII masking before LLM calls; templated outbound messages | r4-07 |
-| LLM03 | Supply chain | Pinned dependencies, licenses listed, only API models from known providers | Partly (README licenses TBD) |
+| LLM03 | Supply chain | Pinned dependencies, licenses listed, only API models from known providers | **Done**: licenses of every library, font, dataset and service in the root README (r3-08); gitleaks in CI |
 | LLM04 | Data and model poisoning | No fine-tuning; synthetic data only; documents never become instructions | N/A by design |
-| LLM05 | Improper output handling | Schema validation (`extra=forbid`), no LLM text rendered as HTML or run as code | Designed |
-| LLM06 | Excessive agency | Least-privilege tools, no free-form money/contact params, L0–L3 + OTP, kill switch | Policy done |
-| LLM07 | System prompt leakage | No secrets or limits in prompts; limits live in the policy engine | Designed |
+| LLM05 | Improper output handling | Schema validation (`extra=forbid`), no LLM text rendered as HTML or run as code | **Done**: every model output is a Pydantic model with `extra="forbid"` (`quarantine.py`, `ingest.py`, `tools.py`); outbound messages are templates |
+| LLM06 | Excessive agency | Least-privilege tools, no free-form money/contact params, L0–L3 + OTP, kill switch | **Done**: tools take ids from master data only; collections only to the invoice's own customer |
+| LLM07 | System prompt leakage | No secrets or limits in prompts; limits live in the policy engine | **Done**: the planner and extractor prompts hold no keys, limits or contacts (`planner.py`, `quarantine.py`) |
 | LLM08 | Vector and embedding weaknesses | No RAG in scope | N/A |
 | LLM09 | Misinformation | The LLM never computes numbers; every figure carries its `source` tool | Done (Vicente's tools) |
-| LLM10 | Unbounded consumption | Max steps per run, OpenRouter spend caps, velocity limit on actions | Velocity done; rest r2 |
+| LLM10 | Unbounded consumption | Max steps per run, OpenRouter spend caps, velocity limit on actions | **Done**: step cap and LLM spend cap halt the run (`orchestrator.py`), velocity rule in the policy engine |
 
 ## Findings in the current code
 
