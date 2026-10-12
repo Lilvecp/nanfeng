@@ -1,3 +1,5 @@
+import hashlib
+
 from app import guard
 
 M = 1_000_000
@@ -66,11 +68,15 @@ def test_scan_blocks_logs_and_streams(client):
     assert any(e["type"] == "security.attack_blocked" for e in events)
 
 
-def test_scan_clean_document_leaves_no_trace(client):
-    before = len(client.get("/audit/entries").json())
-    r = client.post("/security/scan", json={"doc_id": "DOC-1", "ocr_text": LEGIT_OCR}).json()
-    assert r["verdict"] == "clean" and r["audit_seq"] is None
-    assert len(client.get("/audit/entries").json()) == before
+def test_scan_clean_document_leaves_only_its_fingerprint(client):
+    r = client.post("/security/scan", json={"doc_id": "DOC-1", "source": "email", "ocr_text": LEGIT_OCR}).json()
+    assert r["verdict"] == "clean" and r["audit_seq"]
+    entry = client.get("/audit/entries", params={"kind": "document.received"}).json()[-1]
+    assert entry["seq"] == r["audit_seq"]
+    assert entry["payload"] == {"doc_id": "DOC-1", "source": "email", "text_layer_sha256": None,
+                                "sha256": hashlib.sha256(LEGIT_OCR.encode()).hexdigest()}
+    assert "Cartonera" not in str(entry)  # the text itself never reaches the log
+    assert not any(e["type"] == "document.received" for e in client.get("/agent/events/recent").json())
 
 
 def test_changed_bank_account_is_bec(client):
