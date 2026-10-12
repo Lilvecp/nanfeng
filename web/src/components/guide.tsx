@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { SailMark } from "@/components/logo";
 import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
-import { GUIDE_UI, guideContent, markHelloSeen, markTourSeen, setGuideOn, useGuideOn, useHelloSeen, useTourSeen, type GuideStep } from "@/lib/guide";
+import { GUIDE_UI, guideContent, markHelloSeen, markTourSeen, setGuideOn, snoozeTour, useGuideOn, useHelloSeen, useTourSeen, useTourSnoozed, type GuideStep } from "@/lib/guide";
 import { useLang } from "@/lib/i18n";
 import { usePref } from "@/lib/prefs";
 
@@ -44,7 +44,9 @@ function place(box: Box | null, w: number, h: number) {
 
 const HELLO = "__hello";
 
-function Tour({ steps: pageSteps, hello, onClose }: { steps: GuideStep[]; hello: boolean; onClose: () => void }) {
+type CloseReason = "done" | "skip" | "later";
+
+function Tour({ steps: pageSteps, hello, onClose }: { steps: GuideStep[]; hello: boolean; onClose: (why: CloseReason) => void }) {
   const ui = GUIDE_UI[useLang()];
   // First tour ever: the guide introduces itself in a centred bubble before the screen's steps.
   const steps = hello ? [{ target: HELLO, title: ui.helloTitle, body: ui.helloBody }, ...pageSteps] : pageSteps;
@@ -107,9 +109,9 @@ function Tour({ steps: pageSteps, hello, onClose }: { steps: GuideStep[]; hello:
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onClose("later");
       else if (e.key === "ArrowRight") {
-        if (last) onClose();
+        if (last) onClose("done");
         else go(i + 1);
       }
       else if (e.key === "ArrowLeft" && i > 0) go(i - 1);
@@ -138,10 +140,10 @@ function Tour({ steps: pageSteps, hello, onClose }: { steps: GuideStep[]; hello:
         <p id="guide-body" className="guide-body" aria-live="polite">{step.body}</p>
         {!isHello && <div className="guide-dots" aria-hidden="true">{pageSteps.map((s, k) => <i key={s.target} className={k === n - 1 ? "on" : undefined} />)}</div>}
         <div className="guide-actions">
-          <button className="btn btn-ghost btn-sm" type="button" onClick={onClose}>{isHello ? ui.helloLater : ui.skip}</button>
+          <button className="btn btn-ghost btn-sm" type="button" onClick={() => onClose(isHello ? "later" : "skip")}>{isHello ? ui.helloLater : ui.skip}</button>
           <span style={{ flex: 1 }} />
           {i > 0 && !(hello && i === 1) && <button className="btn btn-secondary btn-sm" type="button" onClick={() => go(i - 1)}>{ui.back}</button>}
-          <button ref={nextBtn} className="btn btn-primary btn-sm" type="button" onClick={() => (last ? onClose() : go(i + 1))}>{isHello ? ui.helloGo : last ? ui.done : ui.next}</button>
+          <button ref={nextBtn} className="btn btn-primary btn-sm" type="button" onClick={() => (last ? onClose("done") : go(i + 1))}>{isHello ? ui.helloGo : last ? ui.done : ui.next}</button>
         </div>
       </div>
     </div>
@@ -153,29 +155,63 @@ export function Guide() {
   const lang = useLang();
   const ui = GUIDE_UI[lang];
   const on = useGuideOn();
-  const seen = useTourSeen(pathname);
-  const helloSeen = useHelloSeen();
   const intro = usePref("intro");
   const view = usePref("view");
-  const { notify } = useDesk();
+  // Home has two views with different parts, so each gets its own tour.
+  const key = pathname === "/cockpit" && view === "detail" ? "/cockpit#detail" : pathname;
+  const seen = useTourSeen(key);
+  const snoozed = useTourSnoozed(key);
+  const helloSeen = useHelloSeen();
+  const { notify, approval, killSwitch, events } = useDesk();
   const { pendingCount } = useCrisisNumbers();
   // Both are tied to the route they were opened on, so moving to another screen closes them.
   const [tourOn, setTourOn] = useState<string | null>(null);
   const [panelOn, setPanelOn] = useState<string | null>(null);
-  const touring = tourOn === pathname;
-  const panel = panelOn === pathname;
-  const setTouring = useCallback((v: boolean) => setTourOn(v ? pathname : null), [pathname]);
+  const touring = tourOn === key;
+  const panel = panelOn === key;
+  const setTouring = useCallback((v: boolean) => setTourOn(v ? key : null), [key]);
   const setPanel = useCallback((v: boolean | ((p: boolean) => boolean)) => {
-    setPanelOn((cur) => ((typeof v === "function" ? v(cur === pathname) : v) ? pathname : null));
-  }, [pathname]);
+    setPanelOn((cur) => ((typeof v === "function" ? v(cur === key) : v) ? key : null));
+  }, [key]);
   const fab = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const page = guideContent(lang)[pathname];
+  const page = guideContent(lang)[key];
   const steps = page?.steps;
   // On Home the owner's welcome card goes first; the tour waits until it is closed.
-  const blocked = pathname === "/cockpit" && (view !== "simple" || intro !== "seen");
-  const autoStart = on === true && !!steps && !seen && !blocked && !NO_GUIDE.has(pathname);
+  const blocked = key === "/cockpit" && intro !== "seen";
+  const autoStart = on === true && !!steps && !seen && !snoozed && !blocked && !NO_GUIDE.has(pathname);
+
+  // Short tips when something worth knowing happens, so the owner knows where to look next.
+  type Tip = { text: string; href?: string; cta?: string };
+  const [tip, setTip] = useState<Tip | null>(null);
+  // Compare with the previous value during render (React's pattern for reacting to a change).
+  const [lastApproval, setLastApproval] = useState(approval);
+  if (approval !== lastApproval) {
+    setLastApproval(approval);
+    if (approval === "approved") setTip({ text: ui.tipApproved, href: "/security", cta: ui.ctaSecurity });
+    else if (approval === "rejected") setTip({ text: ui.tipRejected, href: "/financing", cta: ui.ctaFinancing });
+  }
+  const [lastKill, setLastKill] = useState(killSwitch);
+  if (killSwitch !== lastKill) {
+    setLastKill(killSwitch);
+    if (killSwitch) setTip({ text: ui.tipKill });
+  }
+  // A blocked document reported on the live stream (Andy's guard writes security.* audit entries).
+  // Only recent events count: the stream replays its history when the page connects.
+  const lastEvent = useRef(0);
+  useEffect(() => {
+    const fresh = events.filter((e) => e.id > lastEvent.current && Date.now() - Date.parse(e.ts) < 30_000);
+    lastEvent.current = events.length ? events[events.length - 1].id : lastEvent.current;
+    if (!fresh.some((e) => e.type.startsWith("security.") || String(e.data.kind ?? "").startsWith("security."))) return;
+    const t = setTimeout(() => setTip({ text: ui.tipBlocked, href: "/security", cta: ui.ctaSecurity }), 0);
+    return () => clearTimeout(t);
+  }, [events, ui]);
+  useEffect(() => {
+    if (!tip) return;
+    const t = setTimeout(() => setTip(null), 14000);
+    return () => clearTimeout(t);
+  }, [tip]);
 
   useEffect(() => {
     if (!autoStart) return;
@@ -200,19 +236,34 @@ export function Guide() {
     };
   }, [panel, setPanel]);
 
-  const endTour = useCallback(() => {
+  const endTour = useCallback((why: CloseReason) => {
     setTouring(false);
-    markTourSeen(pathname);
-    markHelloSeen();
+    if (why === "later") {
+      snoozeTour(key); // back on the next visit
+    } else {
+      markTourSeen(key);
+      markHelloSeen();
+    }
     fab.current?.focus({ preventScroll: true });
-  }, [pathname, setTouring]);
+  }, [key, setTouring]);
 
   if (on !== true || NO_GUIDE.has(pathname)) return null;
   const nudge = pendingCount > 0 && pathname !== "/approvals";
 
   return (
     <>
-      {touring && steps && <Tour key={pathname} steps={steps} hello={!helloSeen} onClose={endTour} />}
+      {touring && steps && <Tour key={key} steps={steps} hello={!helloSeen} onClose={endTour} />}
+      {tip && !touring && !panel && (
+        <div className="guide-tip" role="status">
+          <SailMark size={20} />
+          <span className="guide-body">{tip.text}</span>
+          <div className="guide-actions">
+            {tip.href && tip.href !== pathname && <Link className="btn btn-primary btn-sm" href={tip.href} onClick={() => setTip(null)}>{tip.cta}</Link>}
+            <span style={{ flex: 1 }} />
+            <button className="btn btn-ghost btn-sm" type="button" onClick={() => setTip(null)}>{ui.dismiss}</button>
+          </div>
+        </div>
+      )}
       {panel && page && (
         <div ref={panelRef} className="guide-panel" role="dialog" aria-label={ui.name}>
           <div className="guide-panel-h"><SailMark size={22} /><b>{ui.name}</b></div>

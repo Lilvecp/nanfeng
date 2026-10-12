@@ -28,6 +28,8 @@
 
 .guide-panel{position:fixed;right:20px;bottom:84px;z-index:60;width:min(340px,calc(100vw - 32px));background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px rgba(8,16,30,.24);padding:16px;display:flex;flex-direction:column;gap:10px;animation:guide-pop .18s ease}
 .guide-panel-h{display:flex;align-items:center;gap:8px;font-size:14px}
+.guide-tip{position:fixed;right:20px;bottom:84px;z-index:60;width:min(340px,calc(100vw - 32px));background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-left:3px solid var(--accent);border-radius:12px;box-shadow:0 14px 34px rgba(8,16,30,.22);padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start;animation:guide-pop .2s ease}
+.guide-tip .guide-actions{grid-column:1 / -1;margin-top:2px}
 .guide-nudge{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;background:var(--cherry-soft);font-size:13px;font-weight:600;flex-wrap:wrap}
 
 @keyframes guide-ring{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
@@ -40,9 +42,13 @@
   .guide-panel{right:16px;bottom:72px}
 }
 @media (prefers-reduced-motion:reduce){
-  .guide-fab.fresh::after,.guide-avatar.moving,.guide-panel,.guide-bubble.hello .guide-avatar{animation:none}
+  .guide-fab.fresh::after,.guide-avatar.moving,.guide-panel,.guide-tip,.guide-bubble.hello .guide-avatar{animation:none}
   .guide-spot,.guide-bubble,.guide-fab{transition:none}
 }
+
+/* notices (toasts) sit left of the sail button instead of under it */
+body:has(.guide-fab) .toast{right:88px}
+@media (max-width:640px){body:has(.guide-fab) .toast{right:76px;left:16px;max-width:none}}
 
 /* room under the last card so the sail button never covers content */
 .shell .main{padding-bottom:84px}
