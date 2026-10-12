@@ -73,13 +73,13 @@ def scenario(c, outbox: list[str]) -> list[dict]:
     f1 = step("10:20", "Agent proposes factoring half of INV-2026-109 (L3)", c.post("/approvals", json={
         "action": "factoring INV-2026-109", "operations": [
             {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "share": 0.5}}]}, headers=AGENT))
-    step("10:20", "Owner approves; the invoice is registered before the bank pays out",
+    step("10:20", "Owner approves; the invoice's fingerprint is registered before the bank pays out",
          c.post(f"/approvals/{f1['id']}/approve", json={"otp": _code(outbox), "channel": "WA+OTP"}, headers=owner))
     f2 = step("10:21", "Same invoice offered to another lender (double financing)", c.post("/approvals", json={
         "action": "factor INV-2026-109 again elsewhere", "operations": [
             {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "lender_id": "LEN-FINTECH", "share": 0.5}}]},
         headers=AGENT))
-    step("10:21", "Even with the owner's code, the registry refuses it and no money moves",
+    step("10:21", "Even with the owner's code it is refused as already financed; no money moves",
          c.post(f"/approvals/{f2['id']}/approve", json={"otp": _code(outbox), "channel": "WA+OTP"}, headers=owner))
     step("10:32", "Agent tries to split a CLP 30M supplier payment in two",
          c.post("/approvals", json={"action": "pay Cartonera 1/2", "operations": [

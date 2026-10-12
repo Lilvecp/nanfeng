@@ -68,7 +68,7 @@
     "http": 201,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-12T23:07:35.891736Z",
+      "created_at": "2026-10-12T23:07:51.459912Z",
       "decided_at": null,
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
@@ -116,8 +116,8 @@
     "http": 200,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-12T23:07:35.891736",
-      "decided_at": "2026-10-12T23:07:35.912955Z",
+      "created_at": "2026-10-12T23:07:51.459912",
+      "decided_at": "2026-10-12T23:07:51.475934Z",
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
         {
@@ -150,7 +150,7 @@
           "proceeds_clp": 139558272.3,
           "annual_rate": 0.068,
           "audit_seq": 8,
-          "audit_hash": "26d42feaead12f2704fd269b38c55b65cddce9ed13df52fae8492b1fa77471dc"
+          "audit_hash": "56c4dbf397ae8113e66f28a50945c3f88cb06b251908c46ca2e66f5f2c2c6482"
         }
       ]
     }
@@ -161,7 +161,7 @@
     "http": 201,
     "result": {
       "id": "APR-0002",
-      "created_at": "2026-10-12T23:07:35.923021Z",
+      "created_at": "2026-10-12T23:07:51.485535Z",
       "decided_at": null,
       "action": "factoring INV-2026-109",
       "operations": [
@@ -185,12 +185,12 @@
   },
   {
     "time": "10:20",
-    "what": "Owner approves; the invoice is registered before the bank pays out",
+    "what": "Owner approves; the invoice's fingerprint is registered before the bank pays out",
     "http": 200,
     "result": {
       "id": "APR-0002",
-      "created_at": "2026-10-12T23:07:35.923021",
-      "decided_at": "2026-10-12T23:07:35.962440Z",
+      "created_at": "2026-10-12T23:07:51.485535",
+      "decided_at": "2026-10-12T23:07:51.521121Z",
       "action": "factoring INV-2026-109",
       "operations": [
         {
@@ -228,7 +228,7 @@
             "explorer_url": null
           },
           "audit_seq": 13,
-          "audit_hash": "e37f4e5ebda6ed1bf46c9115b997b204386efcbfa1732fb1afb215e2da4ec58c"
+          "audit_hash": "bbf83787ba2786cf6c08f6935c8edb87f4146bb1bb34da379b0abf355675b039"
         }
       ]
     }
@@ -239,7 +239,7 @@
     "http": 201,
     "result": {
       "id": "APR-0003",
-      "created_at": "2026-10-12T23:07:35.969984Z",
+      "created_at": "2026-10-12T23:07:51.529027Z",
       "decided_at": null,
       "action": "factor INV-2026-109 again elsewhere",
       "operations": [
@@ -264,12 +264,12 @@
   },
   {
     "time": "10:21",
-    "what": "Even with the owner's code, the registry refuses it and no money moves",
+    "what": "Even with the owner's code it is refused as already financed; no money moves",
     "http": 200,
     "result": {
       "id": "APR-0003",
-      "created_at": "2026-10-12T23:07:35.969984",
-      "decided_at": "2026-10-12T23:07:35.977558Z",
+      "created_at": "2026-10-12T23:07:51.529027",
+      "decided_at": "2026-10-12T23:07:51.538564Z",
       "action": "factor INV-2026-109 again elsewhere",
       "operations": [
         {
@@ -297,8 +297,8 @@
     "http": 201,
     "result": {
       "id": "AUT-0004",
-      "created_at": "2026-10-12T23:07:35.983552Z",
-      "decided_at": "2026-10-12T23:07:35.985776Z",
+      "created_at": "2026-10-12T23:07:51.546296Z",
+      "decided_at": "2026-10-12T23:07:51.549878Z",
       "action": "pay Cartonera 1/2",
       "operations": [
         {
@@ -327,7 +327,7 @@
           "amount_clp": 15000000.0,
           "reference": "",
           "audit_seq": 19,
-          "audit_hash": "0a3ab80a98da0e65d3062a8ebfed2034dba3061ec78d090ade951d4c24f98f85"
+          "audit_hash": "30149eadcf436335a75cb6a8d32ac4c08c842175fe0ebe34b624a85685a4d261"
         }
       ]
     }
@@ -338,7 +338,7 @@
     "http": 201,
     "result": {
       "id": "APR-0005",
-      "created_at": "2026-10-12T23:07:35.990627Z",
+      "created_at": "2026-10-12T23:07:51.557122Z",
       "decided_at": null,
       "action": "pay Cartonera 2/2",
       "operations": [
@@ -393,10 +393,10 @@
     "http": 201,
     "result": {
       "id": 3,
-      "created_at": "2026-10-12T23:07:36.002432Z",
+      "created_at": "2026-10-12T23:07:51.574725Z",
       "from_seq": 15,
       "to_seq": 23,
-      "merkle_root": "ff3c1b3777b350e16c902b2633ec517506747f0122abe5136fa3403adcb14481",
+      "merkle_root": "e66969d52ccd613fa85f948009183b6a223fa3eebc7ff91fe0f4a09098bc6d95",
       "backend": "local",
       "tx_hash": null,
       "explorer_url": null
