@@ -74,7 +74,7 @@ def scenario(c, outbox: list[str]) -> list[dict]:
     step("10:35", "Agent tries to turn the kill switch back off", c.post("/policy/kill-switch", json={"on": False},
                                                                         headers=AGENT))
     step("10:35", "Anonymous caller tries to turn it off", c.post("/policy/kill-switch", json={"on": False}))
-    step("10:40", "Anchor everything still pending", c.post("/audit/anchor"))
+    step("10:40", "Agent anchors everything still pending", c.post("/audit/anchor", headers=AGENT))
     return steps
 
 

@@ -1,7 +1,7 @@
 [
   {
     "seq": 1,
-    "ts": "2026-10-12T22:52:23.059+00:00",
+    "ts": "2026-10-12T22:56:44.253+00:00",
     "actor": "system",
     "kind": "sandbox.seeded",
     "payload": {
@@ -20,11 +20,11 @@
       "synthetic": true
     },
     "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-    "hash": "46c4a4c7e23b06e6e39fa4ed84f12fd3fee1ed597b87802d02e7e5cf72b5bdab"
+    "hash": "dcb778fddba6e5b2ada2069a1c1139aaba76eedfd7dfb62112f4235445e84a36"
   },
   {
     "seq": 2,
-    "ts": "2026-10-12T22:52:23.067+00:00",
+    "ts": "2026-10-12T22:56:44.262+00:00",
     "actor": "security",
     "kind": "security.attack_blocked",
     "payload": {
@@ -43,12 +43,12 @@
       "source": "email",
       "verdict": "malicious"
     },
-    "prev_hash": "46c4a4c7e23b06e6e39fa4ed84f12fd3fee1ed597b87802d02e7e5cf72b5bdab",
-    "hash": "567d432351a8f0e8e4abf2fbf2854853daa7754a88e7c3759344078ed2127c13"
+    "prev_hash": "dcb778fddba6e5b2ada2069a1c1139aaba76eedfd7dfb62112f4235445e84a36",
+    "hash": "47436ad4dc6b1dd6ff819c6fa16e76911b23cf5f25d73c46c585c975560c721d"
   },
   {
     "seq": 3,
-    "ts": "2026-10-12T22:52:23.070+00:00",
+    "ts": "2026-10-12T22:56:44.264+00:00",
     "actor": "security",
     "kind": "security.attack_blocked",
     "payload": {
@@ -73,12 +73,12 @@
         "call": "+56229876543"
       }
     },
-    "prev_hash": "567d432351a8f0e8e4abf2fbf2854853daa7754a88e7c3759344078ed2127c13",
-    "hash": "5350f654bf87860063d850d3bdb64216f1baca9f314d050fe08f3a60fc11e7f2"
+    "prev_hash": "47436ad4dc6b1dd6ff819c6fa16e76911b23cf5f25d73c46c585c975560c721d",
+    "hash": "6e5f8d74aae48206fbd2db8b8c6324f37d307c0e22382c6c0fc90ee2a13aafca"
   },
   {
     "seq": 4,
-    "ts": "2026-10-12T22:52:23.071+00:00",
+    "ts": "2026-10-12T22:56:44.266+00:00",
     "actor": "security",
     "kind": "document.received",
     "payload": {
@@ -87,12 +87,12 @@
       "source": "email",
       "text_layer_sha256": null
     },
-    "prev_hash": "5350f654bf87860063d850d3bdb64216f1baca9f314d050fe08f3a60fc11e7f2",
-    "hash": "a11e7a654dcab90effd28b54c2010f090e197ad4be9d7d0979e12932d7cca9fc"
+    "prev_hash": "6e5f8d74aae48206fbd2db8b8c6324f37d307c0e22382c6c0fc90ee2a13aafca",
+    "hash": "6fde09b0e9a257581de4a3f52a84f82c649f2bee1bcb14525b0748e2b798aa90"
   },
   {
     "seq": 5,
-    "ts": "2026-10-12T22:52:23.075+00:00",
+    "ts": "2026-10-12T22:56:44.270+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -107,38 +107,38 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "a11e7a654dcab90effd28b54c2010f090e197ad4be9d7d0979e12932d7cca9fc",
-    "hash": "515f27293d75ebb8b25d7536d82f1999467315c818a0c0cf745836cdaf0e6ee5"
+    "prev_hash": "6fde09b0e9a257581de4a3f52a84f82c649f2bee1bcb14525b0748e2b798aa90",
+    "hash": "484fbd9255b8d191fb2d6946259cb6986868d62444228795c2b162b6ebf26bed"
   },
   {
     "seq": 6,
-    "ts": "2026-10-12T22:52:23.077+00:00",
+    "ts": "2026-10-12T22:56:44.271+00:00",
     "actor": "security",
     "kind": "approval.otp_sent",
     "payload": {
       "approval_id": "APR-0001",
       "delivery_id": "msg_3",
-      "expires_at": "2026-10-12T22:57:23.076094+00:00",
+      "expires_at": "2026-10-12T23:01:44.270603+00:00",
       "mode": "sms",
       "sent_to": "+569 •••• 2222"
     },
-    "prev_hash": "515f27293d75ebb8b25d7536d82f1999467315c818a0c0cf745836cdaf0e6ee5",
-    "hash": "55492e9c20b7a39a25fe06d13bee1baafb392dcc5ae376dd58042786f9ea2f5d"
+    "prev_hash": "484fbd9255b8d191fb2d6946259cb6986868d62444228795c2b162b6ebf26bed",
+    "hash": "5d1c5cb29589d9a32ab1085738b691572c243cfbed04ad7d51a9f12e3c78e38c"
   },
   {
     "seq": 7,
-    "ts": "2026-10-12T22:52:23.079+00:00",
+    "ts": "2026-10-12T22:56:44.274+00:00",
     "actor": "owner",
     "kind": "auth.login",
     "payload": {
-      "expires_at": 1791874343
+      "expires_at": 1791874604
     },
-    "prev_hash": "55492e9c20b7a39a25fe06d13bee1baafb392dcc5ae376dd58042786f9ea2f5d",
-    "hash": "466629ddfed20f11b6e215d61d6820f6d39710bfbbf92cc44c5ccc62ee51614e"
+    "prev_hash": "5d1c5cb29589d9a32ab1085738b691572c243cfbed04ad7d51a9f12e3c78e38c",
+    "hash": "f986cffa5f59c73a2b9e9a98a0e7b89e6facc3396b7f9c8e69756bbe3ccd6bdd"
   },
   {
     "seq": 8,
-    "ts": "2026-10-12T22:52:23.083+00:00",
+    "ts": "2026-10-12T22:56:44.277+00:00",
     "actor": "owner",
     "kind": "bank.loan",
     "payload": {
@@ -154,28 +154,28 @@
       "term_days": 60,
       "transaction_id": 1
     },
-    "prev_hash": "466629ddfed20f11b6e215d61d6820f6d39710bfbbf92cc44c5ccc62ee51614e",
-    "hash": "6aa1d02fa8731b44b912230bb931271ee19a77f636e97428fbba985f6d33236a"
+    "prev_hash": "f986cffa5f59c73a2b9e9a98a0e7b89e6facc3396b7f9c8e69756bbe3ccd6bdd",
+    "hash": "10fe6622fa6c3c9c3f8b36a9dbca459006a4a7dee54f84f6a9d5eb71ecfca1ce"
   },
   {
     "seq": 9,
-    "ts": "2026-10-12T22:52:23.083+00:00",
+    "ts": "2026-10-12T22:56:44.278+00:00",
     "actor": "owner",
     "kind": "approval.approved",
     "payload": {
       "approval_id": "APR-0001",
       "channel": "WA+OTP",
       "result_hashes": [
-        "6aa1d02fa8731b44b912230bb931271ee19a77f636e97428fbba985f6d33236a"
+        "10fe6622fa6c3c9c3f8b36a9dbca459006a4a7dee54f84f6a9d5eb71ecfca1ce"
       ],
       "status": "approved"
     },
-    "prev_hash": "6aa1d02fa8731b44b912230bb931271ee19a77f636e97428fbba985f6d33236a",
-    "hash": "754f59b9f5e91d0979968dc8cdb4495da71da8c11397b72d8bb856e8a5d23c5f"
+    "prev_hash": "10fe6622fa6c3c9c3f8b36a9dbca459006a4a7dee54f84f6a9d5eb71ecfca1ce",
+    "hash": "8f5a7726fc2a91f16dc3da1e749f458fbebe269a4513bf3aa295d6ca6d5fff34"
   },
   {
     "seq": 10,
-    "ts": "2026-10-12T22:52:23.085+00:00",
+    "ts": "2026-10-12T22:56:44.280+00:00",
     "actor": "system",
     "kind": "audit.anchored",
     "payload": {
@@ -183,16 +183,16 @@
       "backend": "local",
       "explorer_url": null,
       "from_seq": 1,
-      "merkle_root": "f95c756d1fd2ab444728fe1a3a27343b1d45b3d39078f450bea2cf69489b2ec0",
+      "merkle_root": "308d188873ce08e7515351067b6140e243ddd07409e58e4184c0fce9e71f7577",
       "to_seq": 9,
       "tx_hash": null
     },
-    "prev_hash": "754f59b9f5e91d0979968dc8cdb4495da71da8c11397b72d8bb856e8a5d23c5f",
-    "hash": "07eb9a671e2891f713e32b5b4f143a60409fd218452a22da3940bdb6fbbb6b0c"
+    "prev_hash": "8f5a7726fc2a91f16dc3da1e749f458fbebe269a4513bf3aa295d6ca6d5fff34",
+    "hash": "edcb48bc6466d778a49a32a37460666d8aadcacbab510f325f373d6c32e6a308"
   },
   {
     "seq": 11,
-    "ts": "2026-10-12T22:52:23.088+00:00",
+    "ts": "2026-10-12T22:56:44.283+00:00",
     "actor": "agent",
     "kind": "bank.payment",
     "payload": {
@@ -205,12 +205,12 @@
       "reference": "",
       "transaction_id": 2
     },
-    "prev_hash": "07eb9a671e2891f713e32b5b4f143a60409fd218452a22da3940bdb6fbbb6b0c",
-    "hash": "add83fd2135e1452d72217bc0ca03777923ef59bb751cdd7109cffa765a279ea"
+    "prev_hash": "edcb48bc6466d778a49a32a37460666d8aadcacbab510f325f373d6c32e6a308",
+    "hash": "87f9aa0bdf17a0f1a710a4d6222d522277a60c353c6d79f5038942a248fc5356"
   },
   {
     "seq": 12,
-    "ts": "2026-10-12T22:52:23.089+00:00",
+    "ts": "2026-10-12T22:56:44.284+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -225,12 +225,12 @@
       "status": "auto",
       "tier": 2
     },
-    "prev_hash": "add83fd2135e1452d72217bc0ca03777923ef59bb751cdd7109cffa765a279ea",
-    "hash": "3ca17327defc98e203db7ed2a81b12836467d367e3738657da7d4af37e3a16af"
+    "prev_hash": "87f9aa0bdf17a0f1a710a4d6222d522277a60c353c6d79f5038942a248fc5356",
+    "hash": "647d54f2cd09c9e8de5c57d6114a51d7f67f3375439ea498e655b7065da0a0fe"
   },
   {
     "seq": 13,
-    "ts": "2026-10-12T22:52:23.091+00:00",
+    "ts": "2026-10-12T22:56:44.286+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -245,38 +245,38 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "3ca17327defc98e203db7ed2a81b12836467d367e3738657da7d4af37e3a16af",
-    "hash": "1789c2920c4be1f06793a53422ce61670718e7ae5b64f2f34d62c0b3178d4fff"
+    "prev_hash": "647d54f2cd09c9e8de5c57d6114a51d7f67f3375439ea498e655b7065da0a0fe",
+    "hash": "98fb68223004d50f1fe0006b8891570a8b4a883ed5a10866bf4a9d94d144311f"
   },
   {
     "seq": 14,
-    "ts": "2026-10-12T22:52:23.092+00:00",
+    "ts": "2026-10-12T22:56:44.287+00:00",
     "actor": "security",
     "kind": "approval.otp_sent",
     "payload": {
       "approval_id": "APR-0003",
       "delivery_id": "msg_4",
-      "expires_at": "2026-10-12T22:57:23.092173+00:00",
+      "expires_at": "2026-10-12T23:01:44.287366+00:00",
       "mode": "sms",
       "sent_to": "+569 •••• 2222"
     },
-    "prev_hash": "1789c2920c4be1f06793a53422ce61670718e7ae5b64f2f34d62c0b3178d4fff",
-    "hash": "deccb3a736791628b27a2d2551e26293e64fd0f41a7b2073cf5ac9c691621c5f"
+    "prev_hash": "98fb68223004d50f1fe0006b8891570a8b4a883ed5a10866bf4a9d94d144311f",
+    "hash": "1e0dfac77633424f37e2da02444026c34da99ee7ff9cbec86be0056f9ef0de69"
   },
   {
     "seq": 15,
-    "ts": "2026-10-12T22:52:23.094+00:00",
+    "ts": "2026-10-12T22:56:44.289+00:00",
     "actor": "owner",
     "kind": "policy.kill_switch",
     "payload": {
       "on": true
     },
-    "prev_hash": "deccb3a736791628b27a2d2551e26293e64fd0f41a7b2073cf5ac9c691621c5f",
-    "hash": "afcf3512e94033492ea54be21c800d442c9515b4fd2b957ac82c5464e4f13689"
+    "prev_hash": "1e0dfac77633424f37e2da02444026c34da99ee7ff9cbec86be0056f9ef0de69",
+    "hash": "cd4903155ecb7699dee07218b9587e1ef0e2fcfc3f4cec9c8b5f1d08f5ccf543"
   },
   {
     "seq": 16,
-    "ts": "2026-10-12T22:52:23.097+00:00",
+    "ts": "2026-10-12T22:56:44.292+00:00",
     "actor": "system",
     "kind": "audit.anchored",
     "payload": {
@@ -284,11 +284,11 @@
       "backend": "local",
       "explorer_url": null,
       "from_seq": 10,
-      "merkle_root": "145f5a7eb865116492bd0ea99ffd5069e4b6e67fa97ce90310f4ac79c2e5eab1",
+      "merkle_root": "9c5b9872f0d11774b614f3766e7cc44db1810129c39d1a87e403691fae789fd6",
       "to_seq": 15,
       "tx_hash": null
     },
-    "prev_hash": "afcf3512e94033492ea54be21c800d442c9515b4fd2b957ac82c5464e4f13689",
-    "hash": "88c3e6796eabbbd9b6475c1d22d8b8e820eb2cd3744d1ea0576074756a11d0e5"
+    "prev_hash": "cd4903155ecb7699dee07218b9587e1ef0e2fcfc3f4cec9c8b5f1d08f5ccf543",
+    "hash": "7bf2afaa931a09816f77ca1e69d03c3e2b1f328f9365f08cd52e90502f0a19aa"
   }
 ]

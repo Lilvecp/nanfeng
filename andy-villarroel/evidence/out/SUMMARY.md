@@ -4,8 +4,8 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 
 - Audit entries: **16**, hash chain valid: **True**
 - Anchors: **2** (local)
-  - seq 1–9 root `f95c756d1fd2ab44…`
-  - seq 10–15 root `145f5a7eb8651164…`
+  - seq 1–9 root `308d188873ce08e7…`
+  - seq 10–15 root `9c5b9872f0d11774…`
 - Merkle inclusion proofs for 3 key entries (approvals executed, attacks blocked): `proofs.json`
 
 ## Audit entries by kind
@@ -45,4 +45,4 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 | 10:35 | Owner stops the agent (kill switch on) | 200 | kill switch on=True |
 | 10:35 | Agent tries to turn the kill switch back off | 403 | Only the owner can turn the kill switch off |
 | 10:35 | Anonymous caller tries to turn it off | 401 | owner_login_required |
-| 10:40 | Anchor everything still pending | 201 | 145f5a7eb865116492bd0ea99ffd5069e4b6e67fa97ce90310f4ac79c2e5 |
+| 10:40 | Agent anchors everything still pending | 201 | 9c5b9872f0d11774b614f3766e7cc44db1810129c39d1a87e403691fae78 |
