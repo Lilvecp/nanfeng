@@ -11,6 +11,7 @@ from ..events import broker
 from ..models import Anchor, AuditEntry
 from ..schemas import AnchorOut, AuditAppendIn, AuditEntryOut
 from ..security import require_agent
+from .approvals import require_agent_or_owner
 
 router = APIRouter(prefix="/audit", tags=["audit"])
 
@@ -46,7 +47,9 @@ def anchors(db: Session = Depends(get_db)):
 
 @router.post("/anchor", response_model=AnchorOut, status_code=201,
              summary="Anchor the Merkle root of every entry since the last anchor")
-def anchor(db: Session = Depends(get_db)):
+def anchor(db: Session = Depends(get_db), _: str = Depends(require_agent_or_owner)):
+    """Agent or signed-in owner only: each anchor writes an `audit.anchored` entry, so an open route let
+    anyone send unlimited transactions from the anchoring wallet."""
     try:
         a = anchoring.anchor_pending(db)
     except anchoring.AnchorError as exc:

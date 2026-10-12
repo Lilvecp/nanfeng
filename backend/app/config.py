@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # Shown on the sign-in screen of demo builds so the jury can try the app. A real deploy sets its
 # own NANFENG_OWNER_PASSWORD and NANFENG_DEMO=false (startup refuses the demo password then).
 DEMO_OWNER_PASSWORD = "huerto-demo-2026"
+PLACEHOLDER_AGENT_TOKEN = "change-me"  # what .env.example ships; refused at startup (threat model F6)
 
 
 class Settings(BaseSettings):
@@ -32,6 +33,8 @@ class Settings(BaseSettings):
     zavu_url: str = "https://api.zavu.dev/v1/messages"
     # Token the agent (Renato) uses to publish events and create approvals. Empty = open (local dev).
     agent_token: str = ""
+    # Development only: with no agent token, accept any caller as the agent (threat model F6).
+    allow_open_agent: bool = False
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3100"]
     # "local" records the Merkle root in the DB only; "evm" sends it to an EVM testnet (r3-05).
     anchor_backend: str = "local"

@@ -4,6 +4,7 @@ import tempfile
 _db = os.path.join(tempfile.mkdtemp(), "test.db")
 os.environ["NANFENG_DATABASE_URL"] = f"sqlite:///{_db}"
 os.environ["NANFENG_AGENT_TOKEN"] = ""
+os.environ["NANFENG_ALLOW_OPEN_AGENT"] = "true"  # most tests call agent routes without a token
 os.environ["NANFENG_ANCHOR_BACKEND"] = "local"  # a developer .env must not reach the tests
 os.environ["NANFENG_QUANT_URL"] = "http://127.0.0.1:9"  # nothing listens: proxy must answer 503
 os.environ["NANFENG_OWNER_PASSWORD"] = "test-owner-password"

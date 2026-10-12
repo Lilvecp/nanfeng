@@ -1088,7 +1088,20 @@
           "audit"
         ],
         "summary": "Anchor the Merkle root of every entry since the last anchor",
+        "description": "Agent or signed-in owner only: each anchor writes an `audit.anchored` entry, so an open route let\nanyone send unlimited transactions from the anchoring wallet.",
         "operationId": "anchor_audit_anchor_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Successful Response",
@@ -1096,6 +1109,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AnchorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
