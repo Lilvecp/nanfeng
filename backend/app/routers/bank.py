@@ -1,12 +1,13 @@
 """Read side of the Sandbox Bank. Money only moves through /approvals, behind the policy check."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from .. import bank, seed
+from .. import auth, bank, seed
 from ..audit import canonical
+from ..config import get_settings
 from ..db import get_db
 from ..events import broker
 from ..models import AuditEntry, Lender, Payee, Receivable, Transaction
@@ -61,8 +62,11 @@ def export_logs(db: Session = Depends(get_db)):
                              headers={"Content-Disposition": "attachment; filename=sandbox-bank-log.jsonl"})
 
 
-@router.post("/reset", summary="Demo Mode: wipe and reseed the sandbox")
+@router.post("/reset", summary="Demo Mode: wipe and reseed the sandbox (owner, demo builds only)",
+             dependencies=[Depends(auth.require_owner)])
 def reset(db: Session = Depends(get_db)):
+    if not get_settings().demo:
+        raise HTTPException(404, "Not available outside demo builds")
     seed.reset(db)
     broker.publish("sandbox.reset", {})
     return {"reset": True}

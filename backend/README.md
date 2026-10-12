@@ -39,6 +39,15 @@ python -c "import json; from nanfeng_quant.tools import sandbox_seed; json.dump(
 
 Then reset the sandbox (`POST /bank/reset`, or delete `nanfeng.db` locally).
 
+## Owner sign-in (threat model F1)
+
+Approve, reject, resend a code, the kill switch and `POST /bank/reset` are owner-only. The owner signs in with `POST /auth/login {password}` and sends `Authorization: Bearer <token>` (an HMAC-signed session, 8 h, ended by `POST /auth/logout`). Failed sign-ins are rate limited (5 per 5 min per client). The agent token is never accepted as the owner (403).
+
+- Kill switch: the owner or the agent may turn it **on**; turning it **off** needs the owner's session **and** a one-time code (`otp`; in SMS mode ask for one with `POST /policy/kill-switch/otp`). It is stored in the database (`app_state`), so a restart, a deploy or a sleeping host never turns it off.
+- `POST /bank/reset` exists only with `NANFENG_DEMO=true`.
+- Demo builds use the public password `huerto-demo-2026` and show it on the sign-in screen (`GET /auth/config`). With `NANFENG_DEMO=false` the backend refuses to start on that password.
+- Reads (`/bank/*`, `/audit/*`, `/approvals` GET, the SSE stream) stay public for now (F11).
+
 ## How money moves
 
 Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations, e.g. factoring + forward):
@@ -103,5 +112,5 @@ Non-clean verdicts are hash-chained (`security.flagged`, `security.attack_blocke
 ## Not done yet
 
 - FISCO BCOS backend (Sepolia works today). The on-chain invoice registry (r3-06) is still off-chain only (`financed_by`).
-- Single instance: SSE history, plan jobs and the kill switch live in memory.
+- Single instance: SSE history and plan jobs live in memory (the kill switch is in the database).
 - `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.

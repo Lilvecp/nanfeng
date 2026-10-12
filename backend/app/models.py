@@ -135,3 +135,13 @@ class PayeeAccount(Base):
     bank_account: Mapped[str] = mapped_column(String(64))
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     source: Mapped[str] = mapped_column(String(64), default="")  # seed | owner-approved:<approval id>
+
+
+class AppState(Base):
+    """Small durable flags that must survive restarts and be shared by every backend instance
+    (the kill switch: an in-memory flag reset itself to "off" on every restart or deploy)."""
+
+    __tablename__ = "app_state"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[dict] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)

@@ -35,10 +35,21 @@ def attack(id_: str, category: str, name: str):
 
 
 class Ctx:
-    def __init__(self, client, outbox: list[str], agent_token: str):
+    def __init__(self, client, outbox: list[str], agent_token: str, owner_password: str = ""):
         self.c = client
         self.outbox = outbox
         self.agent = {"Authorization": f"Bearer {agent_token}"}
+        self._owner_password = owner_password
+        self._owner: dict | None = None
+
+    @property
+    def owner(self) -> dict:
+        """The signed-in owner's headers (threat model F1). A backend without owner sign-in gives {},
+        so the "before" run behaves exactly as it did."""
+        if self._owner is None:
+            r = self.c.post("/auth/login", json={"password": self._owner_password})
+            self._owner = {"Authorization": f"Bearer {r.json()['token']}"} if r.status_code == 200 else {}
+        return self._owner
 
     # --- the agent (holds the agent token) ---
     def propose(self, ops: list[dict], action: str = "agent action") -> dict:
@@ -65,7 +76,8 @@ class Ctx:
         return SANDBOX_OTP
 
     def owner_approve(self, approval_id: str, channel: str = "WEB+OTP"):
-        return self.c.post(f"/approvals/{approval_id}/approve", json={"otp": self.owner_code(), "channel": channel})
+        return self.c.post(f"/approvals/{approval_id}/approve", json={"otp": self.owner_code(), "channel": channel},
+                           headers=self.owner)
 
 
 def _doc_stopped(ctx: Ctx, ocr: str, layer: str | None = None, source: str = "email"):
@@ -280,7 +292,7 @@ def _(c):
 
 @attack("TM-05", TM, "Agent re-arms itself after the kill switch")
 def _(c):
-    c.c.post("/policy/kill-switch", json={"on": True})
+    c.c.post("/policy/kill-switch", json={"on": True}, headers=c.owner)
     r = c.c.post("/policy/kill-switch", json={"on": False}, headers=c.agent)
     on = c.c.get("/policy/kill-switch").json()["on"]
     return on, f"agent turn-off -> HTTP {r.status_code}, kill switch on={on}"
@@ -367,8 +379,8 @@ def _(c):
 
 @attack("API-02", API, "Anonymous caller turns the kill switch off")
 def _(c):
-    c.c.post("/policy/kill-switch", json={"on": True})
-    c.c.post("/policy/kill-switch", json={"on": False})
+    c.c.post("/policy/kill-switch", json={"on": True}, headers=c.owner)  # the owner stops the agent
+    c.c.post("/policy/kill-switch", json={"on": False})  # a stranger tries to re-arm it
     on = c.c.get("/policy/kill-switch").json()["on"]
     return on, f"kill switch on={on}"
 

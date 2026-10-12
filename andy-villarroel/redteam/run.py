@@ -14,6 +14,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 AGENT_TOKEN = "redteam-agent-token"
+OWNER_PASSWORD = "redteam-owner-password"
 
 
 def main() -> None:
@@ -31,6 +32,7 @@ def main() -> None:
     os.environ.update({
         "NANFENG_DATABASE_URL": f"sqlite:///{work / 'redteam.db'}",
         "NANFENG_AGENT_TOKEN": AGENT_TOKEN,
+        "NANFENG_OWNER_PASSWORD": OWNER_PASSWORD,
         "NANFENG_ANCHOR_BACKEND": "local",
         "NANFENG_QUANT_URL": "http://127.0.0.1:9",
         "NANFENG_OTP_MODE": args.otp_mode,
@@ -61,10 +63,11 @@ def main() -> None:
         for atk in attacks.ATTACKS:
             with SessionLocal() as db:
                 seed.reset(db)
-            approvals._kill_switch["on"] = False
+            if hasattr(approvals, "_kill_switch"):  # older backends kept it in memory; newer ones in the DB
+                approvals._kill_switch["on"] = False  # (cleared by seed.reset)
             outbox.clear()
             try:
-                stopped, evidence = atk.fn(attacks.Ctx(client, outbox, AGENT_TOKEN))
+                stopped, evidence = atk.fn(attacks.Ctx(client, outbox, AGENT_TOKEN, OWNER_PASSWORD))
             except Exception as exc:  # an attack that crashes the harness is reported, never hidden
                 stopped, evidence = False, f"harness error: {exc.__class__.__name__}: {exc}"
             results.append({"id": atk.id, "category": atk.category, "name": atk.name,

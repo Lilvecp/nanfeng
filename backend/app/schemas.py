@@ -100,6 +100,12 @@ class RejectIn(BaseModel):
 
 class KillSwitchIn(BaseModel):
     on: bool
+    # Turning it off is L3: the owner's session plus a one-time code (threat model F1).
+    otp: str | None = Field(default=None, pattern=r"^\d{6}$")
+
+
+class LoginIn(BaseModel):
+    password: str = Field(min_length=1, max_length=200)
 
 
 class AuditEntryOut(ORM):

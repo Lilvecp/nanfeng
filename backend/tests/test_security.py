@@ -154,7 +154,9 @@ def test_agent_can_stop_itself_but_not_rearm(client, monkeypatch):
     agent = {"Authorization": "Bearer agent-secret"}
     assert client.post("/policy/kill-switch", json={"on": True}, headers=agent).json() == {"on": True}
     assert client.post("/policy/kill-switch", json={"on": False}, headers=agent).status_code == 403
-    assert client.post("/policy/kill-switch", json={"on": False}).json() == {"on": False}
+    # the owner re-arms with a session and a one-time code (L3, threat model F1)
+    assert client.post("/policy/kill-switch", json={"on": False}).status_code == 400
+    assert client.post("/policy/kill-switch", json={"on": False, "otp": "482913"}).json() == {"on": False}
 
 
 def test_exfiltration_instruction_is_caught():

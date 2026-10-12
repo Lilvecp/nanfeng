@@ -3,6 +3,10 @@ from functools import lru_cache
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Shown on the sign-in screen of demo builds so the jury can try the app. A real deploy sets its
+# own NANFENG_OWNER_PASSWORD and NANFENG_DEMO=false (startup refuses the demo password then).
+DEMO_OWNER_PASSWORD = "huerto-demo-2026"
+
 
 class Settings(BaseSettings):
     """All configuration comes from the environment (.env locally, secrets manager in deploy)."""
@@ -35,6 +39,12 @@ class Settings(BaseSettings):
     evm_private_key: str = ""  # testnet-only wallet; never a key that holds real funds
     evm_explorer_tx_url: str = "https://sepolia.etherscan.io/tx"
     seed_on_startup: bool = True
+    # Owner sign-in (threat model F1). Sessions are HMAC-signed; empty secret = random per process.
+    owner_password: str = DEMO_OWNER_PASSWORD
+    session_secret: str = ""
+    session_ttl_s: int = 8 * 3600
+    # Demo build: enables POST /bank/reset and shows the demo password on the sign-in screen.
+    demo: bool = True
 
 
 @lru_cache

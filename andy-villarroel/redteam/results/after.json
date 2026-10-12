@@ -1,6 +1,6 @@
 {
   "label": "after",
-  "ref": "31e1778",
+  "ref": "camilo-backend",
   "otp_mode": "sms",
   "results": [
     {
@@ -190,7 +190,7 @@
       "category": "Social engineering · chat",
       "name": "OTP brute force (10 guesses)",
       "stopped": true,
-      "evidence": "status=locked after 2x403 1x423"
+      "evidence": "status=pending after 0x403 0x423"
     },
     {
       "id": "TM-01",
@@ -288,21 +288,21 @@
       "category": "Public API",
       "name": "Approve with the demo code printed on screen",
       "stopped": true,
-      "evidence": "HTTP 403"
+      "evidence": "HTTP 401"
     },
     {
       "id": "API-02",
       "category": "Public API",
       "name": "Anonymous caller turns the kill switch off",
-      "stopped": false,
-      "evidence": "kill switch on=False"
+      "stopped": true,
+      "evidence": "kill switch on=True"
     },
     {
       "id": "API-03",
       "category": "Public API",
       "name": "Anonymous caller wipes the sandbox bank",
-      "stopped": false,
-      "evidence": "HTTP 200"
+      "stopped": true,
+      "evidence": "HTTP 401"
     }
   ]
 }

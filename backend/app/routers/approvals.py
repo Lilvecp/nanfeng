@@ -5,17 +5,16 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .. import anchoring, audit, bank, bec, otp, policy, sanctions
+from .. import anchoring, audit, auth, bank, bec, otp, policy, sanctions, state
 from ..config import get_settings
 from ..db import get_db
 from ..events import broker
 from ..models import Approval, utcnow
 from ..schemas import ApprovalCreate, ApprovalOut, ApproveIn, KillSwitchIn, RejectIn
-from ..security import is_agent, reject_agent, require_agent
+from ..security import is_agent, require_agent
 
 router = APIRouter(tags=["approvals"])
 
-_kill_switch = {"on": False}
 
 
 def _get(db: Session, approval_id: str) -> Approval:
@@ -45,8 +44,13 @@ def _run(db: Session, appr: Approval, actor: str) -> None:
     appr.results, appr.status, appr.decided_at = results, status, utcnow()
 
 
+def require_agent_or_owner(authorization: str = Header(default="")) -> str:
+    """The agent proposes actions; the signed-in owner may propose one too."""
+    return "owner" if auth.is_owner(authorization) else require_agent(authorization)
+
+
 @router.post("/approvals", response_model=ApprovalOut, status_code=201)
-def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Depends(require_agent)):
+def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Depends(require_agent_or_owner)):
     checks = []
     for o in body.operations:
         try:
@@ -65,7 +69,7 @@ def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Dep
     # The decision and the execution it allows must see the same history (cumulative limits).
     with policy.lock:
         now = utcnow()
-        decision = policy.decide(checks, policy.load_history(db, now), now, _kill_switch["on"])
+        decision = policy.decide(checks, policy.load_history(db, now), now, state.kill_switch_on(db))
         n = (db.scalar(select(func.count()).select_from(Approval)) or 0) + 1
         appr = Approval(
             id=f"{'APR' if decision.tier == 3 else 'AUT'}-{n:04d}", action=body.action,
@@ -124,7 +128,8 @@ def get_approval(approval_id: str, db: Session = Depends(get_db)):
     return _get(db, approval_id)
 
 
-@router.post("/approvals/{approval_id}/otp", summary="Send the owner a new code (SMS mode)")
+@router.post("/approvals/{approval_id}/otp", summary="Send the owner a new code (SMS mode)",
+             dependencies=[Depends(auth.require_owner)])
 def resend_code(approval_id: str, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
@@ -137,12 +142,12 @@ def resend_code(approval_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/approvals/{approval_id}/approve", response_model=ApprovalOut,
-             dependencies=[Depends(reject_agent)])
+             dependencies=[Depends(auth.require_owner)])
 def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
         raise HTTPException(409, f"Approval is {appr.status}")
-    if _kill_switch["on"]:
+    if state.kill_switch_on(db):
         raise HTTPException(423, "Kill switch is on")
     if "VOICE" in body.channel.upper():
         audit.append(db, "security", "approval.voice_refused", {"approval_id": appr.id, "channel": body.channel})
@@ -181,7 +186,7 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
 
 
 @router.post("/approvals/{approval_id}/reject", response_model=ApprovalOut,
-             dependencies=[Depends(reject_agent)])
+             dependencies=[Depends(auth.require_owner)])
 def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
@@ -193,21 +198,45 @@ def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
 
 
 @router.get("/policy", tags=["policy"], summary="Active policy: tier limits and rules the engine applies")
-def get_policy():
-    return {**policy.POLICY, "kill_switch": _kill_switch["on"]}
+def get_policy(db: Session = Depends(get_db)):
+    return {**policy.POLICY, "kill_switch": state.kill_switch_on(db)}
 
 
 @router.get("/policy/kill-switch", tags=["policy"])
-def kill_switch_state():
-    return _kill_switch
+def kill_switch_state(db: Session = Depends(get_db)):
+    return {"on": state.kill_switch_on(db)}
+
+
+@router.post("/policy/kill-switch/otp", tags=["policy"], dependencies=[Depends(auth.require_owner)],
+             summary="Send the owner a code to turn the kill switch off (SMS mode)")
+def kill_switch_code():
+    try:
+        return otp.issue_action("kill_switch_off", "turn the kill switch off")
+    except otp.OtpError as exc:
+        raise HTTPException(exc.status, {"error": exc.code, "detail": exc.message}) from exc
 
 
 @router.post("/policy/kill-switch", tags=["policy"])
 def set_kill_switch(body: KillSwitchIn, db: Session = Depends(get_db), authorization: str = Header(default="")):
-    # The agent may stop itself, never re-arm itself.
-    if not body.on and is_agent(authorization):
-        raise HTTPException(403, "Only the owner can turn the kill switch off")
-    _kill_switch["on"] = body.on
-    audit.append(db, "owner", "policy.kill_switch", {"on": body.on})
-    broker.publish("policy.kill_switch", {"on": body.on})
-    return _kill_switch
+    agent, owner = is_agent(authorization), auth.is_owner(authorization)
+    if body.on:
+        # Stopping is cheap: the owner or the agent itself. Strangers cannot (no denial of service).
+        if not (agent or owner):
+            raise HTTPException(401, {"error": "owner_login_required", "detail": "Sign in as the owner"})
+    else:
+        # Re-arming is L3: the agent never re-arms itself; the owner needs a session and a code.
+        if agent:
+            raise HTTPException(403, "Only the owner can turn the kill switch off")
+        if not owner:
+            raise HTTPException(401, {"error": "owner_login_required", "detail": "Sign in as the owner"})
+        if not body.otp:
+            raise HTTPException(400, {"error": "otp_required", "detail": "Turning the kill switch off needs a one-time code"})
+        check = otp.verify_action("kill_switch_off", body.otp)
+        if check != "ok":
+            audit.append(db, "owner", "policy.kill_switch_otp_failed", {"reason": check})
+            raise HTTPException(410 if check == "expired" else 403, {"error": f"otp_{check}"})
+    actor = "owner" if owner else "agent"
+    state.set_kill_switch(db, body.on)
+    audit.append(db, actor, "policy.kill_switch", {"on": body.on})  # commits the flag with its audit entry
+    broker.publish("policy.kill_switch", {"on": body.on, "by": actor})
+    return {"on": state.kill_switch_on(db)}

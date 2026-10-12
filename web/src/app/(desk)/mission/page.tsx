@@ -38,7 +38,7 @@ const TX = {
   en: {
     run: "Run", halted: "AGENT HALTED · KILL SWITCH", pausedS: "RUN PAUSED", complete: "RUN COMPLETE · EXECUTED", awaiting: "AWAITING APPROVAL · L3",
     trigger: "TRIGGER email:shanghai-hongxin · START 10:12:41.032 · ELAPSED 25.1S · COST USD 0.015",
-    resumed: "Run resumed", pausedT: "Run paused · no new tool calls", resume: "Resume", pause: "Pause", rearm: "Re-arm agent", confirm: "Confirm kill", cancel: "Cancel", kill: "Kill switch",
+    resumed: "Run resumed", pausedT: "Run paused · no new tool calls", resume: "Resume", pause: "Pause", rearm: "Re-arm agent", confirm: "Confirm kill", cancel: "Cancel", kill: "Kill switch", rearmCode: "Re-arm with code", otpPh: "Code", rearmAria: "One-time code to re-arm the agent",
     stop: "STOP", stopBody: "Kill switch engaged. The agent cannot call any tool until it is re-armed. Pending approvals stay frozen; nothing executes.",
     trace: "Execution trace · waterfall", doneL: "DONE", waiting: "WAITING ON OWNER", cols: ["#", "Step", "Tool", "Tier", "Model", "0s ─────────── 12.5s ─────────── 25s", "Latency", "Cost USD"],
     approved: "Approved by owner (OTP)", rejected: "Rejected by owner", awaitingStep: "Awaiting approval", closed: "closed", open: "open", executedStep: "Executed in sandbox · hash anchored",
@@ -51,7 +51,7 @@ const TX = {
   es: {
     run: "Corrida", halted: "AGENTE DETENIDO · FRENO DE EMERGENCIA", pausedS: "CORRIDA EN PAUSA", complete: "CORRIDA TERMINADA · EJECUTADA", awaiting: "ESPERANDO APROBACIÓN · L3",
     trigger: "ORIGEN correo:shanghai-hongxin · INICIO 10:12:41.032 · DURACIÓN 25,1 S · COSTO USD 0,015",
-    resumed: "Corrida reanudada", pausedT: "Corrida en pausa · sin nuevas llamadas a herramientas", resume: "Reanudar", pause: "Pausar", rearm: "Reactivar agente", confirm: "Confirmar freno", cancel: "Cancelar", kill: "Freno de emergencia",
+    resumed: "Corrida reanudada", pausedT: "Corrida en pausa · sin nuevas llamadas a herramientas", resume: "Reanudar", pause: "Pausar", rearm: "Reactivar agente", confirm: "Confirmar freno", cancel: "Cancelar", kill: "Freno de emergencia", rearmCode: "Reactivar con código", otpPh: "Código", rearmAria: "Código de un solo uso para reactivar el agente",
     stop: "ALTO", stopBody: "Freno de emergencia activado. El agente no puede usar ninguna herramienta hasta que lo reactives. Las aprobaciones pendientes quedan congeladas; nada se ejecuta.",
     trace: "Traza de ejecución · cascada", doneL: "HECHO", waiting: "ESPERANDO AL DUEÑO", cols: ["#", "Paso", "Herramienta", "Nivel", "Modelo", "0 s ─────────── 12,5 s ─────────── 25 s", "Latencia", "Costo USD"],
     approved: "Aprobado por el dueño (código)", rejected: "Rechazado por el dueño", awaitingStep: "Esperando aprobación", closed: "cerrado", open: "abierto", executedStep: "Ejecutado en el sandbox · hash anclado",
@@ -64,7 +64,7 @@ const TX = {
   zh: {
     run: "运行", halted: "代理已停止 · 紧急停止", pausedS: "运行已暂停", complete: "运行完成 · 已执行", awaiting: "等待批准 · L3",
     trigger: "触发 邮件:shanghai-hongxin · 开始 10:12:41.032 · 用时 25.1秒 · 成本 USD 0.015",
-    resumed: "运行已恢复", pausedT: "运行已暂停 · 不再调用工具", resume: "恢复", pause: "暂停", rearm: "重新启用代理", confirm: "确认停止", cancel: "取消", kill: "紧急停止",
+    resumed: "运行已恢复", pausedT: "运行已暂停 · 不再调用工具", resume: "恢复", pause: "暂停", rearm: "重新启用代理", confirm: "确认停止", cancel: "取消", kill: "紧急停止", rearmCode: "凭验证码恢复", otpPh: "验证码", rearmAria: "恢复代理所需的一次性验证码",
     stop: "停止", stopBody: "紧急停止已启动。重新启用之前，代理无法调用任何工具。待批事项全部冻结，不会执行任何操作。",
     trace: "执行轨迹 · 瀑布图", doneL: "完成", waiting: "等待企业主", cols: ["#", "步骤", "工具", "级别", "模型", "0秒 ─────────── 12.5秒 ─────────── 25秒", "延迟", "成本 USD"],
     approved: "企业主已批准（验证码）", rejected: "企业主已拒绝", awaitingStep: "等待批准", closed: "已关闭", open: "进行中", executedStep: "已在沙盒执行 · 哈希已锚定",
@@ -94,6 +94,9 @@ export default function MissionPage() {
   const { approval, notify, mode, events, killSwitch: killed, setKillSwitch } = useDesk();
   const [paused, setPaused] = useState(false);
   const [confirmKill, setConfirmKill] = useState(false);
+  // Re-arming on the live API is L3: the owner types the one-time code (sandbox code 482913).
+  const [rearm, setRearm] = useState(false);
+  const [rearmCode, setRearmCode] = useState("");
   const [chat, setChat] = useState<{ who: "out" | "in"; text: string }[]>([]);
   const [q, setQ] = useState("");
   const done = approval === "approved";
@@ -122,7 +125,20 @@ export default function MissionPage() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button className="btn btn-secondary" type="button" disabled={killed} aria-pressed={paused} onClick={() => { setPaused((p) => !p); notify(paused ? x.resumed : x.pausedT); }}>{paused ? x.resume : x.pause} <span className="key">P</span></button>
             {killed ? (
-              <button className="btn btn-primary" type="button" onClick={() => { setPaused(false); void setKillSwitch(false); }}>{x.rearm}</button>
+              mode === "live" && rearm ? (
+                <form style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }} onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (await setKillSwitch(false, rearmCode)) { setRearm(false); setPaused(false); }
+                  setRearmCode("");
+                }}>
+                  <input className="input mono" style={{ width: 120 }} inputMode="numeric" pattern="\d{6}" maxLength={6} placeholder={x.otpPh} aria-label={x.rearmAria}
+                    value={rearmCode} onChange={(e) => setRearmCode(e.target.value.replace(/\D/g, ""))} autoFocus />
+                  <button className="btn btn-primary" type="submit" disabled={rearmCode.length !== 6}>{x.rearmCode}</button>
+                  <button className="btn btn-secondary" type="button" onClick={() => { setRearm(false); setRearmCode(""); }}>{x.cancel}</button>
+                </form>
+              ) : (
+                <button className="btn btn-primary" type="button" onClick={() => { if (mode === "live") setRearm(true); else { setPaused(false); void setKillSwitch(false); } }}>{x.rearm}</button>
+              )
             ) : confirmKill ? (
               <>
                 <button className="btn btn-danger" type="button" style={{ minHeight: 48 }} onClick={() => { setConfirmKill(false); void setKillSwitch(true); }}>{x.confirm}</button>

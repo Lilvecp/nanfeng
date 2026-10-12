@@ -111,3 +111,44 @@ def verify(db: Session, appr: Approval, code: str) -> str:
     db.delete(ch)
     db.commit()
     return "ok"
+
+
+# ---- one-time codes for owner actions that are not approvals (turning the kill switch off) ----
+_actions: dict[str, tuple[str, datetime]] = {}
+
+
+def _action_hash(key: str, code: str) -> str:
+    return hmac.new(_secret(), f"action|{key}|{code}".encode(), hashlib.sha256).hexdigest()
+
+
+def issue_action(key: str, label: str) -> dict:
+    """Sandbox: the shared demo code works. SMS: a fresh code for this action, texted to the owner."""
+    s = get_settings()
+    if not sms_mode():
+        return {"mode": "sandbox"}
+    if not s.owner_phone or not s.zavu_api_key:
+        raise OtpError("otp_unconfigured", "SMS OTP needs NANFENG_OWNER_PHONE and ZAVU_API_KEY", 503)
+    code = f"{secrets.randbelow(10**6):06d}"
+    text = f"NanFeng: {code} confirms \"{label}\". Valid {s.otp_ttl_s // 60} min. NanFeng never asks for this code."
+    try:
+        send_sms(s.owner_phone, text)
+    except httpx.HTTPError as exc:
+        raise OtpError("otp_send_failed", "Could not send the code by SMS", 502) from exc
+    expires = utcnow() + timedelta(seconds=s.otp_ttl_s)
+    _actions[key] = (_action_hash(key, code), expires)
+    return {"mode": "sms", "sent_to": mask_phone(s.owner_phone), "expires_at": expires.isoformat()}
+
+
+def verify_action(key: str, code: str) -> str:
+    """"ok" | "mismatch" | "expired". A correct SMS code is consumed."""
+    if not sms_mode():
+        return "ok" if hmac.compare_digest(code, get_settings().sandbox_otp) else "mismatch"
+    entry = _actions.get(key)
+    if entry is None:
+        return "mismatch"
+    if utcnow() > entry[1]:
+        return "expired"
+    if not hmac.compare_digest(entry[0], _action_hash(key, code)):
+        return "mismatch"
+    del _actions[key]
+    return "ok"

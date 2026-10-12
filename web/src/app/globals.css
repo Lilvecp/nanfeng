@@ -1377,3 +1377,8 @@ html:not(.reveal-ready) .final-signal {
     transition: none;
   }
 }
+
+/* Owner sign-in (threat model F1) */
+.owner-login-layer{position:fixed;inset:0;z-index:80;background:rgba(8,16,30,.5);display:grid;place-items:center;padding:16px}
+.owner-login{width:min(400px,100%);background:var(--surface);color:var(--text);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 40px rgba(8,16,30,.28);padding:20px;display:flex;flex-direction:column;gap:12px}
+.owner-login-t{margin:0;font-family:var(--f-display);font-size:19px;font-weight:600}
