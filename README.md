@@ -91,6 +91,18 @@ Every library, model and dataset used is listed here with its license (IP rule o
 
 The security modules (policy engine, OTP, document guard, BEC checks, PII masking, sanctions screening, red team in `andy-villarroel/`) are our own code on top of the packages above.
 
+### Agent (`renato-lenis/`)
+
+| Package | Version | License | Used for |
+|---|---|---|---|
+| httpx | 0.28.1 | BSD-3-Clause | Backend, OpenRouter, Mistral OCR, Zavu and ElevenLabs calls |
+| Pydantic | 2.14.1 | MIT | Quarantined extraction schema, tool arguments |
+| FastAPI, Uvicorn | 0.143.0 / 0.54.0 | MIT / BSD-3-Clause | Agent service (webhook, uploads, "ask it why") |
+| pypdf | 6.20.0 | BSD-3-Clause | PDF text layer for the hidden-text check |
+| pytest | 9.1.1 | MIT | Tests |
+
+The orchestrator, planners, quarantined extraction, model router, channel layer, templates and the PDF writer are our own code. No model weights are shipped: models run at OpenRouter and Mistral under their terms (see Infrastructure below).
+
 ### Quant engine (`vicente-rodriguez/`, details in its `LICENSES.md`)
 
 | Package | Version | License | Used for |

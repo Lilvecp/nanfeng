@@ -29,6 +29,18 @@ services:
       db:
         condition: service_healthy
 
+  agent:
+    build: ./renato-lenis
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NANFENG_BACKEND_URL: http://backend:8000
+    ports:
+      - "8200:8200"
+    depends_on:
+      - backend
+
   quant:
     profiles: ["quant"]
     image: python:3.12-slim
