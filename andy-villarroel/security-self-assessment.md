@@ -10,7 +10,7 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 |----------|--------|
 | Red team, 43 outcome-based attacks in 7 categories | **4/43 stopped before → 43/43 after** ([report](redteam/results/REPORT.md)) |
 | Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../renato-lenis/tests/test_redteam_via_agent.py)) |
-| Automated tests | **Backend 104**: security/BEC 24, policy 20, API 16, OTP 12, owner sign-in 10, privacy 7, invoice registry 6, demo 5, anchoring 4. **Agent 69**, including the red team replay |
+| Automated tests | **Backend 104**: security/BEC 24, policy 20, API 16, OTP 12, owner sign-in 10, privacy 7, invoice registry 6, demo 5, anchoring 4. **Agent 84**, including the red team replay and the AI label |
 | CI gate | Fails the build if any of the 43 red team attacks gets through |
 | Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; chain verified; Merkle proofs ([evidence](evidence/out/SUMMARY.md)) |
 
@@ -97,7 +97,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 
 ```sh
 cd backend && pytest -q                                       # 104 tests
-cd ../renato-lenis && pytest -q                               # 69 agent tests, red team replay included
+cd ../renato-lenis && pytest -q                               # 84 agent tests, red team replay included
 cd ../andy-villarroel/redteam && python run.py --backend ../../backend --label after --min-stopped 43 && python report.py
 cd ../evidence && python build.py --backend ../../backend     # Cherry Crisis evidence
 python build.py --url <deployed backend> --out out-live      # same export from the live deploy
