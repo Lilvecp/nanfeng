@@ -95,7 +95,7 @@ After extraction and before the planner, compare the document with master data:
 - `domain-mismatch`: sender domain differs from the one on file, or is a look-alike (`shanghaifresh.cn` → `shanghaifresh-imports.co`).
 - `unknown-payee`: issuer not in master data.
 
-`bank-change` → `malicious` (block, verify by calling back the number on file, never the one in the document). This is the Cherry Crisis 10:31 attack.
+`bank-change` → `malicious` (block, verify by calling back the number on file, never the one in the document). This is the Cherry Crisis attack at 08:47.
 
 ### 5. What the planner receives
 
