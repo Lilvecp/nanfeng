@@ -65,7 +65,7 @@ flowchart LR
 | S1 | Owner approval spoofed by a cloned voice | B5 | Voice channels refused on approve; per-approval OTP by SMS | **Done** (r4-05) |
 | S2 | Fake supplier on a look-alike domain | B1 | `domain-mismatch` + look-alike detection in `/security/check-payee` | **Done** (r4-04) |
 | S3 | Caller pretends to be the agent | B3 | Bearer agent token, compared in constant time | Done; **open when the token is unset** (F6) |
-| S4 | Caller pretends to be the owner | B4/B5 | Owner authentication | **Missing** (F1) |
+| S4 | Caller pretends to be the owner | B4/B5 | Owner authentication | **Done** (F1): owner session on approve, reject, kill switch, reset |
 | T1 | Supplier bank account swapped (BEC) | B1 | No tool takes a bank account; payee check vs history; account change is L3 + call-back; 72 h cooling-off | **Done** (r4-04) |
 | T2 | Audit entry edited or deleted | B6 | Hash chain + Merkle anchor on-chain + `/audit/verify` | Done (Camilo) |
 | T3 | Limits raised silently | B4 | Policy is code + data, versioned, logged in each decision | Done; no write API yet |
@@ -75,13 +75,13 @@ flowchart LR
 | I1 | Personal data sent to LLM providers | B1 | `POST /privacy/mask` before any LLM call | **Done** (r4-07); Renato must call it |
 | I2 | Ledger exfiltrated through a collection message | B3 | `send_collection` only to `contact_id`, templated | Designed (r4-03) |
 | I3 | API key leaked in the public repo | — | `.env` git-ignored, gitleaks in CI, spend limits | Done (Camilo) |
-| D1 | Attacker burns the OTP attempts of a pending approval | B4 | 3 attempts then `locked`; owner re-requests | Lockout works; needs F1 to stop strangers |
+| D1 | Attacker burns the OTP attempts of a pending approval | B4 | 3 attempts then `locked`; owner re-requests | Lockout works; strangers are stopped by the owner session (F1) |
 | D2 | Cost exhaustion through a loop of LLM calls | B3 | Max steps per run, spend limits | r2 (Renato) |
 | D3 | Restart turns the kill switch off | B4 | — | **Open** (F9) |
 | E1 | Prompt injection makes the agent move money | B1→B3 | Quarantine + guard + policy outside the LLM + OTP | Policy, guard (`/security/scan`), OTP done; quarantine → Renato |
 | E2 | Split payments to stay under L2 | B3 | Request total, structuring, daily/monthly, velocity | **Done** (policy engine) |
 | E3 | Agent approves its own L3 request | B3→B5 | Agent token refused on approve/reject; per-approval OTP never logged | **Done** (r4-05) |
-| E4 | Anyone turns the kill switch off | B4 | Agent cannot re-arm itself; owner auth for the rest | Agent: **done**; anonymous: **open** (F1) |
+| E4 | Anyone turns the kill switch off | B4 | Agent cannot re-arm itself; owner auth for the rest | Agent: **done**; anonymous: **done** (F1, session + one-time code) |
 
 ## OWASP Top 10 for LLM Applications (2025)
 
@@ -102,7 +102,7 @@ flowchart LR
 
 | # | Severity | Finding | Where | Fix | Owner · when |
 |---|----------|---------|-------|-----|--------------|
-| F1 | High | No owner authentication: anyone who reaches the API can approve (with the OTP), reject, turn the kill switch off or reset the bank. | `backend/app/routers/approvals.py:105`, `:140`, `:161`; `backend/app/routers/bank.py:64` | Owner session (Supabase auth) on these routes; kill switch off = L3; reset only in demo builds | Camilo + Andy · before the public URL (Oct 11) |
+| F1 | High | No owner authentication: anyone who reaches the API can approve (with the OTP), reject, turn the kill switch off or reset the bank. | `backend/app/routers/approvals.py:105`, `:140`, `:161`; `backend/app/routers/bank.py:64` | Owner session (HMAC-signed, 8 h) on these routes; kill switch off needs session + one-time code; reset only with NANFENG_DEMO=true | Camilo · **fixed** (`4453927`, `74528af`) |
 | F2 | High | OTP is one static code shared by every approval, not bound to the amount or the approval, no server-side expiry, printed on screen. | `backend/app/config.py`; `web/src/app/(desk)/approvals/page.tsx:151` | `NANFENG_OTP_MODE=sms`: random code per approval, HMAC-bound to approval + amount, 5 min TTL, single use, sent by Zavu | Andy · **fixed** in SMS mode; the public demo must run with `sms` |
 | F3 | High | Split payments and cumulative spend were not checked: each operation was evaluated alone. | old `backend/app/policy.py` | Policy engine with request total, structuring, 24 h / 30 d limits, velocity, L3 caps | Andy · **fixed** (r4-02) |
 | F4 | Medium | Front and back disagreed on limits (L2 CLP 25M on screen, 10M in the backend). | `web/src/app/(desk)/settings/page.tsx:10` vs old policy | Engine uses the Settings values; `GET /policy` is the source of truth for the front | Andy · **fixed**; front to read `GET /policy` (Camilo) |

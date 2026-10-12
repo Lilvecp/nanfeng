@@ -8,9 +8,9 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 
 | Evidence | Result |
 |----------|--------|
-| Red team, 43 outcome-based attacks in 7 categories | **4/43 stopped before → 41/43 after** ([report](redteam/results/REPORT.md)) |
+| Red team, 43 outcome-based attacks in 7 categories | **4/43 stopped before → 43/43 after** ([report](redteam/results/REPORT.md)) |
 | Automated tests (backend) | 79 passing: policy 20, OTP 12, security/BEC 21, privacy 7, API 15, anchoring 4 |
-| CI gate | Fails the build if fewer than 41 red team attacks are stopped |
+| CI gate | Fails the build if any of the 43 red team attacks gets through |
 | Execution evidence | Cherry Crisis end to end with chain verification and Merkle proofs ([evidence](evidence/out/SUMMARY.md)) |
 
 ## 2. Where decisions are made
@@ -77,7 +77,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 
 | # | Risk | Impact | Why it is still open | Mitigation today |
 |---|------|--------|----------------------|------------------|
-| K1 | **No owner login on the public API.** Anyone who reaches it can turn the kill switch off or reset the sandbox (red team API-02, API-03). | High in production | Owner authentication (Supabase) is not wired yet | Approving still needs the SMS code; the agent token cannot do any of this; the demo runs on synthetic data |
+| K1 | **Owner sign-in is a single shared password**, and demo builds show it on the sign-in screen. Anyone with the password is the owner. (Fixed: anonymous callers can no longer approve, reject, turn the kill switch off or reset the sandbox; red team API-02, API-03 stopped.) | Medium in production | One owner per company in the MVP; per-user accounts come with Supabase auth | Startup refuses the demo password outside demo builds; failed sign-ins rate limited; turning the kill switch off and approving still need the SMS code |
 | K2 | Demo Mode uses a shared sandbox code shown on screen | High if used with real money | The jury must be able to run the demo | SMS mode exists and is what the red team and evidence use |
 | K3 | The document guard is heuristic, and its author also wrote the attacks | Medium | Time | It is one layer; the policy engine and OTP do not depend on it. Blind attacks and promptfoo/garak against the real agent are next |
 | K4 | The quarantined-LLM pipeline is a design until the agent integrates it | Medium | Agent work in progress | Tools still cannot take bank accounts; policy holds regardless |
