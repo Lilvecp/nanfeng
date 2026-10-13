@@ -38,7 +38,7 @@ class Settings:
     zavu_url: str = "https://api.zavu.dev/v1/messages"
     zavu_webhook_secret: str = ""
     owner_phone: str = ""
-    owner_language: str = "es"
+    owner_language: str = "en"
     cockpit_url: str = "http://localhost:3000"
     scenario: str = "cherry_crisis"
     # Model routing (OpenRouter slugs). Cheap to classify and extract, strong to plan, then fallbacks.

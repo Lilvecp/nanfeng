@@ -91,7 +91,8 @@ def test_pdf_text_layer_carries_what_the_page_hides():
 
 def test_ask_explains_the_plan_with_tool_numbers(api, owner):
     assert api.post("/ask", json={"question": "¿por qué?"}).status_code == 401
-    assert "Todavía" in api.post("/ask", headers=owner, json={"question": "¿por qué?"}).json()["answer"]
+    assert "not run anything" in api.post("/ask", headers=owner, json={"question": "why?"}).json()["answer"]
+    assert "Todavía" in api.post("/ask", headers=owner, json={"question": "¿por qué?", "language": "es"}).json()["answer"]
     api.post("/inbound/zavu", json={"channel": "email", "text": fixtures.SHANGHAI_NOTICE}, headers=AGENT)
 
     why = api.post("/ask", headers=owner, json={"question": "¿Por qué elegiste el crédito PAE?", "language": "es"}).json()

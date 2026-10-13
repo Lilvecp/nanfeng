@@ -51,7 +51,7 @@ CONTACTS = {
 }
 
 
-def owner_contact(phone: str = "", language: str = "es") -> Contact:
+def owner_contact(phone: str = "", language: str = "en") -> Contact:
     """The owner: WhatsApp for alerts and approvals, SMS as the out-of-band channel, voice for briefings."""
     phone = phone or "+56900000000"
     return Contact("CON-OWNER", "Owner · Huerto Austral", language,

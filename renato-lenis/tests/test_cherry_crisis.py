@@ -34,12 +34,12 @@ def test_shanghai_notice_runs_forecast_plan_and_waits_for_owner(agent, backend, 
     assert appr["status"] == "pending" and appr["tier"] == 3
     assert appr["operations"] == [{"op": o["op"], "params": o["params"]} for o in expected["operations"]]
 
-    # Owner: alert, plan and approval on WhatsApp in Spanish; the importer gets the reminder in Chinese.
+    # Owner: alert, plan and approval on WhatsApp in English (the default); the importer gets the reminder in Chinese.
     kinds = [(d.channel, d.message.kind, d.message.language) for d in hub.outbox]
-    assert ("whatsapp", "alert", "es") in kinds and ("whatsapp", "approval", "es") in kinds
+    assert ("whatsapp", "alert", "en") in kinds and ("whatsapp", "approval", "en") in kinds
     assert ("wecom", "collection", "zh") in kinds
     alert = next(d for d in hub.outbox if d.message.kind == "alert").message.text
-    assert "81%" in alert and "45 días" in alert and "2026-12-30" in alert
+    assert "81%" in alert and "45 days late" in alert and "2026-12-30" in alert
     approval_msg = next(d for d in hub.outbox if d.message.kind == "approval").message.text
     assert SANDBOX_OTP not in approval_msg  # the agent never carries the code
 

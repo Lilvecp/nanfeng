@@ -49,7 +49,7 @@ class Run:
     planner_input: PlannerInput | None = None
     plan: Plan | None = None
     note: str = ""
-    language: str = "es"
+    language: str = "en"
     memory: dict[str, Any] = field(default_factory=dict)
 
     def summary(self) -> dict[str, Any]:

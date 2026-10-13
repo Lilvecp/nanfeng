@@ -147,7 +147,7 @@ class UploadIn(BaseModel):
 class AskIn(BaseModel):
     question: str = Field(min_length=1, max_length=500)
     run_id: str | None = Field(None, pattern=r"^RUN-\d{4,}$")
-    language: Literal["es", "en", "zh"] = "es"
+    language: Literal["es", "en", "zh"] | None = None
 
 
 class BriefingIn(BaseModel):
@@ -257,7 +257,7 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
         runs = svc.agent.runs
         target = runs.get(body.run_id) if body.run_id else next(
             (r for r in reversed(list(runs.values())) if r.kind == "document"), None)
-        return explain.answer(body.question, target, body.language)
+        return explain.answer(body.question, target, body.language or settings.owner_language)
 
     @app.post("/briefing", dependencies=[Depends(require_owner)])
     def briefing(body: BriefingIn):

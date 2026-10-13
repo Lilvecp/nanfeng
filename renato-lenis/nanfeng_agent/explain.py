@@ -105,7 +105,7 @@ def _template_answer(kind: str, f: dict[str, Any], lang: str) -> str:
              f"在运行 {f['run_id']} 中我使用了：{tools}。状态：{f['status']}{'。' + f['note'] if f['note'] else ''}。")
 
 
-def answer(question: str, run: Run | None, lang: str = "es") -> dict[str, Any]:
+def answer(question: str, run: Run | None, lang: str = "en") -> dict[str, Any]:
     lang = lang if lang in templates.LANGS else "en"
     if run is None:
         return {"answer": NO_RUN[lang], "intent": "none", "run_id": None, "model": "template"}
