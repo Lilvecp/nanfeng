@@ -18,7 +18,7 @@
       "payee_id": null,
       "verify_by": null,
       "alerted_via": "sms",
-      "audit_seq": 2
+      "audit_seq": 4
     }
   },
   {
@@ -44,7 +44,7 @@
         "call": "+56229876543"
       },
       "alerted_via": "sms",
-      "audit_seq": 3
+      "audit_seq": 5
     }
   },
   {
@@ -59,7 +59,7 @@
       "payee_id": null,
       "verify_by": null,
       "alerted_via": null,
-      "audit_seq": 4
+      "audit_seq": 6
     }
   },
   {
@@ -68,7 +68,7 @@
     "http": 201,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-13T00:49:51.567062Z",
+      "created_at": "2026-10-13T03:33:05.934557Z",
       "decided_at": null,
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
@@ -116,8 +116,8 @@
     "http": 200,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-13T00:49:51.567062",
-      "decided_at": "2026-10-13T00:49:51.588973Z",
+      "created_at": "2026-10-13T03:33:05.934557",
+      "decided_at": "2026-10-13T03:33:05.945228Z",
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
         {
@@ -149,8 +149,10 @@
           "cost_clp": 2106329.01,
           "proceeds_clp": 139558272.3,
           "annual_rate": 0.068,
-          "audit_seq": 8,
-          "audit_hash": "ddf6bb184e1fa56642be5720ccb63ad56a1ac8b7cce93a419eca173e6d284b40"
+          "approval_id": "APR-0001",
+          "tier": 3,
+          "audit_seq": 10,
+          "audit_hash": "7af76f75adfb07e5adece59cb4dfd90e1d479ce10139527b9a06a93728dd9b27"
         }
       ]
     }
@@ -161,7 +163,7 @@
     "http": 201,
     "result": {
       "id": "APR-0002",
-      "created_at": "2026-10-13T00:49:51.598084Z",
+      "created_at": "2026-10-13T03:33:05.948905Z",
       "decided_at": null,
       "action": "factoring INV-2026-109",
       "operations": [
@@ -189,8 +191,8 @@
     "http": 200,
     "result": {
       "id": "APR-0002",
-      "created_at": "2026-10-13T00:49:51.598084",
-      "decided_at": "2026-10-13T00:49:51.640809Z",
+      "created_at": "2026-10-13T03:33:05.948905",
+      "decided_at": "2026-10-13T03:33:05.970297Z",
       "action": "factoring INV-2026-109",
       "operations": [
         {
@@ -227,8 +229,10 @@
             "tx_hash": null,
             "explorer_url": null
           },
-          "audit_seq": 13,
-          "audit_hash": "b934bc282fa3f9dae633412caa5ac2f1e9a69ef7e47a2371e53dbea2ee02eb4b"
+          "approval_id": "APR-0002",
+          "tier": 3,
+          "audit_seq": 15,
+          "audit_hash": "d87da7d1b5e3a9ddace25141dca659fc0985d6fca4ae77b1a8e368b0f665fb80"
         }
       ]
     }
@@ -239,7 +243,7 @@
     "http": 201,
     "result": {
       "id": "APR-0003",
-      "created_at": "2026-10-13T00:49:51.648884Z",
+      "created_at": "2026-10-13T03:33:05.973585Z",
       "decided_at": null,
       "action": "factor INV-2026-109 again elsewhere",
       "operations": [
@@ -268,8 +272,8 @@
     "http": 200,
     "result": {
       "id": "APR-0003",
-      "created_at": "2026-10-13T00:49:51.648884",
-      "decided_at": "2026-10-13T00:49:51.657402Z",
+      "created_at": "2026-10-13T03:33:05.973585",
+      "decided_at": "2026-10-13T03:33:05.978525Z",
       "action": "factor INV-2026-109 again elsewhere",
       "operations": [
         {
@@ -297,8 +301,8 @@
     "http": 201,
     "result": {
       "id": "AUT-0004",
-      "created_at": "2026-10-13T00:49:51.664893Z",
-      "decided_at": "2026-10-13T00:49:51.667878Z",
+      "created_at": "2026-10-13T03:33:05.981262Z",
+      "decided_at": "2026-10-13T03:33:05.982203Z",
       "action": "pay Cartonera 1/2",
       "operations": [
         {
@@ -326,8 +330,10 @@
           "currency": "CLP",
           "amount_clp": 15000000.0,
           "reference": "",
-          "audit_seq": 19,
-          "audit_hash": "e374977240a5f2576fd50f9e4979a62ed8502627badd51102bfaf63d92ec878e"
+          "approval_id": "AUT-0004",
+          "tier": 2,
+          "audit_seq": 21,
+          "audit_hash": "958ec7d7149eef4cff20b06904c36b1a1b01e57248e6a75bec433a910f92f2c4"
         }
       ]
     }
@@ -338,7 +344,7 @@
     "http": 201,
     "result": {
       "id": "APR-0005",
-      "created_at": "2026-10-13T00:49:51.673396Z",
+      "created_at": "2026-10-13T03:33:05.984396Z",
       "decided_at": null,
       "action": "pay Cartonera 2/2",
       "operations": [
@@ -393,10 +399,10 @@
     "http": 201,
     "result": {
       "id": 3,
-      "created_at": "2026-10-13T00:49:51.686735Z",
-      "from_seq": 15,
-      "to_seq": 23,
-      "merkle_root": "9db191ed81508f61fb99d4b9f80e370dae2c87fc53fe1539a57e18356604846e",
+      "created_at": "2026-10-13T03:33:05.989878Z",
+      "from_seq": 17,
+      "to_seq": 25,
+      "merkle_root": "16c8fa984383c3e3e6a6fefb1dee18caf12b200a83ab8d0eb363246619fc64ac",
       "backend": "local",
       "tx_hash": null,
       "explorer_url": null

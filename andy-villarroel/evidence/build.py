@@ -187,6 +187,11 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
                   f"- MILP plan (Vicente's engine): **CLP {milp.group(1) if milp else '?'}**",
                   f"- Sandbox bank, `bank.loan` entry seq {loans[0]['seq']}: **CLP {bank:,}** "
                   f"(interest {round(loans[0]['payload']['interest_clp']):,} + fees {round(loans[0]['payload']['fee_clp']):,})"]
+        lp = loans[0]["payload"]
+        if lp.get("approval_id"):
+            same = [e for e in loans if e["payload"].get("approval_id") == lp["approval_id"]]
+            lines += [f"- Runs under approval {lp['approval_id']}, tier **L{lp.get('tier')}** (the owner's code), "
+                      f"executed **{len(same)}** time(s): one decision per approval, even when two channels approve at once"]
     if steps:
         lines += ["", "## Cherry Crisis run", "", "| Time | Step | HTTP | Outcome |", "|------|------|------|---------|"]
         for s in steps:

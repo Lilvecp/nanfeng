@@ -2,19 +2,19 @@
 
 Synthetic data in the NanFeng sandbox bank. Every line below is reproducible with `build.py`.
 
-- Audit entries: **24**, hash chain valid: **True**
+- Audit entries: **26**, hash chain valid: **True**
 - Anchors: **3** (local)
-  - seq 1–9 root `feaaa058a840fb6a…`
-  - seq 10–14 root `aa06cb3250956627…`
-  - seq 15–23 root `9db191ed81508f61…`
-- Merkle inclusion proofs for 5 key entries (approvals executed, attacks blocked): `proofs.json`
+  - seq 1–11 root `ea43e9285daa7236…`
+  - seq 12–16 root `ba0308798165426c…`
+  - seq 17–25 root `16c8fa984383c3e3…`
+- Merkle inclusion proofs for 7 key entries (approvals executed, attacks blocked): `proofs.json`
 
 ## Checked here, without the backend's code
 
-- Hash chain recomputed from the published formula: **24/24** entries match
-- Merkle proofs recomputed from leaf to anchored root: **5/5** valid
+- Hash chain recomputed from the published formula: **26/26** entries match
+- Merkle proofs recomputed from leaf to anchored root: **7/7** valid
 - Anchors read back from the chain: **0/0** match (local anchoring in this run: no transactions)
-- Tamper test: add CLP 1 to the loan in entry 8 and the recomputed chain breaks at seq **8**
+- Tamper test: add CLP 1 to the loan in entry 10 and the recomputed chain breaks at seq **10**
 - Invoice registry (local): **1** invoices registered against double financing: `registry.json`
 
 ## Audit entries by kind
@@ -32,12 +32,13 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 | `document.received` | 1 |
 | `policy.kill_switch` | 1 |
 | `sandbox.seeded` | 1 |
-| `security.attack_blocked` | 2 |
+| `security.attack_blocked` | 4 |
 
 ## The plan the owner approved is the plan the bank executed
 
 - MILP plan (Vicente's engine): **CLP 2,106,329**
-- Sandbox bank, `bank.loan` entry seq 8: **CLP 2,106,329** (interest 1,566,033 + fees 540,296)
+- Sandbox bank, `bank.loan` entry seq 10: **CLP 2,106,329** (interest 1,566,033 + fees 540,296)
+- Runs under approval APR-0001, tier **L3** (the owner's code), executed **1** time(s): one decision per approval, even when two channels approve at once
 
 ## Cherry Crisis run
 
@@ -59,4 +60,4 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 | 10:35 | Owner stops the agent (kill switch on) | 200 | kill switch on=True |
 | 10:35 | Agent tries to turn the kill switch back off | 403 | Only the owner can turn the kill switch off |
 | 10:35 | Anonymous caller tries to turn it off | 401 | owner_login_required |
-| 10:40 | Agent anchors everything still pending | 201 | 9db191ed81508f61fb99d4b9f80e370dae2c87fc53fe1539a57e18356604 |
+| 10:40 | Agent anchors everything still pending | 201 | 16c8fa984383c3e3e6a6fefb1dee18caf12b200a83ab8d0eb363246619fc |
