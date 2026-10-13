@@ -171,7 +171,7 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
              + (f" (first mismatch at seq {broken})" if broken else ""),
              f"- Merkle proofs recomputed from leaf to anchored root: **{sum(proofs_ok)}/{len(proofs_ok)}** valid",
              f"- Anchors read back from the chain: **{sum(1 for x in on_chain if x.get('valid'))}/{len(on_chain)}** match"
-             + ("" if on_chain else " (local anchoring in this run: no transactions)")
+             + ("" if on_chain else (" (no anchors yet)" if not anchors else " (local anchoring in this run: no transactions)"))
              + "".join(f"\n  - anchor {x['anchor_id']}: valid={x.get('valid')} {x.get('explorer_url', '')}" for x in on_chain),
              (f"- Tamper test: add CLP 1 to the loan in entry {tamper[0]} and the recomputed chain breaks at "
               f"seq **{tamper[1]}**" if tamper else "- Tamper test: no loan in this export"),

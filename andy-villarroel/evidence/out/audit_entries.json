@@ -1,7 +1,7 @@
 [
   {
     "seq": 1,
-    "ts": "2026-10-12T23:08:10.141+00:00",
+    "ts": "2026-10-13T00:49:51.526+00:00",
     "actor": "system",
     "kind": "sandbox.seeded",
     "payload": {
@@ -20,11 +20,11 @@
       "synthetic": true
     },
     "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-    "hash": "2e28c91fa695638f64e6657a69202133bf7dd1bfe9e5f3ce2d86dadc97f7171d"
+    "hash": "e11821eede002121555c0e07fd95103bf603dedd1a4b2db42273f25a4a7f8465"
   },
   {
     "seq": 2,
-    "ts": "2026-10-12T23:08:10.153+00:00",
+    "ts": "2026-10-13T00:49:51.549+00:00",
     "actor": "security",
     "kind": "security.attack_blocked",
     "payload": {
@@ -43,12 +43,12 @@
       "source": "email",
       "verdict": "malicious"
     },
-    "prev_hash": "2e28c91fa695638f64e6657a69202133bf7dd1bfe9e5f3ce2d86dadc97f7171d",
-    "hash": "f1309ca3d5c5eaae1d78ce2fc62f721f08f00be0ee6de98a65aae6542eb4d164"
+    "prev_hash": "e11821eede002121555c0e07fd95103bf603dedd1a4b2db42273f25a4a7f8465",
+    "hash": "606adeb4ea7f7eeb089c89d27dc9aca525225ef31665ec102aeaaef3fa28e49b"
   },
   {
     "seq": 3,
-    "ts": "2026-10-12T23:08:10.156+00:00",
+    "ts": "2026-10-13T00:49:51.554+00:00",
     "actor": "security",
     "kind": "security.attack_blocked",
     "payload": {
@@ -73,12 +73,12 @@
         "call": "+56229876543"
       }
     },
-    "prev_hash": "f1309ca3d5c5eaae1d78ce2fc62f721f08f00be0ee6de98a65aae6542eb4d164",
-    "hash": "05dd7d0f0287d09d51e179820d9a82f4cb5370c33d4c980f965f0c4b77186acb"
+    "prev_hash": "606adeb4ea7f7eeb089c89d27dc9aca525225ef31665ec102aeaaef3fa28e49b",
+    "hash": "823dada9a66e3839a977ce6f779638122299babe364488abb3a422c40afd7cda"
   },
   {
     "seq": 4,
-    "ts": "2026-10-12T23:08:10.158+00:00",
+    "ts": "2026-10-13T00:49:51.557+00:00",
     "actor": "security",
     "kind": "document.received",
     "payload": {
@@ -87,12 +87,12 @@
       "source": "email",
       "text_layer_sha256": null
     },
-    "prev_hash": "05dd7d0f0287d09d51e179820d9a82f4cb5370c33d4c980f965f0c4b77186acb",
-    "hash": "1883fa2d37cd6c8e0bae8c1ceaae8baf8d5625f50525ed57b78d07f0791253c3"
+    "prev_hash": "823dada9a66e3839a977ce6f779638122299babe364488abb3a422c40afd7cda",
+    "hash": "21a6b4c338e1d5b3c1dc02eeb4e100e87c05b69d44a39abbdf9c20ffacd729dc"
   },
   {
     "seq": 5,
-    "ts": "2026-10-12T23:08:10.164+00:00",
+    "ts": "2026-10-13T00:49:51.568+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -107,38 +107,38 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "1883fa2d37cd6c8e0bae8c1ceaae8baf8d5625f50525ed57b78d07f0791253c3",
-    "hash": "9599ba483cdde3c5005780dccaa0cf50bbec5829e1c8735bc5af6f084cda25a5"
+    "prev_hash": "21a6b4c338e1d5b3c1dc02eeb4e100e87c05b69d44a39abbdf9c20ffacd729dc",
+    "hash": "d372f5a15b660d2eda592b9d7868ef5147c4a36779bd29e47a96e2d1798ee065"
   },
   {
     "seq": 6,
-    "ts": "2026-10-12T23:08:10.166+00:00",
+    "ts": "2026-10-13T00:49:51.572+00:00",
     "actor": "security",
     "kind": "approval.otp_sent",
     "payload": {
       "approval_id": "APR-0001",
       "delivery_id": "msg_3",
-      "expires_at": "2026-10-12T23:13:10.165107+00:00",
+      "expires_at": "2026-10-13T00:54:51.569371+00:00",
       "mode": "sms",
       "sent_to": "+569 •••• 2222"
     },
-    "prev_hash": "9599ba483cdde3c5005780dccaa0cf50bbec5829e1c8735bc5af6f084cda25a5",
-    "hash": "42dbe5adc7f6dbda622a94121b7d7c85a2a7d0db2226db1e154613b6503a95e0"
+    "prev_hash": "d372f5a15b660d2eda592b9d7868ef5147c4a36779bd29e47a96e2d1798ee065",
+    "hash": "648869954ae1c04dad02892398432fb957685a2d85fa3c6d5e6edd6feca5e15c"
   },
   {
     "seq": 7,
-    "ts": "2026-10-12T23:08:10.170+00:00",
+    "ts": "2026-10-13T00:49:51.578+00:00",
     "actor": "owner",
     "kind": "auth.login",
     "payload": {
-      "expires_at": 1791875290
+      "expires_at": 1791881391
     },
-    "prev_hash": "42dbe5adc7f6dbda622a94121b7d7c85a2a7d0db2226db1e154613b6503a95e0",
-    "hash": "593dc5b831dba7c2ed9a3d7f6157844694a3a5955e59b490685a619568a16237"
+    "prev_hash": "648869954ae1c04dad02892398432fb957685a2d85fa3c6d5e6edd6feca5e15c",
+    "hash": "546425fdbdb2bc17b4d6465763e7fe440b9bb67213f556afc65f88be4e87ca8a"
   },
   {
     "seq": 8,
-    "ts": "2026-10-12T23:08:10.175+00:00",
+    "ts": "2026-10-13T00:49:51.588+00:00",
     "actor": "owner",
     "kind": "bank.loan",
     "payload": {
@@ -154,28 +154,28 @@
       "term_days": 60,
       "transaction_id": 1
     },
-    "prev_hash": "593dc5b831dba7c2ed9a3d7f6157844694a3a5955e59b490685a619568a16237",
-    "hash": "5bebde662a2361ffa05fb3d779281836b1d8a4adf89320f0e10fd3e2d1aa9c44"
+    "prev_hash": "546425fdbdb2bc17b4d6465763e7fe440b9bb67213f556afc65f88be4e87ca8a",
+    "hash": "ddf6bb184e1fa56642be5720ccb63ad56a1ac8b7cce93a419eca173e6d284b40"
   },
   {
     "seq": 9,
-    "ts": "2026-10-12T23:08:10.176+00:00",
+    "ts": "2026-10-13T00:49:51.589+00:00",
     "actor": "owner",
     "kind": "approval.approved",
     "payload": {
       "approval_id": "APR-0001",
       "channel": "WA+OTP",
       "result_hashes": [
-        "5bebde662a2361ffa05fb3d779281836b1d8a4adf89320f0e10fd3e2d1aa9c44"
+        "ddf6bb184e1fa56642be5720ccb63ad56a1ac8b7cce93a419eca173e6d284b40"
       ],
       "status": "approved"
     },
-    "prev_hash": "5bebde662a2361ffa05fb3d779281836b1d8a4adf89320f0e10fd3e2d1aa9c44",
-    "hash": "8f2d2083e27024b1282679a602103d20f5ec540bd16df281be63c9fe60b68f32"
+    "prev_hash": "ddf6bb184e1fa56642be5720ccb63ad56a1ac8b7cce93a419eca173e6d284b40",
+    "hash": "6406eac3d1c40a7a0cdf08e4bbc38be7a7f4b79b61bd282b151937f3e6a9adb0"
   },
   {
     "seq": 10,
-    "ts": "2026-10-12T23:08:10.178+00:00",
+    "ts": "2026-10-13T00:49:51.592+00:00",
     "actor": "system",
     "kind": "audit.anchored",
     "payload": {
@@ -183,16 +183,16 @@
       "backend": "local",
       "explorer_url": null,
       "from_seq": 1,
-      "merkle_root": "e8631000574d5dadf1bc2a17092047cc1cdc75735f3ee2ecba125456fedc36d7",
+      "merkle_root": "feaaa058a840fb6a8e5bf29d5ca2f43116be447f09f40e85fb23c80eb168f8a0",
       "to_seq": 9,
       "tx_hash": null
     },
-    "prev_hash": "8f2d2083e27024b1282679a602103d20f5ec540bd16df281be63c9fe60b68f32",
-    "hash": "0ee1fa8d620b8e49feb206e5701693d9d1a4002f5ef3e7d4985c757b57f92dbc"
+    "prev_hash": "6406eac3d1c40a7a0cdf08e4bbc38be7a7f4b79b61bd282b151937f3e6a9adb0",
+    "hash": "497a4b4738b91f93d7da987f95bfd8a83962b8d05898659cfbd76b8c586ec48e"
   },
   {
     "seq": 11,
-    "ts": "2026-10-12T23:08:10.181+00:00",
+    "ts": "2026-10-13T00:49:51.598+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -207,27 +207,27 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "0ee1fa8d620b8e49feb206e5701693d9d1a4002f5ef3e7d4985c757b57f92dbc",
-    "hash": "2cfc59e297226f880cc4bfbfaa843cd08ebd710f331be96a65342048e67019d5"
+    "prev_hash": "497a4b4738b91f93d7da987f95bfd8a83962b8d05898659cfbd76b8c586ec48e",
+    "hash": "a86bd265a64716314045cc87897aeb5afe6e32d4ba4071e8790cc802a9668241"
   },
   {
     "seq": 12,
-    "ts": "2026-10-12T23:08:10.183+00:00",
+    "ts": "2026-10-13T00:49:51.601+00:00",
     "actor": "security",
     "kind": "approval.otp_sent",
     "payload": {
       "approval_id": "APR-0002",
       "delivery_id": "msg_4",
-      "expires_at": "2026-10-12T23:13:10.182480+00:00",
+      "expires_at": "2026-10-13T00:54:51.599857+00:00",
       "mode": "sms",
       "sent_to": "+569 •••• 2222"
     },
-    "prev_hash": "2cfc59e297226f880cc4bfbfaa843cd08ebd710f331be96a65342048e67019d5",
-    "hash": "e2c8af0de96e9112b921656889d3d544fb2d3637c634c5f491b0673df845a6d2"
+    "prev_hash": "a86bd265a64716314045cc87897aeb5afe6e32d4ba4071e8790cc802a9668241",
+    "hash": "e0cf6f6fadc1bf7ce9c065405722752765cafa60053a9d701380be3774a23627"
   },
   {
     "seq": 13,
-    "ts": "2026-10-12T23:08:10.206+00:00",
+    "ts": "2026-10-13T00:49:51.639+00:00",
     "actor": "owner",
     "kind": "bank.factoring",
     "payload": {
@@ -249,28 +249,28 @@
       "share": 0.5,
       "transaction_id": 2
     },
-    "prev_hash": "e2c8af0de96e9112b921656889d3d544fb2d3637c634c5f491b0673df845a6d2",
-    "hash": "bb7181396217a7b05272de0990827cff62cb80a067b67f45ffb3e046e12394c3"
+    "prev_hash": "e0cf6f6fadc1bf7ce9c065405722752765cafa60053a9d701380be3774a23627",
+    "hash": "b934bc282fa3f9dae633412caa5ac2f1e9a69ef7e47a2371e53dbea2ee02eb4b"
   },
   {
     "seq": 14,
-    "ts": "2026-10-12T23:08:10.207+00:00",
+    "ts": "2026-10-13T00:49:51.641+00:00",
     "actor": "owner",
     "kind": "approval.approved",
     "payload": {
       "approval_id": "APR-0002",
       "channel": "WA+OTP",
       "result_hashes": [
-        "bb7181396217a7b05272de0990827cff62cb80a067b67f45ffb3e046e12394c3"
+        "b934bc282fa3f9dae633412caa5ac2f1e9a69ef7e47a2371e53dbea2ee02eb4b"
       ],
       "status": "approved"
     },
-    "prev_hash": "bb7181396217a7b05272de0990827cff62cb80a067b67f45ffb3e046e12394c3",
-    "hash": "0d5a30c8bc4b6277ec228ebbb53e640b5b490eef67bd68cda6f399fe537e4e81"
+    "prev_hash": "b934bc282fa3f9dae633412caa5ac2f1e9a69ef7e47a2371e53dbea2ee02eb4b",
+    "hash": "b755c8b452231bbd881e58a5622ebbc46b9ab3e605a3a27a046d3ad44a3a3694"
   },
   {
     "seq": 15,
-    "ts": "2026-10-12T23:08:10.208+00:00",
+    "ts": "2026-10-13T00:49:51.643+00:00",
     "actor": "system",
     "kind": "audit.anchored",
     "payload": {
@@ -278,16 +278,16 @@
       "backend": "local",
       "explorer_url": null,
       "from_seq": 10,
-      "merkle_root": "a432b563c1be447521423a49f7c9fe938fcf4af47871b1ddef425b96cf9ca774",
+      "merkle_root": "aa06cb32509566270d599c80ac6505faeabd06a8b5a61dcef2cb3a6f26ba731e",
       "to_seq": 14,
       "tx_hash": null
     },
-    "prev_hash": "0d5a30c8bc4b6277ec228ebbb53e640b5b490eef67bd68cda6f399fe537e4e81",
-    "hash": "a452087fe55f30178b584cc84a4bd489993865cb3ca70a61c5a2fbd434e1c73f"
+    "prev_hash": "b755c8b452231bbd881e58a5622ebbc46b9ab3e605a3a27a046d3ad44a3a3694",
+    "hash": "dc0329173a403748dfff6dfb8cff75c0f19ba3179b6cc7fe86ec0199a72fe4f2"
   },
   {
     "seq": 16,
-    "ts": "2026-10-12T23:08:10.212+00:00",
+    "ts": "2026-10-13T00:49:51.650+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -302,27 +302,27 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "a452087fe55f30178b584cc84a4bd489993865cb3ca70a61c5a2fbd434e1c73f",
-    "hash": "fa72b26cffcd83e4915866c4fc682aaf17f02bc42e1ef8c13fa075ac890d7f79"
+    "prev_hash": "dc0329173a403748dfff6dfb8cff75c0f19ba3179b6cc7fe86ec0199a72fe4f2",
+    "hash": "b42069a8e38c6874a874b222f3abb55e0aae83a22464aa617efed1bcf55d2779"
   },
   {
     "seq": 17,
-    "ts": "2026-10-12T23:08:10.214+00:00",
+    "ts": "2026-10-13T00:49:51.652+00:00",
     "actor": "security",
     "kind": "approval.otp_sent",
     "payload": {
       "approval_id": "APR-0003",
       "delivery_id": "msg_5",
-      "expires_at": "2026-10-12T23:13:10.213246+00:00",
+      "expires_at": "2026-10-13T00:54:51.650972+00:00",
       "mode": "sms",
       "sent_to": "+569 •••• 2222"
     },
-    "prev_hash": "fa72b26cffcd83e4915866c4fc682aaf17f02bc42e1ef8c13fa075ac890d7f79",
-    "hash": "3deb2fd4802483ecf34f57ad3a438bb00176298aec4521445ac816b62beb7c35"
+    "prev_hash": "b42069a8e38c6874a874b222f3abb55e0aae83a22464aa617efed1bcf55d2779",
+    "hash": "2872d030cd5299177d3728775dc9187463333f1ede97e211b8433f8100898c6b"
   },
   {
     "seq": 18,
-    "ts": "2026-10-12T23:08:10.219+00:00",
+    "ts": "2026-10-13T00:49:51.659+00:00",
     "actor": "owner",
     "kind": "approval.approved",
     "payload": {
@@ -331,12 +331,12 @@
       "result_hashes": [],
       "status": "failed"
     },
-    "prev_hash": "3deb2fd4802483ecf34f57ad3a438bb00176298aec4521445ac816b62beb7c35",
-    "hash": "064ff3ddfa11c5bc533ff00fafe8452be0926054fde7ba4c9895a7b5c54ff5da"
+    "prev_hash": "2872d030cd5299177d3728775dc9187463333f1ede97e211b8433f8100898c6b",
+    "hash": "4d30329790640b5193f8e8bb4bd88ae8ea64f8798a82bdb8db4dd5861aa8e1eb"
   },
   {
     "seq": 19,
-    "ts": "2026-10-12T23:08:10.223+00:00",
+    "ts": "2026-10-13T00:49:51.667+00:00",
     "actor": "agent",
     "kind": "bank.payment",
     "payload": {
@@ -349,12 +349,12 @@
       "reference": "",
       "transaction_id": 3
     },
-    "prev_hash": "064ff3ddfa11c5bc533ff00fafe8452be0926054fde7ba4c9895a7b5c54ff5da",
-    "hash": "979e2d1ab84f5ec07b6a7640f4528036599480f267800a5a54fa8882fbe98ad4"
+    "prev_hash": "4d30329790640b5193f8e8bb4bd88ae8ea64f8798a82bdb8db4dd5861aa8e1eb",
+    "hash": "e374977240a5f2576fd50f9e4979a62ed8502627badd51102bfaf63d92ec878e"
   },
   {
     "seq": 20,
-    "ts": "2026-10-12T23:08:10.224+00:00",
+    "ts": "2026-10-13T00:49:51.668+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -369,12 +369,12 @@
       "status": "auto",
       "tier": 2
     },
-    "prev_hash": "979e2d1ab84f5ec07b6a7640f4528036599480f267800a5a54fa8882fbe98ad4",
-    "hash": "515b9b5bc1f16405a94e0e923cdda82fca44e8f519d73eac8355f9b07c003c65"
+    "prev_hash": "e374977240a5f2576fd50f9e4979a62ed8502627badd51102bfaf63d92ec878e",
+    "hash": "398b9e346d52e892a268211ad68a1cfc897c3afcccb32ba7f2fd6b3ec9bca7c2"
   },
   {
     "seq": 21,
-    "ts": "2026-10-12T23:08:10.227+00:00",
+    "ts": "2026-10-13T00:49:51.674+00:00",
     "actor": "agent",
     "kind": "approval.created",
     "payload": {
@@ -389,38 +389,38 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "515b9b5bc1f16405a94e0e923cdda82fca44e8f519d73eac8355f9b07c003c65",
-    "hash": "baaa9d65b9a3740113bb601218674975ac763119fd22a3ee19d8ecaf2f33910d"
+    "prev_hash": "398b9e346d52e892a268211ad68a1cfc897c3afcccb32ba7f2fd6b3ec9bca7c2",
+    "hash": "37c0e59ded8563dbdb7b0cf4e2f9685380291dc675a59958dbad77dc796792df"
   },
   {
     "seq": 22,
-    "ts": "2026-10-12T23:08:10.229+00:00",
+    "ts": "2026-10-13T00:49:51.676+00:00",
     "actor": "security",
     "kind": "approval.otp_sent",
     "payload": {
       "approval_id": "APR-0005",
       "delivery_id": "msg_6",
-      "expires_at": "2026-10-12T23:13:10.228223+00:00",
+      "expires_at": "2026-10-13T00:54:51.674912+00:00",
       "mode": "sms",
       "sent_to": "+569 •••• 2222"
     },
-    "prev_hash": "baaa9d65b9a3740113bb601218674975ac763119fd22a3ee19d8ecaf2f33910d",
-    "hash": "9b8a4f3e4ce1522e278bf9039189581305d476481d8be95a037b462eac409b81"
+    "prev_hash": "37c0e59ded8563dbdb7b0cf4e2f9685380291dc675a59958dbad77dc796792df",
+    "hash": "b40cb2e788f3bb36f56ff2d6c56bc257af073aa1011d299da7b63f2b8d5bf575"
   },
   {
     "seq": 23,
-    "ts": "2026-10-12T23:08:10.232+00:00",
+    "ts": "2026-10-13T00:49:51.680+00:00",
     "actor": "owner",
     "kind": "policy.kill_switch",
     "payload": {
       "on": true
     },
-    "prev_hash": "9b8a4f3e4ce1522e278bf9039189581305d476481d8be95a037b462eac409b81",
-    "hash": "bf4d20a3df8dd9c90f066180dca835d3e4156ddbbe619bab5459bec44cc0b51a"
+    "prev_hash": "b40cb2e788f3bb36f56ff2d6c56bc257af073aa1011d299da7b63f2b8d5bf575",
+    "hash": "489c60b455bac8ccb021a4341bf3ee632c97051e858893c03ef46bcd965a2639"
   },
   {
     "seq": 24,
-    "ts": "2026-10-12T23:08:10.236+00:00",
+    "ts": "2026-10-13T00:49:51.687+00:00",
     "actor": "system",
     "kind": "audit.anchored",
     "payload": {
@@ -428,11 +428,11 @@
       "backend": "local",
       "explorer_url": null,
       "from_seq": 15,
-      "merkle_root": "d4cbb5ced9009834b9c63ae2c6a3405927ae51dbcee573b01df08d7f09a4342d",
+      "merkle_root": "9db191ed81508f61fb99d4b9f80e370dae2c87fc53fe1539a57e18356604846e",
       "to_seq": 23,
       "tx_hash": null
     },
-    "prev_hash": "bf4d20a3df8dd9c90f066180dca835d3e4156ddbbe619bab5459bec44cc0b51a",
-    "hash": "aae31084cf816765e0f77759267f465856f7bc040f1977662ea91982dfeb65fa"
+    "prev_hash": "489c60b455bac8ccb021a4341bf3ee632c97051e858893c03ef46bcd965a2639",
+    "hash": "c9cbe1248e58b70274b55c2b4e84fbcdc39ec31bc360cfcbe352dc2dcad8a386"
   }
 ]
