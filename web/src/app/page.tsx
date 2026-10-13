@@ -10,7 +10,7 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteNav } from "@/components/site-nav";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
-import { N, clpM, longDate } from "@/lib/scenario";
+import { N } from "@/lib/scenario";
 
 const L = {
   deskH: { en: "One agent. The whole treasury desk.", es: "Un agente. Toda la tesorería.", zh: "一个代理，掌管整个资金台。" },
@@ -40,11 +40,6 @@ const L = {
     es: `Ataques del red team frenados (${N.rtStoppedBefore}/${N.rtAttacks} antes de la protección)`,
     zh: `红队攻击拦截数（防护前为${N.rtStoppedBefore}/${N.rtAttacks}）`,
   },
-  crisisKicker: { en: "Live case · cherries from Chile, buyer in Shanghai", es: "Caso real · cerezas de Chile, cliente en Shanghái", zh: "真实案例 · 智利樱桃，上海买家" },
-  crisisRisk: { en: "chance cash runs out", es: "de quedarse sin caja", zh: "现金耗尽概率" },
-  crisisDays: { en: "days to the harvest payroll", es: "días para los sueldos de la cosecha", zh: "天后发放采收工资" },
-  crisisGap: { en: "gap to cover", es: "brecha por cubrir", zh: "需补足缺口" },
-  crisisSee: { en: "Watch it unfold", es: "Mira cómo se resuelve", zh: "观看全过程" },
   teamH: { en: "Built at Universidad del Desarrollo, Chile.", es: "Hecho en la Universidad del Desarrollo, Chile.", zh: "由智利发展大学团队打造。" },
   sandbox: { en: "NANFENG 南风 · SOUTH WIND · SANDBOX DEMO — NO REAL FUNDS MOVE", es: "NANFENG 南风 · VIENTO DEL SUR · DEMO SANDBOX — NO SE MUEVE DINERO REAL", zh: "南风 NANFENG · 沙盒演示 — 不涉及真实资金" },
 } satisfies Record<string, Record<Lang, string>>;
@@ -101,16 +96,6 @@ export default function LandingPage() {
               <Link className="pill-cherry" href="/demo?play=1">{t("lp.cta.demo")}</Link>
               <a className="pill-out" href="#how">{t("lp.cta.how")}</a>
             </div>
-            <a className="crisis-strip rise rise-2" href="#story">
-              <span className="crisis-route" aria-hidden="true"><i className="crisis-dot" />Santiago<span className="crisis-arc" />Shanghai</span>
-              <span className="crisis-kicker">{l("crisisKicker")}</span>
-              <span className="crisis-stats">
-                <span><b className="num crisis-hot">{N.pNeg}</b>{l("crisisRisk")}</span>
-                <span><b className="num">{N.crunchDay}</b>{l("crisisDays")} · {longDate(N.crunchDate, lang)}</span>
-                <span><b className="num">{clpM(N.gapClp, lang)}</b>{l("crisisGap")}</span>
-              </span>
-              <span className="crisis-see">{l("crisisSee")} →</span>
-            </a>
             <a className="scroll-hint" href="#story" aria-label={lang === "es" ? "Bajar a la historia" : lang === "zh" ? "查看故事" : "Scroll to the story"}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </a>
