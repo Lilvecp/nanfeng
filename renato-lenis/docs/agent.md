@@ -83,7 +83,7 @@ No outbound message is written by an LLM.
 
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | `/inbound/zavu` | Zavu (`X-Webhook-Token` = `NANFENG_ZAVU_WEBHOOK_SECRET`) or the agent token | a WhatsApp, SMS or email → `handle_document` |
+| POST | `/inbound/zavu` | Zavu's signature (`X-Zavu-Signature`, secret in `NANFENG_ZAVU_WEBHOOK_SECRET`) or the agent token | a WhatsApp, SMS or email → `handle_document`; Zavu gets `202` at once and the run continues in the background |
 | POST | `/documents` | owner session (checked with the backend's `/auth/me`) | `{filename, mime, data_base64, source, language}`; PDF, PNG, JPEG, WebP or text, 4 MB max |
 | POST | `/ask` | owner session or agent token | `{question, run_id?, language}` → `{answer, intent, run_id, model}` |
 | POST | `/briefing` | owner session | daily cash briefing; `call: false` returns the text without calling |
@@ -125,6 +125,15 @@ No outbound message is written by an LLM.
 `python -m nanfeng_agent status` prints which are live, never the keys. Models are overridable with `NANFENG_MODEL_PLAN`, `NANFENG_MODEL_EXTRACT`, `NANFENG_MODEL_CLASSIFY` (comma-separated, in fallback order).
 
 ElevenLabs: the default voice is Sarah (`EXAVITQu4vr4xnSDxMaL`), a premade voice every account has. Rachel, the old default, is no longer premade and returns 404 `voice_not_found`. Any other voice goes in `ELEVENLABS_VOICE_ID`.
+
+### Zavu webhook
+
+Zavu posts `{id, type, data: {from, channel, text, ...}}` and signs it: `X-Zavu-Signature: t=<unix s>,v2=<hex>`, with v2 = HMAC-SHA256 of `"{t}.{raw body}"` under the secret Zavu issues when the webhook is added to a sender (Dashboard → sender → Add Webhook, event `message.inbound`). That secret goes in `NANFENG_ZAVU_WEBHOOK_SECRET`; Zavu does not send a custom token header, so a secret we generate ourselves cannot work. The agent:
+
+- rejects a missing, wrong or older-than-5-minutes signature (401) and fails closed (503) with no secret and no agent token;
+- answers `202` at once and runs the agent in the background, since Zavu wants a 2xx within 30 s and retries up to 5 times;
+- remembers the last 1,000 event ids, so a retry does not start a second run;
+- ignores every event that is not `message.inbound` (delivery receipts, templates).
 
 ### Zavu with a test key (`zv_test_…`)
 
