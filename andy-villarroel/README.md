@@ -29,7 +29,7 @@ Daily logs: [Oct 10](progress-2026-10-10.md) · [Oct 12](progress-2026-10-12.md)
 | r4-06 Red team | [redteam/](redteam/) · [results](redteam/results/REPORT.md): 4/43 → 43/43 stopped · through the agent: [`renato-lenis/tests/test_redteam_via_agent.py`](../renato-lenis/tests/test_redteam_via_agent.py) (21 attacks, none moves money) |
 | r4-08 / r4-11 Regulatory slide, China compliance | [privacy-compliance.md](privacy-compliance.md#regulatory-slide-deck-r4-08) |
 | r4-09 Security Self-Assessment (05) | [security-self-assessment.md](security-self-assessment.md) |
-| r4-10 Execution evidence (06) | [evidence/](evidence/) · [sample run](evidence/out/SUMMARY.md) (owner sign-in, PAE plan, 08:47 attack; bank cost = MILP cost); live export from the deployed backend pending with Camilo |
+| r4-10 Execution evidence (06) | [evidence/](evidence/) · [sample run](evidence/out/SUMMARY.md) (owner sign-in, PAE plan, 08:47 attack; bank cost = MILP cost); **live** run on the deployed backend: [out-live](evidence/out-live/SUMMARY.md), anchor on Sepolia [0x67b483e5…](https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a) |
 
 ## Tasks
 
@@ -43,4 +43,4 @@ Daily logs: [Oct 10](progress-2026-10-10.md) · [Oct 12](progress-2026-10-12.md)
 - [x] `r4-08` **Oct 14** · Should — _(content ready in privacy-compliance.md; goes into Valentín's deck)_ **Regulatory slide** for the deck: which regulations we comply with and how.
 - [x] `r4-11` **Oct 14** · Should — **Compliance for China** in the deck and docs: PIPL, cross-border data transfer and the Interim Measures for generative AI (2023), plus Ley 21.719 in Chile.
 - [x] `r4-09` **Oct 15** · Must — _(v2, Oct 12)_ **Security Self-Assessment Report**: how the permission levels are implemented and an honest list of known risks.
-- [ ] `r4-10` **Oct 16** · Must — _(builder fixed for owner sign-in and the PAE plan, Oct 12; only the live export from Camilo's deploy is pending)_ **Execution evidence**: review logs and hashes with Camilo and assemble package 06.
+- [x] `r4-10` **Oct 16** · Must — _(live export from the Railway deploy, Oct 12: [out-live/SUMMARY.md](evidence/out-live/SUMMARY.md), anchor confirmed on Sepolia)_ **Execution evidence**: review logs and hashes with Camilo and assemble package 06.

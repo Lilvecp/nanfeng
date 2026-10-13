@@ -12,7 +12,7 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 | Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../renato-lenis/tests/test_redteam_via_agent.py)) |
 | Automated tests | **Backend 104**: security/BEC 24, policy 20, API 16, OTP 12, owner sign-in 10, privacy 7, invoice registry 6, demo 5, anchoring 4. **Agent 84**, including the red team replay and the AI label |
 | CI gate | Fails the build if any of the 43 red team attacks gets through |
-| Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](evidence/out/SUMMARY.md)) |
+| Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 5/5 and the Merkle root read back from Sepolia ([summary](evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a)) |
 
 ## 2. Where decisions are made
 
