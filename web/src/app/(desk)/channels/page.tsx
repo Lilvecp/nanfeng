@@ -165,9 +165,9 @@ export default function ChannelsPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">Huerto Austral · 应收账款</b><span className="small muted" style={{ fontSize: 11 }}>由南风代发 · 模拟</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
                 <span className="mono small muted" style={{ alignSelf: "center", fontSize: 11 }}>2026年12月11日 10:20</span>
-                <div className="bubble in">尊敬的上海鸿信鲜果进口有限公司财务部：您好！感谢告知发票 {RECEIVABLE.id}（USD 180,000，原到期日 2026年12月18日）将延迟{N.delayDays}天付款。请确认新的付款日期；如可提前支付部分款项，欢迎随时沟通。谢谢！<span className="t">10:20</span></div>
+                <div className="bubble in">尊敬的上海鸿信鲜果进口有限公司财务部：您好！感谢告知发票 {RECEIVABLE.id}（USD 180,000，原到期日 2026年12月18日）将延迟{N.delayDays}天付款。请确认新的付款日期；如可提前支付部分款项，欢迎随时沟通。谢谢！<span className="small muted" style={{ display: "block", fontSize: 11, marginTop: 4 }}>【本消息由AI生成】</span><span className="t">10:20</span></div>
                 <div className="bubble out">收到，我们会在本周内确认付款时间。<span className="t">11:02</span></div>
-                <div className="bubble in">非常感谢！确认后我们将同步更新对账单。<span className="t">11:03</span></div>
+                <div className="bubble in">非常感谢！确认后我们将同步更新对账单。<span className="small muted" style={{ display: "block", fontSize: 11, marginTop: 4 }}>【本消息由AI生成】</span><span className="t">11:03</span></div>
               </div>
             </div></div>
           </figure>

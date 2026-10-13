@@ -441,7 +441,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Anchor the Merkle root of every entry since the last anchor */
+        /**
+         * Anchor the Merkle root of every entry since the last anchor
+         * @description Agent or signed-in owner only: each anchor writes an `audit.anchored` entry, so an open route let
+         *     anyone send unlimited transactions from the anchoring wallet.
+         */
         post: operations["anchor_audit_anchor_post"];
         delete?: never;
         options?: never;
@@ -1884,7 +1888,9 @@ export interface operations {
     anchor_audit_anchor_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1897,6 +1903,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnchorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

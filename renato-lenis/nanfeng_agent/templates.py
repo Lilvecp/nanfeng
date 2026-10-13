@@ -109,6 +109,19 @@ T: dict[str, dict[str, str]] = {
 
 COMPANY = "Huerto Austral Export SpA"
 
+# Every message NanFeng writes to a third party (an importer) says it was written by AI: required for people
+# in China by the CAC Measures for Labelling AI-Generated Synthetic Content (Sept 2025), and honest everywhere
+# else. Messages to the owner, who uses NanFeng knowingly, are not labelled.
+AI_LABEL = {
+    "es": "[Mensaje generado por IA · NanFeng]",
+    "en": "[AI-generated message · NanFeng]",
+    "zh": "【本消息由AI生成 · NanFeng】",
+}
+
+
+def ai_label(lang: str) -> str:
+    return AI_LABEL[lang if lang in LANGS else "en"]
+
 
 def render(name: str, lang: str, **slots: object) -> str:
     lang = lang if lang in LANGS else "en"

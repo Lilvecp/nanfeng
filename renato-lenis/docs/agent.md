@@ -40,7 +40,7 @@ Every step is published to Mission Control as `agent.step` (`POST /agent/events`
 | `inbound.py` | r2-07 | Zavu webhook payload → `Document` (sender from the envelope, never the body) |
 | `service.py` | r2-09 | HTTP service (:8200): Zavu webhook, uploads, runs, "ask it why", briefing; SSE listener that resumes runs |
 | `explain.py` | r2-09 | "Ask it why": answers from the run's recorded tool results |
-| `pdfgen.py` | r2-10 | The 10:31 fake invoice as a real PDF (hidden white-on-white instruction) for tests and evidence |
+| `pdfgen.py` | r2-10 | The 08:47 fake invoice as a real PDF (hidden white-on-white instruction) for tests and evidence |
 
 ## Tools
 
@@ -71,9 +71,9 @@ No outbound message is written by an LLM.
 
 | Time | Event | What the agent does |
 |---|---|---|
+| 08:47 | fake Frío Austral invoice: new account, look-alike domain, hidden "ignore previous instructions" | guard **malicious** (`doc-instruction`, `hidden-text`) → payee check adds `bank-change`, `domain-mismatch` → blocked, no approval, no LLM read it → owner alerted on WhatsApp (it came by email) with the call-back number **on file** |
 | 10:12 | Shanghai Hongxin's notice: INV-2026-118, USD 180,000, 45 days late | guard clean → extraction → `forecast_run` (81% negative cash on 2026-12-30) → WhatsApp alert to the owner → `financing_quote` → `optimize_plan` (PAE USD 142,400 · CLP 2.1M vs 3.8M) → `propose_plan` (APR, L3, pending) → reminder to the importer in Chinese over WeCom (mock) → "approve in the cockpit with the SMS code" |
 | owner | approves with the OTP in the cockpit | `resume`: approval executed in the sandbox bank → `anchor_audit` → confirmation |
-| 10:31 | fake Frío Austral invoice: new account, look-alike domain, hidden "ignore previous instructions" | guard **malicious** (`doc-instruction`, `hidden-text`) → payee check adds `bank-change`, `domain-mismatch` → blocked, no approval, no LLM read it → owner alerted on WhatsApp (it came by email) with the call-back number **on file** |
 
 `python -m nanfeng_agent cherry` plays it against a running backend.
 
@@ -131,10 +131,10 @@ Backend + quant engine + agent service on one machine, Mistral OCR live:
 1. `POST /inbound/zavu` with the Shanghai notice → forecast 81% → MILP plan (4 s) → `APR-0001`, L3, pending.
 2. The owner approves in the backend with the OTP → the listener resumes the run by itself → anchor → confirmation.
 3. `POST /ask` "¿Por qué elegiste el PAE?" → the plan, CLP 2,1M vs 3,8M, 45% cheaper, 96% of 10,000 scenarios.
-4. `POST /documents` with the real 10:31 PDF → Mistral OCR → `hidden-text`, `doc-instruction`, `bank-change` → blocked, no approval.
+4. `POST /documents` with the real 08:47 PDF → Mistral OCR → `hidden-text`, `doc-instruction`, `bank-change` → blocked, no approval.
 
 ## Not done yet
 
-- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 10:31 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. Zavu and ElevenLabs are written and tested against mocked APIs; they need their keys, then one live run each.
+- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 08:47 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. Zavu and ElevenLabs are written and tested against mocked APIs; they need their keys, then one live run each.
 - **Front wiring:** the cockpit still shows canned answers in "Ask it why" and has no upload button; the endpoints above are ready for it.
 - **LangGraph:** the battle plan listed it. The orchestrator is a plain, explicit state machine instead (fewer dependencies, every transition in one file, easy to test). Swapping it in later does not change the tools or the channel layer.

@@ -171,7 +171,7 @@ def send_collection(ctx: RunContext, a: CollectionArgs) -> dict[str, Any]:
     lang = a.language or contact.language
     text = templates.render("collection", lang, customer=inv["customer"].replace(" (fictional)", ""),
                             invoice=inv["id"], amount=templates.money(inv["amount"], inv["currency"], lang),
-                            due_date=inv["due_date"], company=templates.COMPANY)
+                            due_date=inv["due_date"], company=templates.COMPANY) + " " + templates.ai_label(lang)
     d = ctx.hub.send_to(contact, OutboundMessage(to="", text=text, language=lang, kind="collection"))
     return {"delivery": d.public(), "detail": f"{d.channel} ({'mock' if d.mock else d.status}) · {lang} · {inv['id']}"}
 
