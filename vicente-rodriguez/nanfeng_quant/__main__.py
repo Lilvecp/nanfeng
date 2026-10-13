@@ -4,12 +4,14 @@
   quote     [scenario] [--amount CLP]       Financing Arena quotes
   optimize  [scenario] [--confidence 0.9]   MILP plan vs. default loan + explanation
   passport  [scenario] [--consent]          Credit Passport
+  analysis  [scenario]                      Business financial analysis (cash budget, customers, FX, payrolls)
   generate                                  Regenerate the 50 synthetic SMEs
   bench     [--limit N]                     Run NanFeng-Bench (writes results/)
   backtest                                  Run forecast backtests (writes results/)
   sensitivity                               Plan sensitivity to confidence, rates, forward spread
   demo                                      Recompute every results/cherry_crisis_* file
   story                                     Rebuild cherry_crisis_story.json from saved results (no solve)
+  analysis-demo                             Rewrite results/cherry_crisis_analysis.json only
 """
 from __future__ import annotations
 
@@ -23,7 +25,7 @@ from . import tools
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="nanfeng_quant", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["forecast", "quote", "optimize", "passport", "generate", "bench", "backtest", "sensitivity", "demo", "story"])
+    ap.add_argument("command", choices=["forecast", "quote", "optimize", "passport", "analysis", "analysis-demo", "generate", "bench", "backtest", "sensitivity", "demo", "story"])
     ap.add_argument("scenario", nargs="?", default="cherry_crisis")
     ap.add_argument("--overrides", type=json.loads, default=None)
     ap.add_argument("--amount", type=float, default=None)
@@ -44,6 +46,11 @@ def main(argv: list[str] | None = None) -> None:
         out = tools.optimize_plan(args.scenario, args.confidence, args.overrides, seed=args.seed)
     elif args.command == "passport":
         out = tools.credit_passport(args.scenario, consent=args.consent, seed=args.seed)
+    elif args.command == "analysis":
+        out = tools.business_analysis(args.scenario, seed=args.seed)
+    elif args.command == "analysis-demo":
+        from .demo import write_analysis
+        out = write_analysis()
     elif args.command == "generate":
         from .synthetic import main as gen
         gen()

@@ -267,5 +267,26 @@
     }
    }
   }
+ },
+ {
+  "type": "function",
+  "function": {
+   "name": "business_analysis",
+   "description": "Business financial analysis for the owner: 90-day cash budget by month, where the money goes (outflows by category), customer concentration, receivables (DSO, aging), currency exposure with a 10% peso shock, payroll coverage with its Monte Carlo risk, and plain findings in EN / ES / 中文 (`insights`). Read-only (L0). Quote its numbers and texts verbatim.",
+   "parameters": {
+    "type": "object",
+    "required": [
+     "scenario"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "scenario": {
+      "type": "string",
+      "description": "Scenario id, e.g. \"cherry_crisis\"",
+      "default": "cherry_crisis"
+     }
+    }
+   }
+  }
  }
 ]

@@ -22,6 +22,7 @@ from typing import Any
 import numpy as np
 
 from . import __version__
+from .analysis import business_analysis as _analysis
 from .catalog import CATALOG_FILE, Catalog, financing_quote as _quote, spot
 from .credit_passport import credit_passport as _passport, weight_robustness
 from .explain import forecast_drivers, plan_explanation
@@ -237,6 +238,18 @@ def credit_passport(scenario: str | dict[str, Any], consent: bool = False, seed:
     return _clean(out)
 
 
+def business_analysis(scenario: str | dict[str, Any], seed: int = 7) -> dict[str, Any]:
+    """Business financial analysis (cash budget, customers, receivables, currencies, payrolls, insights)."""
+    def compute():
+        t0 = time.perf_counter()
+        company = load_scenario(scenario)
+        out = _analysis(company, simulate(company, 10_000, seed))
+        out["latency_ms"] = round((time.perf_counter() - t0) * 1000)
+        out["source"] = _source("business_analysis", method="contracted cash calendar + Monte Carlo", seed=seed)
+        return _clean(out)
+    return _cached(_cache_key("business_analysis", scenario, seed=seed), compute)
+
+
 def sandbox_seed(scenario: str | dict[str, Any] = "cherry_crisis") -> dict[str, Any]:
     """State for the sandbox bank, taken from the same scenario and catalog the engine uses, so the
     bank, the forecast and the front tell the same story (field names follow Camilo's seed.py)."""
@@ -288,7 +301,8 @@ def sandbox_seed(scenario: str | dict[str, Any] = "cherry_crisis") -> dict[str, 
 
 
 TOOLS = {"forecast_run": forecast_run, "financing_quote": financing_quote,
-         "optimize_plan": optimize_plan, "credit_passport": credit_passport}
+         "optimize_plan": optimize_plan, "credit_passport": credit_passport,
+         "business_analysis": business_analysis}
 
 _OVERRIDES_SCHEMA = {
     "type": "object", "additionalProperties": False,
@@ -348,6 +362,14 @@ TOOL_SPECS = [
         "parameters": {"type": "object", "required": ["scenario"], "additionalProperties": False, "properties": {
             "scenario": _SCENARIO_ARG,
             "consent": {"type": "boolean", "default": False}}}}},
+    {"type": "function", "function": {
+        "name": "business_analysis",
+        "description": ("Business financial analysis for the owner: 90-day cash budget by month, where the money goes "
+                        "(outflows by category), customer concentration, receivables (DSO, aging), currency exposure "
+                        "with a 10% peso shock, payroll coverage with its Monte Carlo risk, and plain findings in "
+                        "EN / ES / 中文 (`insights`). Read-only (L0). Quote its numbers and texts verbatim."),
+        "parameters": {"type": "object", "required": ["scenario"], "additionalProperties": False, "properties": {
+            "scenario": _SCENARIO_ARG}}}},
 ]
 
 

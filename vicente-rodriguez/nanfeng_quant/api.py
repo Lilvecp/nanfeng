@@ -25,7 +25,7 @@ DEMO_ARTIFACTS = {
     "before": "cherry_crisis_before.json", "forecast": "cherry_crisis_forecast.json",
     "quotes": "cherry_crisis_quotes.json", "plan": "cherry_crisis_plan.json",
     "passport": "cherry_crisis_passport.json", "scenario_lab": "cherry_crisis_scenario_lab.json",
-    "story": "cherry_crisis_story.json",
+    "story": "cherry_crisis_story.json", "analysis": "cherry_crisis_analysis.json",
 }
 
 
@@ -77,6 +77,10 @@ class PlanRequest(ScenarioRef):
     explain: bool = True
     n_scenarios: int = Field(200, ge=50, le=500, description="Scenarios inside the MILP")
     channel: str = Field("WEB", description="Channel written into approval_request (WEB, WHATSAPP, ...)")
+
+
+class AnalysisRequest(ScenarioRef):
+    seed: int = 7
 
 
 class PassportRequest(ScenarioRef):
@@ -247,6 +251,27 @@ class PassportResponse(Loose):
     source: Source
 
 
+class Insight(Loose):
+    id: str
+    severity: Literal["high", "medium", "low", "ok"]
+    metric: str
+    text: dict[str, str]
+
+
+class AnalysisResponse(Loose):
+    company_id: str
+    as_of: str
+    kpis: dict[str, Any]
+    months: list[dict[str, Any]]
+    outflows_by_category: list[dict[str, Any]]
+    customers: list[dict[str, Any]]
+    aging: list[dict[str, Any]]
+    currencies: list[dict[str, Any]]
+    payrolls: list[dict[str, Any]]
+    insights: list[Insight]
+    source: Source
+
+
 # ---------------------------------------------------------------------------
 # app
 # ---------------------------------------------------------------------------
@@ -309,8 +334,14 @@ def passport(req: PassportRequest) -> dict[str, Any]:
     return tools.credit_passport(_scenario(req), req.consent, req.seed)
 
 
+@app.post("/quant/analysis", response_model=AnalysisResponse)
+def analysis(req: AnalysisRequest) -> dict[str, Any]:
+    """Business financial analysis: cash budget, customers, receivables, currencies, payrolls and findings."""
+    return tools.business_analysis(_scenario(req), req.seed)
+
+
 @app.get("/quant/demo/{artifact}")
-def demo(artifact: Literal["before", "forecast", "quotes", "plan", "passport", "scenario_lab", "story"]) -> Any:
+def demo(artifact: Literal["before", "forecast", "quotes", "plan", "passport", "scenario_lab", "story", "analysis"]) -> Any:
     """Precomputed Cherry Crisis results for Demo Mode: no computation, no network dependency."""
     return json.loads((RESULTS_DIR / DEMO_ARTIFACTS[artifact]).read_text(encoding="utf-8"))
 

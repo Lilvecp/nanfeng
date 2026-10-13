@@ -243,6 +243,45 @@
     }
    }
   },
+  "/quant/analysis": {
+   "post": {
+    "summary": "Analysis",
+    "description": "Business financial analysis: cash budget, customers, receivables, currencies, payrolls and findings.",
+    "operationId": "analysis_quant_analysis_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AnalysisRequest"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AnalysisResponse"
+        }
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/quant/demo/{artifact}": {
    "get": {
     "summary": "Demo",
@@ -261,7 +300,8 @@
         "plan",
         "passport",
         "scenario_lab",
-        "story"
+        "story",
+        "analysis"
        ],
        "type": "string",
        "title": "Artifact"
@@ -383,6 +423,122 @@
  },
  "components": {
   "schemas": {
+   "AnalysisRequest": {
+    "properties": {
+     "scenario": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       }
+      ],
+      "title": "Scenario",
+      "description": "Scenario id in data/scenarios, or a full scenario object (see ScenarioSchema)",
+      "default": "cherry_crisis"
+     },
+     "seed": {
+      "type": "integer",
+      "title": "Seed",
+      "default": 7
+     }
+    },
+    "type": "object",
+    "title": "AnalysisRequest"
+   },
+   "AnalysisResponse": {
+    "properties": {
+     "company_id": {
+      "type": "string",
+      "title": "Company Id"
+     },
+     "as_of": {
+      "type": "string",
+      "title": "As Of"
+     },
+     "kpis": {
+      "additionalProperties": true,
+      "type": "object",
+      "title": "Kpis"
+     },
+     "months": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Months"
+     },
+     "outflows_by_category": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Outflows By Category"
+     },
+     "customers": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Customers"
+     },
+     "aging": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Aging"
+     },
+     "currencies": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Currencies"
+     },
+     "payrolls": {
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "type": "array",
+      "title": "Payrolls"
+     },
+     "insights": {
+      "items": {
+       "$ref": "#/components/schemas/Insight"
+      },
+      "type": "array",
+      "title": "Insights"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "company_id",
+     "as_of",
+     "kpis",
+     "months",
+     "outflows_by_category",
+     "customers",
+     "aging",
+     "currencies",
+     "payrolls",
+     "insights",
+     "source"
+    ],
+    "title": "AnalysisResponse"
+   },
    "ApprovalRequest": {
     "properties": {
      "action": {
@@ -702,6 +858,44 @@
     },
     "type": "object",
     "title": "HTTPValidationError"
+   },
+   "Insight": {
+    "properties": {
+     "id": {
+      "type": "string",
+      "title": "Id"
+     },
+     "severity": {
+      "type": "string",
+      "enum": [
+       "high",
+       "medium",
+       "low",
+       "ok"
+      ],
+      "title": "Severity"
+     },
+     "metric": {
+      "type": "string",
+      "title": "Metric"
+     },
+     "text": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "type": "object",
+      "title": "Text"
+     }
+    },
+    "additionalProperties": true,
+    "type": "object",
+    "required": [
+     "id",
+     "severity",
+     "metric",
+     "text"
+    ],
+    "title": "Insight"
    },
    "Operation": {
     "properties": {

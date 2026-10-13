@@ -127,6 +127,8 @@ def run() -> dict[str, Any]:
 
     (RESULTS_DIR / "cherry_crisis_summary.md").write_text(render(before, after, quotes, plan, passport, lab), encoding="utf-8")
 
+    write_analysis()
+
     return {"before": before["summary"]["headline"], "after": after["summary"]["headline"],
 
             "plan_cost_clp": plan["optimal"]["total_cost_clp"], "default_cost_clp": plan["default"]["total_cost_clp"],
@@ -135,6 +137,15 @@ def run() -> dict[str, Any]:
 
 
 
+
+
+def write_analysis() -> dict[str, Any]:
+    """Business financial analysis of the Cherry Crisis (seed 7, like the forecast), for the web and Demo Mode."""
+    out = tools.business_analysis(SCENARIO, seed=7)
+    out.pop("latency_ms", None)
+    out["source"].pop("cached", None)
+    _write("cherry_crisis_analysis.json", out)
+    return out
 
 
 def _m(clp: float) -> str:

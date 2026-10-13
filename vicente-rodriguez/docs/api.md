@@ -17,9 +17,10 @@ The backend (`camilo-backend`, `backend/app/routers/quant.py`) proxies these pat
 | POST | `/quant/quote` | Financing Arena rows: cost, EAC, term, requirements, eligibility | ~0.5 s |
 | POST | `/quant/plan` | MILP plan vs. default loan, savings, out-of-sample coverage, why each product is in or out, **`approval_request`**, **`after_plan`** fan chart, Credit Passport before/after | ~5 s first call on Cherry Crisis (30–50 s on hard SMEs); ~0 s repeated (cached) |
 | POST | `/quant/passport` | Credit Passport; `consent: true` adds a SHA-256 digest for on-chain anchoring | ~0.3 s |
+| POST | `/quant/analysis` | Business financial analysis: cash budget by month, outflows by category, customers, DSO and aging, currency exposure, payroll safety and findings in EN / ES / 中文 | ~0.1 s |
 | GET | `/quant/sandbox/seed` | Accounts, receivables, lenders and FX for the sandbox bank, from the same scenario + catalog | – |
 | GET | `/quant/tools` | Agent tool schemas | – |
-| GET | `/quant/demo/{artifact}` | Precomputed Cherry Crisis results for Demo Mode: `before`, `forecast`, `quotes`, `plan`, `passport`, `scenario_lab`, **`story`** | – |
+| GET | `/quant/demo/{artifact}` | Precomputed Cherry Crisis results for Demo Mode: `before`, `forecast`, `quotes`, `plan`, `passport`, `scenario_lab`, **`story`**, `analysis` | – |
 
 Request bodies take `scenario` as an id (`"cherry_crisis"`) or a full scenario object, plus optional `overrides` (Scenario Lab knobs: `global_delay_extra_days`, `customer_delay_extra_days`, `cny_shift_pct`, `usd_shift_pct`, `cherry_price_pct`, `extra_hires`, `hire_monthly_wage_clp`, …). Unknown override keys are rejected with 422.
 

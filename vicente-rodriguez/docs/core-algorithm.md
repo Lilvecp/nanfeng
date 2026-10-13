@@ -97,3 +97,23 @@ Transparent scorecard: six factors (90-day probability of negative cash, buffer 
 - One common price factor per path (no per-shipment price noise); payables are deterministic.
 - Loans cannot be prepaid; credit-line usage is counted at the full drawn amount (conservative).
 - The MILP finds the optimum on the sampled scenarios; the out-of-sample check is what guarantees the 90% target, not the in-sample solution.
+
+## 6. Business financial analysis
+
+`nanfeng_quant/analysis.py` (`business_analysis` tool, `POST /quant/analysis`, artifact `results/cherry_crisis_analysis.json`) answers the third part of Topic E, *business financial analysis*, with the data the engine already has: the scenario's receivables, planned shipments and payables (the same records the sandbox bank is seeded with), today's FX and the Monte Carlo paths. Nothing new is assumed and nothing is fitted.
+
+**Contracted view.** Every invoice is paid at its due date + any announced delay + the customer's median delay; each shipment pays its advance on the ship date and its balance after its terms + the median delay; amounts at today's FX and the expected cherry price. It is the deterministic ledger NanFeng-Bench uses as the independent check (`bench.ledger_cash`), and a test asserts they agree to the peso. From it:
+
+| Output | Definition |
+|---|---|
+| Cash budget by month | inflows, outflows, net and closing cash per calendar month of the 90-day horizon |
+| Where the money goes | outflows by category (payroll, suppliers, freight, debt service, taxes, utilities) and their share |
+| Operating cash margin | (inflows − outflows other than debt service) / inflows, over the horizon |
+| Customer concentration | each customer's share of expected inflows; Herfindahl index; largest customer |
+| DSO | open receivables / (annual sales / 365), at today's FX; plus the amount-weighted days to collect and an aging table (0–30, 31–60, 61–90, 90+ days) |
+| Currency exposure | inflows and outflows per currency; natural hedge = foreign-currency outflows / foreign-currency inflows; the CLP effect of the peso 10% stronger on the net foreign position |
+| Payroll safety | for each payroll: contracted cash before paying it, coverage (cash before / payroll) and, from the Monte Carlo, `P(cash < 0)` at the end of that day |
+
+**Findings.** `insights` turns the numbers into plain sentences in EN / ES / 中文, most severe first, each with its metric and the threshold that fired: a payroll with `P(cash < 0) ≥ 50%` (high) or ≥ 10% (medium); an announced customer delay (high); the largest customer ≥ 40% (high) or ≥ 25% (medium) of inflows; ≥ 70% of inflows in foreign currency (medium); DSO above 60 days (medium); debt service above 20% of inflows (medium, otherwise reported as healthy). The web's Business health screen and the agent's WhatsApp report quote these sentences verbatim; no LLM writes them.
+
+*Cherry Crisis result:* net cash flow CLP 452M over 90 days (37% operating cash margin) but the contracted low point is −CLP 10.6M on 2026-12-30, the December payroll, with an 81% chance cash is negative after paying it (13% for January, 1% for February); Shanghai Hongxin is 58% of expected inflows (index 0.41); 100% of inflows are in USD or CNY and freight offsets only 6%, so a 10% stronger peso costs CLP 130M; DSO 68 days; debt service only 4% of inflows.

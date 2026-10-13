@@ -56,8 +56,9 @@ The LLM never computes a number: it calls these tools and quotes them. That is b
 | r5-11 | Oct 14 | Must | Core algorithm description | ✅ Done — ready for Valentín's English edit | `docs/core-algorithm.md` |
 | extra | – | – | Plan sensitivity | ✅ Done | `nanfeng_quant/sensitivity.py`, `results/sensitivity_summary.md` |
 | extra | – | – | API contract + reference server + sandbox seed + agent tool schemas | ✅ Done (D1, D2, D6) | `nanfeng_quant/api.py`, `api/`, `docs/api.md` |
+| extra | Oct 13 | – | Business financial analysis (Topic E): cash budget, customers, DSO, FX exposure, payroll safety, findings EN / ES / 中文 | ✅ Done | `nanfeng_quant/analysis.py`, `POST /quant/analysis`, `results/cherry_crisis_analysis.json`, [core-algorithm §6](docs/core-algorithm.md#6-business-financial-analysis) |
 
-Tests: `32 passed` (`pytest`). Bench 50/50.
+Tests: `36 passed` (`pytest`). Bench 50/50.
 
 ---
 
@@ -156,6 +157,7 @@ python -m nanfeng_quant forecast cherry_crisis      # Monte Carlo summary + driv
 python -m nanfeng_quant quote cherry_crisis         # Financing Arena quotes
 python -m nanfeng_quant optimize cherry_crisis      # MILP plan vs. default loan + explanation + approval_request
 python -m nanfeng_quant passport cherry_crisis --consent
+python -m nanfeng_quant analysis cherry_crisis      # business financial analysis (analysis-demo rewrites the results file)
 python -m nanfeng_quant forecast cherry_crisis --overrides '{"cny_shift_pct": -5}'   # Scenario Lab
 
 python -m nanfeng_quant demo          # rewrite every results/cherry_crisis_* file (~4 min, proves optimality)
@@ -183,6 +185,7 @@ vicente-rodriguez/
 │   ├── optimizer.py        # chance-constrained MILP (OR-Tools CBC/SCIP)
 │   ├── explain.py          # counterfactual drivers + why each product is in/out
 │   ├── credit_passport.py  # explainable score (also on post-plan cash)
+│   ├── analysis.py         # business financial analysis: cash budget, customers, FX, payrolls, findings
 │   ├── synthetic.py        # 50 synthetic cherry exporters
 │   ├── bench.py            # NanFeng-Bench
 │   ├── backtest.py         # CRPS / coverage backtests

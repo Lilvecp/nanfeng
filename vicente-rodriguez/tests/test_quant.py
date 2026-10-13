@@ -265,3 +265,46 @@ def test_agent_tool_specs_match_tools():
     assert names == set(tools.TOOLS)
     err = json.loads(tools.call("forecast_run", {"scenario": "cherry_crisis", "bogus": 1}))
     assert "error" in err
+
+
+def test_business_analysis_matches_the_independent_ledger(cherry, cherry_res):
+    from nanfeng_quant.analysis import business_analysis
+    a = business_analysis(cherry, cherry_res)
+    k = a["kpis"]
+    ledger = ledger_cash(cherry)
+    assert k["ending_cash_clp"] == pytest.approx(ledger[-1], abs=1.0)
+    assert k["lowest_cash_clp"] == pytest.approx(ledger.min(), abs=1.0)
+    # The contracted low point is the forecast's crunch day (harvest payroll, 2026-12-30).
+    assert k["lowest_cash_date"] == "2026-12-30"
+    # The months, the categories and the customers add up.
+    assert sum(m["net_clp"] for m in a["months"]) == pytest.approx(k["net_cash_flow_clp"], abs=1.0)
+    assert sum(c["amount_clp"] for c in a["outflows_by_category"]) == pytest.approx(k["expected_outflows_clp"], abs=1.0)
+    assert sum(c["share_of_inflows"] for c in a["customers"]) == pytest.approx(1.0)
+    assert sum(r["amount_clp"] for r in a["aging"]) == pytest.approx(k["open_receivables_clp"])
+
+
+def test_business_analysis_findings_follow_the_data(cherry, cherry_res):
+    from nanfeng_quant.analysis import business_analysis
+    a = business_analysis(cherry, cherry_res)
+    assert a["customers"][0]["id"] == "C-SHA" and a["kpis"]["top_customer_share"] > 0.5
+    dec = next(p for p in a["payrolls"] if p["id"] == "P-07")
+    day = (np.datetime64(dec["date"]) - np.datetime64(cherry.as_of.isoformat())).astype(int)
+    assert dec["prob_negative_after"] == pytest.approx(cherry_res.p_negative_by_day[day])
+    ids = [i["id"] for i in a["insights"]]
+    assert ids[0] == "payroll-P-07" and "late-C-SHA" in ids and "concentration" in ids
+    assert all(set(i["text"]) == {"en", "es", "zh"} for i in a["insights"])
+    assert [i["severity"] for i in a["insights"]] == sorted((i["severity"] for i in a["insights"]),
+                                                            key=["high", "medium", "low", "ok"].index)
+    # Without the Monte Carlo the payroll finding falls back to contracted coverage.
+    plain = business_analysis(cherry)
+    assert plain["payrolls"][0]["prob_negative_after"] is None
+    assert any(i["id"] == "payroll-P-07" and i["metric"] == "coverage" for i in plain["insights"])
+
+
+def test_business_analysis_peso_shock_is_the_net_foreign_position(cherry):
+    from nanfeng_quant.analysis import business_analysis
+    k = business_analysis(cherry)["kpis"]
+    usd = next(r for r in business_analysis(cherry)["currencies"] if r["currency"] == "USD")
+    assert usd["outflows_clp"] > 0  # freight is paid in USD: a partial natural hedge
+    assert k["fx_shock_impact_clp"] < 0
+    assert k["natural_hedge_ratio"] == pytest.approx(usd["outflows_clp"] / (k["foreign_share_of_inflows"] * k["expected_inflows_clp"]))

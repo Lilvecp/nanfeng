@@ -45,3 +45,13 @@ def test_integration_endpoints():
     assert {s["function"]["name"] for s in specs} >= {"forecast_run", "optimize_plan"}
     story = client.get("/quant/demo/story").json()
     assert story["forecast_after"]["crunch_date"] == "2026-12-30"
+
+
+def test_analysis_endpoint_and_demo_artifact():
+    r = client.post("/quant/analysis", json={"scenario": "cherry_crisis"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["kpis"]["lowest_cash_date"] == "2026-12-30" and body["insights"][0]["severity"] == "high"
+    saved = client.get("/quant/demo/analysis").json()
+    assert saved["kpis"] == body["kpis"] and saved["insights"] == body["insights"]
+    assert client.post("/quant/analysis", json={"scenario": "nope"}).status_code == 404
