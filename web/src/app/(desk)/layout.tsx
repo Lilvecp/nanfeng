@@ -1,3 +1,4 @@
+import { DeskGate } from "@/components/desk-gate";
 import { Director } from "@/components/director";
 import { Guide } from "@/components/guide";
 import { OwnerLogin } from "@/components/owner-login";
@@ -9,7 +10,7 @@ export default function DeskLayout({ children }: LayoutProps<"/">) {
     <div className="shell">
       <Sidebar />
       <main className="main">
-        <PageTransition>{children}</PageTransition>
+        <PageTransition><DeskGate>{children}</DeskGate></PageTransition>
       </main>
       <Guide />
       <Director />

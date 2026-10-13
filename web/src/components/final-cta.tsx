@@ -26,9 +26,9 @@ const STAGES: Record<Lang, { label: string; meta: string }[]> = {
 };
 
 const HEAD: Record<Lang, { a: string; kw: string; b: string; note: string; preview: string; time: string }> = {
-  en: { a: "Watch a USD 180,000 gap close in", kw: "four minutes", b: ".", note: "Fixed seed · runs offline · no sign-up", preview: "Cherry Crisis · live preview", time: "≈ 4 min" },
-  es: { a: "Mira cómo se cierra una brecha de USD 180.000 en", kw: "cuatro minutos", b: ".", note: "Semilla fija · funciona sin red · sin registro", preview: "Cherry Crisis · vista previa", time: "≈ 4 min" },
-  zh: { a: "观看 180,000 美元缺口在", kw: "四分钟内补足", b: "。", note: "固定种子 · 离线运行 · 无需注册", preview: "樱桃危机 · 实时预览", time: "约4分钟" },
+  en: { a: `Watch a ${clpM(S.need.amount_clp)} payroll gap close in`, kw: "four minutes", b: ".", note: "Fixed seed · runs offline · no sign-up", preview: "Cherry Crisis · live preview", time: "≈ 4 min" },
+  es: { a: `Mira cómo se cierra una brecha de ${clpM(S.need.amount_clp, "es")} en los sueldos en`, kw: "cuatro minutos", b: ".", note: "Semilla fija · funciona sin red · sin registro", preview: "Cherry Crisis · vista previa", time: "≈ 4 min" },
+  zh: { a: `观看${clpM(S.need.amount_clp, "zh")}的工资缺口在`, kw: "四分钟内补足", b: "。", note: "固定种子 · 离线运行 · 无需注册", preview: "樱桃危机 · 实时预览", time: "约4分钟" },
 };
 
 export function FinalCta({ cta, footer }: { cta: string; footer: string }) {
@@ -45,7 +45,7 @@ export function FinalCta({ cta, footer }: { cta: string; footer: string }) {
               {h.a} <span className="kw">{h.kw}</span>{h.b}
             </h2>
             <div className="final-actions">
-              <Link className="pill-cherry final-btn" href="/demo">
+              <Link className="pill-cherry final-btn" href="/demo?play=1">
                 {cta}
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </Link>

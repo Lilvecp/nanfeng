@@ -42,7 +42,8 @@ const REQ: Record<string, Record<Exclude<Lang, "en">, string>> = {
 };
 
 function reasonFor(r: Row, lang: Lang) {
-  if (lang === "en") return r.reason;
+  // the engine writes full pesos ("CLP 2,802,079"); the screen uses one compact format everywhere
+  if (lang === "en") return r.reason.replace(/CLP ([\d,]+)/g, (_, n: string) => clpM(Number(n.replace(/,/g, ""))));
   const note = NOTE[r.productId]?.[lang];
   if (r.alone === null) return note ?? r.reason;
   const extra = r.alone - N.planCost;
@@ -183,7 +184,7 @@ export default function FinancingPage() {
                   <g key={r.product} onClick={() => setFocus(r.product)} style={{ cursor: "pointer" }}>
                     <text className="ch-axis" x="150" y={i * 30 + 22} textAnchor="end" style={r.selected ? { fill: "var(--accent)", fontWeight: 700 } : undefined}>{sname(r.product, lang)}</text>
                     <rect x="160" y={i * 30 + 10} width={barW(r.alone!)} height="16" fill={r.selected ? "var(--accent)" : "var(--muted)"} opacity={r.selected ? 1 : 0.45} stroke={focus === r.product ? "var(--text)" : "none"} strokeWidth="2" />
-                    <text className="ch-axis" x={166 + barW(r.alone!)} y={i * 30 + 22}>{(r.alone! / 1e6).toFixed(1)}</text>
+                    <text className="ch-axis" x={166 + barW(r.alone!)} y={i * 30 + 22}>{(r.alone! / 1e6).toLocaleString(lang === "es" ? "es-CL" : "en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</text>
                   </g>
                 ))}
               </svg>

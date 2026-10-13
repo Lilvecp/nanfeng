@@ -156,3 +156,40 @@
 @keyframes demo-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.demo-stage{animation:none}}
 @media (max-width:900px){.demo-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Neutral notice: information, not a warning (Approvals "In plain words") */
+.owner-alert.info{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 22%,transparent)}
+.owner-alert.info .owner-alert-ic{background:var(--accent);color:var(--accent-ink);font-family:var(--f-display)}
+
+/* One-time code: sentence-case errors with the next step, a way out of a lockout, reassurance */
+.otp-msg{font-size:13.5px;line-height:1.45;color:var(--crit);font-weight:500}
+.otp-resend{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.otp-resend .btn-ghost{padding-left:0}
+.approve-assure{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45;color:var(--muted)}
+.approve-assure svg{flex:none;margin-top:2px;color:var(--ok)}
+
+/* Demo Mode: an obvious start, and an invitation at the end */
+.demo-start{margin:0 16px 12px;align-self:flex-start;display:flex;align-items:center;gap:14px;padding:12px 22px 12px 12px;border:0;border-radius:999px;background:var(--accent);color:var(--accent-ink);cursor:pointer;text-align:left;box-shadow:0 10px 30px -12px rgba(20,23,28,.45)}
+.demo-start:hover{filter:brightness(1.08)}
+.demo-start:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.demo-start-ic{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--accent-ink);color:var(--accent)}
+.demo-start b{display:block;font-family:var(--f-display);font-size:19px;font-weight:600}
+.demo-start span span{display:block;font-size:13px;opacity:.85}
+.demo-end{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:12px;background:var(--accent-soft)}
+.demo-end b{font-family:var(--f-display);font-size:18px}
+
+/* Welcome: a light strip under the cash notice (it used to be the heaviest block on Home) */
+.owner-intro{background:var(--accent-soft);color:var(--text);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent);border-radius:14px;padding:14px 18px;gap:10px}
+.owner-intro h2{font-size:16px}
+.owner-intro ol{gap:12px}
+.owner-intro li{flex-direction:row;align-items:flex-start;gap:10px;font-size:13.5px}
+.owner-intro li span:last-child{opacity:1;color:var(--muted)}
+.owner-intro li b{color:var(--text)}
+.owner-intro .owner-n{background:var(--accent);color:var(--accent-ink)}
+.owner-intro .btn{background:var(--surface);color:var(--text)}
+
+/* Live desk: waiting for the API's first answer */
+.desk-loading{min-height:60vh;display:flex;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:15px}
+.desk-loading-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:desk-pulse 1s ease-in-out infinite alternate}
+@keyframes desk-pulse{from{opacity:.25;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){.desk-loading-dot{animation:none}}

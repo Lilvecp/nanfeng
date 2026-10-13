@@ -1,0 +1,57 @@
+{
+ "es": {
+  "audio": null,
+  "duration": 25,
+  "lines": [
+   {
+    "at": 0,
+    "text": "Buenos días, habla NanFeng. Caja de hoy: 176 millones de pesos."
+   },
+   {
+    "at": 4.7,
+    "text": "Shanghai Hongxin pagará con 45 días de atraso. Hay 81 por ciento de riesgo de que no alcance para los sueldos de la cosecha del 30 de diciembre."
+   },
+   {
+    "at": 14.7,
+    "text": "Encontré un crédito de pre-exportación 1,7 millones de pesos más barato que el crédito del banco. Te lo dejé para aprobar con tu código."
+   }
+  ]
+ },
+ "en": {
+  "audio": null,
+  "duration": 22,
+  "lines": [
+   {
+    "at": 0,
+    "text": "Good morning, this is NanFeng. Cash today: 176 million pesos."
+   },
+   {
+    "at": 4.6,
+    "text": "Shanghai Hongxin will pay 45 days late. There is an 81 percent risk of not covering the harvest payroll on December 30."
+   },
+   {
+    "at": 12.9,
+    "text": "I found a pre-export loan 1.7 million pesos cheaper than the bank loan, 45 percent less. It is waiting for your approval code."
+   }
+  ]
+ },
+ "zh": {
+  "audio": null,
+  "duration": 25,
+  "lines": [
+   {
+    "at": 0,
+    "text": "早上好，我是南风。今日现金1.76亿智利比索。"
+   },
+   {
+    "at": 5.7,
+    "text": "上海鸿信将延迟45天付款，12月30日的采收工资有百分之81的风险无法足额发放。"
+   },
+   {
+    "at": 15.1,
+    "text": "我找到一笔出口前融资，比银行贷款便宜1.7百万比索，已提交给您，请用验证码批准。"
+   }
+  ]
+ },
+ "voice": null
+}

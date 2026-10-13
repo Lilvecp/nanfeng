@@ -14,6 +14,7 @@ const ICONS: Record<string, React.ReactNode> = {
   home: <><path d="M4 11l8-7 8 7" /><path d="M6 10v10h12V10M10 20v-6h4v6" /></>,
   lock: <><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" /></>,
   bars: <path d="M4 20h16M7 20v-7M12 20V6M17 20v-10" />,
+  pulse: <path d="M3 12h4l2.5-6 4 12 2.5-6H21" />,
   chat: <path d="M4 5h12v9H9l-4 3v-3H4zM18 9h2v8h-2v3l-3-3h-4" />,
   shield: <><path d="M12 3l7 3v6c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z" /><path d="M9 12l2 2 4-4" /></>,
   gear: <><path d="M18.69 9.93 L20.87 10.48 L20.87 13.52 L18.69 14.07 L18.19 15.27 L19.35 17.20 L17.20 19.35 L15.27 18.19 L14.07 18.69 L13.52 20.87 L10.48 20.87 L9.93 18.69 L8.73 18.19 L6.80 19.35 L4.65 17.20 L5.81 15.27 L5.31 14.07 L3.13 13.52 L3.13 10.48 L5.31 9.93 L5.81 8.73 L4.65 6.80 L6.80 4.65 L8.73 5.81 L9.93 5.31 L10.48 3.13 L13.52 3.13 L14.07 5.31 L15.27 5.81 L17.20 4.65 L19.35 6.80 L18.19 8.73Z" /><circle cx="12" cy="12" r="3" /></>,
@@ -67,7 +68,7 @@ export function Sidebar() {
           <Icon name="gear" />{t("nav.settings")}
         </Link>
         {inDemo ? (
-          <span className="badge warn" style={{ alignSelf: "flex-start" }}>Demo · REC</span>
+          <span className="badge warn" style={{ alignSelf: "flex-start" }}>{t("shell.demo")}</span>
         ) : (
           <Link className="btn btn-secondary btn-sm" href="/demo" onClick={() => setOpen(false)}>{t("shell.demo")}</Link>
         )}

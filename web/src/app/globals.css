@@ -1404,3 +1404,91 @@ html:not(.reveal-ready) .final-signal {
 /* the tour bar never hides the end of a screen or a notice */
 body:has(.director-bar) .shell .main{padding-bottom:160px}
 body:has(.director-bar) .toast{bottom:150px}
+
+/* ===== v6 · Front critique (2026-10-12): contrast, focus, legible sizes, cherry with a meaning ===== */
+/* AA text contrast on porcelain and surface-2 (was 3.6–4.0:1 and 4.47:1) */
+.app { --faint: #666c75; --brass: #85672a; }
+/* Cherry is back, but only where it means something: the payroll date and the crisis itself.
+   Buttons and navigation stay navy, so approving never looks like a warning. */
+.app { --cherry: #a3122e; --cherry-ink: #ffffff; --cherry-soft: #f6e2e3; }
+.app[data-theme="dark"] { --cherry: #ee6a80; --cherry-ink: #1a0508; --cherry-soft: #3a1a20; }
+.btn-cherry { background: var(--accent); color: var(--accent-ink); }
+.nav a.on { border-left-color: var(--accent); }
+
+/* One visible focus ring for every custom control */
+.btn:focus-visible, .nav a:focus-visible, .side-link:focus-visible, .seg button:focus-visible,
+.ptabs button:focus-visible, .ctl:focus-visible, .demo-step:focus-visible, .pill-cherry:focus-visible,
+.pill-out:focus-visible, .pill-sm:focus-visible, .site-nav a:focus-visible, .crisis-strip:focus-visible,
+.globe-pause:focus-visible, .icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.net-node:focus-visible, .scc-mod:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+/* No UI text under 12px */
+.net-role, .scc-step-n, .scc-mod-steps, .hint, .workspace-eyebrow { font-size: 12px; }
+.final-foot { letter-spacing: 0.04em; }
+
+/* Faster scroll reveal: a quick scroll (or a recording) never lands on blank sections */
+.reveal-ready [data-reveal] { transform: translateY(18px); transition-duration: 0.45s; }
+.reveal-ready [data-reveal="globe"] { transform: translateY(24px) scale(0.96); transition-duration: 0.6s; }
+
+/* Globe story: the callout title is the section's h2 (was an h3 right after the h1) */
+.globe-callout h2 {
+  margin: 0;
+  font-family: var(--f-body);
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  text-wrap: balance;
+}
+.globe-callout-dots { align-items: center; }
+.globe-callout-dots .globe-pause {
+  width: 26px;
+  height: 26px;
+  margin-left: 6px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+}
+.globe-callout-dots .globe-pause:hover { color: var(--text); }
+
+/* Landing first screen: the Cherry Crisis in three numbers, linked to the globe story */
+.crisis-strip {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "route kicker see" "stats stats stats";
+  gap: 10px 18px;
+  align-items: center;
+  width: min(760px, 100%);
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--cherry);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text) !important;
+  text-align: left;
+  text-decoration: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.crisis-strip:hover { box-shadow: 0 6px 24px -12px rgba(20, 23, 28, 0.25); }
+.crisis-route { grid-area: route; display: inline-flex; align-items: center; gap: 8px; font: 600 12px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.crisis-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cherry); box-shadow: 0 0 0 4px var(--cherry-soft); }
+.crisis-arc { width: 34px; height: 10px; border: 1.5px dashed var(--line-2); border-bottom: 0; border-radius: 34px 34px 0 0; }
+.crisis-kicker { grid-area: kicker; font-size: 13px; color: var(--muted); }
+.crisis-see { grid-area: see; font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.crisis-stats { grid-area: stats; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.crisis-stats > span { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--muted); line-height: 1.35; }
+.crisis-stats b { font-size: 28px; line-height: 1.05; font-weight: 700; color: var(--text); }
+.crisis-stats b.crisis-hot { color: var(--cherry); }
+@media (max-width: 640px) {
+  .crisis-strip { grid-template-columns: 1fr; grid-template-areas: "route" "kicker" "stats" "see"; padding: 14px 16px; }
+  .crisis-stats { grid-template-columns: minmax(0, 1fr); }
+  .crisis-stats > span { flex-direction: row; align-items: baseline; gap: 8px; }
+  .crisis-stats b { font-size: 22px; }
+}

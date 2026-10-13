@@ -78,7 +78,7 @@ const DICT = {
   "lp.nav.channels": { en: "Channels", es: "Canales", zh: "渠道" },
   "lp.nav.security": { en: "Security", es: "Seguridad", zh: "安全" },
   "lp.nav.team": { en: "Team", es: "Equipo", zh: "团队" },
-  "lp.signin": { en: "Sign in", es: "Ingresar", zh: "登录" },
+  "lp.signin": { en: "Open the app", es: "Abrir la app", zh: "进入应用" },
   "lp.hero.a": { en: "You sell to the", es: "Le vendes al", zh: "您向" },
   "lp.hero.kw": { en: "world", es: "mundo", zh: "世界" },
   "lp.hero.b": { en: ".", es: ".", zh: "销售，" },

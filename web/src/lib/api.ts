@@ -37,6 +37,8 @@ async function request<T>(method: "GET" | "POST", path: string, body?: unknown, 
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
+    // a cold or unreachable backend must not leave the desk on "Connecting…": fall back instead
+    signal: AbortSignal.timeout(path === "/health" ? 10_000 : 30_000),
   });
   const data = res.headers.get("content-type")?.includes("json") ? await res.json() : res.status === 204 ? null : await res.text();
   // Owner-only route without a valid session: ask the owner to sign in, then try once more.
@@ -69,6 +71,8 @@ export const api = {
     list: (status?: string) => get<Approval[]>(`/approvals${status ? `?status=${status}` : ""}`),
     // silent: on page load the cockpit only creates the demo plan if it may; it never pops the sign-in.
     create: (body: ApprovalCreate) => post<Approval>("/approvals", body, { auth: "silent" }),
+    // SMS mode: texts the owner a fresh code (429 if asked again too soon, 409 once locked).
+    resendCode: (id: string) => post<{ mode: string; sent_to?: string; expires_at?: string }>(`/approvals/${id}/otp`),
     approve: (id: string, otp: string, channel = "WEB+OTP") => post<Approval>(`/approvals/${id}/approve`, { otp, channel }),
     reject: (id: string, reason: string) => post<Approval>(`/approvals/${id}/reject`, { reason, channel: "WEB" }),
   },

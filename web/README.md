@@ -38,7 +38,7 @@ Production build: `npm run build && npm start`.
 | `/demo` | Demo Mode (fe-10) | Six-step Cherry Crisis replay: play/pause, next, reset, click a step, keyboard (space, ← →) |
 | `/design-system` | Design system reference | Tokens and components |
 
-State is shared across screens: approving in `/approvals` closes the gap in the cockpit, removes the badge in the sidebar, completes the trace in Mission Control and adds anchors in Security. A full page reload resets the sandbox.
+State is shared across screens: approving in `/approvals` closes the gap in the cockpit, removes the badge in the sidebar, completes the trace in Agent activity and adds anchors in Security. Sandbox decisions (and wrong-code attempts) last for the browser tab's session, so a reload keeps them; **Reset sandbox** in Settings or Demo Mode starts over, and **Send a new code** on Approvals gives three fresh attempts.
 
 ## How it is organised
 
