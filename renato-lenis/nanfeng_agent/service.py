@@ -4,6 +4,7 @@
     POST /documents        the cockpit uploads a PDF or photo (owner session)
     POST /ask              "Ask it why" in Mission Control (owner)
     POST /briefing         daily cash briefing (owner)
+    POST /report           business health report on WhatsApp (owner)
     GET  /runs, /runs/{id} what the agent did (owner)
     GET  /health           providers live/offline, never the keys
 
@@ -155,6 +156,11 @@ class BriefingIn(BaseModel):
     call: bool = True
 
 
+class ReportIn(BaseModel):
+    language: Literal["es", "en", "zh"] | None = None
+    send: bool = True
+
+
 def create_app(service: AgentService | None = None, listen: bool | None = None) -> FastAPI:
     svc = service or AgentService(Agent(Settings.from_env()))
     settings = svc.agent.settings
@@ -263,6 +269,11 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
     def briefing(body: BriefingIn):
         with svc.lock:
             return svc.agent.briefing(body.language, call=body.call)
+
+    @app.post("/report", dependencies=[Depends(require_owner)])
+    def report(body: ReportIn):
+        with svc.lock:
+            return svc.agent.health_report(body.language, send=body.send)
 
     return app
 

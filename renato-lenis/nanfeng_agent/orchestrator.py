@@ -316,6 +316,37 @@ class Agent:
         self._finish(run, "completed")
         return {"run": run.summary(), "text": text, "delivery": delivery}
 
+    def health_report(self, language: str | None = None, send: bool = True) -> dict[str, Any]:
+        """Business health report on WhatsApp: the quant engine's top findings, word for word, and a link
+        to the full analysis. No LLM writes it; the findings come in the owner's language from the engine."""
+        run = self._new_run("report", language)
+        lang = run.language
+        try:
+            a = self._tool(run, "business_analysis", {"scenario": self.settings.scenario})
+        except Halt as exc:
+            self._finish(run, "halted", str(exc))
+            return {"run": run.summary(), "text": templates.render("halted", lang)}
+        except (ToolError, BackendError) as exc:
+            self._finish(run, "failed", str(exc))
+            return {"run": run.summary(), "text": ""}
+        top = [i for i in a.get("insights", []) if i["severity"] != "ok"][:3] or a.get("insights", [])[:1]
+        findings = "\n".join(f"{n}. {i['text'].get(lang) or i['text']['en']}" for n, i in enumerate(top, 1))
+        text = templates.render("health_report", lang, company=templates.COMPANY, findings=findings,
+                                link=f"{self.settings.cockpit_url}/health")
+        delivery = None
+        if send:
+            try:
+                d = self.hub.send_to(self.owner, OutboundMessage(to="", text=text, language=lang, kind="report"),
+                                     channels=("whatsapp",))
+                delivery = d.public()
+                run.deliveries.append(delivery)
+                self._trace(run, {"step": "Business health report", "tool": f"channel.{d.channel}", "tier": 1,
+                                  "model": "template", "detail": f"{d.channel} · {d.status} · {lang} · {len(top)} findings"})
+            except UnknownChannel:
+                pass
+        self._finish(run, "completed")
+        return {"run": run.summary(), "text": text, "delivery": delivery}
+
 
 def build_agent(settings: Settings | None = None) -> Agent:
     return Agent(settings or Settings.from_env())

@@ -32,7 +32,7 @@ A Chilean cherry exporter pays harvest wages in pesos every month but is paid in
 |---|---|---|
 | Cash-flow management with alerts | 90-day Monte Carlo forecast (10,000 paths) of every inflow and outflow; the agent alerts the owner on WhatsApp when the probability of negative cash jumps, and sends a daily voice briefing | `vicente-rodriguez/nanfeng_quant`, `renato-lenis/nanfeng_agent` |
 | Financing-option matching | Chance-constrained MILP over a catalog of 9 Chilean financing products (two kinds of export factoring, letter-of-credit discounting, confirming, a bank loan, a FOGAPE-guaranteed loan, a USD pre-export loan, a credit line, a CNY forward); compared fairly with the default bank loan | `vicente-rodriguez/nanfeng_quant`, web `/financing` |
-| Business financial analysis | Credit Passport (a six-factor score a lender can recompute), Scenario Lab (delay, FX, price and hiring shocks), explanations of every plan ("ask it why") | web `/cockpit`, `/scenario` |
+| Business financial analysis | Business health: 90-day cash budget by month, where the money goes, customer concentration, DSO and aging, currency exposure with a peso shock, payroll safety, and plain findings in EN / ES / 中文, also sent to the owner on WhatsApp. Plus the Credit Passport (a six-factor score a lender can recompute) and the Scenario Lab | `vicente-rodriguez/nanfeng_quant/analysis.py`, web `/health`, agent `POST /report` |
 | Acting, not advising | The agent proposes the plan as an approval request; the policy engine tiers it; the owner approves with a code; the sandbox bank executes it; the audit log is anchored on a public chain | `backend/app` |
 
 **The reference scenario, Cherry Crisis** (Huerto Austral Export SpA, fictional). Every number below comes from one run of the quant engine (seed 7, 10,000 paths) and is shared by the web, the agent, the tests and the evidence.
@@ -93,10 +93,10 @@ flowchart LR
 
 | Component | Directory | Stack | Responsibility |
 |---|---|---|---|
-| Web cockpit | `web/` | Next.js 16, React 19, TypeScript, Tailwind 4 | Landing, owner's simple view and full desk (Cockpit, Approvals, Financing Arena, Scenario Lab, Mission Control, Security, Channels, Documents, Settings, Demo Mode), EN / ES / 中文. Runs on the live API, or on the Cherry Crisis sandbox in the browser when no API is reachable |
+| Web cockpit | `web/` | Next.js 16, React 19, TypeScript, Tailwind 4 | Landing, owner's simple view and full desk (Cockpit, Business health, Approvals, Financing Arena, Scenario Lab, Mission Control, Security, Channels, Documents, Settings, Demo Mode), EN / ES / 中文. Runs on the live API, or on the Cherry Crisis sandbox in the browser when no API is reachable |
 | Backend (API gateway) | `backend/` | FastAPI, SQLAlchemy, Postgres (SQLite locally), web3.py | Owner sign-in, policy engine L0–L3, step-up OTP, sandbox bank (accounts, payments, FX, factoring, loans, forwards), hash-chained audit log with Merkle anchoring, invoice registry, security endpoints (document guard, payee check, PII masking), agent event stream (SSE), proxy to the quant engine |
 | Agent service | `renato-lenis/` | FastAPI, OpenRouter, Mistral OCR, Zavu, ElevenLabs | Reads documents and messages, plans, calls tools, proposes approvals, resumes a run when the owner decides, explains its decisions, talks to the owner and the importer |
-| Quant engine | `vicente-rodriguez/` | NumPy, SciPy, pandas, OR-Tools (CBC, SCIP) | Cash Monte Carlo, financing MILP, plan explanations, Credit Passport, NanFeng-Bench, backtest, sensitivity |
+| Quant engine | `vicente-rodriguez/` | NumPy, SciPy, pandas, OR-Tools (CBC, SCIP) | Cash Monte Carlo, financing MILP, plan explanations, Credit Passport, business financial analysis, NanFeng-Bench, backtest, sensitivity |
 | Contracts | `contracts/` | OpenAPI 3 | `openapi.json` is generated from the backend; CI fails if it drifts. The web's types are generated from it |
 | Security tooling | `andy-villarroel/` | Python | Threat model, red team (43 attacks), evidence package builder (deliverable 06) |
 | Design | `design/private-desk/` | Static HTML | The mockups the web is built from |
@@ -199,7 +199,11 @@ plus one operation per invoice, minimum tickets and fixed fees (binary w), credi
 
 A transparent scorecard of six factors (probability of negative cash, buffer in months of payroll, customer concentration, weighted customer delay, debt service over inflows, foreign-currency share), each mapped linearly to 0–100 and weighted 30/15/20/15/10/10. Every factor reports its value, sub-score and points, so a lender can recompute it. The weights are heuristic and labelled as such; the improvement after the plan holds under 10,000 random weightings.
 
-### 3.4 Validation
+### 3.4 Business financial analysis
+
+Built from the same receivables, shipments and payables as the forecast, with no new assumption: a *contracted* 90-day calendar (each invoice paid at its due date plus any announced delay plus the customer's median delay, at today's FX) gives the cash budget by month, outflows by category, the operating cash margin, each customer's share of inflows and the concentration index, DSO (open receivables over daily sales) with an aging table, the exposure per currency with the effect of a 10% stronger peso, and the cash before each payroll. The Monte Carlo adds the probability that cash is negative after each payroll. Fixed thresholds turn this into plain findings in EN / ES / 中文, most severe first (for the Cherry Crisis: the December payroll at 81% risk, one customer at 58% of inflows, 100% of inflows in foreign currency, DSO 68 days; debt service at 4% is reported as healthy). The contracted calendar is the same independent ledger NanFeng-Bench checks against, and a test asserts they agree. Details: [core algorithm §6](../vicente-rodriguez/docs/core-algorithm.md#6-business-financial-analysis).
+
+### 3.5 Validation
 
 | Check | Result |
 |---|---|
@@ -220,7 +224,7 @@ The agent **proposes and never approves**. Its pipeline for every document or me
 4. **Quarantined LLM:** a small model with no tools and no memory returns typed fields only (strict schema, random boundary markers per call, temperature 0).
 5. **Payee check:** bank account and sender domain against master data (business email compromise).
 6. **Planner:** an LLM through OpenRouter (Claude Sonnet, with fallbacks) proposes tool calls; every step is checked against the facts and the rule planner takes over if any check fails.
-7. **Tools:** `ledger_query`, `forecast_run`, `financing_quote`, `optimize_plan`, `propose_plan`, `send_collection`, `schedule_payment`, `request_factoring`, `anchor_audit`. No tool takes a bank account, a phone number, an approval code or free text for a person.
+7. **Tools:** `ledger_query`, `forecast_run`, `business_analysis`, `financing_quote`, `optimize_plan`, `propose_plan`, `send_collection`, `schedule_payment`, `request_factoring`, `anchor_audit`. No tool takes a bank account, a phone number, an approval code or free text for a person.
 8. **Approval and resume:** money only moves through `POST /approvals`; when the owner decides, the agent's listener on the event stream resumes the run, anchors and confirms.
 
 No outbound message is written by an LLM: every message comes from a template in EN / ES / 中文 with typed slots, and messages to importers carry an AI-generated label. "Ask it why" answers from the run's recorded tool results. Hard caps per run (12 steps, USD 0.50 of LLM spend) and the kill switch are checked before every step. Without provider keys every component has a deterministic stand-in, so CI and the demo never depend on a paid API; on the deploy all four providers are live.
@@ -257,8 +261,8 @@ Result: the red team's 43 outcome-based attacks went from 4/43 stopped to **43/4
 | Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 116 | `cd backend && pytest -q` | Backend tests |
 | Red team gate (43 attacks against the API) | 43/43 stopped | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 43` | Backend tests |
 | OpenAPI contract drift | — | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
-| Agent (pipeline, Cherry Crisis, service, red team through the agent, AI label) | 90 | `cd renato-lenis && pytest -q` (needs `../backend[dev]`) | Agent tests |
-| Quant engine (Monte Carlo, MILP, bench, API) | 32 | `cd vicente-rodriguez && pytest -q` | Quant tests |
+| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 91 | `cd renato-lenis && pytest -q` (needs `../backend[dev]`) | Agent tests |
+| Quant engine (Monte Carlo, MILP, business analysis, bench, API) | 36 | `cd vicente-rodriguez && pytest -q` | Quant tests |
 | NanFeng-Bench | 50/50 | `python -m nanfeng_quant bench` (~5 min) | No (results committed) |
 | Web | lint + production build | `cd web && npm run lint && npm run build` | Web lint and build |
 | Secret scanning | gitleaks | — | Secret scanning |

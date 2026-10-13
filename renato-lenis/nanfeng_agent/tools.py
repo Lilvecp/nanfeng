@@ -2,7 +2,7 @@
 
 | Tool | Tier | Rule |
 |------|------|------|
-| ledger_query, forecast_run, financing_quote, optimize_plan | L0 | read-only; every number comes from here |
+| ledger_query, forecast_run, financing_quote, optimize_plan, business_analysis | L0 | read-only; every number comes from here |
 | send_collection | L1 | `contact_id` + `receivable_id` from master data, message from a template |
 | schedule_payment, request_factoring, propose_plan | via /approvals | the policy engine decides the tier |
 | anchor_audit | L0 | system action |
@@ -60,6 +60,10 @@ class Overrides(Args):
 class ForecastArgs(Args):
     scenario: str = Field("cherry_crisis", pattern=r"^[a-z0-9_]{1,40}$")
     overrides: Overrides | None = None
+
+
+class AnalysisArgs(Args):
+    scenario: str = Field("cherry_crisis", pattern=r"^[a-z0-9_]{1,40}$")
 
 
 class QuoteArgs(Args):
@@ -126,6 +130,14 @@ def forecast_run(ctx: RunContext, a: ForecastArgs) -> dict[str, Any]:
     s = res["summary"]
     return {"summary": s, "drivers": res.get("drivers"), "source": res.get("source"),
             "detail": s.get("headline", "")}
+
+
+def business_analysis(ctx: RunContext, a: AnalysisArgs) -> dict[str, Any]:
+    res = ctx.backend.post("/quant/analysis", {"scenario": a.scenario})
+    k = res["kpis"]
+    high = sum(1 for i in res.get("insights", []) if i["severity"] == "high")
+    return {**res, "detail": f"{len(res.get('insights', []))} findings ({high} high) · net 90 days "
+                             f"{templates.money(k['net_cash_flow_clp'], 'CLP')} · DSO {k['dso_days']:.0f} days"}
 
 
 def financing_quote(ctx: RunContext, a: QuoteArgs) -> dict[str, Any]:
@@ -218,6 +230,9 @@ TOOLS: dict[str, Tool] = {t.name: t for t in [
          LedgerArgs, ledger_query, "sandbox bank"),
     Tool("forecast_run", 0, "90-day cash forecast, 10,000 Monte Carlo scenarios. Quote its numbers verbatim.",
          ForecastArgs, forecast_run, "Monte Carlo"),
+    Tool("business_analysis", 0, "Business financial analysis: cash budget, customers, receivables, currencies, "
+                                 "payroll safety and findings in EN / ES / 中文. Quote its texts verbatim.",
+         AnalysisArgs, business_analysis, "quant engine"),
     Tool("financing_quote", 0, "Financing Arena: cost, EAC and eligibility of every product for the cash need.",
          QuoteArgs, financing_quote, "catalog"),
     Tool("optimize_plan", 0, "MILP: cheapest financing mix that keeps cash above the buffer. Returns the "

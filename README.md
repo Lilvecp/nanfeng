@@ -26,7 +26,7 @@ A Chilean cherry exporter learns that its largest Chinese importer will pay USD 
 |---|---|
 | Financing-option matching | Chance-constrained MILP over 9 Chilean financing products, compared fairly with the default bank loan (NanFeng-Bench 50/50, 41% cheaper on average) |
 | Cash-flow management with alerts | 90-day Monte Carlo forecast; WhatsApp alerts and a daily voice briefing |
-| Business financial analysis | Credit Passport (34 E → 67 B), Scenario Lab, "ask it why" on every decision |
+| Business financial analysis | Business health screen and WhatsApp report: cash budget by month, where the money goes, customer concentration, DSO, currency exposure, payroll safety and plain findings; Credit Passport (34 E → 67 B); Scenario Lab |
 
 Security is enforced outside the LLM: a policy engine with permission levels L0–L3, the owner's one-time code for anything that creates debt or changes a payee, a hash-chained audit log anchored on Sepolia, and a red team of 43 attacks (4/43 stopped before the controls, 43/43 after; CI fails if one gets through).
 
@@ -50,8 +50,8 @@ The web also runs alone (`cd web && npm ci && npm run dev`): with no backend it 
 | Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd backend && pip install -e ".[dev]" && pytest -q` | 116 passed | Backend tests |
 | Red team regression gate (43 attacks against the API) | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 43` | 43/43 stopped | Backend tests |
 | OpenAPI contract is up to date | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
-| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd renato-lenis && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 90 passed | Agent tests |
-| Quant engine: Monte Carlo, MILP, Credit Passport, API | `cd vicente-rodriguez && pip install -e ".[dev]" && pytest -q` | 32 passed | Quant tests |
+| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd renato-lenis && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 91 passed | Agent tests |
+| Quant engine: Monte Carlo, MILP, Credit Passport, business analysis, API | `cd vicente-rodriguez && pip install -e ".[dev]" && pytest -q` | 36 passed | Quant tests |
 | NanFeng-Bench: 50 scenarios with a known answer | `cd vicente-rodriguez && python -m nanfeng_quant bench` (~5 min) | 50/50 ([summary](vicente-rodriguez/results/bench_summary.md)) | — |
 | Web: lint and production build | `cd web && npm ci && npm run lint && npm run build` | clean | Web lint and build |
 | Secret scanning | gitleaks | no findings | Secret scanning |

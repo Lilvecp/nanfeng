@@ -9,6 +9,7 @@ const DICT = {
   // shell
   "nav.cockpit": { en: "Home", es: "Inicio", zh: "首页" },
   "nav.inbox": { en: "Messages", es: "Mensajes", zh: "消息" },
+  "nav.health": { en: "Business health", es: "Salud del negocio", zh: "经营健康" },
   "tab.options": { en: "Options", es: "Opciones", zh: "方案" },
   "tab.whatif": { en: "What if…", es: "¿Y si…?", zh: "假设分析" },
   "tab.conversations": { en: "Conversations", es: "Conversaciones", zh: "对话" },

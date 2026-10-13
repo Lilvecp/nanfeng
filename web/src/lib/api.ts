@@ -119,6 +119,7 @@ export const agent = {
   health: () => get<{ status: string; providers: Record<string, string>; planner: string }>("/health", { base: AGENT_URL, auth: "silent" }),
   ask: (question: string, language: string) => post<AgentAnswer>("/ask", { question, language }, AGENT),
   upload: (body: AgentUpload) => post<AgentRun>("/documents", { source: "upload", ...body }, AGENT),
+  report: (language: string) => post<{ text: string; delivery: { channel: string; status: string } | null }>("/report", { language }, AGENT),
 };
 
 /** Subscribes to the backend SSE stream; the browser reconnects and resumes with Last-Event-ID. */

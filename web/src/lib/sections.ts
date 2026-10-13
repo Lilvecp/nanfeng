@@ -1,12 +1,13 @@
 import type { I18nKey } from "./i18n";
 
-// Six sections in the sidebar (the agent's trace is its own: it is what makes "an agent that acts" auditable); related screens live as tabs inside their section (shown in the
+// Seven sections in the sidebar (the agent's trace is its own: it is what makes "an agent that acts" auditable); related screens live as tabs inside their section (shown in the
 // top bar). Routes stay as they were, so every existing link keeps working.
 
 export type Section = { href: string; key: I18nKey; icon: string; tabs?: { href: string; key: I18nKey }[] };
 
 export const SECTIONS: Section[] = [
   { href: "/cockpit", key: "nav.cockpit", icon: "home" },
+  { href: "/health", key: "nav.health", icon: "trend" },
   { href: "/approvals", key: "nav.approvals", icon: "lock" },
   { href: "/mission", key: "tab.agent", icon: "pulse" },
   {

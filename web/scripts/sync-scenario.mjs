@@ -17,6 +17,7 @@ const before = read("results/cherry_crisis_before.json");
 const plan = read("results/cherry_crisis_plan.json");
 const input = read("data/scenarios/cherry_crisis.json");
 const bench = read("results/bench_results.json").summary;
+const analysis = read("results/cherry_crisis_analysis.json");
 // Red team before/after the guard (andy-villarroel/redteam/results), per category in report order.
 const redteam = (label) => JSON.parse(readFileSync(join(here, "..", "..", "andy-villarroel", "redteam", "results", `${label}.json`), "utf8")).results;
 const rtBefore = redteam("before");
@@ -93,6 +94,19 @@ const data = {
     country: customers[r.customer_id].country,
   })),
   strings: story.strings,
+  // Business financial analysis (Topic E): cash budget, customers, receivables, currencies, payrolls, findings.
+  analysis: {
+    basis: analysis.basis,
+    kpis: analysis.kpis,
+    months: analysis.months,
+    outflows: analysis.outflows_by_category,
+    customers: analysis.customers.map(({ id, name, country, currency, open_receivables_clp, expected_inflows_clp, share_of_inflows, announced_delay_days }) =>
+      ({ id, name, country, currency, openClp: open_receivables_clp, inflowsClp: expected_inflows_clp, share: share_of_inflows, announcedDelay: announced_delay_days })),
+    aging: analysis.aging,
+    currencies: analysis.currencies,
+    payrolls: analysis.payrolls,
+    insights: analysis.insights.map(({ id, severity, text }) => ({ id, severity, text })),
+  },
   // NanFeng-Bench (50 synthetic exporters): the landing's "Measured, not promised" row.
   bench: {
     cases: bench.n_cases,

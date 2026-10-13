@@ -14,6 +14,7 @@ const ICONS: Record<string, React.ReactNode> = {
   home: <><path d="M4 11l8-7 8 7" /><path d="M6 10v10h12V10M10 20v-6h4v6" /></>,
   lock: <><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" /></>,
   bars: <path d="M4 20h16M7 20v-7M12 20V6M17 20v-10" />,
+  trend: <><path d="M4 20h16" /><path d="M5 16l4-5 4 3 6-8" /><path d="M15 6h4v4" /></>,
   pulse: <path d="M3 12h4l2.5-6 4 12 2.5-6H21" />,
   chat: <path d="M4 5h12v9H9l-4 3v-3H4zM18 9h2v8h-2v3l-3-3h-4" />,
   shield: <><path d="M12 3l7 3v6c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z" /><path d="M9 12l2 2 4-4" /></>,

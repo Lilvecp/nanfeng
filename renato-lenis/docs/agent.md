@@ -49,6 +49,7 @@ Every step is published to Mission Control as `agent.step` (`POST /agent/events`
 | `ledger_query` | L0 | `GET /bank/*` | accounts, receivables, payees, lenders, transactions, fx |
 | `forecast_run` | L0 | `POST /quant/forecast` | quote its numbers verbatim |
 | `financing_quote` | L0 | `POST /quant/quote` | Financing Arena |
+| `business_analysis` | L0 | `POST /quant/analysis` | cash budget, customers, receivables, currencies, payroll safety; findings in ES / EN / 中文, quoted verbatim |
 | `optimize_plan` | L0 | `POST /quant/plan/jobs` + poll | the MILP; returns `approval_request` |
 | `propose_plan` | via approvals | `POST /approvals` | posts the MILP's `approval_request` untouched (added to the battle-plan list so the plan reaches the owner exactly as optimized) |
 | `send_collection` | L1 | channel hub | `contact_id` + `receivable_id` only; the invoice must belong to that contact's company (checked against the bank, since the number comes from a document); text from the template |
@@ -87,6 +88,7 @@ No outbound message is written by an LLM.
 | POST | `/documents` | owner session (checked with the backend's `/auth/me`) | `{filename, mime, data_base64, source, language}`; PDF, PNG, JPEG, WebP or text, 4 MB max |
 | POST | `/ask` | owner session or agent token | `{question, run_id?, language}` → `{answer, intent, run_id, model}` |
 | POST | `/briefing` | owner session | daily cash briefing; `call: false` returns the text without calling |
+| POST | `/report` | owner session | business health report on WhatsApp: the engine's top three findings, word for word, and the link to `/health`; `send: false` returns the text only |
 | GET | `/runs`, `/runs/{id}` | owner session or agent token | summaries; one run with its full trace |
 | GET | `/health` | anyone | providers live/offline (never the keys), planner, listener alive |
 

@@ -95,6 +95,11 @@ T: dict[str, dict[str, str]] = {
               "Receivables due in the next 30 days: {receivables}. {action}",
         "zh": "早上好。{company} 现金简报：运营账户余额 {cash}。{headline_zh}。未来 30 天应收账款：{receivables}。{action}",
     },
+    "health_report": {
+        "es": "{company} · Salud del negocio (próximos 90 días):\n{findings}\nAnálisis completo: {link}",
+        "en": "{company} · Business health (next 90 days):\n{findings}\nFull analysis: {link}",
+        "zh": "{company} · 经营健康（未来 90 天）：\n{findings}\n完整分析：{link}",
+    },
     "briefing_action": {
         "es": "Tengo un plan de financiamiento listo para tu aprobación.",
         "en": "I have a financing plan ready for your approval.",

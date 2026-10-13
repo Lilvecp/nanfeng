@@ -32,6 +32,7 @@ Production build: `npm run build && npm start`.
 |-------|--------|------------------|
 | `/` | Landing | 3D globe (Santiago → Shanghai, crisis loop), language and theme switch, links into the cockpit and the demo |
 | `/cockpit` | Home: owner's simple view and the detailed Cash Cockpit (fe-03) | Ask NanFeng (the live agent when `NEXT_PUBLIC_AGENT_URL` is set, sandbox answers otherwise), send a document to the agent, 90-day fan chart, KPIs and blotter that update after approval |
+| `/health` | Business health | The quant engine's business analysis: findings, cash budget by month, where the money goes, customers, receivables aging, currency exposure, payroll safety; "Send to my WhatsApp" when the agent is connected |
 | `/mission` | Agent Mission Control (fe-04) | Execution trace, pause, kill switch with confirm, "Ask why" chat |
 | `/approvals` | Approval Center (fe-05) | 6-digit OTP (sandbox code `482913`, paste works), wrong-code attempts, reject with required reason, history filters |
 | `/financing` | Financing Arena (fe-06) | Option book and scatter are selectable, verdict per option, send the recommended plan to approval |

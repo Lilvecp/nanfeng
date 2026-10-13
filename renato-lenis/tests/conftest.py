@@ -49,7 +49,7 @@ SANDBOX_OTP = "482913"
 
 
 def _result(name: str) -> dict:
-    return json.loads((RESULTS / f"cherry_crisis_{name}.json").read_text())
+    return json.loads((RESULTS / f"cherry_crisis_{name}.json").read_text(encoding="utf-8"))
 
 
 class ReplayQuantBackend(Backend):
@@ -67,6 +67,8 @@ class ReplayQuantBackend(Backend):
                 return self.forecast
             if path == "/quant/quote":
                 return _result("quotes")
+            if path == "/quant/analysis":
+                return _result("analysis")
             if path == "/quant/plan/jobs":
                 return {"id": "plan-1", "status": "done", "result": _result("plan"), "error": None}
             raise AssertionError(f"unexpected quant call {path}")

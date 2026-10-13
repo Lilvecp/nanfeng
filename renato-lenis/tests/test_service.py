@@ -220,3 +220,18 @@ def test_relay_can_retry_an_event_that_failed(svc, agent, monkeypatch):
         assert c.post("/inbound/zavu", json=event, headers=AGENT).status_code == 500
         assert c.post("/inbound/zavu", json=event, headers=AGENT).json()["status"] == "completed"
     assert len(calls) == 2
+
+
+def test_health_report_sends_the_engine_findings_on_whatsapp(api, agent, hub, owner):
+    assert api.post("/report", json={}).status_code == 401
+    assert api.post("/report", json={}, headers=AGENT).status_code == 401  # the agent is not the owner
+    out = api.post("/report", json={}, headers=owner).json()
+    assert out["run"]["status"] == "completed" and out["delivery"]["channel"] == "whatsapp"
+    # English by default, the engine's own words, the most severe finding first, and the link to /health.
+    assert "Business health" in out["text"] and "/health" in out["text"]
+    assert "81% chance cash is negative" in out["text"].splitlines()[1]
+    sent = next(d for d in hub.outbox if d.message.kind == "report")
+    assert sent.message.text == out["text"] and sent.message.language == "en"
+    es = api.post("/report", json={"language": "es", "send": False}, headers=owner).json()
+    assert "Salud del negocio" in es["text"] and es["delivery"] is None
+    assert "business_analysis" in [s["tool"] for s in api.get(f"/runs/{out['run']['run_id']}", headers=owner).json()["trace"]]

@@ -123,6 +123,15 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
         { target: "wif-table", title: "Todas las situaciones juntas", body: "Compáralas lado a lado para ver cuál te preocupa más." },
       ],
     },
+    "/health": {
+      summary: "Qué tan sano está el negocio: de dónde viene y a dónde va la plata, de quién depende y si la nómina está segura. Cada número sale del motor cuantitativo.",
+      steps: [
+        { target: "health-insights", title: "Lo que NanFeng ve", body: "Los hallazgos que más importan, de \"actuar ya\" a \"sano\", cada uno ligado a un número de abajo." },
+        { target: "health-kpis", title: "Cuatro signos vitales", body: "Flujo de caja neto, días de venta por cobrar, el peso del cliente principal y la exposición al peso chileno." },
+        { target: "health-budget", title: "Mes a mes", body: "Lo que entra, lo que sale y la caja que queda al cierre de cada mes, con las facturas y pagos que ya se conocen." },
+        { target: "health-payrolls", title: "La nómina, segura o no", body: "Para cada nómina de cosecha: la caja que habrá antes de pagarla y la probabilidad de quedar en negativo después." },
+      ],
+    },
     "/documents": {
       summary: "Las facturas y documentos que llegaron. NanFeng lee cada uno y deja bloqueados los sospechosos.",
       steps: [
@@ -205,6 +214,15 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
         { target: "wif-table", title: "所有情况一览", body: "并排比较，看看哪种情况最让您担心。" },
       ],
     },
+    "/health": {
+      summary: "企业有多健康：现金从哪里来、到哪里去，依赖哪些客户，工资是否安全。每个数字都来自量化引擎。",
+      steps: [
+        { target: "health-insights", title: "南风的观察", body: "最重要的发现，从\"立即处理\"到\"健康\"，每一条都对应下方的一个数字。" },
+        { target: "health-kpis", title: "四个关键指标", body: "净现金流、应收账款周转天数、最大客户占比以及比索汇率敞口。" },
+        { target: "health-budget", title: "逐月预算", body: "每月的流入、流出和月末现金，基于已知的发票和付款。" },
+        { target: "health-payrolls", title: "工资是否安全", body: "每次收获季工资：支付前的现金，以及支付后现金为负的概率。" },
+      ],
+    },
     "/documents": {
       summary: "收到的发票和文件。NanFeng会读取每一份，并拦截可疑文件。",
       steps: [
@@ -285,6 +303,15 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
         { target: "wif-kpis", title: "What changes", body: "These numbers update instantly: the chance of running out of cash and when it would happen." },
         { target: "wif-chart", title: "Your cash with that change", body: "The chart shows your money day by day in that situation." },
         { target: "wif-table", title: "Every situation together", body: "Compare them side by side to see which one worries you most." },
+      ],
+    },
+    "/health": {
+      summary: "How healthy the business is: where cash comes from and goes, who it depends on, and whether payroll is safe. Every number comes from the quant engine.",
+      steps: [
+        { target: "health-insights", title: "What NanFeng sees", body: "The findings that matter most, from \"act now\" to \"healthy\", each tied to a number below." },
+        { target: "health-kpis", title: "Four vital signs", body: "Net cash flow, days of sales waiting to be collected, the largest customer's share and the exposure to the peso." },
+        { target: "health-budget", title: "Month by month", body: "Money in, money out and the cash left at the end of each month, with the invoices and payments already known." },
+        { target: "health-payrolls", title: "Payroll safety", body: "For each harvest payroll: the cash there will be before paying it, and the chance cash goes negative after." },
       ],
     },
     "/documents": {
