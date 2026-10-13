@@ -89,7 +89,7 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 | Red team, 43 outcome-based attacks in 7 categories, against the API | 4/43 stopped before the controls → **43/43 after**; CI fails if one gets through |
 | The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`renato-lenis/tests/test_redteam_via_agent.py`) |
 | Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a)) |
-| Unit tests | 104 backend tests (security/BEC 24, policy 20, API 16, OTP 12, owner sign-in 10, privacy 7, registry 6, demo 5, anchoring 4) |
+| Unit tests | 116 backend tests (security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, registry 6, live story 5, demo 5, anchoring 4) |
 
 ## Known limitations
 
