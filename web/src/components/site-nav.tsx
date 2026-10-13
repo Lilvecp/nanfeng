@@ -80,7 +80,7 @@ export function SiteNav() {
         {LINKS.map((l, i) => (
           <a key={l.id} href={`#${l.id}`} style={{ "--i": i } as React.CSSProperties} onClick={() => setOpen(false)}>{t(l.key)}</a>
         ))}
-        <Link href="/demo" style={{ "--i": LINKS.length } as React.CSSProperties} onClick={() => setOpen(false)}>{t("lp.cta.demo")}</Link>
+        <Link href="/demo?play=1" style={{ "--i": LINKS.length } as React.CSSProperties} onClick={() => setOpen(false)}>{t("lp.cta.demo")}</Link>
         <div className="menu-foot">
           <LangSwitch />
           <ThemeToggle />

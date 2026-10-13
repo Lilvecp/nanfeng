@@ -51,6 +51,8 @@ export function useDemoReplay(step: number, playing: boolean): ReplayStatus {
   const chain = useRef<Promise<void>>(Promise.resolve());
   const prev = useRef({ step, playing });
   const live = useRef(mode === "live");
+  const visitor = useRef(false); // the API said "owner only": this take plays on this screen only
+  const [asVisitor, setAsVisitor] = useState(false);
   useEffect(() => {
     live.current = mode === "live";
   });
@@ -64,11 +66,15 @@ export function useDemoReplay(step: number, playing: boolean): ReplayStatus {
     // Step 1 starts a clean take; otherwise play every step not played yet, in order.
     const from = step === 1 ? 1 : done.current === 0 ? 1 : done.current + 1;
     const todo = Array.from({ length: Math.max(0, step - from + 1) }, (_, i) => from + i);
-    if (step === 1) done.current = 0;
+    if (step === 1) {
+      done.current = 0;
+      visitor.current = false;
+      chain.current = chain.current.then(() => setAsVisitor(false));
+    }
     for (const n of todo) {
       chain.current = chain.current.then(async () => {
         if (n <= done.current) return;
-        if (!live.current) {
+        if (!live.current || visitor.current) {
           done.current = n; // offline: the Demo page drives the local desk itself
           return;
         }
@@ -78,6 +84,13 @@ export function useDemoReplay(step: number, playing: boolean): ReplayStatus {
           done.current = n;
           setStatus({ live: true, state: "ok" });
         } catch (err) {
+          if (err instanceof ApiError && err.status === 401) {
+            visitor.current = true; // not the owner: keep playing locally, no error, no sign-in prompt
+            done.current = n;
+            setAsVisitor(true);
+            setStatus({ live: false, state: "idle" });
+            return;
+          }
           const message = err instanceof ApiError
             ? err.status === 401 ? "Sign in as the owner to replay on the live API"
               : typeof err.detail === "string" ? err.detail : (err.detail as { detail?: string })?.detail ?? `HTTP ${err.status}`
@@ -88,5 +101,5 @@ export function useDemoReplay(step: number, playing: boolean): ReplayStatus {
     }
   }, [step, playing]);
 
-  return { ...status, live: mode === "live" };
+  return { ...status, live: mode === "live" && !asVisitor };
 }

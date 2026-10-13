@@ -2,7 +2,7 @@
 sandbox bank either right away (L1/L2) or after the owner approves with OTP (L3)."""
 
 from fastapi import APIRouter, Depends, Header, HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from .. import anchoring, audit, auth, bank, bec, otp, policy, sanctions, state
@@ -35,7 +35,7 @@ def _run(db: Session, appr: Approval, actor: str) -> None:
     status = "approved" if appr.tier == 3 else "auto"
     for i, op in enumerate(appr.operations):
         try:
-            results.append(bank.execute(db, op["op"], op["params"], actor=actor))
+            results.append(bank.execute(db, op["op"], op["params"], actor=actor, approval_id=appr.id, tier=appr.tier))
         except bank.BankError as exc:
             status = "failed"
             done = f" (operations 1-{i} executed)" if i else ""
@@ -51,6 +51,12 @@ def require_agent_or_owner(authorization: str = Header(default="")) -> str:
 
 @router.post("/approvals", response_model=ApprovalOut, status_code=201)
 def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Depends(require_agent_or_owner)):
+    return create_approval(body, db, actor)
+
+
+def create_approval(body: ApprovalCreate, db: Session, actor: str, send_code: bool = True) -> Approval:
+    """Policy decision, persistence, audit and event for a new request. `send_code=False` skips the OTP
+    text (the idle sandbox reset asks again without paging the owner)."""
     checks = []
     for o in body.operations:
         try:
@@ -91,7 +97,7 @@ def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Dep
         "status": appr.status, "policy_reason": decision.reason, "policy_rules": decision.rules,
         "policy_version": policy.POLICY["version"],
     })
-    if appr.status == "pending":
+    if appr.status == "pending" and send_code:
         try:
             _send_code(db, appr)
         except otp.OtpError:
@@ -169,8 +175,18 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
         raise HTTPException(403 if appr.status == "pending" else 423,
                             {"error": "otp_mismatch", "attempts_left": appr.otp_attempts_left})
 
-    appr.channel = body.channel
+    # Claim the approval atomically before any money moves: two approvals racing for the same request
+    # (the owner typing the code while Demo Mode approves on WhatsApp) must execute it once, not twice.
+    claimed = db.execute(
+        update(Approval)
+        .where(Approval.id == appr.id, Approval.status == "pending", Approval.decided_at.is_(None))
+        .values(decided_at=utcnow(), channel=body.channel)
+    ).rowcount
     db.commit()
+    if not claimed:
+        db.refresh(appr)
+        raise HTTPException(409, f"Approval is already being decided ({appr.status})")
+    db.refresh(appr)
     _run(db, appr, actor="owner")
     audit.append(db, "owner", "approval.approved", {
         "approval_id": appr.id, "status": appr.status, "channel": body.channel,

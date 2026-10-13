@@ -10,7 +10,7 @@ import { useCrisisNumbers, useDesk } from "@/lib/desk-state";
 import { setDismissed, useDismissed } from "@/lib/dismiss";
 import { useLang, useT } from "@/lib/i18n";
 import { usePref, type Lang } from "@/lib/prefs";
-import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, clpM, cny, longDate, pct, presetName, usd } from "@/lib/scenario";
+import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, cashTick, clpM, cny, longDate, pct, presetName, usd } from "@/lib/scenario";
 
 type Answer = { q: Record<Lang, string>; a: Record<Lang, string>; href: string; cta: Record<Lang, string> };
 
@@ -123,28 +123,28 @@ function whatIf(raw: string, lang: Lang): Answer | null {
 
 const TX = {
   en: {
-    monitoring: "AGENT MONITORING", actions: "ACTIONS TODAY", pNeg: `P(cash<0) · ${N.crunchDay}D`, fromAfter: `▼ from ${N.pNeg} · 10:15`, fromBefore: `▲ from ${N.pNegBefore} before the notice`,
+    monitoring: "AGENT MONITORING", actions: "ACTIONS TODAY", pNeg: `Chance of negative cash · day ${N.crunchDay}`, fromAfter: `▼ from ${N.pNeg} · 10:15`, fromBefore: `▲ from ${N.pNegBefore} before the notice`,
     crunch: "Crunch day", crunchSub: `P50 low ${clpM(S.after.minCashP50Clp)} · payroll ${clpM(N.payroll)}`, crunchDone: `buffer held in ${N.coverage} of paths`, cleared: "CLEARED",
     delayed: `Delayed +${N.delayDays}D`, passport: "Credit Passport", passportSub: "explainable score for lenders", from: "from",
-    forecast: "Cash forecast · 90D · CLP M · MC 10,000", tape: "Agent tape", threats: "2 threats blocked today", openMission: "Open Mission Control",
+    forecast: "Cash forecast · 90D · CLP M · MC 10,000", tape: "Agent tape", threats: "2 threats blocked today", openMission: "Open agent activity",
     blotter: "Receivables", blotterHint: "sorted by due date", inv: "Invoice", importer: "Importer", market: "Market", amount: "Amount", due: "Due", delay: "Announced delay", action: "Action",
     pending: "Plan pending", financed: "Bridged by PAE", monitor: "Monitor", lc: "LC-backed",
     tapeRows: { exec: "Plan executed · hash anchored", proposed: "Plan proposed", quotes: `${ELIGIBLE} quotes received`, mc: `MC re-run · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "Delay notice read (OCR)", voice: "Voice cash briefing (ES)", blk1: "Blocked: bank-detail swap", blk2: "Blocked: injected email" },
   },
   es: {
-    monitoring: "AGENTE MONITOREANDO", actions: "ACCIONES HOY", pNeg: `P(caja<0) · ${N.crunchDay}D`, fromAfter: `▼ desde ${N.pNeg} · 10:15`, fromBefore: `▲ desde ${N.pNegBefore} antes del aviso`,
+    monitoring: "AGENTE MONITOREANDO", actions: "ACCIONES HOY", pNeg: `Prob. de caja negativa · día ${N.crunchDay}`, fromAfter: `▼ desde ${N.pNeg} · 10:15`, fromBefore: `▲ desde ${N.pNegBefore} antes del aviso`,
     crunch: "Día crítico", crunchSub: `Mínimo P50 ${clpM(S.after.minCashP50Clp, "es")} · nómina ${clpM(N.payroll, "es")}`, crunchDone: `colchón respetado en ${N.coverage} de los escenarios`, cleared: "DESPEJADO",
     delayed: `Atrasado +${N.delayDays}D`, passport: "Credit Passport", passportSub: "puntaje explicable para prestamistas", from: "desde",
-    forecast: "Pronóstico de caja · 90D · CLP M · MC 10.000", tape: "Bitácora del agente", threats: "2 amenazas bloqueadas hoy", openMission: "Abrir Mission Control",
+    forecast: "Pronóstico de caja · 90D · CLP M · MC 10.000", tape: "Bitácora del agente", threats: "2 amenazas bloqueadas hoy", openMission: "Abrir actividad del agente",
     blotter: "Cuentas por cobrar", blotterHint: "por fecha de vencimiento", inv: "Factura", importer: "Importador", market: "Mercado", amount: "Monto", due: "Vence", delay: "Atraso avisado", action: "Acción",
     pending: "Plan pendiente", financed: "Cubierta con PAE", monitor: "Vigilar", lc: "Con carta de crédito",
     tapeRows: { exec: "Plan ejecutado · hash anclado", proposed: "Plan propuesto", quotes: `${ELIGIBLE} cotizaciones recibidas`, mc: `MC re-calculado · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "Aviso de atraso leído (OCR)", voice: "Briefing de caja por voz (ES)", blk1: "Bloqueado: cambio de cuenta", blk2: "Bloqueado: correo con inyección" },
   },
   zh: {
-    monitoring: "代理监控中", actions: "项今日操作", pNeg: `现金<0 概率 · ${N.crunchDay}天`, fromAfter: `▼ 原为 ${N.pNeg} · 10:15`, fromBefore: `▲ 通知前为 ${N.pNegBefore}`,
+    monitoring: "代理监控中", actions: "项今日操作", pNeg: `现金为负概率 · 第${N.crunchDay}天`, fromAfter: `▼ 原为 ${N.pNeg} · 10:15`, fromBefore: `▲ 通知前为 ${N.pNegBefore}`,
     crunch: "危机日", crunchSub: `P50 最低 ${clpM(S.after.minCashP50Clp, "zh")} · 工资 ${clpM(N.payroll, "zh")}`, crunchDone: `${N.coverage} 的情景保持安全垫`, cleared: "已解除",
     delayed: `延迟 +${N.delayDays}天`, passport: "信用护照", passportSub: "面向贷款方的可解释评分", from: "原为",
-    forecast: "现金预测 · 90天 · 百万智利比索 · 蒙特卡洛 10,000", tape: "代理记录", threats: "今日拦截2次威胁", openMission: "打开任务控制",
+    forecast: "现金预测 · 90天 · 百万智利比索 · 蒙特卡洛 10,000", tape: "代理记录", threats: "今日拦截2次威胁", openMission: "打开代理活动",
     blotter: "应收账款", blotterHint: "按到期日排序", inv: "发票", importer: "进口商", market: "市场", amount: "金额", due: "到期日", delay: "已通知延迟", action: "操作",
     pending: "方案待批", financed: "已由 PAE 过桥", monitor: "监控", lc: "信用证担保",
     tapeRows: { exec: "方案已执行 · 哈希已锚定", proposed: "已提出方案", quotes: `收到${ELIGIBLE}份报价`, mc: `重新模拟 · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "已读取延迟通知（OCR）", voice: "语音现金简报（西语）", blk1: "已拦截：银行账户变更", blk2: "已拦截：注入攻击邮件" },
@@ -155,11 +155,12 @@ const TX = {
 export default function CockpitPage() {
   const view = usePref("view");
   const t = useT();
+  const lang = useLang();
   if (view === "detail") return <CockpitDetail />;
   return (
     <>
       <Topbar lead={<ViewSwitch />}>
-        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{cashTick(S.openingCashClp, lang)}</span></div>
       </Topbar>
       <div className="content"><OwnerView /></div>
     </>
@@ -170,7 +171,7 @@ function CockpitDetail() {
   const t = useT();
   const lang = useLang();
   const x = TX[lang];
-  const { approval } = useDesk();
+  const { approval, receipt } = useDesk();
   const { resolved, pNeg } = useCrisisNumbers();
   const alertClosed = useDismissed(`detail-${approval}`);
   const [question, setQuestion] = useState("");
@@ -187,7 +188,7 @@ function CockpitDetail() {
   return (
     <>
       <Topbar lead={<ViewSwitch />}>
-        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{cashTick(S.openingCashClp, lang)}</span></div>
         <div className="tick"><span className="l">USD/CLP</span><span className="v">{S.fx.clp_per_usd.toFixed(2)}</span></div>
         <div className="tick"><span className="l">USD/CNY</span><span className="v">{S.fx.cny_per_usd.toFixed(4)}</span></div>
         <span className="status"><span className="dot" />{x.monitoring} · {resolved ? 6 : 5} {x.actions}</span>
@@ -268,7 +269,7 @@ function CockpitDetail() {
             <div className="card-h"><span className="h3">{x.tape}</span><span className="badge solid crit">{x.threats}</span></div>
             <div className="tbl-wrap"><table className="tbl">
               <tbody>
-                {resolved && <tr><td className="num muted">10:16</td><td className="up">{x.tapeRows.exec}</td><td className="r"><span className="tier t3"><b>L3</b></span></td></tr>}
+                {resolved && <tr><td className="num muted">{receipt.time}</td><td className="up">{x.tapeRows.exec}</td><td className="r"><span className="tier t3"><b>L3</b></span></td></tr>}
                 <tr><td className="num muted">10:15</td><td>{x.tapeRows.proposed}</td><td className="r"><span className="tier t3"><b>L3</b></span></td></tr>
                 <tr><td className="num muted">10:14</td><td>{x.tapeRows.quotes}</td><td className="r"><span className="tier t1"><b>L1</b></span></td></tr>
                 <tr><td className="num muted">10:13</td><td>{x.tapeRows.mc}</td><td className="r"><span className="tier t0"><b>L0</b></span></td></tr>

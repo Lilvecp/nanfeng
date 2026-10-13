@@ -16,7 +16,7 @@ export default function Image() {
   const stats: [string, string][] = [
     [`${N.pNeg} → ${N.pNegAfterPlan}`, "chance of running out of cash"],
     [N.savingsPct, "cheaper than the bank loan"],
-    ["43/43", "red-team attacks stopped"],
+    [`${N.rtStopped}/${N.rtAttacks}`, "red-team attacks stopped"],
   ];
   return new ImageResponse(
     (

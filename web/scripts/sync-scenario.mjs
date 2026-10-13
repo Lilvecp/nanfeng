@@ -16,6 +16,17 @@ const after = read("results/cherry_crisis_forecast.json");
 const before = read("results/cherry_crisis_before.json");
 const plan = read("results/cherry_crisis_plan.json");
 const input = read("data/scenarios/cherry_crisis.json");
+const bench = read("results/bench_results.json").summary;
+// Red team before/after the guard (andy-villarroel/redteam/results), per category in report order.
+const redteam = (label) => JSON.parse(readFileSync(join(here, "..", "..", "andy-villarroel", "redteam", "results", `${label}.json`), "utf8")).results;
+const rtBefore = redteam("before");
+const rtAfter = redteam("after");
+const rtCategories = [...new Set(rtAfter.map((r) => r.category))].map((name) => ({
+  name,
+  attacks: rtAfter.filter((r) => r.category === name).length,
+  before: rtBefore.filter((r) => r.category === name && r.stopped).length,
+  after: rtAfter.filter((r) => r.category === name && r.stopped).length,
+}));
 
 // CLP millions with one decimal keeps the file small and is what the charts plot.
 const m = (v) => Math.round(v / 1e5) / 10;
@@ -82,6 +93,20 @@ const data = {
     country: customers[r.customer_id].country,
   })),
   strings: story.strings,
+  // NanFeng-Bench (50 synthetic exporters): the landing's "Measured, not promised" row.
+  bench: {
+    cases: bench.n_cases,
+    solved: Math.round(bench.success_rate * bench.n_cases),
+    meanSavingsPct: bench.mean_savings_vs_default_pct,
+    medianSavingsPct: bench.median_savings_vs_default_pct,
+    plansBuilt: bench.plans_built,
+  },
+  redTeam: {
+    attacks: rtAfter.length,
+    stoppedBefore: rtBefore.filter((r) => r.stopped).length,
+    stoppedAfter: rtAfter.filter((r) => r.stopped).length,
+    categories: rtCategories,
+  },
   fan: {
     dates: after.fan_chart.dates,
     before: fan(before.fan_chart),

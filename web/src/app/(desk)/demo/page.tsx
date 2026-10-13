@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { OwnerChart } from "@/components/owner-view";
 import { Receipt } from "@/components/receipt";
@@ -10,7 +11,7 @@ import { useDemoReplay } from "@/lib/demo-replay";
 import { SANDBOX_OTP, useDesk } from "@/lib/desk-state";
 import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
-import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, clpFull, cny, longDate, pesos, productShort, usd } from "@/lib/scenario";
+import { N, RECEIVABLE, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, cashTick, cny, longDate, pesos, productShort, usd } from "@/lib/scenario";
 
 // Deterministic replay of the Cherry Crisis (fixed seed, no network), for the jury and the video.
 // Each step shows its own panel next to the cash chart; the last one leaves the desk approved.
@@ -21,8 +22,10 @@ const LABELS: Record<Lang, string[]> = {
 };
 const UI = {
   en: {
-    cash: "Cash", exit: "Exit demo", step: "STEP", delayed: `Delayed +${N.delayDays}D`, plan: "Plan", run: "RUN CHERRY CRISIS", searching: "SEARCHING…", pae: "PAE LOAN", executed: "EXECUTED", pNeg: `P(cash<0) · ${N.crunchDay}D`,
+    cash: "Cash", exit: "Exit demo", step: "STEP", delayed: `Delayed +${N.delayDays}D`, plan: "Plan", run: "RUN CHERRY CRISIS", searching: "SEARCHING…", pae: "PAE LOAN", executed: "EXECUTED", pNeg: `Chance cash runs out · by day ${N.crunchDay}`,
     synced: "LIVE · SYNCED WITH BACKEND", offline: "OFFLINE REPLAY", reset: "Restart demo", play: "Play demo", pause: "Pause demo", next: "Next step",
+    start: "Play the Cherry Crisis", startSub: "6 steps · about 25 seconds · space to pause",
+    endTitle: "Your turn", endBody: "The run left the desk approved. Reset it and approve the loan yourself with the sandbox code, or let the tour walk you through the real screens.", tryIt: "Approve it yourself",
     mail: "Email from the importer · 10:12", read: "What NanFeng read", inv: "Invoice", amount: "Amount", delay: "Delay", newDate: "New date",
     risk: "Chance of running out of cash", on: "on payroll day", before: "before the notice", payroll: "Harvest payroll", need: "To cover",
     quotes: "Cost of closing the gap with each option", quotesHint: "same goal: cash above the buffer in 90% of scenarios",
@@ -30,8 +33,10 @@ const UI = {
     wa: "Owner · WhatsApp", waPlan: `PLAN ${usd(N.loanUsd)} for ${N.termDays} days. Costs ${pesos(N.planCost)} vs ${pesos(N.defaultCost)}. Reply APPROVE or WHY`, waYes: "APPROVE", waCode: "Code sent by SMS to •••• 4127", l3: "owner + one-time code",
   },
   es: {
-    cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `P(caja<0) · ${N.crunchDay}D`,
+    cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `Riesgo de quedar sin caja · al día ${N.crunchDay}`,
     synced: "EN VIVO · SINCRONIZADO", offline: "REPLAY SIN RED", reset: "Reiniciar demo", play: "Reproducir demo", pause: "Pausar demo", next: "Paso siguiente",
+    start: "Reproducir la Cherry Crisis", startSub: "6 pasos · unos 25 segundos · espacio para pausar",
+    endTitle: "Ahora tú", endBody: "La corrida dejó el escritorio aprobado. Reinícialo y aprueba tú el crédito con el código del sandbox, o deja que el recorrido te muestre las pantallas reales.", tryIt: "Apruébalo tú",
     mail: "Correo del importador · 10:12", read: "Lo que leyó NanFeng", inv: "Factura", amount: "Monto", delay: "Atraso", newDate: "Nueva fecha",
     risk: "Riesgo de quedar sin caja", on: "el día de los sueldos", before: "antes del aviso", payroll: "Sueldos de la cosecha", need: "Hay que cubrir",
     quotes: "Cuánto costaría cerrar la brecha con cada opción", quotesHint: "misma meta: caja sobre el colchón en el 90% de los escenarios",
@@ -39,8 +44,10 @@ const UI = {
     wa: "Dueño · WhatsApp", waPlan: `PLAN ${usd(N.loanUsd, "es")} a ${N.termDays} días. Cuesta ${pesos(N.planCost, "es")} vs ${pesos(N.defaultCost, "es")}. Responde APROBAR o POR QUÉ`, waYes: "APROBAR", waCode: "Código enviado por SMS al •••• 4127", l3: "dueño + código de un solo uso",
   },
   zh: {
-    cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金<0概率 · ${N.crunchDay}天`,
+    cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金耗尽概率 · 第${N.crunchDay}天前`,
     synced: "实时 · 已与后端同步", offline: "离线回放", reset: "重新开始", play: "播放演示", pause: "暂停演示", next: "下一步",
+    start: "播放“樱桃危机”", startSub: "6个步骤 · 约25秒 · 空格键暂停",
+    endTitle: "轮到您了", endBody: "演示已将方案批准。重置后，用沙盒验证码亲自批准这笔贷款，或跟随导览浏览真实界面。", tryIt: "亲自批准",
     mail: "进口商邮件 · 10:12", read: "南风读取的内容", inv: "发票", amount: "金额", delay: "延迟", newDate: "新日期",
     risk: "现金耗尽概率", on: "发薪日", before: "通知之前", payroll: "采收工资", need: "需补足",
     quotes: "用各方案补足缺口的成本", quotesHint: "同一目标：90%情景中现金高于安全垫",
@@ -56,7 +63,7 @@ const CAPTIONS: Record<Lang, string[]> = {
     `${S.arena.length} financing quotes from ${LENDERS} lenders, compared in seconds`,
     `Optimizer: ${N.termDays}-day USD pre-export loan, ${N.savingsPct} cheaper than the bank loan`,
     "Owner approves on WhatsApp with a 6-digit SMS code",
-    `Gap closed in ${N.coverage} of scenarios · hash-chained · anchored on-chain`,
+    `Cash stays above the safety buffer in ${N.coverage} of scenarios · hash-chained · anchored on-chain`,
   ],
   es: [
     `${SHORT_CUSTOMER} pagará ${usd(N.overdueUsd, "es")} con ${N.delayDays} días de atraso`,
@@ -64,7 +71,7 @@ const CAPTIONS: Record<Lang, string[]> = {
     `${S.arena.length} cotizaciones de ${LENDERS} prestamistas, comparadas en segundos`,
     `Optimizador: crédito de pre-exportación en USD a ${N.termDays} días, ${N.savingsPct} más barato que el crédito bancario`,
     "El dueño aprueba por WhatsApp con un código SMS de 6 dígitos",
-    `Brecha cerrada en el ${N.coverage} de los escenarios · hash encadenado · anclado on-chain`,
+    `La caja queda sobre el colchón en el ${N.coverage} de los escenarios · hash encadenado · anclado on-chain`,
   ],
   zh: [
     `${SHORT_CUSTOMER_ZH}将推迟${N.delayDays}天支付 ${usd(N.overdueUsd, "zh")}`,
@@ -72,7 +79,7 @@ const CAPTIONS: Record<Lang, string[]> = {
     `数秒内比较${LENDERS}家贷款方的${S.arena.length}份融资报价`,
     `优化器：${N.termDays}天期美元出口前融资，比银行贷款便宜${N.savingsPct}`,
     "企业主通过 WhatsApp 输入6位短信验证码批准",
-    `${N.coverage}的情景中缺口已补足 · 哈希链 · 已上链锚定`,
+    `${N.coverage}的情景中现金高于安全垫 · 哈希链 · 已上链锚定`,
   ],
 };
 
@@ -91,7 +98,7 @@ function Stage({ step, lang }: { step: number; lang: Lang }) {
     return (
       <div className="demo-stage">
         <span className="kpi-l">{u.mail}</span>
-        <blockquote className="demo-mail" lang="zh-CN">尊敬的客户：发票 {RECEIVABLE.id}（USD 180,000）原定 2026年12月18日付款，因资金安排将延迟{N.delayDays}天支付。敬请谅解。</blockquote>
+        <blockquote className="demo-mail" lang="zh-CN">尊敬的客户：发票 {RECEIVABLE.id}（USD {N.overdueUsd.toLocaleString("en-US")}）原定 {S.event.due_date.replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1年$2月$3日")}付款，因资金安排将延迟{N.delayDays}天支付。敬请谅解。</blockquote>
         <span className="kpi-l">{u.read}</span>
         <dl className="demo-kv">
           <div><dt>{u.inv}</dt><dd className="num">{RECEIVABLE.id}</dd></div>
@@ -164,6 +171,24 @@ function Stage({ step, lang }: { step: number; lang: Lang }) {
   return (
     <div className="demo-stage">
       <Receipt />
+      <DemoEnd lang={lang} />
+    </div>
+  );
+}
+
+/** After the run: approve it yourself on a clean sandbox, or take the guided tour of the real screens. */
+function DemoEnd({ lang }: { lang: Lang }) {
+  const u = UI[lang];
+  const router = useRouter();
+  const { resetDemo } = useDesk();
+  return (
+    <div className="demo-end">
+      <b>{u.endTitle}</b>
+      <span className="small muted">{u.endBody}</span>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <button className="btn btn-primary" type="button" onClick={async () => { await resetDemo(); router.push("/approvals"); }}>{u.tryIt}</button>
+        <TourButton className="btn btn-secondary" />
+      </div>
     </div>
   );
 }
@@ -173,6 +198,19 @@ export default function DemoPage() {
   const { finishDemo, resetDemo } = useDesk();
   const [step, setStep] = useState(1);
   const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
+  const play = (on: boolean) => {
+    setStarted(true);
+    setPlaying(on);
+  };
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("play") !== "1") return;
+    const id = setTimeout(() => {
+      setStarted(true);
+      setPlaying(true);
+    }, 600);
+    return () => clearTimeout(id);
+  }, []);
   // Live API: each step really happens on the backend and every other screen follows (lib/demo-replay).
   const replay = useDemoReplay(step, playing);
 
@@ -198,7 +236,7 @@ export default function DemoPage() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === "INPUT") return;
-      if (e.key === " ") { e.preventDefault(); setPlaying((p) => !p); }
+      if (e.key === " ") { e.preventDefault(); setStarted(true); setPlaying((p) => !p); }
       if (e.key === "ArrowRight") setStep((s) => Math.min(6, s + 1));
       if (e.key === "ArrowLeft") setStep((s) => Math.max(1, s - 1));
     };
@@ -220,13 +258,12 @@ export default function DemoPage() {
   return (
     <>
       <Topbar controls={false}>
-        <div className="tick"><span className="l">{u.cash}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <div className="tick"><span className="l">{u.cash}</span><span className="v">{cashTick(S.openingCashClp, lang)}</span></div>
         <span className="status"><span className="dot crit blink" />DEMO · CHERRY CRISIS · {u.step} {step}/6</span>
         <span className={`badge${replay.state === "error" ? " crit" : replay.live ? " ok" : ""}`} title={replay.message} role="status">
           {replay.state === "error" ? replay.message : replay.live ? u.synced : u.offline}{replay.state === "running" ? " …" : ""}
         </span>
         <span style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <TourButton />
           <Link href="/cockpit" className="btn btn-secondary btn-sm">{u.exit}</Link>
         </span>
       </Topbar>
@@ -243,16 +280,23 @@ export default function DemoPage() {
       </div>
 
       <div style={{ position: "sticky", bottom: 0, display: "flex", flexDirection: "column", zIndex: 5 }}>
+        {!started && step === 1 ? (
+          <button type="button" className="demo-start" onClick={() => play(true)}>
+            <span className="demo-start-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></span>
+            <span><b>{u.start}</b><span>{u.startSub}</span></span>
+          </button>
+        ) : (
         <div style={{ margin: "0 16px 12px", alignSelf: "flex-start", display: "flex", maxWidth: 1000, border: "1px solid #1F3358" }} aria-live="polite">
           <span className="mono" style={{ background: "#1F3358", color: "#FFFFFF", padding: "14px 16px", fontWeight: 700, fontSize: 18 }}>0{step}/06</span>
           <span style={{ background: "#14171C", color: "#F3F3EF", padding: "14px 20px", fontSize: "clamp(16px, 2.2vw, 24px)", fontFamily: "var(--f-display)", fontWeight: 600, lineHeight: 1.25 }}>{CAPTIONS[lang][step - 1]}</span>
         </div>
+        )}
         <div style={{ height: 3, background: "#232930" }}><div style={{ height: 3, background: "var(--accent)", width: `${Math.round((step / 6) * 100)}%`, transition: "width .4s" }} /></div>
         <div className="demo-bar" style={{ borderLeft: 0, borderRight: 0, borderBottom: 0 }}>
           <span style={{ fontWeight: 700, letterSpacing: ".08em", fontSize: 13 }}>{u.run}</span>
           <div className="demo-steps">
             {LABELS[lang].map((label, i) => (
-              <button key={label} className={`demo-step${i + 1 < step ? " done" : i + 1 === step ? " now" : ""}`} type="button" aria-current={i + 1 === step ? "step" : undefined} onClick={() => setStep(i + 1)} style={{ background: i + 1 === step ? undefined : "transparent", border: 0, borderRight: "1px solid #2A313C", fontFamily: "var(--f-mono)", cursor: "pointer" }}>
+              <button key={label} className={`demo-step${i + 1 < step ? " done" : i + 1 === step ? " now" : ""}`} type="button" aria-current={i + 1 === step ? "step" : undefined} onClick={() => { setStarted(true); setStep(i + 1); }} style={{ background: i + 1 === step ? undefined : "transparent", border: 0, borderRight: "1px solid #2A313C", fontFamily: "var(--f-mono)", cursor: "pointer" }}>
                 <i>{i + 1}</i>{label}
               </button>
             ))}
@@ -261,7 +305,7 @@ export default function DemoPage() {
             <button className="ctl" type="button" aria-label={u.reset} title={u.reset} onClick={restart}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v5h5" /></svg>
             </button>
-            <button className="ctl ctl-main" type="button" aria-label={playing ? u.pause : u.play} title={playing ? u.pause : u.play} onClick={() => { if (step >= 6) setStep(1); setPlaying((p) => !p); }}>
+            <button className="ctl ctl-main" type="button" aria-label={playing ? u.pause : u.play} title={playing ? u.pause : u.play} onClick={() => { if (step >= 6) setStep(1); play(!playing); }}>
               {playing ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
               ) : (
