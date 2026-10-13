@@ -12,7 +12,7 @@ Behind it are three things almost no team will have together: probabilistic fore
 
 | Time | Event |
 |------|-------|
-| 08:00 | Huerto Austral Export SpA (fictional) receives its cash briefing by voice, in Spanish, with ElevenLabs. |
+| 08:00 | Huerto Austral Export SpA (fictional) receives its cash briefing by voice, in English (also Spanish or Chinese), with ElevenLabs. |
 | 08:47 (alert) | A "supplier" invoice arrives with a changed bank account and a hidden instruction. NanFeng blocks it and alerts the owner by SMS. |
 | 10:12 | The Shanghai importer emails that it will pay USD 180,000 45 days late. Mistral OCR reads the notice. |
 | 10:13 (alert) | NanFeng re-runs 10,000 scenarios: 81% probability of negative cash in 19 days, right at harvest payroll. |

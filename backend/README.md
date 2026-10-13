@@ -19,7 +19,7 @@ Full contract: [`contracts/openapi.json`](../contracts/openapi.json) (generated,
 # whole stack (Postgres + backend), from the repo root
 cp .env.example .env
 docker compose up --build                    # http://localhost:8000/docs
-docker compose --profile quant up --build    # + Vicente's engine (needs vicente-rodriguez/ merged)
+docker compose --profile quant up --build    # + Vicente's quant engine
 
 # or locally, no Docker
 cd backend

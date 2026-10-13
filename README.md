@@ -8,31 +8,90 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 
 > 南风 (nánfēng) means "south wind": that is how Chile reaches China.
 
+| | |
+|---|---|
+| **Live app** | https://www.nanfengcfo.com |
+| **API** | https://api.nanfengcfo.com/docs |
+| **Repository** | https://github.com/Lilvecp/nanfeng |
+| **Technical documentation** | [docs/technical-documentation.md](docs/technical-documentation.md) |
+| **Deployment guide** | [docs/deployment.md](docs/deployment.md) |
+
+All company, customer, invoice, lender and approval data is synthetic; no real money moves (sandbox bank, EVM testnet).
+
+## What it does
+
+A Chilean cherry exporter learns that its largest Chinese importer will pay USD 180,000 45 days late. NanFeng reads the notice, forecasts cash on 10,000 paths (**81% probability of negative cash in 19 days**, on payroll day), compares 9 financing products with an exact optimizer, and proposes a USD pre-export loan that costs **CLP 2.1M instead of CLP 3.8M** for the bank loan (45% cheaper). The owner approves with a one-time code; the sandbox bank executes exactly the planned amount, and the audit log is anchored on a public chain. A fake supplier invoice with a hidden prompt injection, sent the same morning, is blocked before any LLM reads it.
+
+| Topic E asks for | NanFeng |
+|---|---|
+| Financing-option matching | Chance-constrained MILP over 9 Chilean financing products, compared fairly with the default bank loan (NanFeng-Bench 50/50, 41% cheaper on average) |
+| Cash-flow management with alerts | 90-day Monte Carlo forecast; WhatsApp alerts and a daily voice briefing |
+| Business financial analysis | Credit Passport (34 E → 67 B), Scenario Lab, "ask it why" on every decision |
+
+Security is enforced outside the LLM: a policy engine with permission levels L0–L3, the owner's one-time code for anything that creates debt or changes a payee, a hash-chained audit log anchored on Sepolia, and a red team of 43 attacks (4/43 stopped before the controls, 43/43 after; CI fails if one gets through).
+
+## Quick start
+
+Needs Docker and Node 22. From the repository root:
+
+```sh
+cp .env.example .env                       # set NANFENG_AGENT_TOKEN (instructions in the file)
+docker compose --profile quant up --build  # backend :8000 · agent :8200 · quant engine :8100 · Postgres
+
+cd web && cp .env.example .env.local && npm ci && npm run dev -- -p 3100   # http://localhost:3100
+```
+
+The web also runs alone (`cd web && npm ci && npm run dev`): with no backend it plays the Cherry Crisis on an in-browser sandbox. Provider keys are optional; without them the agent uses deterministic stand-ins. Running each service without Docker, and the public deploy (Vercel + Railway), are in [docs/deployment.md](docs/deployment.md).
+
+## Tests
+
+| Suite | Command | Result | CI job |
+|---|---|---|---|
+| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd backend && pip install -e ".[dev]" && pytest -q` | 116 passed | Backend tests |
+| Red team regression gate (43 attacks against the API) | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 43` | 43/43 stopped | Backend tests |
+| OpenAPI contract is up to date | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
+| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd renato-lenis && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 90 passed | Agent tests |
+| Quant engine: Monte Carlo, MILP, Credit Passport, API | `cd vicente-rodriguez && pip install -e ".[dev]" && pytest -q` | 32 passed | Quant tests |
+| NanFeng-Bench: 50 scenarios with a known answer | `cd vicente-rodriguez && python -m nanfeng_quant bench` (~5 min) | 50/50 ([summary](vicente-rodriguez/results/bench_summary.md)) | — |
+| Web: lint and production build | `cd web && npm ci && npm run lint && npm run build` | clean | Web lint and build |
+| Secret scanning | gitleaks | no findings | Secret scanning |
+
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every push to `main` and on every pull request.
+
+## Submission package
+
+| # | Deliverable | Where |
+|---|---|---|
+| 01 | Technical documentation: system architecture, core algorithm, security design | [docs/technical-documentation.md](docs/technical-documentation.md), with the full sections: [core algorithm](vicente-rodriguez/docs/core-algorithm.md) · [agent](renato-lenis/docs/agent.md) · [security design](andy-villarroel/docs/security-design.md) |
+| 02 | Presentation deck (≤ 10 min) | Outline: [valentin-castro/deck-v1.md](valentin-castro/deck-v1.md). The slides are made on the final product |
+| 03 | Demo video (≤ 5 min) | Script: [valentin-castro/video-script.md](valentin-castro/video-script.md). Recorded on the final product |
+| 04 | Source code: README, repository link, deployment instructions, test cases | This README · [docs/deployment.md](docs/deployment.md) · tests in `backend/tests`, `renato-lenis/tests`, `vicente-rodriguez/tests`, `andy-villarroel/redteam` |
+| 05 | Security self-assessment: permission tiers, known-risk list | [andy-villarroel/security-self-assessment.md](andy-villarroel/security-self-assessment.md) |
+| 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [andy-villarroel/evidence/out-live/](andy-villarroel/evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · video as in 03 |
+
 ## Repository structure
 
 ```
 .
-├── web/                       # Web cockpit (Next.js): landing + all cockpit screens, runs on Cherry Crisis mocks
-├── backend/                   # API gateway (FastAPI): sandbox bank, approvals + OTP, audit log, agent SSE, quant proxy
-├── contracts/                 # OpenAPI contracts (generated)
-├── docker-compose.yml         # One-command stack: Postgres + backend (+ quant profile)
+├── README.md                  # This file: overview, quick start, tests, submission map, licenses
+├── docs/
+│   ├── technical-documentation.md   # Deliverable 01: architecture, algorithms, agent, security
+│   └── deployment.md                # Local and public deployment, every variable
+├── web/                       # Web cockpit (Next.js): landing + every cockpit screen, live API or in-browser sandbox
+├── backend/                   # API gateway (FastAPI): owner sign-in, policy L0–L3, OTP, sandbox bank, audit log,
+│                              #   Merkle anchoring, invoice registry, agent SSE, quant proxy
+├── contracts/                 # OpenAPI contract (generated from the backend; CI checks it)
+├── docker-compose.yml         # One-command stack: Postgres + backend + agent (+ quant profile)
+├── .env.example               # Every backend and agent variable, with safe defaults
+├── .github/workflows/ci.yml   # Secret scanning, backend, agent, quant, web
 ├── design/
-│   └── private-desk/          # Chosen visual direction: static mockups the web app is built from
-├── plan/                      # Main planning: projection of the battle plan
-│   ├── README.md              # Index + key dates
-│   ├── overview.md            # The bet, demo script, scoring, differentiators
-│   ├── stack.md               # Tools + architecture diagram
-│   ├── roles.md               # Who does what (summary)
-│   ├── frontend-shared.md     # Shared frontend card (Valentín + Camilo)
-│   ├── timeline.md            # Sprints and gates
-│   ├── deliverables.md        # Competition package + UDD/admin checklist
-│   ├── risks.md               # Risks and mitigations
-│   └── team-rules.md          # How we work
-├── valentin-castro/           # R1 · Lead & Product Strategist (+ shared frontend)
-├── renato-lenis/              # R2 · AI Agent Engineer
-├── camilo-bufadel/            # R3 · Full-Stack & Blockchain Developer (+ shared frontend)
-├── andy-villarroel/           # R4 · Security & Compliance Lead
-└── vicente-rodriguez/         # R5 · Quant & Data Scientist
+│   └── private-desk/          # Visual direction: static mockups the web app is built from
+├── plan/                      # Planning: battle plan projection, roles, timeline, deliverables checklist
+├── valentin-castro/           # R1 · Lead & Product Strategist: scope, business model, deck outline, video script
+├── renato-lenis/              # R2 · AI Agent Engineer: the agent service (nanfeng_agent), its docs and tests
+├── camilo-bufadel/            # R3 · Full-Stack & Blockchain Developer: task card (code in backend/ and web/)
+├── andy-villarroel/           # R4 · Security & Compliance Lead: threat model, red team, self-assessment, evidence
+└── vicente-rodriguez/         # R5 · Quant & Data Scientist: quant engine (nanfeng_quant), bench, docs, results
 ```
 
 ## Team
@@ -142,3 +201,4 @@ The orchestrator, planners, quarantined extraction, model router, channel layer,
 | gitleaks / gitleaks-action | MIT; the action is free for personal-account repositories | Secret scanning in CI |
 | Ethereum Sepolia testnet, public RPC (publicnode.com) | Public test network; free public endpoint | Audit anchors (test ETH only, no real value) |
 | Zavu, OpenRouter, Mistral, ElevenLabs | Each provider's terms of service; keys live only in `.env` / the host's secret manager | Messaging and OTP, LLM routing, OCR, voice |
+| Vercel, Railway | Each host's terms of service | Hosting: the web on Vercel; backend, agent and quant engine on Railway |

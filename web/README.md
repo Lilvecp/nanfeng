@@ -1,5 +1,7 @@
 # NanFeng web cockpit
 
+Live at **https://www.nanfengcfo.com** (Vercel, region `hkg1`; deployment in [../docs/deployment.md](../docs/deployment.md)).
+
 The web app the jury sees: landing page plus the full cockpit, built on the **Private desk** design direction (`design/private-desk`). Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 (theme + utilities only).
 
 Two modes, picked automatically (badge in the top bar):
@@ -29,7 +31,7 @@ Production build: `npm run build && npm start`.
 | Route | Screen | What works today |
 |-------|--------|------------------|
 | `/` | Landing | 3D globe (Santiago → Shanghai, crisis loop), language and theme switch, links into the cockpit and the demo |
-| `/cockpit` | Cash Cockpit (fe-03) | Ask NanFeng with sandbox answers, 90-day fan chart, KPIs and blotter that update after approval |
+| `/cockpit` | Home: owner's simple view and the detailed Cash Cockpit (fe-03) | Ask NanFeng (the live agent when `NEXT_PUBLIC_AGENT_URL` is set, sandbox answers otherwise), send a document to the agent, 90-day fan chart, KPIs and blotter that update after approval |
 | `/mission` | Agent Mission Control (fe-04) | Execution trace, pause, kill switch with confirm, "Ask why" chat |
 | `/approvals` | Approval Center (fe-05) | 6-digit OTP (sandbox code `482913`, paste works), wrong-code attempts, reject with required reason, history filters |
 | `/financing` | Financing Arena (fe-06) | Option book and scatter are selectable, verdict per option, send the recommended plan to approval |
@@ -71,12 +73,11 @@ public/textures/            # NASA Black Marble + topology for the globe
 
 ## Languages
 
-The shell (sidebar, topbar), landing, cockpit, approvals, channels transcript and demo captions switch between EN / ES / 中文. The other screens are still English only; strings live in `src/lib/i18n.ts`.
+Every screen switches between EN / ES / 中文 (fe-11); key amounts are also shown in yuan in the 中文 view. Shared strings live in `src/lib/i18n.ts`, screen copy next to each screen.
 
 ## Next steps
 
-- Replace the mocks in `src/lib/desk-state.tsx` with the API client and the SSE stream (fe-02, fe-04).
-- Real OTP from Zavu instead of the sandbox code.
+- Loading and error states and an accessibility pass (fe-12).
 - Record a short clip of the globe loop for phones and reduced motion.
 
 ## Licenses

@@ -13,11 +13,11 @@
 
 **Tools:** Python · FastAPI · OpenRouter · Mistral · Zavu · ElevenLabs
 
-## Status (Oct 12)
+## Status (Oct 13)
 
 The agent lives in [`nanfeng_agent/`](nanfeng_agent) and is documented in [`docs/agent.md`](docs/agent.md) (r2-11). It runs as a service on :8200 (`docker compose up`, service `agent`): Zavu webhook, document uploads, "ask it why", the daily briefing, and a listener that resumes a paused run as soon as the owner approves in the cockpit. 90 tests run against the real backend (CI job "Agent tests"), and the whole Cherry Crisis was run live with the backend, the quant engine and Mistral OCR.
 
-Still open: **r2-01** for Zavu. Mistral (USD 10 limit), OpenRouter (USD 5 limit) and ElevenLabs are live: a full Cherry Crisis run with the LLM planner (Claude Sonnet 5.5) and the quarantined extractor (Mistral Small) costs about USD 0.02. Zavu has a test key: it only sends WhatsApp, only to team numbers, and only after that phone writes to the Zavu number first (24-hour window). The live test is waiting on that message; see [`docs/agent.md`](docs/agent.md#zavu-with-a-test-key-zv_test_). Every provider is optional: without a key the agent uses deterministic stand-ins, so the demo and CI never depend on a paid API. Handoff to the front: the cockpit's "Ask it why" and an upload button can call the service (see the doc).
+All four providers are live on the deploy (`GET /health` on the agent service): Mistral (USD 10 limit), OpenRouter (USD 5 limit), ElevenLabs and Zavu. A full Cherry Crisis run with the LLM planner (Claude Sonnet 5.5) and the quarantined extractor (Mistral Small) costs about USD 0.02. WhatsApp through Zavu was tested live from a team phone; with the test key the phone must write to the Zavu number first (24-hour window, see [`docs/agent.md`](docs/agent.md#zavu-with-a-test-key-zv_test_)). The agent service runs on Railway and the web's Home and ask box call it (`NEXT_PUBLIC_AGENT_URL`). Every provider is optional: without a key the agent uses deterministic stand-ins, so the demo and CI never depend on a paid API. Owner messages default to English (`NANFENG_OWNER_LANGUAGE=en`; also `es`, `zh`).
 
 ```sh
 cd renato-lenis
@@ -44,7 +44,7 @@ python3 -m venv .venv && .venv/bin/pip install -e "../backend[dev]" -e ".[dev,se
 
 ## Tasks
 
-- [ ] `r2-01` **Oct 8** · Must — **Accounts and API keys** for OpenRouter, Mistral, Zavu and ElevenLabs with spending limits; keys only in Camilo's secret manager.
+- [x] `r2-01` **Oct 8** · Must — _(all four live on the deploy; WhatsApp tested from a team phone)_ **Accounts and API keys** for OpenRouter, Mistral, Zavu and ElevenLabs with spending limits; keys only in Camilo's secret manager.
 - [x] `r2-02` **Oct 9** · Must — **Ingestion**: invoices, bank statements and notices via WhatsApp or upload → Mistral OCR → schema-validated JSON.
 - [x] `r2-03` **Oct 9** · Must — **Quarantined LLM** (Andy's design): reads documents and only returns typed fields; the agent never sees the raw text.
 - [x] `r2-04` **Oct 9** · Must — **Orchestrator**: planner → tool → policy check → execution, with a pause for human approval.

@@ -33,7 +33,7 @@ Decided on Oct 11: the web, deck and video use the engine's plan (PAE loan). The
 | Backend + sandbox bank + audit log + SSE | Camilo | Done on branch `camilo-backend` (inside `andy`) |
 | Web cockpit: Cockpit, Approvals, Financing, Mission Control, Demo Mode | Valentín · Camilo | Done; numbers aligned on branch `valentin-castro` |
 | Demo Mode that runs offline with a fixed seed | Valentín · Camilo | UI done; API replay pending (Camilo) |
-| Deployed URL on our own domain (not *.vercel.app) | Camilo | Pending |
+| Deployed URL on our own domain (not *.vercel.app) | Camilo | Done: https://www.nanfengcfo.com |
 | Deliverables 01–06 and the UDD email | Everyone → Valentín | In production week |
 
 ## Should (this makes us win)
