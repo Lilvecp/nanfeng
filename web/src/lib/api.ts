@@ -92,8 +92,10 @@ export const api = {
   },
   demo: {
     // Demo Mode replay (owner, demo builds): the step really happens on the backend.
+    // silent: a visitor watching the demo is never asked for the owner's password; the replay then
+    // plays on their screen only (the tour signs in first on purpose, see useStartTour).
     step: (n: number, body: { agent_steps?: DemoAgentStep[]; plan?: ApprovalCreate }) =>
-      post<{ step: number; approval?: { id: string; status: string } }>(`/demo/step/${n}`, body),
+      post<{ step: number; approval?: { id: string; status: string } }>(`/demo/step/${n}`, body, { auth: "silent" }),
   },
   bank: {
     accounts: () => get<Account[]>("/bank/accounts"),

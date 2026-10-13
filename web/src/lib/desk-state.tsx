@@ -462,7 +462,8 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       approval: isLive ? (verifying ? "verifying" : liveStatus(live)) : approval,
       approvalId: isLive && live ? live.id : SANDBOX_RECEIPT.ref,
       receipt: liveReceipt ?? { ref: SANDBOX_RECEIPT.ref, time: SANDBOX_RECEIPT.time, seq: SANDBOX_RECEIPT.seq, hash: SANDBOX_RECEIPT.hash },
-      otpAttemptsLeft: isLive ? (live?.otp_attempts_left ?? 0) : otpAttemptsLeft,
+      // no request open yet on the API: nothing was attempted, so nothing is locked
+      otpAttemptsLeft: isLive ? (live?.otp_attempts_left ?? SAVED_DEFAULT.attempts) : otpAttemptsLeft,
       rejectReason: isLive ? (live?.note ?? "") : rejectReason,
       plan,
       history: isLive ? [...liveHistory, ...INITIAL_HISTORY] : history,
