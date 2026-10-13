@@ -57,7 +57,7 @@ The LLM never computes a number: it calls these tools and quotes them. That is b
 | extra | – | – | Plan sensitivity | ✅ Done | `nanfeng_quant/sensitivity.py`, `results/sensitivity_summary.md` |
 | extra | – | – | API contract + reference server + sandbox seed + agent tool schemas | ✅ Done (D1, D2, D6) | `nanfeng_quant/api.py`, `api/`, `docs/api.md` |
 
-Tests: `28 passed` (`pytest`). Bench 50/50.
+Tests: `32 passed` (`pytest`). Bench 50/50.
 
 ---
 

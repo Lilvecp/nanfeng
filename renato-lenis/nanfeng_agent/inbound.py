@@ -25,7 +25,7 @@ SIGNATURE_TOLERANCE_S = 300
 
 def verify_signature(secret: str, header: str, body: bytes, now: float | None = None) -> bool:
     """v2 only: it binds a timestamp, so a captured request cannot be replayed after five minutes."""
-    parts = dict(p.split("=", 1) for p in header.split(",") if "=" in p)
+    parts = {k.strip(): v.strip() for k, v in (p.split("=", 1) for p in header.split(",") if "=" in p)}
     try:
         t = int(parts["t"])
     except (KeyError, ValueError):

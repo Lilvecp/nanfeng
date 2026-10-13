@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AgentCard, useAgentLive } from "@/components/agent-card";
 import { ForecastChart, ForecastLegend } from "@/components/forecast-chart";
 import { agent, type AgentAnswer } from "@/lib/api";
@@ -179,8 +179,10 @@ function CockpitDetail() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<Answer | AgentAnswer | "fallback" | "thinking" | null>(null);
   const agentLive = useAgentLive();
+  const asked = useRef(0);
 
   const ask = async (text: string) => {
+    const n = ++asked.current;
     setQuestion(text);
     if (!text.trim()) return setAnswer(null);
     const local = ANSWERS.find((a) => Object.values(a.q).some((q) => q.toLowerCase() === text.trim().toLowerCase()));
@@ -192,10 +194,12 @@ function CockpitDetail() {
       setAnswer("thinking");
       try {
         const a = await agent.ask(text.trim(), lang);
+        if (n !== asked.current) return; // a newer question was asked meanwhile
         if (a.intent !== "none" || !local) return setAnswer(a);
       } catch {
         // agent unreachable: answer from the sandbox below
       }
+      if (n !== asked.current) return;
     }
     setAnswer(local ?? "fallback");
   };

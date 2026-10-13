@@ -13,3 +13,6 @@ __pycache__/
 *.egg-info/
 *.db
 andy-villarroel/redteam/results/ci.json
+
+# Competition brief (kept local)
+PDF FinTechathon.pdf

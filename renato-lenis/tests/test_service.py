@@ -180,3 +180,42 @@ def test_zavu_status_events_and_retries_do_not_start_runs(zavu_api, agent):
     assert zavu_api.post("/inbound/zavu", content=body, headers=headers).status_code == 202
     assert zavu_api.post("/inbound/zavu", content=body, headers=headers).json()["status"] == "duplicate"
     assert len(agent.runs) == 1
+
+
+def test_zavu_signature_tolerates_spaces_in_the_header():
+    import time
+    from nanfeng_agent.inbound import verify_signature
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE))
+    spaced = headers["X-Zavu-Signature"].replace(",", ", ").replace("=", " = ", 1)
+    assert verify_signature(ZAVU_SECRET, spaced, body, now=time.time())
+    assert not verify_signature(ZAVU_SECRET, spaced, body + b" ", now=time.time())
+
+
+def test_background_run_failure_is_logged_not_raised(zavu_api, agent, monkeypatch, caplog):
+    from nanfeng_agent.backend import BackendError
+
+    def down(doc):
+        raise BackendError("backend unreachable")
+
+    monkeypatch.setattr(agent, "handle_document", down)
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE, event_id="evt_4"))
+    with caplog.at_level("ERROR", logger="nanfeng_agent"):
+        assert zavu_api.post("/inbound/zavu", content=body, headers=headers).status_code == 202
+    assert "inbound message failed" in caplog.text
+
+
+def test_relay_can_retry_an_event_that_failed(svc, agent, monkeypatch):
+    calls = []
+
+    def flaky(doc):
+        calls.append(doc)
+        if len(calls) == 1:
+            raise RuntimeError("transient")
+        return type("Run", (), {"summary": lambda self: {"status": "completed"}})()
+
+    monkeypatch.setattr(agent, "handle_document", flaky)
+    event = _event(fixtures.SHANGHAI_NOTICE, event_id="evt_5")
+    with TestClient(create_app(svc, listen=False), raise_server_exceptions=False) as c:
+        assert c.post("/inbound/zavu", json=event, headers=AGENT).status_code == 500
+        assert c.post("/inbound/zavu", json=event, headers=AGENT).json()["status"] == "completed"
+    assert len(calls) == 2

@@ -131,8 +131,8 @@ ElevenLabs: the default voice is Sarah (`EXAVITQu4vr4xnSDxMaL`), a premade voice
 Zavu posts `{id, type, data: {from, channel, text, ...}}` and signs it: `X-Zavu-Signature: t=<unix s>,v2=<hex>`, with v2 = HMAC-SHA256 of `"{t}.{raw body}"` under the secret Zavu issues when the webhook is added to a sender (Dashboard → sender → Add Webhook, event `message.inbound`). That secret goes in `NANFENG_ZAVU_WEBHOOK_SECRET`; Zavu does not send a custom token header, so a secret we generate ourselves cannot work. The agent:
 
 - rejects a missing, wrong or older-than-5-minutes signature (401) and fails closed (503) with no secret and no agent token;
-- answers `202` at once and runs the agent in the background, since Zavu wants a 2xx within 30 s and retries up to 5 times;
-- remembers the last 1,000 event ids, so a retry does not start a second run;
+- answers `202` at once and runs the agent in the background, since Zavu wants a 2xx within 30 s and retries up to 5 times; a background run that fails (backend down, unreadable message) is logged with its traceback;
+- remembers the last 1,000 event ids, so a retry does not start a second run; a relay call with the agent token that fails is forgotten, so the relay can retry it;
 - ignores every event that is not `message.inbound` (delivery receipts, templates).
 
 ### Zavu with a test key (`zv_test_…`)

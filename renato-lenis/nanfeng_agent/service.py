@@ -78,11 +78,20 @@ class AgentService:
         with self.lock:
             return self.agent.handle_document(doc).summary()
 
+    def forget(self, event_id: str | None) -> None:
+        """A delivery that failed before running can be retried."""
+        if event_id is not None:
+            with self.lock:
+                self.seen_events.pop(event_id, None)
+
     def run_inbound_quietly(self, message: dict[str, Any]) -> None:
+        # Runs after the 202: nobody is waiting for the answer, so every failure ends up in the log.
         try:
             self.run_inbound(message)
         except HTTPException as exc:
             log.warning("inbound message skipped: %s", exc.detail)
+        except Exception:
+            log.exception("inbound message failed")
 
     def handle_event(self, event: dict[str, Any]) -> None:
         """One SSE event from the backend. Resumes the run that proposed the approval, if any."""
@@ -211,7 +220,11 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
             tasks.add_task(svc.run_inbound_quietly, message)
             response.status_code = 202
             return {"status": "accepted", "event_id": event_id}
-        return svc.run_inbound(message)
+        try:
+            return svc.run_inbound(message)
+        except Exception:
+            svc.forget(event_id)  # the relay gets the error and may retry the same event
+            raise
 
     @app.post("/documents", dependencies=[Depends(require_owner)])
     def upload(body: UploadIn):

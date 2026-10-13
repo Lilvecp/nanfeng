@@ -15,7 +15,7 @@
 
 ## Status (Oct 12)
 
-The agent lives in [`nanfeng_agent/`](nanfeng_agent) and is documented in [`docs/agent.md`](docs/agent.md) (r2-11). It runs as a service on :8200 (`docker compose up`, service `agent`): Zavu webhook, document uploads, "ask it why", the daily briefing, and a listener that resumes a paused run as soon as the owner approves in the cockpit. 49 tests run against the real backend (CI job "Agent tests"), and the whole Cherry Crisis was run live with the backend, the quant engine and Mistral OCR.
+The agent lives in [`nanfeng_agent/`](nanfeng_agent) and is documented in [`docs/agent.md`](docs/agent.md) (r2-11). It runs as a service on :8200 (`docker compose up`, service `agent`): Zavu webhook, document uploads, "ask it why", the daily briefing, and a listener that resumes a paused run as soon as the owner approves in the cockpit. 90 tests run against the real backend (CI job "Agent tests"), and the whole Cherry Crisis was run live with the backend, the quant engine and Mistral OCR.
 
 Still open: **r2-01** for Zavu. Mistral (USD 10 limit), OpenRouter (USD 5 limit) and ElevenLabs are live: a full Cherry Crisis run with the LLM planner (Claude Sonnet 5.5) and the quarantined extractor (Mistral Small) costs about USD 0.02. Zavu has a test key: it only sends WhatsApp, only to team numbers, and only after that phone writes to the Zavu number first (24-hour window). The live test is waiting on that message; see [`docs/agent.md`](docs/agent.md#zavu-with-a-test-key-zv_test_). Every provider is optional: without a key the agent uses deterministic stand-ins, so the demo and CI never depend on a paid API. Handoff to the front: the cockpit's "Ask it why" and an upload button can call the service (see the doc).
 
@@ -37,6 +37,10 @@ python3 -m venv .venv && .venv/bin/pip install -e "../backend[dev]" -e ".[dev,se
 - **Agent code changed by Andy (branch `andy`, PR #7), Oct 12:** `nanfeng_agent/templates.py` gains `AI_LABEL` / `ai_label(lang)`, and `send_collection` in `nanfeng_agent/tools.py` appends that label to every reminder to an importer (CAC labelling measures: 【本消息由AI生成 · NanFeng】 in Chinese, an equivalent label in English and Spanish; messages to the owner are not labelled). Tests: [`tests/test_ai_label.py`](tests/test_ai_label.py). `docs/agent.md`: the fake invoice moved to 08:47 to match the final story. Nothing else in the agent changed.
 - **Backend change that affects the agent (F6):** with `NANFENG_AGENT_TOKEN` empty, agent routes now answer 401 instead of accepting anyone. Set the same token in the backend and the agent service; for local work without a token, start the backend with `NANFENG_ALLOW_OPEN_AGENT=true`. Checked live: with the token, the clean invoice is paid and the BEC invoice is blocked; without it the run ends `failed` and nothing moves.
 - **If this test fails after a change to the agent**, an injected document got further than it should. Check the guard verdict and what the planner did with a `suspicious` document before you relax the test. The attacks live in `andy-villarroel/redteam/attacks.py` (ask Andy).
+
+## Checked by Vicente (Oct 13)
+
+- **Agent code changed by Vicente (on `main`), after PR #11 and #12:** `inbound.verify_signature` trims spaces in `X-Zavu-Signature`, so `t=…, v2=…` is accepted too. `AgentService.run_inbound_quietly` logs any background failure with its traceback (before, only a `422` was caught, so a `BackendError` or a network error escaped the task). On the synchronous relay path (agent token), an event that fails is forgotten, so the relay can retry it instead of getting `duplicate`. Tests: the last three in [`tests/test_service.py`](tests/test_service.py). Nothing else in the agent changed.
 
 ## Tasks
 
