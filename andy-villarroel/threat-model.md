@@ -115,6 +115,7 @@ flowchart LR
 | F11 | Low | Read endpoints (`/audit/entries`, `/bank/*`) are public. Fine with synthetic data, not with real data. | routers | Owner session on reads once F1 lands | Camilo · after freeze |
 | F12 | Medium | Every payment wrote the payee's full bank account into the public audit log (red team EX-04). | `backend/app/bank.py` | Last four digits only | Andy · **fixed** |
 | F13 | Medium | `POST /audit/anchor` was open to anyone, and every anchor writes a new `audit.anchored` entry, so there was always something pending: an anonymous caller could send unlimited transactions from the anchoring wallet (found Oct 12: 5 anonymous calls, 5 anchors). | `backend/app/routers/audit.py` | Agent token or owner session required | Andy · **fixed** (Oct 12) |
+| F14 | Low | The OTP attempt counter was a read-modify-write: wrong codes sent in parallel each saw "3 attempts left" (40 at once: 17 compared), and a right code among them could still win after the attempts were spent. | `backend/app/routers/approvals.py` (`approve`) | Reserve the attempt with an atomic conditional UPDATE before comparing; no comparison once spent | Andy · **fixed** (Oct 13) |
 
 ## Residual risks we will declare (deliverable 05)
 

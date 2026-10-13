@@ -29,7 +29,7 @@ Daily logs: [Oct 10](progress-2026-10-10.md) · [Oct 12](progress-2026-10-12.md)
 | r4-06 Red team | [redteam/](redteam/) · [results](redteam/results/REPORT.md): 4/43 → 43/43 stopped · through the agent: [`renato-lenis/tests/test_redteam_via_agent.py`](../renato-lenis/tests/test_redteam_via_agent.py) (21 attacks, none moves money) |
 | r4-08 / r4-11 Regulatory slide, China compliance | [privacy-compliance.md](privacy-compliance.md#regulatory-slide-deck-r4-08) |
 | r4-09 Security Self-Assessment (05) | [security-self-assessment.md](security-self-assessment.md) |
-| r4-10 Execution evidence (06) | [evidence/](evidence/) · [sample run](evidence/out/SUMMARY.md) (owner sign-in, PAE plan, 08:47 attack; bank cost = MILP cost); **live** run on the deployed backend: [out-live](evidence/out-live/SUMMARY.md), anchor on Sepolia [0x67b483e5…](https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a) |
+| r4-10 Execution evidence (06) | [evidence/](evidence/) · [sample run](evidence/out/SUMMARY.md) (owner sign-in, PAE plan, 08:47 attack; bank cost = MILP cost); **live** run on the deployed backend: [out-live](evidence/out-live/SUMMARY.md), anchor on Sepolia [0x67b483e5…](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b) |
 
 ## Tasks
 

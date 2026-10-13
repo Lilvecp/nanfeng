@@ -207,3 +207,27 @@ def test_a_decided_approval_cannot_be_rejected_or_approved_again(client):
     assert client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).status_code == 200
     assert client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).status_code == 409
     assert client.post(f"/approvals/{a['id']}/reject", json={"reason": "late"}).status_code == 409
+
+
+def test_parallel_wrong_codes_get_three_tries_in_total(client):
+    """Guesses sent at the same time must not each see "3 attempts left": the attempt is reserved
+    atomically before the code is compared (threat model F14)."""
+    import threading
+
+    appr = client.post("/approvals", json=FACTORING).json()
+    codes = [f"{n:06d}" for n in range(100000, 100030)]
+    statuses: list[int] = []
+
+    def guess(code):
+        statuses.append(client.post(f"/approvals/{appr['id']}/approve", json={"otp": code}).status_code)
+
+    threads = [threading.Thread(target=guess, args=(c,)) for c in codes]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+
+    assert statuses.count(403) <= 3  # a wrong code was really compared at most three times
+    final = client.get(f"/approvals/{appr['id']}").json()
+    assert final["status"] == "locked" and final["otp_attempts_left"] == 0
+    # once locked, even the right code is refused and nothing executes
+    assert client.post(f"/approvals/{appr['id']}/approve", json={"otp": "482913"}).status_code in (409, 423)
+    assert clp_balance(client) == OPENING

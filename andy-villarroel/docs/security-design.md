@@ -44,7 +44,8 @@ Rules evaluated over the request **and** the rolling history of executed request
 ### 2. Step-up authentication (`auth.py`, `otp.py`)
 
 - **Owner session:** `v1.<expires>.<nonce>.<HMAC-SHA256(secret, "v1.<expires>.<nonce>")>`, 8 hours, stateless; sign-out puts the nonce on a deny list; failed sign-ins are rate limited (5 per 5 minutes per client). The backend refuses to start with the public demo password outside demo builds.
-- **One-time code (SMS mode):** a random 6-digit code per L3 approval, texted by Zavu. Only `HMAC(secret, approval_id | amount | code)` is stored, so the code works once, for that approval and that amount, for 5 minutes; it never reaches the audit log, the event stream or the agent. Three wrong codes lock the approval.
+- **One-time code (SMS mode):** a random 6-digit code per L3 approval, texted by Zavu. Only `HMAC(secret, approval_id | amount | code)` is stored, so the code works once, for that approval and that amount, for 5 minutes; it never reaches the audit log, the event stream or the agent. Three wrong codes lock the approval; each attempt is reserved atomically before the comparison, so parallel guesses get three tries in total (F14).
+- **One decision per approval:** approve and reject claim the request with an atomic conditional UPDATE before any money moves, so a request approved on two channels at once executes once.
 - **Voice never approves L3:** any channel containing "voice" is refused (a cloned voice costs seconds of audio).
 - **Kill switch:** stored in the database (survives restarts). The owner or the agent may turn it on; turning it off needs the owner's session and a one-time code.
 
@@ -87,8 +88,8 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 |-------|--------|
 | Red team, 43 outcome-based attacks in 7 categories, against the API | 4/43 stopped before the controls → **43/43 after**; CI fails if one gets through |
 | The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`renato-lenis/tests/test_redteam_via_agent.py`) |
-| Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a)) |
-| Unit tests | 104 backend tests (security/BEC 24, policy 20, API 16, OTP 12, owner sign-in 10, privacy 7, registry 6, demo 5, anchoring 4) |
+| Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
+| Unit tests | 116 backend tests (security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, registry 6, live story 5, demo 5, anchoring 4) |
 
 ## Known limitations
 
