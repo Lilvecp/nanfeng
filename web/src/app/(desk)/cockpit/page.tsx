@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AgentCard, useAgentLive } from "@/components/agent-card";
 import { ForecastChart, ForecastLegend } from "@/components/forecast-chart";
+import { agent, type AgentAnswer } from "@/lib/api";
 import { CloseButton } from "@/components/close-button";
 import { OwnerView, ViewSwitch } from "@/components/owner-view";
 import { Topbar } from "@/components/topbar";
@@ -18,8 +20,8 @@ const CNY_INVOICES = S.receivables.filter((r) => r.currency === "CNY");
 const CNY_TOTAL = CNY_INVOICES.reduce((a, r) => a + r.amount, 0);
 const ELIGIBLE = S.arena.length;
 
-// Sandbox answers until the planner agent is wired in. Every number comes from the quant engine's
-// Cherry Crisis run (lib/scenario.ts).
+// Sandbox answers, and the fallback when the live agent is not reachable. Every number comes from the
+// quant engine's Cherry Crisis run (lib/scenario.ts).
 const ANSWERS: Answer[] = [
   {
     q: { en: `Why is day ${N.crunchDay} at risk?`, es: `¿Por qué el día ${N.crunchDay} está en riesgo?`, zh: `为什么第${N.crunchDay}天有风险？` },
@@ -175,12 +177,27 @@ function CockpitDetail() {
   const { resolved, pNeg } = useCrisisNumbers();
   const alertClosed = useDismissed(`detail-${approval}`);
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState<Answer | "fallback" | null>(null);
+  const [answer, setAnswer] = useState<Answer | AgentAnswer | "fallback" | "thinking" | null>(null);
+  const agentLive = useAgentLive();
 
-  const ask = (text: string) => {
-    const hit = ANSWERS.find((a) => Object.values(a.q).some((q) => q.toLowerCase() === text.trim().toLowerCase())) ?? whatIf(text, lang);
+  const ask = async (text: string) => {
     setQuestion(text);
-    setAnswer(hit ?? (text.trim() ? "fallback" : null));
+    if (!text.trim()) return setAnswer(null);
+    const local = ANSWERS.find((a) => Object.values(a.q).some((q) => q.toLowerCase() === text.trim().toLowerCase()));
+    // What-ifs come from the quant engine's runs; everything else goes to the live agent, which explains
+    // what it actually did. The sandbox answers stay as the fallback when the agent has nothing to say.
+    const lab = whatIf(text, lang);
+    if (lab) return setAnswer(lab);
+    if (agentLive) {
+      setAnswer("thinking");
+      try {
+        const a = await agent.ask(text.trim(), lang);
+        if (a.intent !== "none" || !local) return setAnswer(a);
+      } catch {
+        // agent unreachable: answer from the sandbox below
+      }
+    }
+    setAnswer(local ?? "fallback");
   };
 
   const receivables = [...S.receivables].sort((a, b) => a.due_date.localeCompare(b.due_date));
@@ -217,6 +234,13 @@ function CockpitDetail() {
               <span className="eyebrow">NanFeng</span>
               {answer === "fallback" ? (
                 <span>{FALLBACK[lang]}</span>
+              ) : answer === "thinking" ? (
+                <span className="muted">…</span>
+              ) : "answer" in answer ? (
+                <>
+                  <span>{answer.answer}</span>
+                  {answer.run_id && <Link href="/mission" className="mono small">{answer.run_id} →</Link>}
+                </>
               ) : (
                 <>
                   <span>{answer.a[lang]}</span>
@@ -226,6 +250,8 @@ function CockpitDetail() {
             </div>
           )}
         </div>
+
+        <AgentCard uploadOnly />
 
         {alertClosed ? null : approval === "approved" ? (
           <div data-guide="det-alert" className="alert ok" style={{ alignItems: "center", flexWrap: "wrap" }}>

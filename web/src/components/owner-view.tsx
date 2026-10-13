@@ -10,6 +10,7 @@ import { useLang, useT } from "@/lib/i18n";
 import { setPref, usePref, type Lang } from "@/lib/prefs";
 import { Receipt } from "@/components/receipt";
 import { N, S, SHORT_CUSTOMER, SHORT_CUSTOMER_ZH, cny, dayOf, longDate, outOf10, pesos, usd } from "@/lib/scenario";
+import { AgentCard } from "./agent-card";
 
 // The owner's view of the desk: what is happening, what NanFeng recommends and one decision, in
 // plain words. Every number still comes from the quant engine (lib/scenario.ts); the full desk with
@@ -365,6 +366,8 @@ export function OwnerView() {
               {why && <ul className="owner-why">{c.rec.reasons.map((r) => <li key={r}>{r}</li>)}</ul>}
             </section>
           )}
+
+          <AgentCard />
 
           <section className="card owner-card" data-guide="home-agent">
             <h2 className="owner-h">{c.agent.title}</h2>

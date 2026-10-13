@@ -18,6 +18,8 @@ export type ChainCheck = { valid: boolean; entries: number; broken_at_seq: numbe
 export type ApiEvent = { id: number; type: string; ts: string; source: string; data: Record<string, unknown> };
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
+// The agent service (renato-lenis, :8200). It checks the same owner session with the backend.
+export const AGENT_URL = (process.env.NEXT_PUBLIC_AGENT_URL ?? "").replace(/\/$/, "");
 
 export class ApiError extends Error {
   constructor(public status: number, public detail: unknown) {
@@ -25,20 +27,20 @@ export class ApiError extends Error {
   }
 }
 
-type Opts = { auth?: "prompt" | "silent" };
+type Opts = { auth?: "prompt" | "silent"; base?: string; timeoutMs?: number };
 
 async function request<T>(method: "GET" | "POST", path: string, body?: unknown, opts: Opts = {}, retried = false): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {};
   if (body !== undefined) headers["content-type"] = "application/json";
   if (token) headers.authorization = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${opts.base ?? API_URL}${path}`, {
     method,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
     // a cold or unreachable backend must not leave the desk on "Connecting…": fall back instead
-    signal: AbortSignal.timeout(path === "/health" ? 10_000 : 30_000),
+    signal: AbortSignal.timeout(opts.timeoutMs ?? (path === "/health" ? 10_000 : 30_000)),
   });
   const data = res.headers.get("content-type")?.includes("json") ? await res.json() : res.status === 204 ? null : await res.text();
   // Owner-only route without a valid session: ask the owner to sign in, then try once more.
@@ -57,7 +59,7 @@ async function request<T>(method: "GET" | "POST", path: string, body?: unknown, 
   return data as T;
 }
 
-const get = <T,>(path: string) => request<T>("GET", path);
+const get = <T,>(path: string, opts: Opts = {}) => request<T>("GET", path, undefined, opts);
 const post = <T,>(path: string, body: unknown = {}, opts: Opts = {}) => request<T>("POST", path, body, opts);
 
 export const api = {
@@ -101,6 +103,22 @@ export const api = {
     accounts: () => get<Account[]>("/bank/accounts"),
     reset: () => post<{ reset: boolean }>("/bank/reset"),
   },
+};
+
+export type AgentAnswer = { answer: string; intent: string; run_id: string | null; model: string };
+export type AgentRun = {
+  run_id: string; kind: string; status: string; note: string; steps: number; planner: string | null;
+  approvals: { id: string; tier: number; status: string }[];
+};
+export type AgentUpload = { filename: string; mime: string; data_base64: string; source?: "upload"; language?: string };
+
+// A document run reads it (OCR), forecasts, optimizes and proposes: allow more than the default 30 s.
+const AGENT = { base: AGENT_URL, timeoutMs: 120_000 } as const;
+
+export const agent = {
+  health: () => get<{ status: string; providers: Record<string, string>; planner: string }>("/health", { base: AGENT_URL, auth: "silent" }),
+  ask: (question: string, language: string) => post<AgentAnswer>("/ask", { question, language }, AGENT),
+  upload: (body: AgentUpload) => post<AgentRun>("/documents", { source: "upload", ...body }, AGENT),
 };
 
 /** Subscribes to the backend SSE stream; the browser reconnects and resumes with Last-Event-ID. */

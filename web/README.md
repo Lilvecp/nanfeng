@@ -5,6 +5,7 @@ The web app the jury sees: landing page plus the full cockpit, built on the **Pr
 Two modes, picked automatically (badge in the top bar):
 
 - **API LIVE**: with `NEXT_PUBLIC_API_URL` set (see `.env.example`) and the backend up, Approvals (OTP, reject, history), Mission Control (kill switch, live SSE event stream) and Security (audit chain, verify, anchors) use the real API in `../backend`.
+- **Agent**: with `NEXT_PUBLIC_AGENT_URL` also set and the agent service up (`../renato-lenis`), Home gets an "Ask NanFeng" card (questions to the agent, and "Send a document": a PDF, photo or text the agent reads, forecasts on and turns into a plan or blocks), and the detailed view's ask box asks the agent. What-ifs still come from the quant engine's runs; the sandbox answers are the fallback when the agent is unreachable. The agent checks the same owner session as the backend.
 - **SANDBOX**: no URL or the backend is down, so every screen runs on the Cherry Crisis mocks in the browser. Demo Mode never depends on the network.
 
 The typed client lives in `src/lib/api.ts`; types are generated from `../contracts/openapi.json` with `npm run api:types`.
@@ -17,6 +18,8 @@ npm install
 npm run dev -- -p 3100   # any free port; open http://localhost:3100
 # live mode: run the backend (see ../backend/README.md), then
 NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev -- -p 3100
+# with the agent too (see ../renato-lenis/README.md)
+NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_AGENT_URL=http://localhost:8200 npm run dev -- -p 3100
 ```
 
 Production build: `npm run build && npm start`.
