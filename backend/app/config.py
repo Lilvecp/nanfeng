@@ -1,7 +1,9 @@
+import json
 from functools import lru_cache
+from typing import Annotated
 
-from pydantic import AliasChoices, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import AliasChoices, Field, field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # Shown on the sign-in screen of demo builds so the jury can try the app. A real deploy sets its
 # own NANFENG_OWNER_PASSWORD and NANFENG_DEMO=false (startup refuses the demo password then).
@@ -31,11 +33,12 @@ class Settings(BaseSettings):
     owner_phone: str = ""  # E.164, e.g. +56911112222
     zavu_api_key: str = Field(default="", validation_alias=AliasChoices("NANFENG_ZAVU_API_KEY", "ZAVU_API_KEY"))
     zavu_url: str = "https://api.zavu.dev/v1/messages"
-    # Token the agent (Renato) uses to publish events and create approvals. Empty = open (local dev).
+    # Token the agent (Renato) uses to publish events and create approvals. Empty = agent routes refuse everyone.
     agent_token: str = ""
     # Development only: with no agent token, accept any caller as the agent (threat model F6).
     allow_open_agent: bool = False
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3100"]
+    # A JSON list or comma-separated origins, whichever the host's secret manager makes easier.
+    cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:3000", "http://localhost:3100"]
     # "local" records the Merkle root in the DB only; "evm" sends it to an EVM testnet (r3-05).
     anchor_backend: str = "local"
     evm_rpc_url: str = ""
@@ -56,6 +59,15 @@ class Settings(BaseSettings):
     session_ttl_s: int = 8 * 3600
     # Demo build: enables POST /bank/reset and shows the demo password on the sign-in screen.
     demo: bool = True
+
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _origins(cls, v):
+        if isinstance(v, str):
+            v = v.strip().strip("'")
+            v = json.loads(v) if v.startswith("[") else v.split(",")
+        return [o.strip().strip('"').rstrip("/") for o in v if o.strip()]
 
 
 @lru_cache
