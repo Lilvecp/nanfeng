@@ -1,6 +1,6 @@
 # Privacy and compliance (r4-07 · r4-08 · r4-11)
 
-**Owner:** Andy · **Status:** v1, Oct 10 · Source for the regulatory slide, the compliance section of the technical documentation and the Security Self-Assessment Report.
+**Owner:** Andy · **Status:** v2, Oct 12 · Source for the regulatory slide, the compliance section of the technical documentation and the Security Self-Assessment Report.
 
 > Everything in the demo is synthetic data, declared as such. This section describes how NanFeng is built so that the same design holds when real data arrives. It is our reading of the rules, not legal advice; a lawyer reviews it before any pilot with real companies.
 
@@ -65,12 +65,4 @@ NanFeng's user is a Chilean SME. Chinese law matters because the counterparties 
 
 ## Regulatory slide (deck, r4-08)
 
-**Title:** Built to be trusted with a company's money
-
-| Chile 🇨🇱 | China 🇨🇳 | Everywhere |
-|-----------|-----------|------------|
-| Ley 21.719 data protection: PII masked before any AI model | PIPL: no profiling of individuals in China; no data exported out of China | OWASP Top 10 for LLM apps: policy engine outside the LLM |
-| Ley Fintec: built for Open Finance APIs | Generative AI measures: every message to an importer labelled AI-generated | Every money decision explainable, human-approved with OTP |
-| AML: structuring detection + sanctions screening | WeBank-ready: audit anchored on FISCO BCOS-compatible chain | Tamper-evident audit log, 40+ attack red team |
-
-**Speaker line:** "NanFeng never lets the AI touch money or personal data directly. The AI proposes; deterministic rules decide; the owner approves with a one-time code; every step is hashed on-chain."
+Final text: slide 8 of [deck-v1.md](../valentin-castro/deck-v1.md). It claims only what the code does: PII masking before any model, human-approved money decisions (L3), structuring detection, simulated sanctions screening, the invoice registry against double financing, HMAC-stored one-time codes and the on-chain audit log. The AI-generated label for importers is built (`renato-lenis/tests/test_ai_label.py`) and can go on the slide. Not on the slide until built: FISCO BCOS anchoring (Sepolia today) and Ley Fintec / Open Finance connectors.
