@@ -44,7 +44,8 @@ Rules evaluated over the request **and** the rolling history of executed request
 ### 2. Step-up authentication (`auth.py`, `otp.py`)
 
 - **Owner session:** `v1.<expires>.<nonce>.<HMAC-SHA256(secret, "v1.<expires>.<nonce>")>`, 8 hours, stateless; sign-out puts the nonce on a deny list; failed sign-ins are rate limited (5 per 5 minutes per client). The backend refuses to start with the public demo password outside demo builds.
-- **One-time code (SMS mode):** a random 6-digit code per L3 approval, texted by Zavu. Only `HMAC(secret, approval_id | amount | code)` is stored, so the code works once, for that approval and that amount, for 5 minutes; it never reaches the audit log, the event stream or the agent. Three wrong codes lock the approval.
+- **One-time code (SMS mode):** a random 6-digit code per L3 approval, texted by Zavu. Only `HMAC(secret, approval_id | amount | code)` is stored, so the code works once, for that approval and that amount, for 5 minutes; it never reaches the audit log, the event stream or the agent. Three wrong codes lock the approval; each attempt is reserved atomically before the comparison, so parallel guesses get three tries in total (F14).
+- **One decision per approval:** approve and reject claim the request with an atomic conditional UPDATE before any money moves, so a request approved on two channels at once executes once.
 - **Voice never approves L3:** any channel containing "voice" is refused (a cloned voice costs seconds of audio).
 - **Kill switch:** stored in the database (survives restarts). The owner or the agent may turn it on; turning it off needs the owner's session and a one-time code.
 

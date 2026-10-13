@@ -10,7 +10,7 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 |----------|--------|
 | Red team, 43 outcome-based attacks in 7 categories | **4/43 stopped before → 43/43 after** ([report](redteam/results/REPORT.md)) |
 | Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../renato-lenis/tests/test_redteam_via_agent.py)) |
-| Automated tests | **Backend 104**: security/BEC 24, policy 20, API 16, OTP 12, owner sign-in 10, privacy 7, invoice registry 6, demo 5, anchoring 4. **Agent 84**, including the red team replay and the AI label |
+| Automated tests | **Backend 116**: security/BEC 24, policy 20, API 20, OTP 12, owner sign-in 10, privacy 7, invoice registry 6, demo 5, anchoring 4. **Agent 84**, including the red team replay and the AI label |
 | CI gate | Fails the build if any of the 43 red team attacks gets through |
 | Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 5/5 and the Merkle root read back from Sepolia ([summary](evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a)) |
 
@@ -58,6 +58,9 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 
   Decision and execution run under one lock, so two concurrent requests cannot both fit under a cumulative limit (verified by a test that fails without the lock). Every decision records the rules that fired and the policy version in the audit chain.
 
+- **One decision per approval** (`backend/app/routers/approvals.py`, Oct 13): approve and reject claim the request with an atomic `UPDATE … WHERE status = 'pending' AND decided_at IS NULL` before any money moves, so two approvals racing for the same request (the owner typing the code on the web while Demo Mode approved on WhatsApp) execute it once. The deploy's chain had shown the PAE loan disbursed twice; it can no longer happen (tests for WhatsApp + web, approve + reject). Executions of different approvals run one at a time with the account row locked on Postgres, so two credits never read the same balance. `bank.*` and `approval.*` entries carry the approval id and its tier, so the chain shows the loan as the L3 action it is.
+- **Three tries, even in parallel** (threat model F14, Oct 13): each code attempt is reserved atomically before the code is compared. Before, 40 wrong codes sent at once had 17 of them compared instead of 3; now at most 3 are compared and the rest get 423 without being checked (test `test_parallel_wrong_codes_get_three_tries_in_total`).
+
 - **Step-up authentication** (`backend/app/otp.py`): in SMS mode each L3 approval gets its own random 6-digit code sent by Zavu to the owner's phone. Only `HMAC(approval id | amount | code)` is stored: the code works once, for that approval and that amount, for 5 minutes, and is never written to the audit log, the event stream or the agent's context. Three wrong codes lock the approval. Resends are rate-limited.
 - **Voice never approves L3.** Any approval whose channel includes "voice" is refused and logged: a cloned voice costs a few seconds of audio.
 - **Owner session** (`backend/app/auth.py`): the owner signs in with a password and gets an HMAC-signed token valid for 8 hours; sign-out revokes it; failed sign-ins are rate limited (5 per 5 minutes per client). The backend refuses to start with the public demo password unless it is a demo build.
@@ -96,7 +99,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 ## 6. Reproduce
 
 ```sh
-cd backend && pytest -q                                       # 104 tests
+cd backend && pytest -q                                       # 116 tests
 cd ../renato-lenis && pytest -q                               # 84 agent tests, red team replay included
 cd ../andy-villarroel/redteam && python run.py --backend ../../backend --label after --min-stopped 43 && python report.py
 cd ../evidence && python build.py --backend ../../backend     # Cherry Crisis evidence

@@ -165,14 +165,38 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
         raise HTTPException(403, {"error": "voice_cannot_approve",
                                   "detail": "L3 actions need the OTP; voice never approves (deepfake risk)"})
 
+    # Reserve one attempt atomically before comparing the code (threat model F14): guesses sent in
+    # parallel must not all read "3 attempts left", and once they are spent no guess is compared at all.
+    reserved = db.execute(
+        update(Approval)
+        .where(Approval.id == appr.id, Approval.status == "pending", Approval.otp_attempts_left > 0)
+        .values(otp_attempts_left=Approval.otp_attempts_left - 1)
+    ).rowcount
+    db.commit()
+    db.refresh(appr)
+    if not reserved:
+        raise HTTPException(409 if appr.status != "pending" else 423,
+                            {"error": "otp_locked", "attempts_left": appr.otp_attempts_left})
+
     check = otp.verify(db, appr, body.otp)
+    if check == "ok":
+        db.execute(update(Approval).where(Approval.id == appr.id)
+                   .values(otp_attempts_left=Approval.otp_attempts_left + 1))  # a right code costs nothing
+        db.commit()
+        db.refresh(appr)
     if check == "expired":
+        db.execute(update(Approval).where(Approval.id == appr.id)
+                   .values(otp_attempts_left=Approval.otp_attempts_left + 1))  # not a guess: give it back
+        db.commit()
+        db.refresh(appr)
         audit.append(db, "owner", "approval.otp_expired", {"approval_id": appr.id, "channel": body.channel})
         raise HTTPException(410, {"error": "otp_expired", "attempts_left": appr.otp_attempts_left})
     if check != "ok":
-        appr.otp_attempts_left -= 1
         if appr.otp_attempts_left <= 0:
-            appr.status, appr.decided_at = "locked", utcnow()
+            db.execute(update(Approval).where(Approval.id == appr.id, Approval.status == "pending")
+                       .values(status="locked", decided_at=utcnow()))
+            db.commit()
+            db.refresh(appr)
         audit.append(db, "owner", "approval.otp_failed", {
             "approval_id": appr.id, "attempts_left": appr.otp_attempts_left, "channel": body.channel,
         })
