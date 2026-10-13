@@ -72,6 +72,10 @@ export const api = {
     approve: (id: string, otp: string, channel = "WEB+OTP") => post<Approval>(`/approvals/${id}/approve`, { otp, channel }),
     reject: (id: string, reason: string) => post<Approval>(`/approvals/${id}/reject`, { reason, channel: "WEB" }),
   },
+  // The policy engine's limits (threat model F4: the backend is the source of truth for Settings).
+  policy: {
+    get: () => get<{ version: number; tiers: Record<string, Record<string, number>> }>("/policy"),
+  },
   killSwitch: {
     get: () => get<{ on: boolean }>("/policy/kill-switch"),
     set: (on: boolean, otp?: string) => post<{ on: boolean }>("/policy/kill-switch", otp ? { on, otp } : { on }),

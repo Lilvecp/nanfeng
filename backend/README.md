@@ -44,6 +44,8 @@ Then reset the sandbox (`POST /bank/reset`, or delete `nanfeng.db` locally).
 
 Approve, reject, resend a code, the kill switch and `POST /bank/reset` are owner-only. The owner signs in with `POST /auth/login {password}` and sends `Authorization: Bearer <token>` (an HMAC-signed session, 8 h, ended by `POST /auth/logout`). Failed sign-ins are rate limited (5 per 5 min per client). The agent token is never accepted as the owner (403).
 
+Agent routes (`POST /approvals` without an owner session, `/security/*`, `/privacy/mask`, `/agent/events`, `POST /audit/entries`) need `Authorization: Bearer $NANFENG_AGENT_TOKEN`, the same value in the backend and the agent. With no token configured they refuse every caller (401 `agent_token_not_configured`), and the `change-me` placeholder from `.env.example` is refused at startup (threat model F6). For local development without the agent, `NANFENG_ALLOW_OPEN_AGENT=true` accepts any caller as the agent.
+
 - Kill switch: the owner or the agent may turn it **on**; turning it **off** needs the owner's session **and** a one-time code (`otp`; in SMS mode ask for one with `POST /policy/kill-switch/otp`). It is stored in the database (`app_state`), so a restart, a deploy or a sleeping host never turns it off.
 - `POST /bank/reset` exists only with `NANFENG_DEMO=true`.
 - Demo builds use the public password `huerto-demo-2026` and show it on the sign-in screen (`GET /auth/config`). With `NANFENG_DEMO=false` the backend refuses to start on that password.
@@ -125,8 +127,19 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 - **Vicente (quant):** your API is proxied unchanged under `/quant`. For the plan, the front calls `POST /quant/plan/jobs` and gets `quant.plan.*` events.
 - **Front:** one origin for everything; listen to `GET /agent/events` (SSE, supports `Last-Event-ID`) or poll `/agent/events/recent`.
 
+## Security checklist for a public deploy (Andy)
+
+| Variable | Why |
+|---|---|
+| `NANFENG_AGENT_TOKEN` | Long random value, **the same in the backend and the agent service**. Empty = agent routes answer 401 and the agent stops; `change-me` = the backend refuses to start (threat model F6). |
+| `NANFENG_SESSION_SECRET` | Fixed random value. Empty = a new one per process, so every restart signs the owner out. |
+| `NANFENG_OTP_MODE=sms` + `NANFENG_OTP_SECRET` + `ZAVU_API_KEY` + `NANFENG_OWNER_PHONE` | Per-approval codes by SMS instead of the shared demo code (threat model F2). For the video, sandbox mode is fine. |
+| `NANFENG_DEMO` / `NANFENG_OWNER_PASSWORD` | `NANFENG_DEMO=true` shows the demo password on the sign-in screen and enables `POST /bank/reset` (owner only). With `false`, set your own password: the demo one is refused at startup. |
+| `NANFENG_ALLOW_OPEN_AGENT` | Never on a deploy (local development only). |
+
+After the deploy: `cd andy-villarroel/evidence && python build.py --url <backend URL> --out out-live` exports deliverable 06 and re-checks the chain without the backend's code.
+
 ## Not done yet
 
 - FISCO BCOS backend (Sepolia works today for anchoring and the invoice registry). The registry contract is not deployed on Sepolia yet: run `python chain/deploy.py` with the funded anchoring wallet.
 - Single instance: SSE history and plan jobs live in memory (the kill switch is in the database).
-- `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.

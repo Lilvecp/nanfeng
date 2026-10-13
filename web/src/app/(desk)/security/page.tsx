@@ -17,7 +17,7 @@ const RED_TEAM: [string, number, number][] = [
   ["Tool misuse / escalation", 6, 6],
   ["Data exfiltration", 4, 4],
   ["Jailbreak via voice", 3, 3],
-  ["Public API", 3, 1],
+  ["Public API", 3, 3],
 ];
 const RT_NAME: Record<string, Record<Exclude<Lang, "en">, string>> = {
   "Prompt injection in docs": { es: "Inyección de instrucciones en documentos", zh: "文档中的提示注入" },

@@ -4,6 +4,7 @@ import { N, S, usd } from "./scenario";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { API_URL, ApiError, api, useEventStream, type ApiEvent, type Approval, type ApprovalCreate } from "./api";
 import { useLang } from "./i18n";
+import { useSignedIn } from "./owner-session";
 
 // Front-end state for the Cherry Crisis desk. Two modes with the same shape:
 // - "live": NEXT_PUBLIC_API_URL is set and the backend answers; approvals, OTP, kill switch and
@@ -241,7 +242,15 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async (create = false) => {
     const all = await api.approvals.list();
     let current = all.find((a) => a.action === CHERRY_PLAN.action) ?? null;
-    if (!current && create) current = await api.approvals.create(CHERRY_PLAN);
+    if (!current && create) {
+      // Only the owner or the agent may open an approval (deploys set NANFENG_AGENT_TOKEN). A visitor
+      // without a session still gets the live cockpit; the plan is created once the owner signs in.
+      try {
+        current = await api.approvals.create(CHERRY_PLAN);
+      } catch (err) {
+        if (!(err instanceof ApiError && (err.status === 401 || err.status === 403))) throw err;
+      }
+    }
     setLive(current);
     setLiveHistory(all.filter((a) => a.status !== "pending" && a.status !== "locked").map(toHistoryRow));
   }, []);
@@ -265,6 +274,14 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, [refresh]);
+
+  // the owner just signed in on a live cockpit with no plan yet: open the demo approval now
+  const signedIn = useSignedIn();
+  useEffect(() => {
+    if (mode !== "live" || !signedIn || live) return;
+    const id = setTimeout(() => refresh(true).catch(() => {}), 0);
+    return () => clearTimeout(id);
+  }, [mode, signedIn, live, refresh]);
 
   useEventStream(mode === "live", (e) => {
     setEvents((list) => (list.some((x) => x.id === e.id) ? list : [...list, e].slice(-60)));

@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 
 from . import audit, seed
 from .bank import BankError
-from .config import DEMO_OWNER_PASSWORD, get_settings
+from .config import DEMO_OWNER_PASSWORD, PLACEHOLDER_AGENT_TOKEN, get_settings
 from .db import SessionLocal
 from .events import broker
 from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, demo, privacy, quant, security, registry as registry_router
@@ -20,6 +20,8 @@ async def lifespan(app: FastAPI):
     s = get_settings()
     if not s.demo and s.owner_password == DEMO_OWNER_PASSWORD:
         raise RuntimeError("NANFENG_DEMO=false needs its own NANFENG_OWNER_PASSWORD (the demo one is public)")
+    if s.agent_token == PLACEHOLDER_AGENT_TOKEN:
+        raise RuntimeError("NANFENG_AGENT_TOKEN is the public placeholder from .env.example: set a long random one")
     broker.bind_loop(asyncio.get_running_loop())
     seed.create_schema()
     if get_settings().seed_on_startup:
