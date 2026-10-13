@@ -115,9 +115,14 @@ export default function SecurityPage() {
   useEffect(() => {
     if (!isLive) return;
     let cancelled = false;
-    Promise.all([api.audit.entries(), api.audit.anchors()])
-      .then(([entries, anchors]) => {
+    Promise.all([api.audit.entries(), api.audit.anchors(), api.audit.verify().catch(() => null)])
+      .then(([entries, anchors, check]) => {
         if (cancelled) return;
+        if (check) {
+          setVerify(check.valid ? "ok" : "broken");
+          setBrokenAt(check.broken_at_seq);
+          setCheckedAt(fmtLocal(new Date().toISOString(), false).slice(0, 5));
+        }
         const last = anchors[0];
         const tiers = new Map<string, number>();
         for (const e of entries) {
@@ -130,15 +135,6 @@ export default function SecurityPage() {
           onChain: anchors.some((x) => x.backend === "evm"),
           blocked: new Set(entries.filter((e) => e.kind === "security.attack_blocked").map((e) => String((e.payload as Record<string, unknown>).doc_id))).size,
         });
-      })
-      .catch(() => {});
-    // and check the whole chain for real, so the top bar reports a verification that just happened
-    api.audit.verify()
-      .then((r) => {
-        if (cancelled) return;
-        setVerify(r.valid ? "ok" : "broken");
-        setBrokenAt(r.broken_at_seq);
-        setCheckedAt(fmtLocal(new Date().toISOString(), false).slice(0, 5));
       })
       .catch(() => {});
     return () => {

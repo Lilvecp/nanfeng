@@ -287,7 +287,11 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        await api.health();
+        // A slow or sleeping backend must not hold the screen: after 6 s the desk runs on the sandbox.
+        await Promise.race([
+          api.health(),
+          new Promise((_, fail) => setTimeout(() => fail(new Error("API timeout")), 6000)),
+        ]);
         await refresh(true);
         const ks = await api.killSwitch.get();
         if (cancelled) return;
@@ -506,6 +510,7 @@ export function useCrisisNumbers() {
   const resolved = approval === "approved";
   return {
     resolved,
+    // no badge until the backend answered: the live request may already be decided
     pendingCount: mode !== "checking" && (approval === "pending" || approval === "verifying") ? 1 : 0,
     pNeg: resolved ? N.pNegAfterPlan : N.pNeg,
     runway: resolved ? "90D+" : `${N.crunchDay}D`,

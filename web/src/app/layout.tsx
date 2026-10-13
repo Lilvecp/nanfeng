@@ -6,16 +6,14 @@ import "./globals.css";
 // Fonts are self-hosted in src/fonts (see src/styles/fonts.css): the build and the browser never
 // call Google Fonts, which is blocked in mainland China (fe-14).
 
-const TITLE = "NanFeng 南风 · The autonomous CFO for exporters";
-const DESCRIPTION = "NanFeng sees the cash crunch before it happens, finds the cheapest financing and executes it with the owner's permission.";
+const description = "NanFeng sees the cash crunch before it happens, finds the cheapest financing and executes it with the owner's permission.";
 
 export const metadata: Metadata = {
-  // absolute URLs for the link preview image (WhatsApp and email clients need them)
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.nanfengcfo.com"),
-  title: TITLE,
-  description: DESCRIPTION,
-  openGraph: { type: "website", siteName: "NanFeng 南风", title: TITLE, description: DESCRIPTION, url: "/", locale: "en_US", alternateLocale: ["es_CL", "zh_CN"] },
-  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
+  metadataBase: new URL("https://www.nanfengcfo.com"),
+  title: "NanFeng 南风 · The autonomous CFO for exporters",
+  description,
+  openGraph: { type: "website", siteName: "NanFeng 南风", title: "NanFeng · The AI CFO for exporters", description, url: "/" },
+  twitter: { card: "summary_large_image", title: "NanFeng · The AI CFO for exporters", description },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

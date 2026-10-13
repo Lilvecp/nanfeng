@@ -188,8 +188,3 @@
 .owner-intro .owner-n{background:var(--accent);color:var(--accent-ink)}
 .owner-intro .btn{background:var(--surface);color:var(--text)}
 
-/* Live desk: waiting for the API's first answer */
-.desk-loading{min-height:60vh;display:flex;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:15px}
-.desk-loading-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:desk-pulse 1s ease-in-out infinite alternate}
-@keyframes desk-pulse{from{opacity:.25;transform:scale(.8)}to{opacity:1;transform:scale(1.1)}}
-@media (prefers-reduced-motion:reduce){.desk-loading-dot{animation:none}}
