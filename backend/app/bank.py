@@ -49,7 +49,7 @@ def to_clp(amount: float, currency: str) -> float:
 
 
 def _account(db: Session, currency: str) -> Account:
-    acc = db.get(Account, ACCOUNT_BY_CCY.get(currency, ""))
+    acc = db.get(Account, ACCOUNT_BY_CCY.get(currency, ""), with_for_update=True)  # row lock on Postgres
     if not acc:
         raise BankError("unknown_currency", f"No sandbox account in {currency}")
     return acc

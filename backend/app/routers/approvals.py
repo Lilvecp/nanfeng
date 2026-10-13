@@ -1,6 +1,8 @@
 """Approval Center API: every money movement enters here, gets a policy tier, and runs in the
 sandbox bank either right away (L1/L2) or after the owner approves with OTP (L3)."""
 
+import threading
+
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
@@ -14,6 +16,8 @@ from ..schemas import ApprovalCreate, ApprovalOut, ApproveIn, KillSwitchIn, Reje
 from ..security import is_agent, require_agent
 
 router = APIRouter(tags=["approvals"])
+# One execution at a time: two different approvals running together must not read the same balance.
+_exec_lock = threading.Lock()
 
 
 
@@ -35,7 +39,8 @@ def _run(db: Session, appr: Approval, actor: str) -> None:
     status = "approved" if appr.tier == 3 else "auto"
     for i, op in enumerate(appr.operations):
         try:
-            results.append(bank.execute(db, op["op"], op["params"], actor=actor, approval_id=appr.id, tier=appr.tier))
+            with _exec_lock:
+                results.append(bank.execute(db, op["op"], op["params"], actor=actor, approval_id=appr.id, tier=appr.tier))
         except bank.BankError as exc:
             status = "failed"
             done = f" (operations 1-{i} executed)" if i else ""
@@ -189,7 +194,7 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
     db.refresh(appr)
     _run(db, appr, actor="owner")
     audit.append(db, "owner", "approval.approved", {
-        "approval_id": appr.id, "status": appr.status, "channel": body.channel,
+        "approval_id": appr.id, "tier": appr.tier, "status": appr.status, "channel": body.channel,
         "result_hashes": [r.get("audit_hash") for r in appr.results or []],
     })
     if appr.status == "approved":
@@ -207,8 +212,18 @@ def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
         raise HTTPException(409, f"Approval is {appr.status}")
-    appr.status, appr.note, appr.channel, appr.decided_at = "rejected", body.reason, body.channel, utcnow()
-    audit.append(db, "owner", "approval.rejected", {"approval_id": appr.id, "reason": body.reason})
+    # Same claim as approve(): an approve and a reject racing for one request decide it once.
+    claimed = db.execute(
+        update(Approval)
+        .where(Approval.id == appr.id, Approval.status == "pending", Approval.decided_at.is_(None))
+        .values(decided_at=utcnow())
+    ).rowcount
+    db.commit()
+    db.refresh(appr)
+    if not claimed:
+        raise HTTPException(409, f"Approval is already being decided ({appr.status})")
+    appr.status, appr.note, appr.channel = "rejected", body.reason, body.channel
+    audit.append(db, "owner", "approval.rejected", {"approval_id": appr.id, "tier": appr.tier, "reason": body.reason})
     broker.publish("approval.rejected", _out(appr))
     return appr
 

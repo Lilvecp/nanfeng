@@ -172,3 +172,38 @@ def test_cherry_crisis_pae_loan_from_the_quant_plan(client):
     # Same cost as the engine's plan (CLP 2,106,329): 0.3% + the CLP 120,000 fixed fee, no stamp tax (exempt)
     assert r["fee_clp"] == round(140098568 * 0.003 + 120000, 2) and r["stamp_tax_clp"] == 0
     assert abs(r["cost_clp"] - 2106329) < 5
+
+
+PAE_PLAN = {"action": "Pre-export loan in USD (PAE)", "operations": [
+    {"op": "loan", "params": {"lender_id": "LEN-PAE", "amount_clp": 140098568, "term_days": 60}}]}
+
+
+def test_two_simultaneous_approvals_execute_the_loan_once(client):
+    """WhatsApp and the web approving the same plan 80 ms apart (seen on the deploy): one wins, the
+    other gets 409, and the bank shows one loan whose balance matches."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    a = client.post("/approvals", json=PAE_PLAN).json()
+    go = lambda ch: client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913", "channel": ch})  # noqa: E731
+    with ThreadPoolExecutor(2) as pool:
+        codes = sorted(r.status_code for r in pool.map(go, ["WA+OTP", "WEB+OTP"]))
+    assert codes == [200, 409]
+    loans = [line for line in client.get("/bank/logs").text.splitlines() if '"kind":"bank.loan"' in line]
+    assert len(loans) == 1
+    done = client.get(f"/approvals/{a['id']}").json()
+    assert clp_balance(client) == OPENING + done["results"][0]["proceeds_clp"]
+
+
+def test_approved_l3_entries_carry_their_tier_in_the_chain(client):
+    a = client.post("/approvals", json=PAE_PLAN).json()
+    client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"})
+    entries = {e["kind"]: e for e in client.get("/audit/entries").json()}
+    assert entries["approval.approved"]["payload"]["tier"] == 3
+    assert entries["bank.loan"]["payload"]["tier"] == 3
+
+
+def test_a_decided_approval_cannot_be_rejected_or_approved_again(client):
+    a = client.post("/approvals", json=PAE_PLAN).json()
+    assert client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).status_code == 200
+    assert client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"}).status_code == 409
+    assert client.post(f"/approvals/{a['id']}/reject", json={"reason": "late"}).status_code == 409
