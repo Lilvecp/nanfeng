@@ -1,0 +1,10 @@
+{
+  "backend": {
+    "backend": "evm",
+    "contract_address": "0xb5530B5c1b7728e347EbEd727e56d760dbaEeEeA",
+    "issuer_tax_id": "76.543.210-3",
+    "document_type": "110",
+    "chain_id": 11155111
+  },
+  "invoices": []
+}

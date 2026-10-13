@@ -1,0 +1,99 @@
+[
+  {
+    "seq": 1,
+    "ts": "2026-10-13T01:24:46.871+00:00",
+    "actor": "system",
+    "kind": "sandbox.seeded",
+    "payload": {
+      "company": "Huerto Austral Export SpA (fictional)",
+      "opening_balances": {
+        "ACC-CLP": 176000000,
+        "ACC-CNY": 0,
+        "ACC-USD": 0
+      },
+      "seed_source": {
+        "catalog_version": "0.2.0",
+        "deterministic": true,
+        "engine": "nanfeng_quant 0.3.0",
+        "tool": "sandbox_seed"
+      },
+      "synthetic": true
+    },
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "hash": "3568762d3b4a88c8b0d48e8c8c0984993056dfac27c9834d6ff1f43469da6ca2"
+  },
+  {
+    "seq": 2,
+    "ts": "2026-10-13T01:24:48.242+00:00",
+    "actor": "agent",
+    "kind": "approval.created",
+    "payload": {
+      "action": "Pre-export loan in USD (PAE)",
+      "amount_clp": 140098568.0,
+      "approval_id": "APR-0001",
+      "policy_reason": "Loan always needs the owner's approval",
+      "policy_rules": [
+        "financing"
+      ],
+      "policy_version": 1,
+      "status": "pending",
+      "tier": 3
+    },
+    "prev_hash": "3568762d3b4a88c8b0d48e8c8c0984993056dfac27c9834d6ff1f43469da6ca2",
+    "hash": "0c68de2578a98d80f95647f9d96f1e05c84fa57c24c05871ea772984f36c5667"
+  },
+  {
+    "seq": 3,
+    "ts": "2026-10-13T01:24:48.742+00:00",
+    "actor": "owner",
+    "kind": "bank.loan",
+    "payload": {
+      "amount_clp": 140098568,
+      "annual_rate": 0.068,
+      "cost_clp": 2106329.01,
+      "fee_clp": 540295.7,
+      "interest_clp": 1566033.31,
+      "lender_id": "LEN-PAE",
+      "proceeds_clp": 139558272.3,
+      "product": "wc_loan",
+      "stamp_tax_clp": 0.0,
+      "term_days": 60,
+      "transaction_id": 1
+    },
+    "prev_hash": "0c68de2578a98d80f95647f9d96f1e05c84fa57c24c05871ea772984f36c5667",
+    "hash": "6fb6952b523002a54b3f17b25610041068dc81b5e055e7de998567b4ffcbae4b"
+  },
+  {
+    "seq": 4,
+    "ts": "2026-10-13T01:24:48.762+00:00",
+    "actor": "owner",
+    "kind": "approval.approved",
+    "payload": {
+      "approval_id": "APR-0001",
+      "channel": "WA+OTP",
+      "result_hashes": [
+        "6fb6952b523002a54b3f17b25610041068dc81b5e055e7de998567b4ffcbae4b"
+      ],
+      "status": "approved"
+    },
+    "prev_hash": "6fb6952b523002a54b3f17b25610041068dc81b5e055e7de998567b4ffcbae4b",
+    "hash": "8b9924b8744ff38da16a800a02e6d0277df466668c9e3402521e83eef07330e6"
+  },
+  {
+    "seq": 5,
+    "ts": "2026-10-13T01:24:50.182+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 1,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a",
+      "from_seq": 1,
+      "merkle_root": "2ed8fb22eeec8afe256b6368e2551b3cd6fbf43ee6c5574dd4e397da2b9e8361",
+      "to_seq": 4,
+      "tx_hash": "0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a"
+    },
+    "prev_hash": "8b9924b8744ff38da16a800a02e6d0277df466668c9e3402521e83eef07330e6",
+    "hash": "f9732a8d3e4a5b76e50a0bf6a6262c551344353ab4dc73f14c2c67de7aa0d2bc"
+  }
+]

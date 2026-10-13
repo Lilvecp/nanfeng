@@ -1,0 +1,19 @@
+[
+  {
+    "seq": 4,
+    "leaf": "8b9924b8744ff38da16a800a02e6d0277df466668c9e3402521e83eef07330e6",
+    "anchor_id": 1,
+    "merkle_root": "2ed8fb22eeec8afe256b6368e2551b3cd6fbf43ee6c5574dd4e397da2b9e8361",
+    "tx_hash": "0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a",
+    "proof": [
+      {
+        "position": "left",
+        "hash": "6fb6952b523002a54b3f17b25610041068dc81b5e055e7de998567b4ffcbae4b"
+      },
+      {
+        "position": "left",
+        "hash": "5e9c67594f9c0d3a70c304010cd4a8e534ac719ed3b3788701771436a883028f"
+      }
+    ]
+  }
+]

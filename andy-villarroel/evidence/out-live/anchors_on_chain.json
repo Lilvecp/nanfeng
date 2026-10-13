@@ -1,0 +1,20 @@
+[
+  {
+    "anchor_id": 1,
+    "http": 200,
+    "backend": "evm",
+    "tx_hash": "0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a",
+    "explorer_url": "https://sepolia.etherscan.io/tx/0x67b483e523eb4543b4642bd6a973d4ff86992a63571b4c1fa17002c275547f6a",
+    "on_chain": true,
+    "confirmed": true,
+    "block_number": 11902764,
+    "confirmations": 1,
+    "calldata_matches": true,
+    "valid": true,
+    "decoded": {
+      "merkle_root": "2ed8fb22eeec8afe256b6368e2551b3cd6fbf43ee6c5574dd4e397da2b9e8361",
+      "from_seq": 1,
+      "to_seq": 4
+    }
+  }
+]
