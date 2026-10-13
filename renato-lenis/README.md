@@ -11,7 +11,7 @@
 
 **Deliverables:** 01 (agent) · 04 (with Camilo)
 
-**Tools:** Python · LangGraph · OpenRouter · Mistral · Zavu · ElevenLabs
+**Tools:** Python · FastAPI · OpenRouter · Mistral · Zavu · ElevenLabs
 
 ## Status (Oct 12)
 
