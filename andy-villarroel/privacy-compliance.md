@@ -1,6 +1,6 @@
 # Privacy and compliance (r4-07 · r4-08 · r4-11)
 
-**Owner:** Andy · **Status:** v1, Oct 10 · Source for the regulatory slide, the compliance section of the technical documentation and the Security Self-Assessment Report.
+**Owner:** Andy · **Status:** v2, Oct 12 · Source for the regulatory slide, the compliance section of the technical documentation and the Security Self-Assessment Report.
 
 > Everything in the demo is synthetic data, declared as such. This section describes how NanFeng is built so that the same design holds when real data arrives. It is our reading of the rules, not legal advice; a lawyer reviews it before any pilot with real companies.
 
