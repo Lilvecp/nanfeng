@@ -1404,3 +1404,9 @@ html:not(.reveal-ready) .final-signal {
 /* the tour bar never hides the end of a screen or a notice */
 body:has(.director-bar) .shell .main{padding-bottom:160px}
 body:has(.director-bar) .toast{bottom:150px}
+
+/* Desk screens wait for the backend check instead of flashing the local sandbox (components/api-gate) */
+.api-gate, .api-gate-in { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.api-gate { position: relative; }
+.api-gate-msg { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted, var(--text)); font-size: 14px; }
+@media (prefers-reduced-motion: no-preference) { .api-gate-msg { animation: callout-in .3s ease both; } }

@@ -34,13 +34,13 @@ const TX = {
 export function Receipt({ compact = false }: { compact?: boolean }) {
   const lang = useLang();
   const x = TX[lang];
-  const { mode, approvalId } = useDesk();
+  const { mode, approvalId, approvedAt } = useDesk();
   const live = mode === "live";
   const r = SANDBOX_RECEIPT;
   const rows: [string, React.ReactNode][] = [
     [x.ref, <>{live ? approvalId : r.ref} <span className="badge">{x.sandbox}</span></>],
     [x.amount, `${usd(N.loanUsd, lang)}${lang === "zh" ? `（${cny(N.loanClp)}）` : ""} · ${x.arrives} ${longDate(N.crunchDate, lang)}`],
-    [x.approved, `${r.time} · ${x.code}`],
+    [x.approved, `${approvedAt} · ${x.code}`],
     [x.risk, <><s className="muted">{N.pNeg}</s> → <b className="up">{N.pNegAfterPlan}</b></>],
     [x.passport, <><s className="muted">{grade(S.passport.before)}</s> → <b className="up">{grade(S.passport.after_plan)}</b></>],
     ...(live ? [] : [[x.audit, <span key="a" className="num">{`#${r.seq} · ${r.hash} · ${x.anchored}`}</span>] as [string, React.ReactNode]]),

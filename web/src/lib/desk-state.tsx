@@ -115,6 +115,8 @@ type DeskState = {
   mode: ApiMode;
   approval: ApprovalStatus;
   approvalId: string;
+  /** Time the owner approved (HH:MM, viewer's clock); the sandbox story says 10:16. */
+  approvedAt: string;
   otpAttemptsLeft: number;
   rejectReason: string;
   plan: PlanId;
@@ -260,7 +262,11 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        await api.health();
+        // A slow or sleeping backend must not hold the screen: after 6 s the desk runs on the sandbox.
+        await Promise.race([
+          api.health(),
+          new Promise((_, fail) => setTimeout(() => fail(new Error("API timeout")), 6000)),
+        ]);
         await refresh(true);
         const ks = await api.killSwitch.get();
         if (cancelled) return;
@@ -407,6 +413,7 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       mode,
       approval: isLive ? (verifying ? "verifying" : liveStatus(live)) : approval,
       approvalId: isLive && live ? live.id : "APR-0412-05",
+      approvedAt: isLive && live?.decided_at ? fmtLocal(live.decided_at, false).slice(0, 5) : SANDBOX_RECEIPT.time,
       otpAttemptsLeft: isLive ? (live?.otp_attempts_left ?? 0) : otpAttemptsLeft,
       rejectReason: isLive ? (live?.note ?? "") : rejectReason,
       plan,
@@ -445,11 +452,12 @@ export function useDesk() {
 
 /** Derived numbers every screen agrees on. */
 export function useCrisisNumbers() {
-  const { approval } = useDesk();
+  const { approval, mode } = useDesk();
   const resolved = approval === "approved";
   return {
     resolved,
-    pendingCount: approval === "pending" || approval === "verifying" ? 1 : 0,
+    // no badge until the backend answered: the live request may already be decided
+    pendingCount: mode !== "checking" && (approval === "pending" || approval === "verifying") ? 1 : 0,
     pNeg: resolved ? N.pNegAfterPlan : N.pNeg,
     runway: resolved ? "90D+" : `${N.crunchDay}D`,
   };

@@ -110,6 +110,7 @@ export default function SecurityPage() {
   const [reviewed, setReviewed] = useState(false);
   const [verify, setVerify] = useState<"idle" | "running" | "ok" | "broken">("idle");
   const [brokenAt, setBrokenAt] = useState<number | null>(null);
+  const [verifiedAt, setVerifiedAt] = useState<string | null>(null); // live: when the backend last checked the chain
   const [live, setLive] = useState<{ rows: AuditRow[]; lastAnchor: string; onChain: boolean } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -119,9 +120,14 @@ export default function SecurityPage() {
   useEffect(() => {
     if (!isLive) return;
     let cancelled = false;
-    Promise.all([api.audit.entries(), api.audit.anchors()])
-      .then(([entries, anchors]) => {
+    Promise.all([api.audit.entries(), api.audit.anchors(), api.audit.verify().catch(() => null)])
+      .then(([entries, anchors, check]) => {
         if (cancelled) return;
+        if (check) {
+          setVerify(check.valid ? "ok" : "broken");
+          setBrokenAt(check.broken_at_seq);
+          setVerifiedAt(fmtLocal(new Date().toISOString(), false).slice(0, 5));
+        }
         const last = anchors[0];
         setLive({
           rows: entries.slice(-12).reverse().map((e) => toRow(e, anchors)),
@@ -151,6 +157,7 @@ export default function SecurityPage() {
         const r = await api.audit.verify();
         setVerify(r.valid ? "ok" : "broken");
         setBrokenAt(r.broken_at_seq);
+        setVerifiedAt(fmtLocal(new Date().toISOString(), false).slice(0, 5));
         notify(r.valid ? x.chainOk(r.entries) : x.chainBroken(r.broken_at_seq));
       } catch {
         setVerify("idle");
@@ -168,7 +175,7 @@ export default function SecurityPage() {
     <>
       <Topbar>
         <div className="tick"><span className="l">{x.blockedToday}</span><span className="v down">2</span></div>
-        <div className="tick"><span className="l">{x.chain}</span>{verify === "broken" ? <span className="v down">{x.broken} {brokenAt}</span> : <span className="v up">{x.verified} {verify === "ok" ? "10:16" : "09:15"}</span>}</div>
+        <div className="tick"><span className="l">{x.chain}</span>{verify === "broken" ? <span className="v down">{x.broken} {brokenAt}</span> : <span className="v up">{x.verified} {isLive ? (verifiedAt ?? "…") : verify === "ok" ? "10:16" : "09:15"}</span>}</div>
         <div className="tick"><span className="l">{x.lastAnchor}</span><span className="v">{live ? live.lastAnchor : approval === "approved" ? SANDBOX_RECEIPT.tx : "0x51b8…09d4"}</span></div>
       </Topbar>
 

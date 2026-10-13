@@ -6,9 +6,14 @@ import "./globals.css";
 // Fonts are self-hosted in src/fonts (see src/styles/fonts.css): the build and the browser never
 // call Google Fonts, which is blocked in mainland China (fe-14).
 
+const description = "NanFeng sees the cash crunch before it happens, finds the cheapest financing and executes it with the owner's permission.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.nanfengcfo.com"),
   title: "NanFeng 南风 · The autonomous CFO for exporters",
-  description: "NanFeng sees the cash crunch before it happens, finds the cheapest financing and executes it with the owner's permission.",
+  description,
+  openGraph: { type: "website", siteName: "NanFeng 南风", title: "NanFeng · The AI CFO for exporters", description, url: "/" },
+  twitter: { card: "summary_large_image", title: "NanFeng · The AI CFO for exporters", description },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

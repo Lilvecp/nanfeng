@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Topbar } from "@/components/topbar";
-import { SANDBOX_OTP, useDesk, type ApprovalStatus } from "@/lib/desk-state";
+import { SANDBOX_OTP, SANDBOX_RECEIPT, useDesk, type ApprovalStatus } from "@/lib/desk-state";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { N, RECEIVABLE, S, clpM, longDate, pesos, usd } from "@/lib/scenario";
@@ -38,14 +38,14 @@ const REJECTED: Record<Lang, string> = {
 
 // The owner's WhatsApp thread, in the owner's language, as far as the approval has gone: before the
 // decision it ends at the "why" answer; the code and the execution appear once the plan is approved.
-function ownerThread(lang: Lang, approval: ApprovalStatus): Bubble[] {
-  const all = fullThread(lang);
+function ownerThread(lang: Lang, approval: ApprovalStatus, ref: string): Bubble[] {
+  const all = fullThread(lang, ref);
   if (approval === "approved") return all;
   if (approval === "rejected") return [...all.slice(0, 4), { who: "in", t: "10:16", text: REJECTED[lang] }];
   return all.slice(0, 4);
 }
 
-function fullThread(lang: Lang): Bubble[] {
+function fullThread(lang: Lang, ref: string): Bubble[] {
   const date = longDate(N.crunchDate, lang);
   if (lang === "es") return [
     { who: "in", tone: "crit", t: "10:13", text: <><b className="down">ALERTA</b> Shanghai Hongxin pagará {usd(N.overdueUsd, "es")} con {N.delayDays} días de atraso. Hay {N.pNeg} de probabilidad de quedar sin caja el {date} (sueldos {pesos(N.payroll, "es")}).</> },
@@ -55,7 +55,7 @@ function fullThread(lang: Lang): Bubble[] {
     { who: "out", t: "10:16", text: "APROBAR" },
     { who: "in", t: "10:16", text: "Te enviamos un código por SMS al •••• 4127. Respóndelo aquí. Nunca te lo pediremos por teléfono." },
     { who: "out", t: "10:16", text: <span className="num">{SANDBOX_OTP}</span> },
-    { who: "in", tone: "ok", t: "10:16", text: <><b className="up">EJECUTADO</b> ref. PAE-14240 (sandbox). La plata llega el {date}.</> },
+    { who: "in", tone: "ok", t: "10:16", text: <><b className="up">EJECUTADO</b> ref. {ref} (sandbox). La plata llega el {date}.</> },
   ];
   if (lang === "zh") return [
     { who: "in", tone: "crit", t: "10:13", text: <><b className="down">警报</b> 上海鸿信将延迟{N.delayDays}天支付 {usd(N.overdueUsd, "zh")}。{date}现金不足的概率为{N.pNeg}（工资{pesos(N.payroll, "zh")}）。</> },
@@ -65,7 +65,7 @@ function fullThread(lang: Lang): Bubble[] {
     { who: "out", t: "10:16", text: "批准" },
     { who: "in", t: "10:16", text: "验证码已通过短信发送至 •••• 4127，请在此回复。我们绝不会通过电话索取。" },
     { who: "out", t: "10:16", text: <span className="num">{SANDBOX_OTP}</span> },
-    { who: "in", tone: "ok", t: "10:16", text: <><b className="up">已执行</b> 编号 PAE-14240（沙盒）。资金于{date}到账。</> },
+    { who: "in", tone: "ok", t: "10:16", text: <><b className="up">已执行</b> 编号 {ref}（沙盒）。资金于{date}到账。</> },
   ];
   return [
     { who: "in", tone: "crit", t: "10:13", text: <><b className="down">ALERT</b> Shanghai Hongxin will pay {usd(N.overdueUsd)} {N.delayDays} days late. {N.pNeg} chance of running out of cash on {date} (payroll {pesos(N.payroll)}).</> },
@@ -75,7 +75,7 @@ function fullThread(lang: Lang): Bubble[] {
     { who: "out", t: "10:16", text: "APPROVE" },
     { who: "in", t: "10:16", text: "We sent a code by SMS to •••• 4127. Reply with it here. We will never ask for it by phone." },
     { who: "out", t: "10:16", text: <span className="num">{SANDBOX_OTP}</span> },
-    { who: "in", tone: "ok", t: "10:16", text: <><b className="up">EXECUTED</b> ref PAE-14240 (sandbox). Funds arrive on {date}.</> },
+    { who: "in", tone: "ok", t: "10:16", text: <><b className="up">EXECUTED</b> ref {ref} (sandbox). Funds arrive on {date}.</> },
   ];
 }
 
@@ -112,7 +112,8 @@ export default function ChannelsPage() {
   const t = useT();
   const lang = useLang();
   const x = TX[lang];
-  const { approval } = useDesk();
+  const { approval, mode, approvalId } = useDesk();
+  const ref = mode === "live" ? approvalId : SANDBOX_RECEIPT.ref;
   const [picked, setPicked] = useState<Lang | null>(null);
   const tl = picked ?? lang;
   const [pos, setPos] = useState(12);
@@ -152,7 +153,7 @@ export default function ChannelsPage() {
             <div className="phone" data-guide="msg-owner"><div className="phone-screen" style={{ background: "var(--bg)" }} lang={lang === "zh" ? "zh-CN" : lang}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}><span className="brand-mark">南</span><div style={{ display: "flex", flexDirection: "column" }}><b className="small">NanFeng CFO</b><span className="mono small muted" style={{ fontSize: 10 }}>{x.verified}</span></div></div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "12px 10px" }}>
-                {ownerThread(lang, approval).map((b, i) => (
+                {ownerThread(lang, approval, ref).map((b, i) => (
                   <div key={i} className={`bubble ${b.who}`} style={b.tone ? { borderColor: b.tone === "crit" ? "var(--crit)" : "var(--ok)" } : undefined}>{b.text}<span className="t">{b.t}</span></div>
                 ))}
               </div>
