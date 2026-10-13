@@ -187,7 +187,14 @@ export function Guide() {
   const steps = page?.steps;
   // On Home the owner's welcome card goes first; the tour waits until it is closed.
   const blocked = key === "/cockpit" && intro !== "seen";
-  const autoStart = on === true && auto && !!steps && !seen && !blocked && !NO_GUIDE.has(pathname);
+  // Coming straight out of Demo Mode the viewer has just seen the story: no tour on top of it.
+  const [prevPath, setPrevPath] = useState(pathname);
+  const [fromDemo, setFromDemo] = useState(false);
+  if (pathname !== prevPath) {
+    setPrevPath(pathname);
+    setFromDemo(NO_GUIDE.has(prevPath));
+  }
+  const autoStart = on === true && auto && !!steps && !seen && !blocked && !fromDemo && !NO_GUIDE.has(pathname);
 
   // Short tips when something worth knowing happens, so the owner knows where to look next.
   type Tip = { text: string; href?: string; cta?: string };

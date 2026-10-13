@@ -1,9 +1,11 @@
 "use client";
 
-import { N, S, usd } from "./scenario";
+import { N, S } from "./scenario";
+import type { Lang } from "./prefs";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { API_URL, ApiError, api, useEventStream, type ApiEvent, type Approval, type ApprovalCreate } from "./api";
 import { useLang } from "./i18n";
+import { useSignedIn } from "./owner-session";
 
 // Front-end state for the Cherry Crisis desk. Two modes with the same shape:
 // - "live": NEXT_PUBLIC_API_URL is set and the backend answers; approvals, OTP, kill switch and
@@ -16,7 +18,7 @@ export type PlanId = string; // quant product id, e.g. "PAE-USD"
 // The plan the MILP picks in the Cherry Crisis (see lib/scenario.ts).
 export const DEFAULT_PLAN: PlanId = "PAE-USD";
 const APPROVED_ACTION = `pae.loan ${N.termDays}D`;
-const APPROVED_AMOUNT = usd(N.loanUsd);
+const APPROVED_LABEL: Record<Lang, string> = { en: `Pre-export loan · ${N.termDays} days`, es: `Crédito de pre-exportación · ${N.termDays} días`, zh: `出口前融资 · ${N.termDays}天` };
 
 // Notices the desk shows after an action, in the viewer's language.
 const TOASTS = {
@@ -36,6 +38,10 @@ const TOASTS = {
     signInReject: "Sign in as the owner to reject",
     signInKill: "Sign in as the owner to change the kill switch",
     wrongCode: "Wrong or missing code · kill switch stays on",
+    codeSent: "New code sent. You have 3 attempts again.",
+    codeSentSandbox: "New code ready. In the sandbox it is always 482 913.",
+    codeTooSoon: "A code was just sent. Wait half a minute and try again.",
+    codeLocked: "This request is locked after 3 wrong codes. Reset the sandbox to start over.",
   },
   es: {
     approved: "Plan aprobado · ejecutado en el sandbox · hash de auditoría anclado",
@@ -53,6 +59,10 @@ const TOASTS = {
     signInReject: "Inicia sesión como dueño para rechazar",
     signInKill: "Inicia sesión como dueño para cambiar el freno de emergencia",
     wrongCode: "Código incorrecto o vacío · el freno sigue activado",
+    codeSent: "Código nuevo enviado. Tienes 3 intentos otra vez.",
+    codeSentSandbox: "Código nuevo listo. En el sandbox siempre es 482 913.",
+    codeTooSoon: "Acabamos de enviar un código. Espera medio minuto y vuelve a intentarlo.",
+    codeLocked: "Esta solicitud quedó bloqueada tras 3 códigos incorrectos. Reinicia el sandbox para empezar de nuevo.",
   },
   zh: {
     approved: "方案已批准 · 已在沙盒执行 · 审计哈希已上链",
@@ -70,13 +80,20 @@ const TOASTS = {
     signInReject: "请以企业主身份登录后再拒绝",
     signInKill: "请以企业主身份登录后再更改紧急停止",
     wrongCode: "验证码错误或为空 · 紧急停止保持开启",
+    codeSent: "新验证码已发送，您再次有3次机会。",
+    codeSentSandbox: "新验证码已就绪。沙盒中验证码始终为 482 913。",
+    codeTooSoon: "验证码刚刚发送，请等待半分钟后再试。",
+    codeLocked: "连续3次输错，此请求已锁定。请重置沙盒后重新开始。",
   },
 };
 
 export const SANDBOX_OTP = "482913";
 
 /** What the sandbox bank and the audit chain return when the plan runs (Approvals, Home, Security). */
-export const SANDBOX_RECEIPT = { ref: "PAE-14240", time: "10:16", seq: 1043, hash: "c90e…77b2", tx: "0x7d3a…e21c", block: "Sepolia #7,291,604" };
+export const SANDBOX_RECEIPT = { ref: "APR-0412", time: "10:16", seq: 1043, hash: "c90e…77b2", tx: "0x7d3a…e21c", block: "Sepolia #7,291,604" };
+
+/** The executed plan as every screen quotes it: one reference, one time, one audit entry. */
+export type Receipt = { ref: string; time: string; seq: number | null; hash: string | null };
 
 export type ApiMode = "checking" | "live" | "sandbox";
 export type OtpResult = { status: "ok" | "mismatch" | "locked" | "cancelled"; attemptsLeft: number };
@@ -96,24 +113,29 @@ export type HistoryRow = {
   time: string;
   id: string;
   action: string;
+  /** What the action means in plain words; the tool name stays as a tooltip. */
+  label?: Record<Lang, string>;
   tier: 1 | 2 | 3;
-  amount: string;
+  /** Amount in its own currency, formatted for the viewer's language on screen (lib/scenario money()). */
+  amount: { value: number; currency: "CLP" | "USD" | "CNY" } | null;
   decision: "approved" | "rejected" | "auto";
   channel: string;
   note: string;
 };
 
 const INITIAL_HISTORY: HistoryRow[] = [
-  { time: "2026-12-07 16:22", id: "APR-0398", action: "fx.forward 30D", tier: 3, amount: "¥450,000", decision: "approved", channel: "WA+OTP", note: "—" },
-  { time: "2026-12-03 10:05", id: "AUT-0377", action: "pay Cartonera Sur", tier: 2, amount: "CLP 6.240.000", decision: "auto", channel: "—", note: "within limit · allowlisted" },
-  { time: "2026-11-29 18:40", id: "APR-0361", action: "wc.loan Banco Andino", tier: 3, amount: "CLP 90.000.000", decision: "rejected", channel: "WEB", note: "\"Too expensive, check other options\"" },
-  { time: "2026-11-22 09:00", id: "AUT-0350", action: "reminder.send WeCom", tier: 1, amount: "—", decision: "auto", channel: "—", note: "—" },
+  { time: "2026-12-07 16:22", id: "APR-0398", action: "fx.forward 30D", label: { en: "CNY forward · 30 days", es: "Forward en CNY · 30 días", zh: "人民币远期 · 30天" }, tier: 3, amount: { value: 450000, currency: "CNY" }, decision: "approved", channel: "WA+OTP", note: "—" },
+  { time: "2026-12-03 10:05", id: "AUT-0377", action: "pay Cartonera Sur", label: { en: "Pay Cartonera Sur (boxes)", es: "Pago a Cartonera Sur (cajas)", zh: "支付 Cartonera Sur（纸箱）" }, tier: 2, amount: { value: 6240000, currency: "CLP" }, decision: "auto", channel: "—", note: "within limit · allowlisted" },
+  { time: "2026-11-29 18:40", id: "APR-0361", action: "wc.loan Banco Andino", label: { en: "Working-capital loan · Banco Andino", es: "Crédito de capital de trabajo · Banco Andino", zh: "流动资金贷款 · Banco Andino" }, tier: 3, amount: { value: 90000000, currency: "CLP" }, decision: "rejected", channel: "WEB", note: "\"Too expensive, check other options\"" },
+  { time: "2026-11-22 09:00", id: "AUT-0350", action: "reminder.send WeCom", label: { en: "Payment reminder on WeCom", es: "Recordatorio de pago por WeCom", zh: "企业微信付款提醒" }, tier: 1, amount: null, decision: "auto", channel: "—", note: "—" },
 ];
 
 type DeskState = {
   mode: ApiMode;
   approval: ApprovalStatus;
   approvalId: string;
+  /** Reference, time and audit entry of the executed plan (live: the real ones from the API). */
+  receipt: Receipt;
   otpAttemptsLeft: number;
   rejectReason: string;
   plan: PlanId;
@@ -122,6 +144,8 @@ type DeskState = {
   killSwitch: boolean;
   toast: string | null;
   submitOtp: (code: string) => Promise<OtpResult>;
+  /** Asks for a fresh code. Sandbox: the attempts start over. Live: the backend texts a new code. */
+  resendOtp: () => Promise<boolean>;
   reject: (reason: string) => Promise<void>;
   choosePlan: (plan: PlanId) => void;
   /** Turning it off on the live API needs the owner's one-time code (L3). Returns false if refused. */
@@ -171,12 +195,16 @@ const subscribeSaved = (cb: () => void) => {
 const pad = (n: number) => String(n).padStart(2, "0");
 /** API timestamps are UTC; show them in the viewer's local time like the rest of the desk. */
 export const fmtLocal = (iso: string, withDate = true) => {
-  const d = new Date(iso);
+  // the API speaks UTC; a timestamp without an offset (SQLite drops it) is UTC too, not local time
+  const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : `${iso}Z`);
   const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  return withDate ? `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${time}` : `${time}:${pad(d.getSeconds())}`;
+  if (!withDate) return `${time}:${pad(d.getSeconds())}`;
+  // The desk lives on the scenario's day (the cockpit says "Today · December 11"): what happened today
+  // on the API is dated on that day too, so it sorts above the December history instead of in October.
+  const ymd = (x: Date) => `${x.getFullYear()}-${pad(x.getMonth() + 1)}-${pad(x.getDate())}`;
+  return `${ymd(d) === ymd(new Date()) ? S.asOf : ymd(d)} ${time}`;
 };
 const fmtTime = (iso: string) => fmtLocal(iso);
-const fmtClp = (n: number) => (n ? `CLP ${Math.round(n).toLocaleString("es-CL")}` : "—");
 
 function toHistoryRow(a: Approval): HistoryRow {
   const decision: HistoryRow["decision"] = a.status === "approved" ? "approved" : a.status === "auto" ? "auto" : "rejected";
@@ -185,7 +213,7 @@ function toHistoryRow(a: Approval): HistoryRow {
     id: a.id,
     action: a.action,
     tier: Math.min(3, Math.max(1, a.tier)) as HistoryRow["tier"],
-    amount: fmtClp(a.amount_clp),
+    amount: a.amount_clp ? { value: Number(a.amount_clp), currency: "CLP" } : null,
     decision,
     channel: a.channel || "—",
     note: a.status === "rejected" ? `"${a.note}"` : a.status === "auto" ? a.note : a.status === "approved" ? "—" : `${a.status}: ${a.note}`,
@@ -211,7 +239,7 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
     if (saved.approval === "pending") return INITIAL_HISTORY;
     const approved = saved.approval === "approved";
     return [
-      { time: "2026-12-11 10:15", id: "APR-0412", action: APPROVED_ACTION, tier: 3, amount: APPROVED_AMOUNT, decision: approved ? "approved" : "rejected", channel: approved ? "WEB+OTP" : "WEB", note: approved ? "Cherry Crisis plan" : `"${saved.reason}"` },
+      { time: "2026-12-11 10:15", id: "APR-0412", action: APPROVED_ACTION, label: APPROVED_LABEL, tier: 3, amount: { value: N.loanUsd, currency: "USD" }, decision: approved ? "approved" : "rejected", channel: approved ? "WEB+OTP" : "WEB", note: approved ? "Cherry Crisis plan" : `"${saved.reason}"` },
       ...INITIAL_HISTORY,
     ];
   }, [saved]);
@@ -241,7 +269,15 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async (create = false) => {
     const all = await api.approvals.list();
     let current = all.find((a) => a.action === CHERRY_PLAN.action) ?? null;
-    if (!current && create) current = await api.approvals.create(CHERRY_PLAN);
+    if (!current && create) {
+      // Only the owner or the agent may open an approval (deploys set NANFENG_AGENT_TOKEN). A visitor
+      // without a session still gets the live cockpit; the plan is created once the owner signs in.
+      try {
+        current = await api.approvals.create(CHERRY_PLAN);
+      } catch (err) {
+        if (!(err instanceof ApiError && (err.status === 401 || err.status === 403))) throw err;
+      }
+    }
     setLive(current);
     setLiveHistory(all.filter((a) => a.status !== "pending" && a.status !== "locked").map(toHistoryRow));
   }, []);
@@ -251,7 +287,11 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        await api.health();
+        // A slow or sleeping backend must not hold the screen: after 6 s the desk runs on the sandbox.
+        await Promise.race([
+          api.health(),
+          new Promise((_, fail) => setTimeout(() => fail(new Error("API timeout")), 6000)),
+        ]);
         await refresh(true);
         const ks = await api.killSwitch.get();
         if (cancelled) return;
@@ -265,6 +305,14 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, [refresh]);
+
+  // the owner just signed in on a live cockpit with no plan yet: open the demo approval now
+  const signedIn = useSignedIn();
+  useEffect(() => {
+    if (mode !== "live" || !signedIn || live) return;
+    const id = setTimeout(() => refresh(true).catch(() => {}), 0);
+    return () => clearTimeout(id);
+  }, [mode, signedIn, live, refresh]);
 
   useEventStream(mode === "live", (e) => {
     setEvents((list) => (list.some((x) => x.id === e.id) ? list : [...list, e].slice(-60)));
@@ -315,6 +363,23 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
     },
     [mode, live, otpAttemptsLeft, saved, notify, refresh, T],
   );
+
+  const resendOtp = useCallback(async () => {
+    if (mode === "live" && live) {
+      try {
+        await api.approvals.resendCode(live.id);
+        notify(T.codeSent);
+        return true;
+      } catch (err) {
+        if (signInCancelled(err)) return false;
+        notify(err instanceof ApiError ? (err.status === 429 ? T.codeTooSoon : err.status === 409 ? T.codeLocked : T.retry) : T.retry);
+        return false;
+      }
+    }
+    writeSaved({ ...saved, attempts: SAVED_DEFAULT.attempts });
+    notify(T.codeSentSandbox);
+    return true;
+  }, [mode, live, saved, notify, T]);
 
   const reject = useCallback(
     async (reason: string) => {
@@ -385,12 +450,24 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
   }, [mode]);
 
   const isLive = mode === "live";
+  const liveReceipt = useMemo<Receipt | null>(() => {
+    if (!isLive || !live?.decided_at) return null;
+    const r = (live.results ?? [])[0] as { audit_seq?: number; audit_hash?: string } | undefined;
+    return {
+      ref: live.id,
+      time: fmtLocal(live.decided_at, false).slice(0, 5),
+      seq: r?.audit_seq ?? null,
+      hash: r?.audit_hash ? `${r.audit_hash.slice(0, 4)}…${r.audit_hash.slice(-4)}` : null,
+    };
+  }, [isLive, live]);
   const value = useMemo<DeskState>(
     () => ({
       mode,
       approval: isLive ? (verifying ? "verifying" : liveStatus(live)) : approval,
-      approvalId: isLive && live ? live.id : "APR-0412-05",
-      otpAttemptsLeft: isLive ? (live?.otp_attempts_left ?? 0) : otpAttemptsLeft,
+      approvalId: isLive && live ? live.id : SANDBOX_RECEIPT.ref,
+      receipt: liveReceipt ?? { ref: SANDBOX_RECEIPT.ref, time: SANDBOX_RECEIPT.time, seq: SANDBOX_RECEIPT.seq, hash: SANDBOX_RECEIPT.hash },
+      // no request open yet on the API: nothing was attempted, so nothing is locked
+      otpAttemptsLeft: isLive ? (live?.otp_attempts_left ?? SAVED_DEFAULT.attempts) : otpAttemptsLeft,
       rejectReason: isLive ? (live?.note ?? "") : rejectReason,
       plan,
       history: isLive ? [...liveHistory, ...INITIAL_HISTORY] : history,
@@ -398,6 +475,7 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       killSwitch,
       toast,
       submitOtp,
+      resendOtp,
       reject,
       choosePlan,
       setKillSwitch,
@@ -405,7 +483,7 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
       finishDemo,
       notify,
     }),
-    [mode, isLive, verifying, live, approval, otpAttemptsLeft, rejectReason, plan, liveHistory, history, events, killSwitch, toast, submitOtp, reject, choosePlan, setKillSwitch, resetDemo, finishDemo, notify],
+    [mode, isLive, verifying, live, liveReceipt, approval, otpAttemptsLeft, rejectReason, plan, liveHistory, history, events, killSwitch, toast, submitOtp, resendOtp, reject, choosePlan, setKillSwitch, resetDemo, finishDemo, notify],
   );
 
   return (
@@ -428,11 +506,12 @@ export function useDesk() {
 
 /** Derived numbers every screen agrees on. */
 export function useCrisisNumbers() {
-  const { approval } = useDesk();
+  const { approval, mode } = useDesk();
   const resolved = approval === "approved";
   return {
     resolved,
-    pendingCount: approval === "pending" || approval === "verifying" ? 1 : 0,
+    // no badge until the backend answered: the live request may already be decided
+    pendingCount: mode !== "checking" && (approval === "pending" || approval === "verifying") ? 1 : 0,
     pNeg: resolved ? N.pNegAfterPlan : N.pNeg,
     runway: resolved ? "90D+" : `${N.crunchDay}D`,
   };

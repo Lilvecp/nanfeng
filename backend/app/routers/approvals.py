@@ -1,8 +1,10 @@
 """Approval Center API: every money movement enters here, gets a policy tier, and runs in the
 sandbox bank either right away (L1/L2) or after the owner approves with OTP (L3)."""
 
+import threading
+
 from fastapi import APIRouter, Depends, Header, HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from .. import anchoring, audit, auth, bank, bec, otp, policy, sanctions, state
@@ -14,6 +16,8 @@ from ..schemas import ApprovalCreate, ApprovalOut, ApproveIn, KillSwitchIn, Reje
 from ..security import is_agent, require_agent
 
 router = APIRouter(tags=["approvals"])
+# One execution at a time: two different approvals running together must not read the same balance.
+_exec_lock = threading.Lock()
 
 
 
@@ -35,7 +39,8 @@ def _run(db: Session, appr: Approval, actor: str) -> None:
     status = "approved" if appr.tier == 3 else "auto"
     for i, op in enumerate(appr.operations):
         try:
-            results.append(bank.execute(db, op["op"], op["params"], actor=actor))
+            with _exec_lock:
+                results.append(bank.execute(db, op["op"], op["params"], actor=actor, approval_id=appr.id, tier=appr.tier))
         except bank.BankError as exc:
             status = "failed"
             done = f" (operations 1-{i} executed)" if i else ""
@@ -51,6 +56,12 @@ def require_agent_or_owner(authorization: str = Header(default="")) -> str:
 
 @router.post("/approvals", response_model=ApprovalOut, status_code=201)
 def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Depends(require_agent_or_owner)):
+    return create_approval(body, db, actor)
+
+
+def create_approval(body: ApprovalCreate, db: Session, actor: str, send_code: bool = True) -> Approval:
+    """Policy decision, persistence, audit and event for a new request. `send_code=False` skips the OTP
+    text (the idle sandbox reset asks again without paging the owner)."""
     checks = []
     for o in body.operations:
         try:
@@ -91,7 +102,7 @@ def create(body: ApprovalCreate, db: Session = Depends(get_db), actor: str = Dep
         "status": appr.status, "policy_reason": decision.reason, "policy_rules": decision.rules,
         "policy_version": policy.POLICY["version"],
     })
-    if appr.status == "pending":
+    if appr.status == "pending" and send_code:
         try:
             _send_code(db, appr)
         except otp.OtpError:
@@ -154,14 +165,38 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
         raise HTTPException(403, {"error": "voice_cannot_approve",
                                   "detail": "L3 actions need the OTP; voice never approves (deepfake risk)"})
 
+    # Reserve one attempt atomically before comparing the code (threat model F14): guesses sent in
+    # parallel must not all read "3 attempts left", and once they are spent no guess is compared at all.
+    reserved = db.execute(
+        update(Approval)
+        .where(Approval.id == appr.id, Approval.status == "pending", Approval.otp_attempts_left > 0)
+        .values(otp_attempts_left=Approval.otp_attempts_left - 1)
+    ).rowcount
+    db.commit()
+    db.refresh(appr)
+    if not reserved:
+        raise HTTPException(409 if appr.status != "pending" else 423,
+                            {"error": "otp_locked", "attempts_left": appr.otp_attempts_left})
+
     check = otp.verify(db, appr, body.otp)
+    if check == "ok":
+        db.execute(update(Approval).where(Approval.id == appr.id)
+                   .values(otp_attempts_left=Approval.otp_attempts_left + 1))  # a right code costs nothing
+        db.commit()
+        db.refresh(appr)
     if check == "expired":
+        db.execute(update(Approval).where(Approval.id == appr.id)
+                   .values(otp_attempts_left=Approval.otp_attempts_left + 1))  # not a guess: give it back
+        db.commit()
+        db.refresh(appr)
         audit.append(db, "owner", "approval.otp_expired", {"approval_id": appr.id, "channel": body.channel})
         raise HTTPException(410, {"error": "otp_expired", "attempts_left": appr.otp_attempts_left})
     if check != "ok":
-        appr.otp_attempts_left -= 1
         if appr.otp_attempts_left <= 0:
-            appr.status, appr.decided_at = "locked", utcnow()
+            db.execute(update(Approval).where(Approval.id == appr.id, Approval.status == "pending")
+                       .values(status="locked", decided_at=utcnow()))
+            db.commit()
+            db.refresh(appr)
         audit.append(db, "owner", "approval.otp_failed", {
             "approval_id": appr.id, "attempts_left": appr.otp_attempts_left, "channel": body.channel,
         })
@@ -169,11 +204,21 @@ def approve(approval_id: str, body: ApproveIn, db: Session = Depends(get_db)):
         raise HTTPException(403 if appr.status == "pending" else 423,
                             {"error": "otp_mismatch", "attempts_left": appr.otp_attempts_left})
 
-    appr.channel = body.channel
+    # Claim the approval atomically before any money moves: two approvals racing for the same request
+    # (the owner typing the code while Demo Mode approves on WhatsApp) must execute it once, not twice.
+    claimed = db.execute(
+        update(Approval)
+        .where(Approval.id == appr.id, Approval.status == "pending", Approval.decided_at.is_(None))
+        .values(decided_at=utcnow(), channel=body.channel)
+    ).rowcount
     db.commit()
+    if not claimed:
+        db.refresh(appr)
+        raise HTTPException(409, f"Approval is already being decided ({appr.status})")
+    db.refresh(appr)
     _run(db, appr, actor="owner")
     audit.append(db, "owner", "approval.approved", {
-        "approval_id": appr.id, "status": appr.status, "channel": body.channel,
+        "approval_id": appr.id, "tier": appr.tier, "status": appr.status, "channel": body.channel,
         "result_hashes": [r.get("audit_hash") for r in appr.results or []],
     })
     if appr.status == "approved":
@@ -191,8 +236,18 @@ def reject(approval_id: str, body: RejectIn, db: Session = Depends(get_db)):
     appr = _get(db, approval_id)
     if appr.status != "pending":
         raise HTTPException(409, f"Approval is {appr.status}")
-    appr.status, appr.note, appr.channel, appr.decided_at = "rejected", body.reason, body.channel, utcnow()
-    audit.append(db, "owner", "approval.rejected", {"approval_id": appr.id, "reason": body.reason})
+    # Same claim as approve(): an approve and a reject racing for one request decide it once.
+    claimed = db.execute(
+        update(Approval)
+        .where(Approval.id == appr.id, Approval.status == "pending", Approval.decided_at.is_(None))
+        .values(decided_at=utcnow())
+    ).rowcount
+    db.commit()
+    db.refresh(appr)
+    if not claimed:
+        raise HTTPException(409, f"Approval is already being decided ({appr.status})")
+    appr.status, appr.note, appr.channel = "rejected", body.reason, body.channel
+    audit.append(db, "owner", "approval.rejected", {"approval_id": appr.id, "tier": appr.tier, "reason": body.reason})
     broker.publish("approval.rejected", _out(appr))
     return appr
 

@@ -1,3 +1,4 @@
+import pytest
 """Owner sign-in and the routes it protects (threat model F1, red team API-02 / API-03)."""
 
 from app import auth
@@ -96,3 +97,12 @@ def test_kill_switch_survives_a_restart(client):
         assert r["status"] == "blocked"
     with SessionLocal() as db:  # what any other backend instance would read
         assert kill_switch_on(db) is True
+
+
+@pytest.mark.parametrize("raw", ['["https://nanfeng.app","http://localhost:3000"]',
+                                 "https://nanfeng.app, http://localhost:3000",
+                                 "https://nanfeng.app/,http://localhost:3000"])
+def test_cors_origins_accept_json_or_comma_separated(monkeypatch, raw):
+    from app.config import Settings
+    monkeypatch.setenv("NANFENG_CORS_ORIGINS", raw)
+    assert Settings().cors_origins == ["https://nanfeng.app", "http://localhost:3000"]

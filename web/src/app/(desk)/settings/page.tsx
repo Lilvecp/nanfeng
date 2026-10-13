@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Topbar } from "@/components/topbar";
+import { api } from "@/lib/api";
 import { SANDBOX_OTP, useDesk } from "@/lib/desk-state";
 import { GUIDE_UI, resetTours, setGuideOn, useGuideOn } from "@/lib/guide";
 import { useLang, useT } from "@/lib/i18n";
@@ -67,11 +68,26 @@ const PAYEES: Payee[] = [
 export default function SettingsPage() {
   const t = useT();
   const x = TX[useLang()];
-  const { notify } = useDesk();
+  const { notify, mode } = useDesk();
   const [saved, setSaved] = useState(SAVED);
   const [draft, setDraft] = useState<Record<LimitKey, string>>(() => Object.fromEntries(Object.entries(SAVED).map(([k, v]) => [k, clp(v)])) as Record<LimitKey, string>);
   const [version, setVersion] = useState(14);
   const [payees, setPayees] = useState(PAYEES);
+  // Live mode: show the limits the policy engine actually applies (GET /policy), not the defaults above.
+  const live = mode === "live";
+  useEffect(() => {
+    if (!live) return;
+    let cancelled = false;
+    api.policy.get().then((p) => {
+      if (cancelled) return;
+      const pick = (path: string) => path.split(".").reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], p);
+      const next = Object.fromEntries((Object.keys(POLICY_KEY) as LimitKey[]).map((k) => [k, Number(pick(POLICY_KEY[k])) || SAVED[k]])) as Record<LimitKey, number>;
+      setSaved(next);
+      setDraft(Object.fromEntries(Object.entries(next).map(([k, v]) => [k, clp(v)])) as Record<LimitKey, string>);
+      setVersion(p.version);
+    }).catch(() => undefined);  // backend down: keep the local defaults
+    return () => { cancelled = true; };
+  }, [live]);
   const [otpOpen, setOtpOpen] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpErr, setOtpErr] = useState<string | null>(null);

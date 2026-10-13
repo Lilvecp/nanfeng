@@ -1,160 +1,10 @@
 [
   {
-    "time": "10:12",
-    "what": "Payment notice from the Shanghai importer goes through the guard",
-    "http": 200,
-    "result": {
-      "doc_id": "DOC-1012",
-      "verdict": "clean",
-      "rules": [],
-      "details": {},
-      "payee_id": null,
-      "verify_by": null,
-      "alerted_via": null,
-      "audit_seq": null
-    }
-  },
-  {
-    "time": "10:14",
-    "what": "Agent proposes the MILP plan; the policy engine sends it to the owner (L3)",
-    "http": 201,
-    "result": {
-      "id": "APR-0001",
-      "created_at": "2026-10-10T22:20:09.999487Z",
-      "decided_at": null,
-      "action": "Cherry Crisis plan: partial non-recourse factoring of three invoices",
-      "operations": [
-        {
-          "op": "factoring",
-          "params": {
-            "receivable_id": "INV-2026-121",
-            "share": 0.44
-          }
-        },
-        {
-          "op": "factoring",
-          "params": {
-            "receivable_id": "INV-2026-109",
-            "share": 0.24
-          }
-        },
-        {
-          "op": "factoring",
-          "params": {
-            "receivable_id": "INV-2026-118",
-            "share": 0.21
-          }
-        }
-      ],
-      "amount_clp": 116997600.0,
-      "tier": 3,
-      "status": "pending",
-      "otp_attempts_left": 3,
-      "channel": "WEB",
-      "explanation": "81% probability of negative cash in 19 days; factoring mix costs CLP 1.64M vs CLP 5.81M bank loan",
-      "note": "Factoring always needs the owner's approval",
-      "results": null
-    }
-  },
-  {
-    "time": "10:14",
-    "what": "Agent tries to approve its own plan",
-    "http": 403,
-    "result": {
-      "detail": "The agent cannot approve its own requests"
-    }
-  },
-  {
-    "time": "10:15",
-    "what": "Owner approves with the one-time code received by SMS",
-    "http": 200,
-    "result": {
-      "id": "APR-0001",
-      "created_at": "2026-10-10T22:20:09.999487",
-      "decided_at": "2026-10-10T22:20:10.007747Z",
-      "action": "Cherry Crisis plan: partial non-recourse factoring of three invoices",
-      "operations": [
-        {
-          "op": "factoring",
-          "params": {
-            "receivable_id": "INV-2026-121",
-            "share": 0.44
-          }
-        },
-        {
-          "op": "factoring",
-          "params": {
-            "receivable_id": "INV-2026-109",
-            "share": 0.24
-          }
-        },
-        {
-          "op": "factoring",
-          "params": {
-            "receivable_id": "INV-2026-118",
-            "share": 0.21
-          }
-        }
-      ],
-      "amount_clp": 116997600.0,
-      "tier": 3,
-      "status": "approved",
-      "otp_attempts_left": 3,
-      "channel": "WA+OTP",
-      "explanation": "81% probability of negative cash in 19 days; factoring mix costs CLP 1.64M vs CLP 5.81M bank loan",
-      "note": "Factoring always needs the owner's approval",
-      "results": [
-        {
-          "transaction_id": 1,
-          "receivable_id": "INV-2026-121",
-          "lender_id": "LEN-FACTOR",
-          "share": 0.44,
-          "face_value_clp": 47625600.0,
-          "advance_pct": 0.9,
-          "fee_clp": 476256.0,
-          "proceeds_clp": 42386784.0,
-          "amount_clp": 47625600.0,
-          "annual_rate": 0.168,
-          "audit_seq": 4,
-          "audit_hash": "33896e27f0aa5cdf425f755bf46710b71444434bbfb8bef7dec96a86a4d26309"
-        },
-        {
-          "transaction_id": 2,
-          "receivable_id": "INV-2026-109",
-          "lender_id": "LEN-FACTOR",
-          "share": 0.24,
-          "face_value_clp": 33840000.0,
-          "advance_pct": 0.9,
-          "fee_clp": 338400.0,
-          "proceeds_clp": 30117600.0,
-          "amount_clp": 33840000.0,
-          "annual_rate": 0.168,
-          "audit_seq": 5,
-          "audit_hash": "c28353d33a4af9707c82d192ce734383a36af1f0f65a817f2b33e6c6634eb926"
-        },
-        {
-          "transaction_id": 3,
-          "receivable_id": "INV-2026-118",
-          "lender_id": "LEN-FACTOR",
-          "share": 0.21,
-          "face_value_clp": 35532000.0,
-          "advance_pct": 0.9,
-          "fee_clp": 355320.0,
-          "proceeds_clp": 31623480.0,
-          "amount_clp": 35532000.0,
-          "annual_rate": 0.168,
-          "audit_seq": 6,
-          "audit_hash": "9465fd6c3a0054eff53c87e4345a4bc068f2754c91d0c193066252f5955c74a1"
-        }
-      ]
-    }
-  },
-  {
-    "time": "10:31",
+    "time": "08:47",
     "what": "Supplier invoice with changed account and hidden instruction: guard",
     "http": 200,
     "result": {
-      "doc_id": "DOC-1031",
+      "doc_id": "DOC-0847",
       "verdict": "malicious",
       "rules": [
         "doc-instruction",
@@ -168,15 +18,15 @@
       "payee_id": null,
       "verify_by": null,
       "alerted_via": "sms",
-      "audit_seq": 9
+      "audit_seq": 4
     }
   },
   {
-    "time": "10:31",
+    "time": "08:47",
     "what": "Same invoice: payee check against master data",
     "http": 200,
     "result": {
-      "doc_id": "DOC-1031",
+      "doc_id": "DOC-0847",
       "verdict": "malicious",
       "rules": [
         "bank-change",
@@ -194,7 +44,255 @@
         "call": "+56229876543"
       },
       "alerted_via": "sms",
-      "audit_seq": 10
+      "audit_seq": 5
+    }
+  },
+  {
+    "time": "10:12",
+    "what": "Payment notice from the Shanghai importer goes through the guard",
+    "http": 200,
+    "result": {
+      "doc_id": "DOC-1012",
+      "verdict": "clean",
+      "rules": [],
+      "details": {},
+      "payee_id": null,
+      "verify_by": null,
+      "alerted_via": null,
+      "audit_seq": 6
+    }
+  },
+  {
+    "time": "10:14",
+    "what": "Agent proposes the MILP plan (PAE loan); the policy engine sends it to the owner (L3)",
+    "http": 201,
+    "result": {
+      "id": "APR-0001",
+      "created_at": "2026-10-13T03:33:05.934557Z",
+      "decided_at": null,
+      "action": "Pre-export loan in USD (PAE)",
+      "operations": [
+        {
+          "op": "loan",
+          "params": {
+            "lender_id": "LEN-PAE",
+            "amount_clp": 140098568,
+            "term_days": 60
+          }
+        }
+      ],
+      "amount_clp": 140098568.0,
+      "tier": 3,
+      "status": "pending",
+      "otp_attempts_left": 3,
+      "channel": "WEB",
+      "explanation": "81% probability of negative cash in 19 days (2026-12-30). Plan: Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE). Cost CLP 2,106,329 vs CLP 3,796,513 for the default bank loan (45% cheaper); cash stays above the buffer in 96% of 10,000 scenarios.",
+      "note": "Loan always needs the owner's approval",
+      "results": null
+    }
+  },
+  {
+    "time": "10:14",
+    "what": "Agent tries to approve its own plan",
+    "http": 403,
+    "result": {
+      "detail": "The agent cannot act as the owner"
+    }
+  },
+  {
+    "time": "10:14",
+    "what": "Anonymous caller tries to approve with the right code (no owner session)",
+    "http": 401,
+    "result": {
+      "detail": {
+        "error": "owner_login_required",
+        "detail": "Sign in as the owner (POST /auth/login)"
+      }
+    }
+  },
+  {
+    "time": "10:15",
+    "what": "Owner signs in and approves with the one-time code received by SMS",
+    "http": 200,
+    "result": {
+      "id": "APR-0001",
+      "created_at": "2026-10-13T03:33:05.934557",
+      "decided_at": "2026-10-13T03:33:05.945228Z",
+      "action": "Pre-export loan in USD (PAE)",
+      "operations": [
+        {
+          "op": "loan",
+          "params": {
+            "lender_id": "LEN-PAE",
+            "amount_clp": 140098568,
+            "term_days": 60
+          }
+        }
+      ],
+      "amount_clp": 140098568.0,
+      "tier": 3,
+      "status": "approved",
+      "otp_attempts_left": 3,
+      "channel": "WA+OTP",
+      "explanation": "81% probability of negative cash in 19 days (2026-12-30). Plan: Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE). Cost CLP 2,106,329 vs CLP 3,796,513 for the default bank loan (45% cheaper); cash stays above the buffer in 96% of 10,000 scenarios.",
+      "note": "Loan always needs the owner's approval",
+      "results": [
+        {
+          "transaction_id": 1,
+          "lender_id": "LEN-PAE",
+          "product": "wc_loan",
+          "amount_clp": 140098568,
+          "term_days": 60,
+          "fee_clp": 540295.7,
+          "stamp_tax_clp": 0.0,
+          "interest_clp": 1566033.31,
+          "cost_clp": 2106329.01,
+          "proceeds_clp": 139558272.3,
+          "annual_rate": 0.068,
+          "approval_id": "APR-0001",
+          "tier": 3,
+          "audit_seq": 10,
+          "audit_hash": "7af76f75adfb07e5adece59cb4dfd90e1d479ce10139527b9a06a93728dd9b27"
+        }
+      ]
+    }
+  },
+  {
+    "time": "10:20",
+    "what": "Agent proposes factoring half of INV-2026-109 (L3)",
+    "http": 201,
+    "result": {
+      "id": "APR-0002",
+      "created_at": "2026-10-13T03:33:05.948905Z",
+      "decided_at": null,
+      "action": "factoring INV-2026-109",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "pending",
+      "otp_attempts_left": 3,
+      "channel": "WEB",
+      "explanation": "",
+      "note": "Factoring always needs the owner's approval",
+      "results": null
+    }
+  },
+  {
+    "time": "10:20",
+    "what": "Owner approves; the invoice's fingerprint is registered before the bank pays out",
+    "http": 200,
+    "result": {
+      "id": "APR-0002",
+      "created_at": "2026-10-13T03:33:05.948905",
+      "decided_at": "2026-10-13T03:33:05.970297Z",
+      "action": "factoring INV-2026-109",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "approved",
+      "otp_attempts_left": 3,
+      "channel": "WA+OTP",
+      "explanation": "",
+      "note": "Factoring always needs the owner's approval",
+      "results": [
+        {
+          "transaction_id": 2,
+          "receivable_id": "INV-2026-109",
+          "lender_id": "LEN-FACTOR",
+          "share": 0.5,
+          "face_value_clp": 73788000.0,
+          "advance_pct": 0.85,
+          "fee_clp": 244470.0,
+          "proceeds_clp": 62475330.0,
+          "amount_clp": 73788000.0,
+          "annual_rate": 0.18,
+          "registry": {
+            "fingerprint": "0x66f4ed34271881fd9a5687d5a14143905c02b73ce102682816d70f2f645d1213",
+            "backend": "local",
+            "contract_address": null,
+            "tx_hash": null,
+            "explorer_url": null
+          },
+          "approval_id": "APR-0002",
+          "tier": 3,
+          "audit_seq": 15,
+          "audit_hash": "d87da7d1b5e3a9ddace25141dca659fc0985d6fca4ae77b1a8e368b0f665fb80"
+        }
+      ]
+    }
+  },
+  {
+    "time": "10:21",
+    "what": "Same invoice offered to another lender (double financing)",
+    "http": 201,
+    "result": {
+      "id": "APR-0003",
+      "created_at": "2026-10-13T03:33:05.973585Z",
+      "decided_at": null,
+      "action": "factor INV-2026-109 again elsewhere",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "lender_id": "LEN-FINTECH",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "pending",
+      "otp_attempts_left": 3,
+      "channel": "WEB",
+      "explanation": "",
+      "note": "Factoring always needs the owner's approval",
+      "results": null
+    }
+  },
+  {
+    "time": "10:21",
+    "what": "Even with the owner's code it is refused as already financed; no money moves",
+    "http": 200,
+    "result": {
+      "id": "APR-0003",
+      "created_at": "2026-10-13T03:33:05.973585",
+      "decided_at": "2026-10-13T03:33:05.978525Z",
+      "action": "factor INV-2026-109 again elsewhere",
+      "operations": [
+        {
+          "op": "factoring",
+          "params": {
+            "receivable_id": "INV-2026-109",
+            "lender_id": "LEN-FINTECH",
+            "share": 0.5
+          }
+        }
+      ],
+      "amount_clp": 73788000.0,
+      "tier": 3,
+      "status": "failed",
+      "otp_attempts_left": 3,
+      "channel": "WA+OTP",
+      "explanation": "",
+      "note": "already_financed: INV-2026-109 was already financed by LEN-FACTOR:factoring",
+      "results": []
     }
   },
   {
@@ -202,9 +300,9 @@
     "what": "Agent tries to split a CLP 30M supplier payment in two",
     "http": 201,
     "result": {
-      "id": "AUT-0002",
-      "created_at": "2026-10-10T22:20:10.015227Z",
-      "decided_at": "2026-10-10T22:20:10.016328Z",
+      "id": "AUT-0004",
+      "created_at": "2026-10-13T03:33:05.981262Z",
+      "decided_at": "2026-10-13T03:33:05.982203Z",
       "action": "pay Cartonera 1/2",
       "operations": [
         {
@@ -224,7 +322,7 @@
       "note": "Within the L2 limits",
       "results": [
         {
-          "transaction_id": 4,
+          "transaction_id": 3,
           "payee_id": "PAY-CARTONERA",
           "payee": "Cartonera Sur Ltda. (fictional)",
           "bank_account": "•••• 2117",
@@ -232,8 +330,10 @@
           "currency": "CLP",
           "amount_clp": 15000000.0,
           "reference": "",
-          "audit_seq": 11,
-          "audit_hash": "0ec58d51702b44c55329f317994d491fb61e74f1b6ceee3d9a3614eeefb4cf03"
+          "approval_id": "AUT-0004",
+          "tier": 2,
+          "audit_seq": 21,
+          "audit_hash": "958ec7d7149eef4cff20b06904c36b1a1b01e57248e6a75bec433a910f92f2c4"
         }
       ]
     }
@@ -243,8 +343,8 @@
     "what": "Second half",
     "http": 201,
     "result": {
-      "id": "APR-0003",
-      "created_at": "2026-10-10T22:20:10.018474Z",
+      "id": "APR-0005",
+      "created_at": "2026-10-13T03:33:05.984396Z",
       "decided_at": null,
       "action": "pay Cartonera 2/2",
       "operations": [
@@ -267,15 +367,42 @@
     }
   },
   {
+    "time": "10:35",
+    "what": "Owner stops the agent (kill switch on)",
+    "http": 200,
+    "result": {
+      "on": true
+    }
+  },
+  {
+    "time": "10:35",
+    "what": "Agent tries to turn the kill switch back off",
+    "http": 403,
+    "result": {
+      "detail": "Only the owner can turn the kill switch off"
+    }
+  },
+  {
+    "time": "10:35",
+    "what": "Anonymous caller tries to turn it off",
+    "http": 401,
+    "result": {
+      "detail": {
+        "error": "owner_login_required",
+        "detail": "Sign in as the owner"
+      }
+    }
+  },
+  {
     "time": "10:40",
-    "what": "Anchor everything still pending",
+    "what": "Agent anchors everything still pending",
     "http": 201,
     "result": {
-      "id": 2,
-      "created_at": "2026-10-10T22:20:10.021216Z",
-      "from_seq": 8,
-      "to_seq": 14,
-      "merkle_root": "c76c248f2909482df216f8b7f5a54ff436f921d029b4788684572a0d3a612acf",
+      "id": 3,
+      "created_at": "2026-10-13T03:33:05.989878Z",
+      "from_seq": 17,
+      "to_seq": 25,
+      "merkle_root": "16c8fa984383c3e3e6a6fefb1dee18caf12b200a83ab8d0eb363246619fc64ac",
       "backend": "local",
       "tx_hash": null,
       "explorer_url": null

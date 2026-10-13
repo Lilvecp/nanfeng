@@ -1,3 +1,5 @@
+import hashlib
+
 from app import guard
 
 M = 1_000_000
@@ -66,11 +68,15 @@ def test_scan_blocks_logs_and_streams(client):
     assert any(e["type"] == "security.attack_blocked" for e in events)
 
 
-def test_scan_clean_document_leaves_no_trace(client):
-    before = len(client.get("/audit/entries").json())
-    r = client.post("/security/scan", json={"doc_id": "DOC-1", "ocr_text": LEGIT_OCR}).json()
-    assert r["verdict"] == "clean" and r["audit_seq"] is None
-    assert len(client.get("/audit/entries").json()) == before
+def test_scan_clean_document_leaves_only_its_fingerprint(client):
+    r = client.post("/security/scan", json={"doc_id": "DOC-1", "source": "email", "ocr_text": LEGIT_OCR}).json()
+    assert r["verdict"] == "clean" and r["audit_seq"]
+    entry = client.get("/audit/entries", params={"kind": "document.received"}).json()[-1]
+    assert entry["seq"] == r["audit_seq"]
+    assert entry["payload"] == {"doc_id": "DOC-1", "source": "email", "text_layer_sha256": None,
+                                "sha256": hashlib.sha256(LEGIT_OCR.encode()).hexdigest()}
+    assert "Cartonera" not in str(entry)  # the text itself never reaches the log
+    assert not any(e["type"] == "document.received" for e in client.get("/agent/events/recent").json())
 
 
 def test_changed_bank_account_is_bec(client):
@@ -180,3 +186,42 @@ def test_audit_log_shows_only_last_four_digits(client):
     client.post("/approvals", json={"action": "pay", "operations": [{
         "op": "payment", "params": {"payee_id": "PAY-FRIO", "amount": 500_000}}]})
     assert "CL-BANCOSUR-7781203" not in client.get("/audit/entries").text
+
+
+def test_agent_routes_fail_closed_without_a_token(client, monkeypatch):
+    anon = {"Authorization": ""}
+    """Threat model F6: no configured token must not mean "anyone is the agent"."""
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "agent_token", "")
+    monkeypatch.setattr(get_settings(), "allow_open_agent", False)
+    r = client.post("/approvals", json={"action": "pay", "operations": [
+        {"op": "payment", "params": {"payee_id": "PAY-CARTONERA", "amount": 500_000}}]}, headers=anon)
+    assert r.status_code == 401
+    assert client.post("/security/scan", json={"doc_id": "D", "source": "email", "ocr_text": "x"},
+                       headers=anon).status_code == 401
+    assert client.get("/bank/transactions").json() == []  # nothing was paid
+
+
+def test_placeholder_agent_token_is_refused_at_startup(monkeypatch):
+    import pytest
+    from fastapi.testclient import TestClient
+
+    from app.config import PLACEHOLDER_AGENT_TOKEN, get_settings
+    from app.main import app
+
+    monkeypatch.setattr(get_settings(), "agent_token", PLACEHOLDER_AGENT_TOKEN)
+    with pytest.raises(RuntimeError, match="placeholder"):
+        with TestClient(app):
+            pass
+
+
+def test_anonymous_caller_cannot_spend_the_anchoring_wallet(client, monkeypatch):
+    """Every anchor leaves a new pending entry, so an open route meant unlimited on-chain transactions."""
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "agent_token", "agent-secret")
+    anon = {"Authorization": ""}
+    assert client.post("/audit/anchor", headers=anon).status_code == 401
+    assert client.post("/audit/anchor").status_code == 201  # the signed-in owner still can
+    assert client.post("/audit/anchor", headers={"Authorization": "Bearer agent-secret"}).status_code == 201

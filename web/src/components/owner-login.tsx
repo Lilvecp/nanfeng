@@ -15,19 +15,19 @@ const TX: Record<Lang, Record<string, string>> = {
   en: {
     title: "Owner access", body: "Approving, rejecting, the kill switch and resetting the sandbox are for the owner only. Sign in to continue.",
     password: "Owner password", demo: "Demo password", signIn: "Sign in", cancel: "Cancel", wrong: "Wrong password.",
-    tooMany: "Too many attempts. Wait a few minutes.", down: "Cannot reach the backend.", account: "Owner sign-in",
+    tooMany: "Too many attempts. Wait a few minutes.", down: "Cannot reach the server. Check your connection and try again; Demo mode keeps working offline.", account: "Owner sign-in",
     signOut: "Sign out", signedOut: "Signed out", signedIn: "Signed in as the owner",
   },
   es: {
     title: "Acceso del dueño", body: "Aprobar, rechazar, el kill switch y reiniciar el sandbox son solo para el dueño. Inicia sesión para continuar.",
     password: "Contraseña del dueño", demo: "Contraseña de demo", signIn: "Ingresar", cancel: "Cancelar", wrong: "Contraseña incorrecta.",
-    tooMany: "Demasiados intentos. Espera unos minutos.", down: "No se puede conectar con el backend.", account: "Acceso dueño",
+    tooMany: "Demasiados intentos. Espera unos minutos.", down: "No se puede conectar con el servidor. Revisa tu conexión y vuelve a intentarlo; el modo demo sigue funcionando sin red.", account: "Acceso dueño",
     signOut: "Cerrar sesión", signedOut: "Sesión cerrada", signedIn: "Sesión iniciada como dueño",
   },
   zh: {
     title: "企业主登录", body: "批准、拒绝、紧急停止和重置沙盒仅限企业主操作。请登录以继续。",
     password: "企业主密码", demo: "演示密码", signIn: "登录", cancel: "取消", wrong: "密码错误。",
-    tooMany: "尝试次数过多，请稍后再试。", down: "无法连接后端。", account: "企业主登录",
+    tooMany: "尝试次数过多，请稍后再试。", down: "无法连接服务器。请检查网络后重试；演示模式可离线使用。", account: "企业主登录",
     signOut: "退出登录", signedOut: "已退出登录", signedIn: "已以企业主身份登录",
   },
 };

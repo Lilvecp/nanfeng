@@ -4,17 +4,36 @@ Every operation moves balances, writes a transaction row, appends to the audit l
 an event, so the logs exported from /bank/logs are the execution evidence (deliverable 06).
 """
 
+from contextvars import ContextVar
 from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import audit
+from . import audit, registry
 from .events import broker
 from .models import Account, Lender, Payee, PayeeAccount, Receivable, Transaction
-from .seed import FX_RATES
+from .seed import FX_RATES, LENDER_TERMS
 
 ACCOUNT_BY_CCY = {"CLP": "ACC-CLP", "USD": "ACC-USD", "CNY": "ACC-CNY"}
+
+# The approval an operation runs under: its id and policy tier go into the bank.* audit entry, so the
+# chain shows a loan disbursement as the L3 action the owner approved, not as an unlabelled event.
+_approval: ContextVar[dict] = ContextVar("approval", default={})
+
+
+def _fixed_fee(lender_id: str) -> float:
+    return float(LENDER_TERMS.get(lender_id, {}).get("fee_fixed_clp", 0))
+
+
+def _stamp_pct(lender_id: str, term_days: int) -> float:
+    """Chilean stamp tax as the engine charges it: flat for sight credits, else per month or fraction, capped."""
+    stamp = LENDER_TERMS.get(lender_id, {}).get("stamp_tax")
+    if not stamp:
+        return 0.0
+    if "flat" in stamp:
+        return float(stamp["flat"])
+    return min(float(stamp["monthly"]) * max(1, -(-term_days // 30)), float(stamp["cap"]))
 
 
 class BankError(Exception):
@@ -30,7 +49,7 @@ def to_clp(amount: float, currency: str) -> float:
 
 
 def _account(db: Session, currency: str) -> Account:
-    acc = db.get(Account, ACCOUNT_BY_CCY.get(currency, ""))
+    acc = db.get(Account, ACCOUNT_BY_CCY.get(currency, ""), with_for_update=True)  # row lock on Postgres
     if not acc:
         raise BankError("unknown_currency", f"No sandbox account in {currency}")
     return acc
@@ -49,6 +68,7 @@ def _move(db: Session, acc: Account, amount: float, kind: str, counterparty: str
 
 
 def _finish(db: Session, actor: str, kind: str, result: dict) -> dict:
+    result = {**result, **_approval.get()}
     entry = audit.append(db, actor, f"bank.{kind}", result)  # commits
     result = {**result, "audit_seq": entry.seq, "audit_hash": entry.hash}
     broker.publish(f"bank.{kind}", result)
@@ -94,14 +114,19 @@ def factoring(db: Session, receivable_id: str, lender_id: str = "LEN-FACTOR",
     if not inv.factoring_eligible or not 0 < share <= 1:
         raise BankError("not_eligible", f"{inv.id} cannot be factored with share {share}")
     face_clp = to_clp(float(inv.amount) * share, inv.currency)
-    fee = round(face_clp * float(lender.fee_pct), 2)
+    fee = round(face_clp * float(lender.fee_pct) + _fixed_fee(lender.id), 2)
     proceeds = round(face_clp * float(lender.advance_pct) - fee, 2)
+    try:  # invoice registry (r3-06): before any money moves, so a refused registration pays nothing
+        reg = registry.register(db, inv.id, f"{lender.id}:factoring")
+    except registry.RegistryError as exc:
+        raise BankError(exc.code, exc.message, exc.status) from exc
     inv.financed_by = f"{lender.id}:factoring"
     tx = _move(db, _account(db, "CLP"), proceeds, "factoring", lender.name, inv.id)
     return _finish(db, actor, "factoring", {
         "transaction_id": tx.id, "receivable_id": inv.id, "lender_id": lender.id, "share": share,
         "face_value_clp": face_clp, "advance_pct": float(lender.advance_pct), "fee_clp": fee,
         "proceeds_clp": proceeds, "amount_clp": face_clp, "annual_rate": float(lender.annual_rate),
+        "registry": registry.receipt(reg),
     })
 
 
@@ -111,13 +136,15 @@ def loan(db: Session, lender_id: str, amount_clp: float, term_days: int, actor: 
         raise BankError("not_found", "Loan lender not found", 404)
     if amount_clp <= 0 or term_days <= 0:
         raise BankError("invalid_amount", "Amount and term must be positive")
-    fee = round(amount_clp * float(lender.fee_pct), 2)
+    fee = round(amount_clp * float(lender.fee_pct) + _fixed_fee(lender.id), 2)
+    stamp = round(amount_clp * _stamp_pct(lender.id, term_days), 2)
     interest = round(amount_clp * float(lender.annual_rate) * term_days / 365, 2)
-    tx = _move(db, _account(db, "CLP"), amount_clp - fee, "loan", lender.name, f"{lender.product}-{term_days}d")
+    proceeds = round(amount_clp - fee - stamp, 2)
+    tx = _move(db, _account(db, "CLP"), proceeds, "loan", lender.name, f"{lender.product}-{term_days}d")
     return _finish(db, actor, "loan", {
         "transaction_id": tx.id, "lender_id": lender.id, "product": lender.product, "amount_clp": amount_clp,
-        "term_days": term_days, "fee_clp": fee, "interest_clp": interest, "cost_clp": fee + interest,
-        "proceeds_clp": amount_clp - fee, "annual_rate": float(lender.annual_rate),
+        "term_days": term_days, "fee_clp": fee, "stamp_tax_clp": stamp, "interest_clp": interest,
+        "cost_clp": round(fee + stamp + interest, 2), "proceeds_clp": proceeds, "annual_rate": float(lender.annual_rate),
     })
 
 
@@ -186,10 +213,12 @@ def operation_amount_clp(db: Session, op: str, params: dict) -> float:
     raise BankError("unknown_operation", f"Unknown operation {op}")
 
 
-def execute(db: Session, op: str, params: dict, actor: str) -> dict:
+def execute(db: Session, op: str, params: dict, actor: str, approval_id: str | None = None,
+            tier: int | None = None) -> dict:
     fn = OPERATIONS.get(op)
     if not fn:
         raise BankError("unknown_operation", f"Unknown operation {op}")
+    token = _approval.set({"approval_id": approval_id, "tier": tier} if approval_id else {})
     try:
         return fn(db, **params, actor=actor)
     except TypeError as exc:
@@ -197,6 +226,8 @@ def execute(db: Session, op: str, params: dict, actor: str) -> dict:
     except BankError:
         db.rollback()
         raise
+    finally:
+        _approval.reset(token)
 
 
 def counterparty(db: Session, op: str, params: dict) -> str | None:

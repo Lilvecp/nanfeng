@@ -32,6 +32,11 @@ class Product:
         """Contract terms the lender offers (days). Loans can list several; the optimizer picks one."""
         return sorted(self.raw.get("term_options_days") or [self.raw["term_days"]])
 
+    def max_ticket(self) -> float:
+        """Largest single operation, CLP. Above it the CMF prices the credit in another bracket whose
+        legal maximum rate (TMC) is below this product's rate, so bigger needs take several operations."""
+        return float(self.raw.get("max_ticket_clp") or math.inf)
+
 
 @dataclass
 class Catalog:
@@ -174,7 +179,10 @@ def financing_quote(company: Company, catalog: Catalog, amount_clp: float, need_
             amount = min(amount, p.get("max_amount_clp", amount))
             # shortest term the lender offers that still covers the need
             term = next((t for t in p.terms() if t >= need_days), p.terms()[-1])
-            cost = amount * catalog.loan_unit_cost(p, term) + p.fee_fixed_clp
+            n_loans = max(1, math.ceil(amount / p.max_ticket()))  # each loan pays its own fixed fee
+            cost = amount * catalog.loan_unit_cost(p, term) + p.fee_fixed_clp * n_loans
+            if n_loans > 1:
+                row["loans"] = n_loans
             row.update(amount_clp=amount, cost_clp=cost, term_days=term, term_options_days=p.terms(),
                        eac=effective_annual_cost(cost, amount, term),
                        covers_need=amount >= amount_clp,
@@ -191,7 +199,7 @@ def financing_quote(company: Company, catalog: Catalog, amount_clp: float, need_
                 if days <= 0:
                     continue
                 face = r.amount * fx[r.currency]
-                frac = min(1.0, (amount_clp - proceeds) / (face * p.advance_rate))
+                frac = min(1.0, (amount_clp - proceeds) / (face * p.advance_rate), p.max_ticket() / (face * p.advance_rate))
                 proceeds += frac * face * p.advance_rate
                 cost += frac * face * catalog.factoring_unit_cost(p, days)
                 used.append({"receivable_id": r.id, "fraction": round(frac, 4), "days": days})
@@ -206,7 +214,7 @@ def financing_quote(company: Company, catalog: Catalog, amount_clp: float, need_
                        covers_need=proceeds >= amount_clp * 0.999, invoices=used)
         elif p.kind == "confirming":
             pool = [x for x in company.payables if x.confirming_eligible and company.day(x.date) >= need_day]
-            extended = sum(x.amount for x in pool)
+            extended = sum(min(x.amount, p.max_ticket()) for x in pool)
             cost = extended * catalog.confirming_unit_cost(p)
             row.update(amount_clp=extended, cost_clp=cost, term_days=p.term_days,
                        eac=effective_annual_cost(cost, extended, p.term_days) if extended else None,

@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
+import { N, S } from "@/lib/scenario";
+
+const passport = (p: { score: number; grade: string }) => `${Math.round(p.score)} ${p.grade}`;
 
 // "One agent. The whole treasury desk." — feature cards that expand in place, one at a time.
 type Card = { n: Record<Lang, string>; title: Record<Lang, [string, string]>; body: Record<Lang, string>; glyph: React.ReactNode };
@@ -24,7 +27,7 @@ const CARDS: Card[] = [
   },
   {
     n: { en: "03 · ACT", es: "03 · ACTUAR", zh: "03 · 执行" },
-    title: { en: ["Acts with", "your code"], es: ["Actúa con", "tu código"], zh: ["凭您的", "验证码执行"] },
+    title: { en: ["Acts only", "with your OK"], es: ["Actúa solo", "con tu OK"], zh: ["经您批准", "才会执行"] },
     body: { en: "NanFeng drafts and executes, but anything that moves money waits for you: a six-digit code on WhatsApp or the web. You set every limit.", es: "NanFeng prepara y ejecuta, pero todo lo que mueve plata te espera a ti: un código de seis dígitos por WhatsApp o en la web. Tú pones cada límite.", zh: "南风负责起草和执行，但任何资金操作都要等您确认：在 WhatsApp 或网页输入六位验证码。所有限额由您设定。" },
     glyph: <svg width="56" height="56" viewBox="0 0 56 56"><rect x="10" y="24" width="36" height="24" rx="5" stroke="currentColor" strokeWidth="3" fill="none" /><path d="M18 24v-6a10 10 0 0 1 20 0v6" stroke="currentColor" strokeWidth="3" fill="none" /></svg>,
   },
@@ -36,8 +39,8 @@ const CARDS: Card[] = [
   },
   {
     n: { en: "05 · PROTECT", es: "05 · PROTEGER", zh: "05 · 防护" },
-    title: { en: ["Injection-", "proof"], es: ["A prueba de", "inyecciones"], zh: ["抵御", "提示注入"] },
-    body: { en: "Invoices and emails are read as data, never as orders. A changed bank account or a hidden instruction is quarantined and you're told by SMS.", es: "Las facturas y los correos se leen como datos, nunca como órdenes. Una cuenta bancaria cambiada o una instrucción oculta queda en cuarentena y te avisamos por SMS.", zh: "发票和邮件只作为数据读取，绝不当作指令。银行账户被更改或夹带隐藏指令的文件会被隔离，并通过短信通知您。" },
+    title: { en: [`${N.rtStopped}/${N.rtAttacks} attacks`, "stopped"], es: [`${N.rtStopped}/${N.rtAttacks} ataques`, "frenados"], zh: [`${N.rtStopped}/${N.rtAttacks} 次攻击`, "全部拦截"] },
+    body: { en: `Invoices and emails are read as data, never as orders. A changed bank account or a hidden instruction is quarantined and you're told by SMS. Our red team threw ${N.rtAttacks} attacks at it.`, es: `Las facturas y los correos se leen como datos, nunca como órdenes. Una cuenta bancaria cambiada o una instrucción oculta queda en cuarentena y te avisamos por SMS. Nuestro red team lo probó con ${N.rtAttacks} ataques.`, zh: `发票和邮件只作为数据读取，绝不当作指令。银行账户被更改或夹带隐藏指令的文件会被隔离，并通过短信通知您。我们的红队对其发起了${N.rtAttacks}次攻击。` },
     glyph: <svg width="56" height="56" viewBox="0 0 56 56"><path d="M28 6l18 7v13c0 12-8 20-18 24C18 46 10 38 10 26V13z" stroke="currentColor" strokeWidth="3" fill="none" /><path d="M20 28l6 6 11-12" stroke="currentColor" strokeWidth="3" fill="none" /></svg>,
   },
   {
@@ -45,6 +48,16 @@ const CARDS: Card[] = [
     title: { en: ["On-chain", "audit"], es: ["Auditoría", "on-chain"], zh: ["链上", "审计"] },
     body: { en: "Every decision is hash-chained and anchored on a public blockchain (Sepolia testnet today, FISCO BCOS next), so you and your bank can verify what happened, and when.", es: "Cada decisión queda encadenada por hash y anclada en una blockchain pública (hoy la testnet Sepolia, después FISCO BCOS), para que tú y tu banco puedan verificar qué pasó y cuándo.", zh: "每项决策都经哈希链接并锚定在公共区块链上（目前为 Sepolia 测试网，下一步为 FISCO BCOS），您和银行都能核实发生了什么、何时发生。" },
     glyph: <svg width="56" height="56" viewBox="0 0 56 56"><rect x="6" y="20" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="3" fill="none" /><rect x="36" y="20" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="3" fill="none" /><path d="M20 27h16" stroke="currentColor" strokeWidth="3" /></svg>,
+  },
+  {
+    n: { en: "07 · LEND", es: "07 · CRÉDITO", zh: "07 · 授信" },
+    title: { en: ["Credit", "Passport"], es: ["Credit", "Passport"], zh: ["信用", "护照"] },
+    body: {
+      en: `An explainable credit score built from the audited cash history, which a bank can verify instead of asking for paperwork. After this plan Huerto Austral goes from ${passport(S.passport.before)} to ${passport(S.passport.after_plan)}.`,
+      es: `Un puntaje de crédito explicable, armado con el historial de caja auditado, que el banco puede verificar en vez de pedir papeles. Con este plan Huerto Austral pasa de ${passport(S.passport.before)} a ${passport(S.passport.after_plan)}.`,
+      zh: `基于经审计的现金流历史生成的可解释信用评分，银行可直接核验，无需再要纸质材料。采用此方案后，Huerto Austral 从 ${passport(S.passport.before)} 升至 ${passport(S.passport.after_plan)}。`,
+    },
+    glyph: <svg width="56" height="56" viewBox="0 0 56 56"><rect x="10" y="6" width="36" height="44" rx="4" stroke="currentColor" strokeWidth="3" fill="none" /><path d="M18 40l6-8 6 4 8-12" stroke="currentColor" strokeWidth="3" fill="none" strokeLinejoin="round" /><path d="M18 16h20" stroke="currentColor" strokeWidth="3" /></svg>,
   },
 ];
 

@@ -21,6 +21,8 @@ const covered = Math.round(S.plan.coverage * 100); // 96
 const repay = longDate(S.plan.maturity ?? N.crunchDate, "en");
 /** Pesos, plus the yuan equivalent in the 中文 view. */
 const amt = (v: number, lang: Lang) => (lang === "zh" ? `${pesos(v, "zh")}（${cny(v)}）` : pesos(v, lang));
+const grade = (p: { score: number; grade: string }) => `${Math.round(p.score)} ${p.grade}`;
+const PASSPORT = [grade(S.passport.before), grade(S.passport.after_plan)] as const;
 
 type Copy = {
   today: string;
@@ -32,7 +34,7 @@ type Copy = {
   what: string;
   whatSteps: string[];
   chart: { title: string; hint: string; you: string; range: string; broke: string; payroll: string; after: string; before: string };
-  rec: { eyebrow: string; title: string; body: string; ours: string; bank: string; save: string; safe: string; approve: string; why: string; all: string; reasons: string[] };
+  rec: { eyebrow: string; title: string; body: string; ours: string; bank: string; save: string; safe: string; passport: string; approve: string; why: string; all: string; reasons: string[] };
   next: { eyebrow: string; title: string; items: string[] };
   rej: { eyebrow: string; title: string; body: string; cta: string };
   agent: { title: string; items: [string, string][] };
@@ -74,7 +76,8 @@ const COPY: Record<Lang, Copy> = {
       body: `The bank lends you ${usd(N.loanUsd)} on ${crunch("en")}. You pay it back in ${N.termDays} days with the money from your shipments.`,
       ours: "This loan", bank: "Regular bank loan",
       save: `You save ${pesos(N.savings)}`,
-      safe: `With this, your cash stays safe in ${covered} out of 100 scenarios.`,
+      safe: `With this, your cash stays above your safety cushion in ${covered} of 100 scenarios (the chance of running out drops from ${N.pNeg} to ${N.pNegAfterPlan}).`,
+      passport: `Your Credit Passport, the score banks can verify, goes from ${PASSPORT[0]} to ${PASSPORT[1]}.`,
       approve: "Approve with code", why: "Why this option?", all: "See all 9 options",
       reasons: [
         `It is the cheapest of the ${S.arena.length} options that cover the gap in time.`,
@@ -131,7 +134,8 @@ const COPY: Record<Lang, Copy> = {
       body: `El banco te presta ${usd(N.loanUsd, "es")} el ${crunch("es")}. Lo devuelves en ${N.termDays} días con lo que te paguen por tus envíos.`,
       ours: "Este crédito", bank: "Crédito normal del banco",
       save: `Te ahorras ${pesos(N.savings, "es")}`,
-      safe: `Con esto, tu caja queda segura en ${covered} de cada 100 escenarios.`,
+      safe: `Con esto, tu caja se mantiene sobre el colchón de seguridad en ${covered} de cada 100 escenarios (el riesgo de quedarte sin caja baja de ${N.pNeg} a ${N.pNegAfterPlan}).`,
+      passport: `Tu Credit Passport, el puntaje que los bancos pueden verificar, sube de ${PASSPORT[0]} a ${PASSPORT[1]}.`,
       approve: "Aprobar con código", why: "¿Por qué esta opción?", all: "Ver las 9 opciones",
       reasons: [
         `Es la más barata de las ${S.arena.length} opciones que cubren el faltante a tiempo.`,
@@ -188,7 +192,8 @@ const COPY: Record<Lang, Copy> = {
       body: `银行于${crunch("zh")}向您贷款 ${usd(N.loanUsd, "zh")}，您在${N.termDays}天内用出口货款偿还。`,
       ours: "此贷款", bank: "普通银行贷款",
       save: `节省${amt(N.savings, "zh")}`,
-      safe: `采用后，100个情景中有${covered}个现金安全。`,
+      safe: `采用后，100个情景中有${covered}个现金高于安全垫（现金耗尽概率从${N.pNeg}降至${N.pNegAfterPlan}）。`,
+      passport: `您的信用护照（银行可核验的评分）从 ${PASSPORT[0]} 升至 ${PASSPORT[1]}。`,
       approve: "输入验证码批准", why: "为什么选这个？", all: "查看全部9个方案",
       reasons: [
         `在能及时补足缺口的${S.arena.length}个方案中成本最低。`,
@@ -245,10 +250,10 @@ function SimpleChart({ resolved, before = false, c, lang }: { resolved: boolean;
       <path d={band(f.p10, f.p90)} fill="var(--accent)" opacity=".1" />
       {resolved && <path d={line(S.fan.after.p50)} fill="none" stroke="var(--faint)" strokeWidth="1.5" strokeDasharray="4 4" />}
       <path d={line(f.p50)} fill="none" stroke={resolved ? "var(--ok)" : "var(--accent)"} strokeWidth="3" strokeLinejoin="round" />
-      <line x1={px} x2={px} y1="20" y2="280" stroke={resolved ? "var(--ok)" : "var(--crit)"} strokeDasharray="3 3" />
-      <rect x={px + 6} y="22" width={tag.length * (lang === "zh" ? 13 : 7.4) + 22} height="22" rx="11" fill={resolved ? "var(--ok)" : "var(--crit)"} />
+      <line x1={px} x2={px} y1="20" y2="280" stroke={resolved ? "var(--ok)" : "var(--cherry)"} strokeDasharray="3 3" />
+      <rect x={px + 6} y="22" width={tag.length * (lang === "zh" ? 13 : 7.4) + 22} height="22" rx="11" fill={resolved ? "var(--ok)" : "var(--cherry)"} />
       <text x={px + 17} y="37" className="owner-ch-lbl" style={{ fill: "#FFFFFF", fontWeight: 700 }}>{tag}</text>
-      {!resolved && !before && <circle cx={px} cy={fy(S.fan.after.p50[N.crunchDay])} r="6" fill="var(--crit)" />}
+      {!resolved && !before && <circle cx={px} cy={fy(S.fan.after.p50[N.crunchDay])} r="6" fill="var(--cherry)" />}
       {[0, 200, 400, 600].map((v) => (
         <text key={v} x="42" y={fy(v) + 4} textAnchor="end" className="owner-ch-axis">{v === 0 ? "0" : `${v}M`}</text>
       ))}
@@ -263,7 +268,7 @@ export function OwnerView() {
   const lang = useLang();
   const c = COPY[lang];
   const intro = usePref("intro");
-  const { approval } = useDesk();
+  const { approval, receipt } = useDesk();
   const [why, setWhy] = useState(false);
   const resolved = approval === "approved";
   const rejected = approval === "rejected";
@@ -274,18 +279,6 @@ export function OwnerView() {
 
   return (
     <div className="owner">
-      {intro === "new" && (
-        <section className="owner-intro" aria-labelledby="owner-intro-t">
-          <h2 id="owner-intro-t">{c.intro.title}</h2>
-          <ol>
-            {c.intro.steps.map(([t, d], i) => (
-              <li key={t}><span className="owner-n">{i + 1}</span><b>{t}</b><span>{d}</span></li>
-            ))}
-          </ol>
-          <button className="btn btn-primary" type="button" onClick={() => setPref("intro", "seen")}>{c.intro.ok}</button>
-        </section>
-      )}
-
       <header className="owner-greet">
         <span className="owner-eyebrow">{c.today}</span>
         <h1>{c.hello.title}</h1>
@@ -300,6 +293,18 @@ export function OwnerView() {
             <span>{head.sub}</span>
           </div>
           <CloseButton onClick={() => setDismissed(alertId)} />
+        </section>
+      )}
+
+      {intro === "new" && (
+        <section className="owner-intro" aria-labelledby="owner-intro-t">
+          <h2 id="owner-intro-t">{c.intro.title}</h2>
+          <ol>
+            {c.intro.steps.map(([t, d], i) => (
+              <li key={t}><span className="owner-n">{i + 1}</span><span><b>{t}{lang === "zh" ? "：" : "."}</b> {d}</span></li>
+            ))}
+          </ol>
+          <button className="btn btn-secondary btn-sm" type="button" onClick={() => setPref("intro", "seen")}>{c.intro.ok}</button>
         </section>
       )}
 
@@ -351,6 +356,7 @@ export function OwnerView() {
               </div>
               <p className="owner-save">{c.rec.save} <span>({N.savingsPct})</span></p>
               <p className="owner-hint">{c.rec.safe}</p>
+              <p className="owner-hint">{c.rec.passport}</p>
               <Link className="btn btn-cherry owner-cta" href="/approvals">{c.rec.approve}</Link>
               <div className="owner-actions">
                 <button className="btn btn-ghost btn-sm" type="button" aria-expanded={why} onClick={() => setWhy((w) => !w)}>{c.rec.why}</button>
@@ -363,7 +369,7 @@ export function OwnerView() {
           <section className="card owner-card" data-guide="home-agent">
             <h2 className="owner-h">{c.agent.title}</h2>
             <ul className="owner-log">
-              {[...c.agent.items, ...(resolved ? [["10:16", c.done.title] as [string, string]] : [])]
+              {[...c.agent.items, ...(resolved ? [[receipt.time, c.done.title] as [string, string]] : [])]
                 .sort((a, b) => a[0].localeCompare(b[0]))
                 .map(([t, s]) => <li key={t}><span className="num muted">{t}</span><span>{s}</span></li>)}
             </ul>

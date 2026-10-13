@@ -10,6 +10,7 @@ import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteNav } from "@/components/site-nav";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
+import { N, clpM, longDate } from "@/lib/scenario";
 
 const L = {
   deskH: { en: "One agent. The whole treasury desk.", es: "Un agente. Toda la tesorería.", zh: "一个代理，掌管整个资金台。" },
@@ -27,29 +28,42 @@ const L = {
   },
   secH: { en: "An agent that can't be talked into moving your money.", es: "Un agente al que nadie puede convencer de mover tu dinero.", zh: "任何人都无法诱使它动用您的资金。" },
   benchH: { en: "Measured, not promised.", es: "Medido, no prometido.", zh: "实测结果，而非承诺。" },
-  benchNote: { en: "NanFeng-Bench · 50 synthetic exporters · red-team suite of 43 attacks", es: "NanFeng-Bench · 50 exportadoras sintéticas · red team de 43 ataques", zh: "NanFeng-Bench · 50家模拟出口企业 · 43项红队攻击" },
+  benchNote: { en: `NanFeng-Bench · ${N.benchCases} synthetic exporters · red-team suite of ${N.rtAttacks} attacks`, es: `NanFeng-Bench · ${N.benchCases} exportadoras sintéticas · red team de ${N.rtAttacks} ataques`, zh: `NanFeng-Bench · ${N.benchCases}家模拟出口企业 · ${N.rtAttacks}项红队攻击` },
   bench1: { en: "Benchmark cases solved", es: "Casos del benchmark resueltos", zh: "基准测试案例全部通过" },
-  bench2: { en: "Average financing cost vs default bank loan", es: "Costo financiero promedio vs crédito bancario", zh: "平均融资成本（对比银行贷款）" },
-  bench3: { en: "Red-team attacks stopped (4/43 before)", es: "Ataques del red team frenados (4/43 antes)", zh: "红队攻击拦截数（之前为4/43）" },
+  bench2: {
+    en: `Average financing cost vs the default bank loan, across the benchmark cases that needed a loan (Cherry Crisis alone: −${N.savingsPct})`,
+    es: `Costo financiero promedio vs el crédito bancario, en los casos del benchmark que necesitaban financiamiento (solo Cherry Crisis: −${N.savingsPct})`,
+    zh: `需要融资的基准案例中，平均融资成本对比银行贷款（仅樱桃危机：−${N.savingsPct}）`,
+  },
+  bench3: {
+    en: `Red-team attacks stopped (${N.rtStoppedBefore}/${N.rtAttacks} before the guard)`,
+    es: `Ataques del red team frenados (${N.rtStoppedBefore}/${N.rtAttacks} antes de la protección)`,
+    zh: `红队攻击拦截数（防护前为${N.rtStoppedBefore}/${N.rtAttacks}）`,
+  },
+  crisisKicker: { en: "Live case · cherries from Chile, buyer in Shanghai", es: "Caso real · cerezas de Chile, cliente en Shanghái", zh: "真实案例 · 智利樱桃，上海买家" },
+  crisisRisk: { en: "chance cash runs out", es: "de quedarse sin caja", zh: "现金耗尽概率" },
+  crisisDays: { en: "days to the harvest payroll", es: "días para los sueldos de la cosecha", zh: "天后发放采收工资" },
+  crisisGap: { en: "gap to cover", es: "brecha por cubrir", zh: "需补足缺口" },
+  crisisSee: { en: "Watch it unfold", es: "Mira cómo se resuelve", zh: "观看全过程" },
   teamH: { en: "Built at Universidad del Desarrollo, Chile.", es: "Hecho en la Universidad del Desarrollo, Chile.", zh: "由智利发展大学团队打造。" },
   sandbox: { en: "NANFENG 南风 · SOUTH WIND · SANDBOX DEMO — NO REAL FUNDS MOVE", es: "NANFENG 南风 · VIENTO DEL SUR · DEMO SANDBOX — NO SE MUEVE DINERO REAL", zh: "南风 NANFENG · 沙盒演示 — 不涉及真实资金" },
 } satisfies Record<string, Record<Lang, string>>;
 
 const HOW: { n: Record<Lang, string>; h: Record<Lang, string>; p: Record<Lang, string>; href: string; link: Record<Lang, string> }[] = [
   {
-    n: { en: "01 · PREDICT", es: "01 · PREDECIR", zh: "01 · 预测" },
+    n: { en: "Predict", es: "Predecir", zh: "预测" },
     h: { en: "Monte Carlo cash forecast", es: "Pronóstico de caja Monte Carlo", zh: "蒙特卡洛现金预测" },
     p: { en: "P10 / P50 / P90 over 90 days, refreshed whenever an email, invoice or bank statement changes the picture.", es: "P10 / P50 / P90 a 90 días, recalculado cada vez que un correo, una factura o una cartola cambia el panorama.", zh: "90天 P10 / P50 / P90 预测，每当邮件、发票或银行流水改变情况时自动更新。" },
-    href: "/cockpit", link: { en: "Cash Cockpit", es: "Inicio", zh: "首页" },
+    href: "/cockpit", link: { en: "Home", es: "Inicio", zh: "首页" },
   },
   {
-    n: { en: "02 · DECIDE", es: "02 · DECIDIR", zh: "02 · 决策" },
+    n: { en: "Decide", es: "Decidir", zh: "决策" },
     h: { en: "Optimizer picks the cheapest financing", es: "El optimizador elige el financiamiento más barato", zh: "优化器选出成本最低的融资" },
     p: { en: "Pre-export loans, factoring, FOGAPE guarantees, credit lines and CNY forwards, ranked by cost, timing and gap coverage.", es: "Créditos de pre-exportación, factoring, garantías FOGAPE, líneas de crédito y forwards en CNY, ordenados por costo, plazo y cobertura de la brecha.", zh: "出口前融资、保理、FOGAPE 担保、信用额度和人民币远期，按成本、时效和缺口覆盖排序。" },
     href: "/financing", link: { en: "Financing", es: "Financiamiento", zh: "融资" },
   },
   {
-    n: { en: "03 · ACT", es: "03 · ACTUAR", zh: "03 · 执行" },
+    n: { en: "Act", es: "Actuar", zh: "执行" },
     h: { en: "Executes with owner approval", es: "Ejecuta con la aprobación del dueño", zh: "经企业主批准后执行" },
     p: { en: "Tiered permissions; a six-digit code for anything that moves money; every step written to an audit chain.", es: "Permisos por niveles; un código de seis dígitos para todo lo que mueve plata; cada paso queda en una cadena de auditoría.", zh: "分级权限；任何资金操作都需六位验证码；每一步都写入审计链。" },
     href: "/approvals", link: { en: "Approvals", es: "Aprobaciones", zh: "审批" },
@@ -84,9 +98,19 @@ export default function LandingPage() {
             </h1>
             <p className="lead rise rise-2" style={{ textAlign: "center", maxWidth: 640, margin: "-8px auto 0" }}>{t("lp.hero.sub")}</p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 12 }}>
-              <Link className="pill-cherry" href="/demo">{t("lp.cta.demo")}</Link>
+              <Link className="pill-cherry" href="/demo?play=1">{t("lp.cta.demo")}</Link>
               <a className="pill-out" href="#how">{t("lp.cta.how")}</a>
             </div>
+            <a className="crisis-strip rise rise-2" href="#story">
+              <span className="crisis-route" aria-hidden="true"><i className="crisis-dot" />Santiago<span className="crisis-arc" />Shanghai</span>
+              <span className="crisis-kicker">{l("crisisKicker")}</span>
+              <span className="crisis-stats">
+                <span><b className="num crisis-hot">{N.pNeg}</b>{l("crisisRisk")}</span>
+                <span><b className="num">{N.crunchDay}</b>{l("crisisDays")} · {longDate(N.crunchDate, lang)}</span>
+                <span><b className="num">{clpM(N.gapClp, lang)}</b>{l("crisisGap")}</span>
+              </span>
+              <span className="crisis-see">{l("crisisSee")} →</span>
+            </a>
             <a className="scroll-hint" href="#story" aria-label={lang === "es" ? "Bajar a la historia" : lang === "zh" ? "查看故事" : "Scroll to the story"}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
             </a>
@@ -111,7 +135,7 @@ export default function LandingPage() {
       </section>
 
       <section id="how" className="lp-section alt"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 48 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><span className="eyebrow" style={{ textAlign: "center", color: "var(--brass)" }}>{t("lp.nav.how")}</span><h2 className="lp-h">{l("howH")}</h2></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h">{l("howH")}</h2></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 20 }}>
           {HOW.map((h) => (
             <div key={h.href} className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">{h.n[lang]}</span><h3 className="h2" style={{ fontSize: 24 }}>{h.h[lang]}</h3><p className="muted" style={{ margin: 0 }}>{h.p[lang]}</p><Link className="mono small" href={h.href}>{h.link[lang]} →</Link></div></div>
@@ -120,26 +144,25 @@ export default function LandingPage() {
       </div></section>
 
       <section id="channels" className="lp-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><span className="eyebrow" style={{ textAlign: "center", color: "var(--brass)" }}>{t("lp.nav.channels")}</span><h2 className="lp-h">{l("chanH")}</h2><p className="lp-sub">{l("chanSub")}</p></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h">{l("chanH")}</h2><p className="lp-sub">{l("chanSub")}</p></div>
         <ChannelsNetwork />
       </div></section>
 
       <section id="security" className="lp-section alt security-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 36 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><span className="eyebrow" style={{ textAlign: "center", color: "var(--brass)" }}>{t("lp.nav.security")}</span><h2 className="lp-h">{l("secH")}</h2></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h">{l("secH")}</h2></div>
         <SecurityControl />
       </div></section>
 
       <section className="lp-section alt metrics-section"><div className="wrap" style={{ position: "relative", display: "flex", flexDirection: "column", gap: 28 }}>
         <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}><h2 className="lp-h" style={{ color: "var(--text)" }}>{l("benchH")}</h2><span className="badge" style={{ background: "transparent" }}>{l("benchNote")}</span></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: 0, borderTop: "1px solid var(--line)" }}>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>50/50</span><span className="muted">{l("bench1")}</span></div>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--accent)", fontSize: 64 }}>−41%</span><span className="muted">{l("bench2")}</span></div>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>41/43</span><span className="muted">{l("bench3")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>{N.benchSolved}/{N.benchCases}</span><span className="muted">{l("bench1")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--accent)", fontSize: 64 }}>−{N.benchSavingsPct}</span><span className="muted" style={{ textAlign: "center", maxWidth: 320 }}>{l("bench2")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>{N.rtStopped}/{N.rtAttacks}</span><span className="muted">{l("bench3")}</span></div>
         </div>
       </div></section>
 
       <section id="team" className="lp-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center" }}>
-        <span className="eyebrow" style={{ color: "var(--brass)" }}>{t("lp.nav.team")}</span>
         <h2 className="lp-h" data-reveal style={{ fontSize: 34 }}>{l("teamH")}</h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
           {TEAM.map(([n, role]) => <span key={n} data-reveal className="chip" style={{ borderRadius: 999, padding: "10px 22px", fontSize: 14, display: "inline-flex", gap: 8, alignItems: "baseline" }}><b>{n}</b><span className="muted small">{role[lang]}</span></span>)}

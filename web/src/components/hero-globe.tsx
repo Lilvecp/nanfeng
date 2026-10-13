@@ -108,6 +108,8 @@ const STEPS: Record<Lang, Step[]> = {
   ],
 };
 
+const PAUSE: Record<Lang, [string, string]> = { en: ["Pause the story", "Play the story"], es: ["Pausar la historia", "Reproducir la historia"], zh: ["暂停故事", "播放故事"] };
+
 // Matte globe: no specular glare on the night texture. Created lazily in the browser
 // (three.js mints random ids, which must not run during the server prerender).
 let matte: MeshPhongMaterial | undefined;
@@ -127,6 +129,8 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
   const [generation, setGeneration] = useState(0);
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState(0);
+  // WCAG 2.2.2: the story loops, so the viewer can stop it (and the callout is only announced then).
+  const [paused, setPaused] = useState(false);
   const [still] = useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const lang = useLang();
 
@@ -191,7 +195,7 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
       return () => cancelAnimationFrame(id);
     }
 
-    if (!visible) {
+    if (!visible || paused) {
       // Waits over Shanghai until the globe scrolls into view; pauses where it was otherwise.
       if (!started.current) look(0);
       const id = requestAnimationFrame(() => render(story(clock.current)));
@@ -216,7 +220,7 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [ready, visible, still]);
+  }, [ready, visible, still, paused]);
 
   const shown = still ? 1 : phase;
   const step = STEPS[lang][shown];
@@ -293,10 +297,10 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
           <span className="tag fixed">+USD {(N.loanUsd / 1000).toFixed(1)}K · PAE</span>
         </div>
       </div>
-      <aside className={`globe-callout tone-${STEP_TONE[shown]}`} aria-live="polite">
+      <aside className={`globe-callout tone-${STEP_TONE[shown]}`} aria-live={paused ? "polite" : "off"}>
         <div key={`${shown}-${lang}`} className="globe-callout-body">
           <span className="globe-callout-step">{String(shown + 1).padStart(2, "0")} / 05</span>
-          <h3>{step.title}</h3>
+          <h2>{step.title}</h2>
           <p>{step.body}</p>
           <span className="globe-callout-stat">{step.stat}</span>
         </div>
@@ -304,6 +308,15 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
           {STEPS[lang].map((st, i) => (
             <button key={i} type="button" className={i === shown ? "on" : undefined} aria-label={st.title} aria-current={i === shown ? "step" : undefined} onClick={() => jump(i)} disabled={still} />
           ))}
+          {!still && (
+            <button type="button" className="globe-pause" aria-pressed={paused} aria-label={PAUSE[lang][paused ? 1 : 0]} title={PAUSE[lang][paused ? 1 : 0]} onClick={() => setPaused((p) => !p)}>
+              {paused ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+              ) : (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
+              )}
+            </button>
+          )}
         </div>
       </aside>
     </div>

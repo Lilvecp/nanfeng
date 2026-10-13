@@ -106,20 +106,21 @@ def build_levers(company: Company, catalog: Catalog, res: ForecastResult, sample
                     meta = {"face_clp": face_clp, "days_charged": max(exp_day - d, p.min_days_charged)}
                     if p.get("recourse"):
                         meta["recourse_day"] = exp_day + p.get("recourse_days", 30)
-                    levers.append(Lever(f"{p.id}:{r.id}:d{d}", p, p.kind, d, 1.0, cost, "fraction", r.id, j, meta))
+                    ub = min(1.0, p.max_ticket() / (face_clp * p.advance_rate))  # one operation per invoice
+                    levers.append(Lever(f"{p.id}:{r.id}:d{d}", p, p.kind, d, ub, cost, "fraction", r.id, j, meta))
         elif p.kind == "loan":
             cur = p.currencies[0]
             k = fx0[cur]  # CLP per unit of the loan currency
             for d in days:
                 for term in p.terms():  # the lender offers several terms: the MILP picks the cheapest that works
-                    levers.append(Lever(f"{p.id}:d{d}:t{term}", p, "loan", d, float(p.max_amount_clp) / k,
+                    levers.append(Lever(f"{p.id}:d{d}:t{term}", p, "loan", d, min(float(p.max_amount_clp), p.max_ticket()) / k,
                                         catalog.loan_unit_cost(p, term) * k, cur,
                                         meta={"clp_per_unit": k, "currency": cur, "term_days": term}))
         elif p.kind == "confirming":
             for j, x in enumerate(company.payables):
                 d = company.day(x.date)
                 if x.confirming_eligible and x.currency == "CLP" and lead <= d <= T:
-                    levers.append(Lever(f"{p.id}:{x.id}", p, "confirming", d, 1.0,
+                    levers.append(Lever(f"{p.id}:{x.id}", p, "confirming", d, min(1.0, p.max_ticket() / x.amount),
                                         x.amount * catalog.confirming_unit_cost(p), "fraction", x.id, j,
                                         {"amount_clp": x.amount}))
         elif p.kind == "forward":

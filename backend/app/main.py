@@ -5,12 +5,12 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import audit, seed
+from . import audit, autoreset, seed
 from .bank import BankError
-from .config import DEMO_OWNER_PASSWORD, get_settings
+from .config import DEMO_OWNER_PASSWORD, PLACEHOLDER_AGENT_TOKEN, get_settings
 from .db import SessionLocal
 from .events import broker
-from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, demo, privacy, quant, security
+from .routers import agent, approvals, audit as audit_router, auth as auth_router, bank as bank_router, demo, privacy, quant, security, registry as registry_router
 
 VERSION = "0.1.0"
 
@@ -20,13 +20,18 @@ async def lifespan(app: FastAPI):
     s = get_settings()
     if not s.demo and s.owner_password == DEMO_OWNER_PASSWORD:
         raise RuntimeError("NANFENG_DEMO=false needs its own NANFENG_OWNER_PASSWORD (the demo one is public)")
+    if s.agent_token == PLACEHOLDER_AGENT_TOKEN:
+        raise RuntimeError("NANFENG_AGENT_TOKEN is the public placeholder from .env.example: set a long random one")
     broker.bind_loop(asyncio.get_running_loop())
     seed.create_schema()
     if get_settings().seed_on_startup:
         with SessionLocal() as db:
             seed.seed(db)
             seed.seed_security(db)
+    idle_reset = asyncio.create_task(autoreset.run_forever()) if s.demo and s.sandbox_idle_reset_s > 0 else None
     yield
+    if idle_reset:
+        idle_reset.cancel()
 
 
 app = FastAPI(
@@ -58,7 +63,7 @@ def health():
 
 
 for r in (auth_router.router, demo.router, bank_router.router, approvals.router, audit_router.router, agent.router, quant.router, security.router,
-          privacy.router):
+          privacy.router, registry_router.router):
     app.include_router(r)
 
 

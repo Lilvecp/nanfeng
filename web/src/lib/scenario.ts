@@ -24,8 +24,23 @@ export function clpM(v: number, lang: Lang = "en") {
   return `${sign}CLP ${num(a / 1e6, lang, a >= 1e8 ? 0 : 1)}M`;
 }
 
-/** Full CLP for tickers and tables: "CLP $176.000.000" (Chilean grouping in every language). */
-export const clpFull = (v: number) => `CLP $${Math.round(v).toLocaleString("es-CL")}`;
+/** Full CLP for tables, grouped the way the reader writes numbers: "CLP 176,000,000" · "CLP $176.000.000" · "176,000,000 智利比索". */
+export function clpFull(v: number, lang: Lang = "en") {
+  const n = num(Math.round(Math.abs(v)), lang);
+  const sign = v < 0 ? "−" : "";
+  if (lang === "zh") return `${sign}${n} 智利比索`;
+  return lang === "es" ? `${sign}CLP $${n}` : `${sign}CLP ${n}`;
+}
+
+/** Cash in the top bar: one compact format everywhere, plus yuan in the 中文 view. */
+export const cashTick = (v: number, lang: Lang = "en") => (lang === "zh" ? `${clpM(v, "zh")} · ${cny(v)}` : clpM(v, lang));
+
+/** An amount in its own currency, for mixed tables: "CNY 450,000" · "CNY 450.000" · "450,000 元". */
+export function money(v: number, currency: "CLP" | "USD" | "CNY", lang: Lang = "en") {
+  if (currency === "CLP") return clpFull(v, lang);
+  if (currency === "USD") return usd(v, lang);
+  return lang === "zh" ? `${num(v, "zh")} 元` : `CNY ${num(v, lang)}`;
+}
 
 /** "USD 180,000" · "USD 180.000" · "180,000 美元" */
 export function usd(v: number, lang: Lang = "en") {
@@ -49,7 +64,8 @@ export function longDate(iso: string, lang: Lang = "en") {
 /** Pesos the way an owner says them: "CLP 238 million" · "$238 millones" · "2.38亿智利比索". */
 export function pesos(v: number, lang: Lang = "en") {
   const m = Math.abs(v) / 1e6;
-  const n = m < 10 ? num(m, lang, 1) : num(Math.round(m), lang);
+  // one decimal below 100 million, like clpM, so the same amount never reads 16.7 here and 17 there
+  const n = m < 100 ? num(m, lang, 1) : num(Math.round(m), lang);
   if (lang === "es") return `$${n} millones`;
   if (lang === "zh") return Math.abs(v) >= 1e8 ? `${num(Math.abs(v) / 1e8, "zh", 2)}亿智利比索` : `${num(Math.round(Math.abs(v) / 1e4), "zh")}万智利比索`;
   return `CLP ${n} million`;
@@ -133,4 +149,12 @@ export const N = {
   lender: PLAN.lender.replace(" (fictional)", ""),
   overdueUsd: S.event.amount,
   delayDays: S.event.delay_days,
+  gapClp: S.need.amount_clp, // what has to be covered on payroll day
+  // NanFeng-Bench and the red team, from their result files (npm run sync:scenario).
+  benchCases: S.bench.cases,
+  benchSolved: S.bench.solved,
+  benchSavingsPct: pct(S.bench.meanSavingsPct), // average over the benchmark cases, not the Cherry Crisis
+  rtAttacks: S.redTeam.attacks,
+  rtStopped: S.redTeam.stoppedAfter,
+  rtStoppedBefore: S.redTeam.stoppedBefore,
 };

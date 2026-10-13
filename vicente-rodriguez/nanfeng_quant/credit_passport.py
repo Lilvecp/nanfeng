@@ -2,8 +2,12 @@
 
 A transparent scorecard (no black box): each factor maps to 0-100 with fixed linear bands,
 and the score is the weighted sum. Every factor reports its raw value, sub-score, weight and
-points, so a lender (or a judge) can recompute it by hand. Thresholds are initial expert
-choices to calibrate against lender data.
+points, so a lender (or a judge) can recompute it by hand.
+
+The weights and bands are HEURISTIC (expert choices, v1), not fitted: calibrating them needs
+repayment or default outcomes of real SMEs, which a hackathon does not have (our companies are
+synthetic). Every passport says so in `method`. `weight_robustness` checks that the conclusions we
+show (the plan improves the score) do not depend on the chosen weights.
 """
 from __future__ import annotations
 
@@ -28,6 +32,8 @@ FACTORS = {
     "fx_exposure": (0.10, 0.30, 1.00, "Share of expected inflows in foreign currency"),
 }
 GRADES = [(80, "A"), (65, "B"), (50, "C"), (35, "D"), (0, "E")]
+METHOD = ("Heuristic scorecard v1: expert weights and linear bands, not fitted to repayment data. "
+          "To calibrate with a lender's portfolio (logistic regression of default on the six factors).")
 
 
 def _band(value: float, best: float, worst: float) -> float:
@@ -92,6 +98,7 @@ def credit_passport(company: Company, res: ForecastResult, consent: bool = False
         "factors": factors,
         "summary": (f"Score {score:.0f}/100 (grade {grade}). Weakest factor: "
                     f"{weakest['description'].lower()} = {weakest['value']}."),
+        "method": METHOD,
         "consent": consent,
         "shareable": consent,
         "synthetic": company.synthetic,
@@ -100,4 +107,32 @@ def credit_passport(company: Company, res: ForecastResult, consent: bool = False
         payload = json.dumps({k: out[k] for k in ("company_id", "as_of", "score", "grade", "factors")}, sort_keys=True)
         out["digest_sha256"] = hashlib.sha256(payload.encode()).hexdigest()  # can be anchored on-chain
         out["issued_at"] = dt.date.today().isoformat()
+    return out
+
+
+def weight_robustness(before: dict[str, Any], after: dict[str, Any], n: int = 10_000,
+                      seed: int = 0) -> dict[str, Any]:
+    """How much the before/after comparison depends on the heuristic weights.
+
+    Sub-scores do not depend on the weights, so the score under any weights w is sum(w_i * sub_i).
+    Two families of weights: "perturbed" (Dirichlet centred on v1, each weight typically within about
+    +-50% of its value) and "any" (uniform over every possible weighting of the six factors)."""
+    rng = np.random.default_rng(seed)
+    keys = list(FACTORS)
+    v1 = np.array([FACTORS[k][0] for k in keys])
+    sub_b = np.array([next(f["sub_score"] for f in before["factors"] if f["factor"] == k) for k in keys])
+    sub_a = np.array([next(f["sub_score"] for f in after["factors"] if f["factor"] == k) for k in keys])
+
+    def grade(x: np.ndarray) -> np.ndarray:
+        return np.select([x >= t for t, _ in GRADES], [g for _, g in GRADES], "E")
+
+    out: dict[str, Any] = {"n": n, "seed": seed, "v1": {"before": round(float(v1 @ sub_b), 1), "after": round(float(v1 @ sub_a), 1)}}
+    for name, w in (("perturbed", rng.dirichlet(v1 * 20, n)), ("any", rng.dirichlet(np.ones(len(keys)), n))):
+        b, a = w @ sub_b, w @ sub_a
+        out[name] = {
+            "after_better_share": round(float((a > b).mean()), 4),
+            "before_p5_p95": [round(float(np.percentile(b, 5)), 1), round(float(np.percentile(b, 95)), 1)],
+            "after_p5_p95": [round(float(np.percentile(a, 5)), 1), round(float(np.percentile(a, 95)), 1)],
+            "grade_up_share": round(float((grade(a) < grade(b)).mean()), 4),  # "A" < "B": a better letter
+        }
     return out

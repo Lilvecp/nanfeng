@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Topbar } from "@/components/topbar";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
-import { S, clpFull, clpM, pct, presetName } from "@/lib/scenario";
+import { S, cashTick, clpM, pct, presetName } from "@/lib/scenario";
 
 // Every preset is a full run of the quant engine (10,000-path Monte Carlo + MILP), precomputed so
 // the lab answers instantly and offline. Free-form what-ifs go to /quant once the API is connected.
@@ -58,7 +58,7 @@ export default function ScenarioPage() {
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{clpFull(S.openingCashClp)}</span></div>
+        <div className="tick"><span className="l">{t("tick.cash")}</span><span className="v">{cashTick(S.openingCashClp, lang)}</span></div>
         <div className="tick"><span className="l">{x.mode}</span><span className="v" style={{ color: "var(--warn)" }}>{x.sim}</span></div>
       </Topbar>
 

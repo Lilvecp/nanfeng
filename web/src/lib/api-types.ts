@@ -441,7 +441,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Anchor the Merkle root of every entry since the last anchor */
+        /**
+         * Anchor the Merkle root of every entry since the last anchor
+         * @description Agent or signed-in owner only: each anchor writes an `audit.anchored` entry, so an open route let
+         *     anyone send unlimited transactions from the anchoring wallet.
+         */
         post: operations["anchor_audit_anchor_post"];
         delete?: never;
         options?: never;
@@ -632,6 +636,57 @@ export interface paths {
         put?: never;
         /** Replace personal data with placeholders before an LLM call */
         post: operations["mask_privacy_mask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/registry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Registry backend, contract and chain */
+        get: operations["info_registry_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/registry/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every registered invoice */
+        get: operations["invoices_registry_invoices_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/registry/invoices/{receivable_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fingerprint of an invoice and whether it is registered (here and on-chain) */
+        get: operations["invoice_registry_invoices__receivable_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1833,7 +1888,9 @@ export interface operations {
     anchor_audit_anchor_post: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                authorization?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1846,6 +1903,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnchorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2233,6 +2299,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MaskOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    info_registry_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    invoices_registry_invoices_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    invoice_registry_invoices__receivable_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                receivable_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

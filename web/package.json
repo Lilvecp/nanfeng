@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "api:types": "openapi-typescript ../contracts/openapi.json -o src/lib/api-types.ts",
-    "sync:scenario": "node scripts/sync-scenario.mjs"
+    "sync:scenario": "node scripts/sync-scenario.mjs",
+    "voice:briefing": "node scripts/voice-briefing.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

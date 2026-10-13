@@ -7,6 +7,7 @@ API gateway for the cockpit and the agent. FastAPI + Postgres (SQLite locally). 
 | Sandbox Bank: accounts, transactions, receivables, payees, lenders, FX, JSONL log export | `/bank` | r3-04 |
 | Approval Center: policy tier, OTP approval, reject with reason, kill switch | `/approvals`, `/policy` | r3-03 (+ Andy) |
 | Audit log: hash chain, verify, Merkle anchors, inclusion proofs | `/audit` | r3-05 |
+| Invoice registry against double financing (local or on-chain contract) | `/registry` | r3-06 |
 | Agent event stream (SSE) for Mission Control + publish endpoint for the agent | `/agent/events` | r3-03 |
 | Vicente's quant engine, same paths as his contract, plus background plan jobs | `/quant` | r3-02 |
 
@@ -42,6 +43,8 @@ Then reset the sandbox (`POST /bank/reset`, or delete `nanfeng.db` locally).
 ## Owner sign-in (threat model F1)
 
 Approve, reject, resend a code, the kill switch and `POST /bank/reset` are owner-only. The owner signs in with `POST /auth/login {password}` and sends `Authorization: Bearer <token>` (an HMAC-signed session, 8 h, ended by `POST /auth/logout`). Failed sign-ins are rate limited (5 per 5 min per client). The agent token is never accepted as the owner (403).
+
+Agent routes (`POST /approvals` without an owner session, `/security/*`, `/privacy/mask`, `/agent/events`, `POST /audit/entries`) need `Authorization: Bearer $NANFENG_AGENT_TOKEN`, the same value in the backend and the agent. With no token configured they refuse every caller (401 `agent_token_not_configured`), and the `change-me` placeholder from `.env.example` is refused at startup (threat model F6). For local development without the agent, `NANFENG_ALLOW_OPEN_AGENT=true` accepts any caller as the agent.
 
 - Kill switch: the owner or the agent may turn it **on**; turning it **off** needs the owner's session **and** a one-time code (`otp`; in SMS mode ask for one with `POST /policy/kill-switch/otp`). It is stored in the database (`app_state`), so a restart, a deploy or a sleeping host never turns it off.
 - `POST /bank/reset` exists only with `NANFENG_DEMO=true`.
@@ -106,6 +109,17 @@ Non-clean verdicts are hash-chained (`security.flagged`, `security.attack_blocke
 - If the chain refuses (no funds, RPC down) the approval still executes, `audit.anchor_failed` goes out on SSE and the next anchor covers those entries.
 - `local` keeps roots in the DB only (tests, offline demo). FISCO BCOS would be one more backend in `app/anchoring.py`.
 
+## Invoice registry against double financing (r3-06)
+
+Before the bank pays out on an invoice (factoring, letter-of-credit discounting), it registers the invoice's fingerprint, `keccak256("NANFENG-INVOICE-V1|<issuer tax id>|110|<folio>")` (110 = SII electronic export invoice). Only the hash is stored: no amount, customer or name.
+
+- `NANFENG_REGISTRY_BACKEND=local` (default): fingerprints in the `invoice_registrations` table, next to the `financed_by` guard.
+- `NANFENG_REGISTRY_BACKEND=evm`: also in the `InvoiceRegistry` contract (`chain/InvoiceRegistry.sol`, compiled ABI and bytecode in `app/data/invoice_registry.json`). The bank reads the registry first (`lookup`, an `eth_call`), so an invoice another financier already registered is refused with `already_financed` before any money moves; then it sends `register`, which reverts for anyone who tries the same invoice again. If the chain cannot be read the factoring is refused (`registry_unavailable`): no check, no payout. `NANFENG_REGISTRY_WAIT_RECEIPT_S=30` also waits for the registration to be mined before paying out.
+- Deploy once with the anchoring wallet: `python chain/deploy.py`, then set `NANFENG_INVOICE_REGISTRY_ADDRESS`. Re-compile after changing the contract with `python chain/compile.py` (needs `py-solc-x`; EVM version london, so it also runs on older EVM chains such as FISCO BCOS).
+- `GET /registry` (backend, contract, chain id) · `GET /registry/invoices` · `GET /registry/invoices/{id}` (fingerprint, our record and the on-chain entry, `valid` when they match). The factoring result carries `registry` (fingerprint, tx hash, explorer link).
+- Demo builds add the sandbox's genesis hash to the identity, so Demo Mode's reset starts with a clean registry; a real deploy (`NANFENG_DEMO=false`) uses the bare invoice identity, which any financier holding the invoice can recompute.
+- Scope: the PAE loan in the Cherry Crisis plan is not tied to one invoice in the sandbox, so it is not registered; factoring and LC discounting are.
+
 ## For the rest of the team
 
 - **Renato (agent):** publish each step with `POST /agent/events` (`{type: "agent.step", data: {tool, tier, model, cost_usd, status}}`) and propose actions with `POST /approvals`. Send `Authorization: Bearer $NANFENG_AGENT_TOKEN`.
@@ -113,8 +127,19 @@ Non-clean verdicts are hash-chained (`security.flagged`, `security.attack_blocke
 - **Vicente (quant):** your API is proxied unchanged under `/quant`. For the plan, the front calls `POST /quant/plan/jobs` and gets `quant.plan.*` events.
 - **Front:** one origin for everything; listen to `GET /agent/events` (SSE, supports `Last-Event-ID`) or poll `/agent/events/recent`.
 
+## Security checklist for a public deploy (Andy)
+
+| Variable | Why |
+|---|---|
+| `NANFENG_AGENT_TOKEN` | Long random value, **the same in the backend and the agent service**. Empty = agent routes answer 401 and the agent stops; `change-me` = the backend refuses to start (threat model F6). |
+| `NANFENG_SESSION_SECRET` | Fixed random value. Empty = a new one per process, so every restart signs the owner out. |
+| `NANFENG_OTP_MODE=sms` + `NANFENG_OTP_SECRET` + `ZAVU_API_KEY` + `NANFENG_OWNER_PHONE` | Per-approval codes by SMS instead of the shared demo code (threat model F2). For the video, sandbox mode is fine. |
+| `NANFENG_DEMO` / `NANFENG_OWNER_PASSWORD` | `NANFENG_DEMO=true` shows the demo password on the sign-in screen and enables `POST /bank/reset` (owner only). With `false`, set your own password: the demo one is refused at startup. |
+| `NANFENG_ALLOW_OPEN_AGENT` | Never on a deploy (local development only). |
+
+After the deploy: `cd andy-villarroel/evidence && python build.py --url <backend URL> --out out-live` exports deliverable 06 and re-checks the chain without the backend's code.
+
 ## Not done yet
 
-- FISCO BCOS backend (Sepolia works today). The on-chain invoice registry (r3-06) is still off-chain only (`financed_by`).
+- FISCO BCOS backend (Sepolia works today for anchoring and the invoice registry). The registry contract is not deployed on Sepolia yet: run `python chain/deploy.py` with the funded anchoring wallet.
 - Single instance: SSE history and plan jobs live in memory (the kill switch is in the database).
-- `POST /bank/reset` is open so Demo Mode can call it; lock it down before a public deploy.

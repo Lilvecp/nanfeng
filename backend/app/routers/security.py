@@ -3,9 +3,11 @@
 Renato's ingestion calls /security/scan on the raw text of every document before any LLM reads it,
 and /security/check-payee on the extracted fields before the planner sees them. Anything that is not
 clean is hash-chained in the audit log; a malicious document also alerts the owner on a channel
-different from the one it came in on.
+different from the one it came in on. A clean document leaves only its fingerprint (document.received:
+SHA-256 of the text, never the text), so every document the agent read is in the anchored chain too.
 """
 
+import hashlib
 import logging
 
 from fastapi import APIRouter, Depends
@@ -52,6 +54,13 @@ def _record(db: Session, doc_id: str, source: str, check: str, result: dict) -> 
 def scan(body: ScanIn, db: Session = Depends(get_db), _: str = Depends(require_agent)):
     result = guard.scan(body.ocr_text, body.text_layer)
     result.pop("payment_details")
+    if result["verdict"] == "clean":
+        entry = audit.append(db, "security", "document.received", {
+            "doc_id": body.doc_id, "source": body.source,
+            "sha256": hashlib.sha256(body.ocr_text.encode()).hexdigest(),
+            "text_layer_sha256": hashlib.sha256(body.text_layer.encode()).hexdigest() if body.text_layer else None,
+        })
+        return {"doc_id": body.doc_id, **result, "audit_seq": entry.seq}
     return {"doc_id": body.doc_id, **_record(db, body.doc_id, body.source, "scan", result)}
 
 

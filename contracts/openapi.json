@@ -1088,7 +1088,20 @@
           "audit"
         ],
         "summary": "Anchor the Merkle root of every entry since the last anchor",
+        "description": "Agent or signed-in owner only: each anchor writes an `audit.anchored` entry, so an open route let\nanyone send unlimited transactions from the anchoring wallet.",
         "operationId": "anchor_audit_anchor_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Authorization"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Successful Response",
@@ -1096,6 +1109,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AnchorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1618,6 +1641,84 @@
                 "schema": {
                   "$ref": "#/components/schemas/MaskOut"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registry": {
+      "get": {
+        "tags": [
+          "invoice-registry"
+        ],
+        "summary": "Registry backend, contract and chain",
+        "operationId": "info_registry_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registry/invoices": {
+      "get": {
+        "tags": [
+          "invoice-registry"
+        ],
+        "summary": "Every registered invoice",
+        "operationId": "invoices_registry_invoices_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registry/invoices/{receivable_id}": {
+      "get": {
+        "tags": [
+          "invoice-registry"
+        ],
+        "summary": "Fingerprint of an invoice and whether it is registered (here and on-chain)",
+        "operationId": "invoice_registry_invoices__receivable_id__get",
+        "parameters": [
+          {
+            "name": "receivable_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Receivable Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },

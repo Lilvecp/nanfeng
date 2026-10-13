@@ -64,14 +64,21 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 - Policy engine outside the LLM: L0 read · L1 notify · L2 pay within limits to allowlisted payees · **L3 new money or new payee = owner + OTP**. Kill switch.
 - Voice and the agent can never approve L3 (deepfake risk).
 - BEC: changed bank account + look-alike domain → block, call-back number, alert on another channel.
-- **Red team: 43 attacks, 4 stopped before → 41 after**; CI fails if it drops below 41.
+- **Red team: 43 attacks, 4 stopped before → 43/43 after**; CI fails if a single one gets through. The same document attacks also run through the agent: none moves money.
 - Audit log: hash chain + Merkle root anchored on-chain (Sepolia today; FISCO BCOS if Camilo lands it).
+- **Say (Andy, 1:00):** "We assume the AI will be fooled, so it never decides. A rules engine outside the model sets the level; new money or a new beneficiary waits for the owner's one-time code, and a cloned voice can never approve. At 08:47 a fake supplier invoice changed the bank account and hid an instruction: blocked, and the owner was told on another channel. We attacked our own system forty-three ways; all forty-three are stopped, and the build fails if one ever gets through. Every step is hashed and anchored on-chain, so nobody, not even us, can rewrite what happened."
 
-## 8 · Compliance
+## 8 · Compliance: built to be trusted with a company's money
 
-- PII masked before any LLM call; data minimisation; encryption.
-- Chile Ley 21.719 · China PIPL and cross-border transfer rules · CAC measures for generative AI · sanctions screening (simulated).
-- Content: `andy-villarroel/docs/privacy-compliance.md` (branch `andy`).
+| Chile | China | Every market |
+|---|---|---|
+| **Ley 21.719**: personal data masked before any AI model; every automated money decision is explained and reviewable; new debt or a new payee waits for the owner (L3) | **PIPL**: no profiling of individuals in China; no personal data exported out of China; only what the trade contract needs | **AML**: structuring detection + sanctions screening (synthetic list, real matching) |
+| Data minimisation: the AI that reads documents returns typed fields only | **CAC AI labelling**: every message to an importer says 由AI生成 (AI-generated) | **Double financing**: every invoice is registered before it is financed |
+
+- Security of the data: HTTPS only; one-time codes stored as HMAC, never in plain text; tamper-evident audit log anchored on-chain.
+- Say it plainly: sanctions list is synthetic; production loads OFAC / UN lists.
+- Source: [`andy-villarroel/privacy-compliance.md`](../andy-villarroel/privacy-compliance.md).
+- **Say (Andy, 0:30):** "NanFeng never lets the AI touch money or personal data directly. The AI proposes; deterministic rules decide; the owner approves with a one-time code; every step is hashed on-chain."
 
 ## 9 · One agent, every market's channel
 
@@ -82,7 +89,7 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 
 ## 10 · Results, business model, roadmap
 
-- **Results:** NanFeng-Bench 50/50 cases solved · −41% average financing cost vs the default bank loan · 41/43 attacks stopped.
+- **Results:** NanFeng-Bench 50/50 cases solved · −41% average financing cost vs the default bank loan · 43/43 attacks stopped.
 - **Business model (B2B2B):** banks and trade-finance fintechs license NanFeng for their SME exporters; license per active SME + success fee on financing originated (pricing to validate). See [business-model.md](business-model.md).
 - **Roadmap:** WeCom production channel · FISCO BCOS invoice registry against double financing · real lender APIs with a design partner · next corridor in APEC.
 - Close: "NanFeng doesn't advise. It acts — with your permission."
