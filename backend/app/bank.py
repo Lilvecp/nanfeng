@@ -4,6 +4,7 @@ Every operation moves balances, writes a transaction row, appends to the audit l
 an event, so the logs exported from /bank/logs are the execution evidence (deliverable 06).
 """
 
+from contextvars import ContextVar
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -15,6 +16,10 @@ from .models import Account, Lender, Payee, PayeeAccount, Receivable, Transactio
 from .seed import FX_RATES, LENDER_TERMS
 
 ACCOUNT_BY_CCY = {"CLP": "ACC-CLP", "USD": "ACC-USD", "CNY": "ACC-CNY"}
+
+# The approval an operation runs under: its id and policy tier go into the bank.* audit entry, so the
+# chain shows a loan disbursement as the L3 action the owner approved, not as an unlabelled event.
+_approval: ContextVar[dict] = ContextVar("approval", default={})
 
 
 def _fixed_fee(lender_id: str) -> float:
@@ -63,6 +68,7 @@ def _move(db: Session, acc: Account, amount: float, kind: str, counterparty: str
 
 
 def _finish(db: Session, actor: str, kind: str, result: dict) -> dict:
+    result = {**result, **_approval.get()}
     entry = audit.append(db, actor, f"bank.{kind}", result)  # commits
     result = {**result, "audit_seq": entry.seq, "audit_hash": entry.hash}
     broker.publish(f"bank.{kind}", result)
@@ -207,10 +213,12 @@ def operation_amount_clp(db: Session, op: str, params: dict) -> float:
     raise BankError("unknown_operation", f"Unknown operation {op}")
 
 
-def execute(db: Session, op: str, params: dict, actor: str) -> dict:
+def execute(db: Session, op: str, params: dict, actor: str, approval_id: str | None = None,
+            tier: int | None = None) -> dict:
     fn = OPERATIONS.get(op)
     if not fn:
         raise BankError("unknown_operation", f"Unknown operation {op}")
+    token = _approval.set({"approval_id": approval_id, "tier": tier} if approval_id else {})
     try:
         return fn(db, **params, actor=actor)
     except TypeError as exc:
@@ -218,6 +226,8 @@ def execute(db: Session, op: str, params: dict, actor: str) -> dict:
     except BankError:
         db.rollback()
         raise
+    finally:
+        _approval.reset(token)
 
 
 def counterparty(db: Session, op: str, params: dict) -> str | None:

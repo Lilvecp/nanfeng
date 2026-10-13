@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     session_ttl_s: int = 8 * 3600
     # Demo build: enables POST /bank/reset and shows the demo password on the sign-in screen.
     demo: bool = True
+    # Demo builds: reset the shared sandbox after this many seconds with no new audit entry, once a
+    # visitor has moved past the opening state (see app/autoreset.py). 0 = never.
+    sandbox_idle_reset_s: int = 1800
 
 
     @field_validator("cors_origins", mode="before")

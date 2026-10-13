@@ -52,7 +52,7 @@ def play_step(n: int, body: DemoStepIn, db: Session = Depends(get_db)):
         if body.plan is None:
             raise HTTPException(422, "Step 4 needs the plan")
         existing = _plan_approval(db, body.plan.action)
-        appr = existing if existing and existing.status == "pending" else approvals.create(body.plan, db, actor="agent")
+        appr = existing if existing and existing.status == "pending" else approvals.create_approval(body.plan, db, actor="agent")
         result["approval"] = {"id": appr.id, "status": appr.status, "tier": appr.tier}
 
     if n == 5:
@@ -64,7 +64,12 @@ def play_step(n: int, body: DemoStepIn, db: Session = Depends(get_db)):
         if appr.status == "pending":
             if otp.sms_mode():  # a real code went to the owner's phone: the owner approves it themselves
                 raise HTTPException(409, {"error": "owner_must_approve", "detail": "SMS mode: approve with the texted code"})
-            appr = approvals.approve(appr.id, ApproveIn(otp=get_settings().sandbox_otp, channel="WA+OTP"), db)
+            try:
+                appr = approvals.approve(appr.id, ApproveIn(otp=get_settings().sandbox_otp, channel="WA+OTP"), db)
+            except HTTPException as exc:
+                if exc.status_code != 409:
+                    raise
+                db.refresh(appr)  # the owner approved it on screen a moment earlier: it ran once, keep going
         result["approval"] = {"id": appr.id, "status": appr.status,
                               "audit_hashes": [r.get("audit_hash") for r in appr.results or []]}
 
