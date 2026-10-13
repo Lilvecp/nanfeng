@@ -83,7 +83,7 @@ No outbound message is written by an LLM.
 
 | Method | Path | Who | What |
 |---|---|---|---|
-| POST | `/inbound/zavu` | Zavu (`X-Webhook-Token` = `NANFENG_ZAVU_WEBHOOK_SECRET`) or the agent token | a WhatsApp, SMS or email → `handle_document` |
+| POST | `/inbound/zavu` | Zavu's signature (`X-Zavu-Signature`, secret in `NANFENG_ZAVU_WEBHOOK_SECRET`) or the agent token | a WhatsApp, SMS or email → `handle_document`; Zavu gets `202` at once and the run continues in the background |
 | POST | `/documents` | owner session (checked with the backend's `/auth/me`) | `{filename, mime, data_base64, source, language}`; PDF, PNG, JPEG, WebP or text, 4 MB max |
 | POST | `/ask` | owner session or agent token | `{question, run_id?, language}` → `{answer, intent, run_id, model}` |
 | POST | `/briefing` | owner session | daily cash briefing; `call: false` returns the text without calling |
@@ -124,6 +124,37 @@ No outbound message is written by an LLM.
 
 `python -m nanfeng_agent status` prints which are live, never the keys. Models are overridable with `NANFENG_MODEL_PLAN`, `NANFENG_MODEL_EXTRACT`, `NANFENG_MODEL_CLASSIFY` (comma-separated, in fallback order).
 
+ElevenLabs: the default voice is Sarah (`EXAVITQu4vr4xnSDxMaL`), a premade voice every account has. Rachel, the old default, is no longer premade and returns 404 `voice_not_found`. Any other voice goes in `ELEVENLABS_VOICE_ID`.
+
+### Zavu webhook
+
+Zavu posts `{id, type, data: {from, channel, text, ...}}` and signs it: `X-Zavu-Signature: t=<unix s>,v2=<hex>`, with v2 = HMAC-SHA256 of `"{t}.{raw body}"` under the secret Zavu issues when the webhook is added to a sender (Dashboard → sender → Add Webhook, event `message.inbound`). That secret goes in `NANFENG_ZAVU_WEBHOOK_SECRET`; Zavu does not send a custom token header, so a secret we generate ourselves cannot work. The agent:
+
+- rejects a missing, wrong or older-than-5-minutes signature (401) and fails closed (503) with no secret and no agent token;
+- answers `202` at once and runs the agent in the background, since Zavu wants a 2xx within 30 s and retries up to 5 times;
+- remembers the last 1,000 event ids, so a retry does not start a second run;
+- ignores every event that is not `message.inbound` (delivery receipts, templates).
+
+### Zavu with a test key (`zv_test_…`)
+
+The team key is a sandbox key. Checked live on Oct 13, Zavu answers:
+
+| Attempt | Zavu's answer |
+|---|---|
+| WhatsApp to a number outside the Zavu team | 403 `forbidden`: a test key only reaches the phone numbers of people on the team |
+| SMS (or email, voice) | 400 `invalid_request`: sandbox mode only supports WhatsApp, other channels need a configured sender |
+| WhatsApp to a team number | accepted (`sent`), then `failed` with WhatsApp error 131047: the 24-hour window is closed |
+
+WhatsApp only lets a business send free text to someone who wrote to it in the last 24 hours. So, to receive a message from the agent with the test key:
+
+1. The phone must belong to someone on the team in the Zavu dashboard.
+2. From that phone, send any WhatsApp (a "hola" is enough) to the Zavu sandbox number shown in the Zavu dashboard.
+3. For the next 24 hours the agent's messages arrive. After that, write again.
+
+Check a send with `GET https://api.zavu.dev/v1/messages/{id}`: `status` and `errorCode` / `errorMessage` say whether it reached the phone. A `sent` from `POST /v1/messages` only means Zavu accepted it.
+
+For the demo and production this means: a live key (`zv_live_…`) with a sender for SMS, which the SMS OTP (`NANFENG_OTP_MODE=sms`) also needs; and an approved WhatsApp template for the agent's first message of a conversation (the cash alert), since the owner will not have written in the last 24 hours. The agent sends free text today.
+
 ## Verified live (Oct 12)
 
 Backend + quant engine + agent service on one machine, Mistral OCR live:
@@ -135,6 +166,6 @@ Backend + quant engine + agent service on one machine, Mistral OCR live:
 
 ## Not done yet
 
-- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 08:47 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. Zavu and ElevenLabs are written and tested against mocked APIs; they need their keys, then one live run each.
+- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 08:47 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. ElevenLabs is live (Oct 13): the daily briefing was synthesized with a real call. Zavu has a test key: it authenticates and accepts WhatsApp, but the live WhatsApp is waiting on the team phone writing to the Zavu number first (see "Zavu with a test key" above). Then one resend closes r2-01.
 - **Front wiring:** the cockpit still shows canned answers in "Ask it why" and has no upload button; the endpoints above are ready for it.
 - **LangGraph:** the battle plan listed it. The orchestrator is a plain, explicit state machine instead (fewer dependencies, every transition in one file, easy to test). Swapping it in later does not change the tools or the channel layer.

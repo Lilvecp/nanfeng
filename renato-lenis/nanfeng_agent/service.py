@@ -1,6 +1,6 @@
 """Agent service (r2-09): what makes the agent part of the product instead of a CLI.
 
-    POST /inbound/zavu     Zavu webhook: a WhatsApp, SMS or email reaches the owner → the agent runs
+    POST /inbound/zavu     Zavu webhook (signed): a WhatsApp, SMS or email reaches the owner → the agent runs
     POST /documents        the cockpit uploads a PDF or photo (owner session)
     POST /ask              "Ask it why" in Mission Control (owner)
     POST /briefing         daily cash briefing (owner)
@@ -23,17 +23,18 @@ import logging
 import os
 import threading
 import time
+from collections import OrderedDict
 from typing import Any, Literal
 
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from . import __version__, explain
 from .backend import BackendError
 from .config import Settings
-from .inbound import from_zavu
+from .inbound import from_zavu, unwrap, verify_signature
 from .ingest import Document
 from .ocr import OcrError, read_file
 from .orchestrator import Agent
@@ -41,6 +42,7 @@ from .orchestrator import Agent
 log = logging.getLogger("nanfeng_agent")
 
 MAX_UPLOAD_BYTES = 4 * 1024 * 1024
+SEEN_EVENTS = 1000  # Zavu retries a delivery up to 5 times: remember recent event ids
 RESUME_EVENTS = {"approval.approved", "approval.rejected", "approval.locked", "approval.failed"}
 
 
@@ -53,6 +55,34 @@ class AgentService:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self.last_event_id = 0
+        self.seen_events: OrderedDict[str, None] = OrderedDict()
+
+    def first_delivery(self, event_id: str | None) -> bool:
+        if event_id is None:
+            return True
+        with self.lock:
+            if event_id in self.seen_events:
+                return False
+            self.seen_events[event_id] = None
+            while len(self.seen_events) > SEEN_EVENTS:
+                self.seen_events.popitem(last=False)
+            return True
+
+    def run_inbound(self, message: dict[str, Any]) -> dict[str, Any]:
+        try:
+            doc = from_zavu(message, self.agent.settings.mistral_api_key)
+        except (OcrError, KeyError, ValueError, binascii.Error) as exc:
+            raise HTTPException(422, f"cannot read the message: {exc.__class__.__name__}") from exc
+        if not doc.ocr_text.strip():
+            return {"status": "ignored", "reason": "empty message"}
+        with self.lock:
+            return self.agent.handle_document(doc).summary()
+
+    def run_inbound_quietly(self, message: dict[str, Any]) -> None:
+        try:
+            self.run_inbound(message)
+        except HTTPException as exc:
+            log.warning("inbound message skipped: %s", exc.detail)
 
     def handle_event(self, event: dict[str, Any]) -> None:
         """One SSE event from the backend. Resumes the run that proposed the approval, if any."""
@@ -149,33 +179,39 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
             return "agent"
         return require_owner(authorization)
 
-    def require_webhook(authorization: str = Header(default=""), x_webhook_token: str = Header(default="")) -> str:
-        """Zavu signs with the shared webhook secret; the agent token is also accepted (tests, relays).
-        Fails closed: with neither configured, nobody can feed documents to the agent."""
+    async def require_webhook(request: Request, authorization: str = Header(default=""),
+                              x_zavu_signature: str = Header(default="")) -> str:
+        """Zavu signs every delivery with the sender's webhook secret (X-Zavu-Signature, HMAC over the raw body);
+        the agent token is also accepted (tests, relays). Fails closed: with neither configured, nobody can feed
+        documents to the agent."""
         secret, token = settings.zavu_webhook_secret, settings.agent_token
         if not secret and not token:
             raise HTTPException(503, "webhook not configured: set NANFENG_ZAVU_WEBHOOK_SECRET or NANFENG_AGENT_TOKEN")
-        if secret and x_webhook_token and hmac.compare_digest(x_webhook_token, secret):
+        if secret and x_zavu_signature and verify_signature(secret, x_zavu_signature, await request.body()):
             return "zavu"
         if token and hmac.compare_digest(authorization.removeprefix("Bearer ").strip(), token):
             return "agent"
-        raise HTTPException(401, "invalid webhook token")
+        raise HTTPException(401, "invalid webhook signature")
 
     @app.get("/health")
     def health():
         return {"status": "ok", "version": __version__, "providers": settings.mode(),
                 "planner": svc.agent.planner.name, "listener": bool(svc._thread and svc._thread.is_alive())}
 
-    @app.post("/inbound/zavu", dependencies=[Depends(require_webhook)])
-    def inbound(payload: dict[str, Any]):
-        try:
-            doc = from_zavu(payload, settings.mistral_api_key)
-        except (OcrError, KeyError, ValueError, binascii.Error) as exc:
-            raise HTTPException(422, f"cannot read the message: {exc.__class__.__name__}") from exc
-        if not doc.ocr_text.strip():
-            return {"status": "ignored", "reason": "empty message"}
-        with svc.lock:
-            return svc.agent.handle_document(doc).summary()
+    @app.post("/inbound/zavu")
+    def inbound(payload: dict[str, Any], tasks: BackgroundTasks, response: Response,
+                caller: str = Depends(require_webhook)):
+        event_id, kind, message = unwrap(payload)
+        if kind != "message.inbound":
+            return {"status": "ignored", "reason": kind}  # delivery receipts, templates, ...
+        if not svc.first_delivery(event_id):
+            return {"status": "duplicate", "event_id": event_id}
+        if caller == "zavu":
+            # Zavu wants a 2xx within 30 s and retries otherwise; a run with the LLM and the MILP can take longer.
+            tasks.add_task(svc.run_inbound_quietly, message)
+            response.status_code = 202
+            return {"status": "accepted", "event_id": event_id}
+        return svc.run_inbound(message)
 
     @app.post("/documents", dependencies=[Depends(require_owner)])
     def upload(body: UploadIn):

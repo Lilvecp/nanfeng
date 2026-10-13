@@ -123,3 +123,60 @@ def test_webhook_fails_closed_without_credentials(agent):
         r = c.post("/inbound/zavu", json={"channel": "email", "text": fixtures.SHANGHAI_NOTICE})
     assert r.status_code == 503
     assert agent.runs == {}
+
+
+# --- Real Zavu webhooks: signed envelope, answered fast, run in the background -------------------
+
+ZAVU_SECRET = "zavu-signing-secret-test"
+
+
+def _signed(payload: dict, secret: str = ZAVU_SECRET, t: int | None = None) -> tuple[bytes, dict]:
+    import hashlib, hmac, json, time
+    body = json.dumps(payload).encode()
+    t = int(time.time()) if t is None else t
+    v2 = hmac.new(secret.encode(), f"{t}.".encode() + body, hashlib.sha256).hexdigest()
+    return body, {"X-Zavu-Signature": f"t={t},v2={v2}", "Content-Type": "application/json"}
+
+
+def _event(text: str, event_id: str = "evt_1", type_: str = "message.inbound") -> dict:
+    return {"id": event_id, "type": type_, "timestamp": 1705312200000, "senderId": "snd_1", "projectId": "prj_1",
+            "data": {"messageId": "msg_1", "from": "+8613800000000", "to": "+12025550100", "channel": "whatsapp",
+                     "messageType": "text", "text": text, "profileName": "Hongxin AP"}}
+
+
+@pytest.fixture()
+def zavu_api(agent):
+    import dataclasses
+    agent.settings = dataclasses.replace(agent.settings, zavu_webhook_secret=ZAVU_SECRET)
+    with TestClient(create_app(AgentService(agent), listen=False)) as c:
+        yield c
+
+
+def test_signed_zavu_event_is_accepted_then_run(zavu_api, agent):
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE))
+    r = zavu_api.post("/inbound/zavu", content=body, headers=headers)
+    assert r.status_code == 202 and r.json()["status"] == "accepted"
+    (run,) = agent.runs.values()  # the TestClient runs background tasks before returning
+    assert run.status == "awaiting_approval"
+
+
+def test_zavu_signature_is_checked(zavu_api, agent):
+    import time
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE), secret="another-secret")
+    assert zavu_api.post("/inbound/zavu", content=body, headers=headers).status_code == 401
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE), t=int(time.time()) - 3600)  # replayed
+    assert zavu_api.post("/inbound/zavu", content=body, headers=headers).status_code == 401
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE))
+    tampered = body.replace(b"Shanghai", b"Shanghaj")
+    assert zavu_api.post("/inbound/zavu", content=tampered, headers=headers).status_code == 401
+    assert zavu_api.post("/inbound/zavu", json=_event("x"), headers={"X-Webhook-Token": ZAVU_SECRET}).status_code == 401
+    assert agent.runs == {}
+
+
+def test_zavu_status_events_and_retries_do_not_start_runs(zavu_api, agent):
+    body, headers = _signed(_event("", event_id="evt_2", type_="message.delivered"))
+    assert zavu_api.post("/inbound/zavu", content=body, headers=headers).json()["status"] == "ignored"
+    body, headers = _signed(_event(fixtures.SHANGHAI_NOTICE, event_id="evt_3"))
+    assert zavu_api.post("/inbound/zavu", content=body, headers=headers).status_code == 202
+    assert zavu_api.post("/inbound/zavu", content=body, headers=headers).json()["status"] == "duplicate"
+    assert len(agent.runs) == 1
