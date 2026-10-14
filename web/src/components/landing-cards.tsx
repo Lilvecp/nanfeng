@@ -5,7 +5,7 @@ import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { N, S } from "@/lib/scenario";
 
-const passport = (p: { score: number; grade: string }) => `${Math.round(p.score)} ${p.grade}`;
+const passport = (p: { score: number; grade: string }) => `${Math.round(p.score)}\u00a0${p.grade}`; // "67 B" never splits across lines
 
 // "One agent. The whole treasury desk." — feature cards that expand in place, one at a time.
 type Card = { n: Record<Lang, string>; title: Record<Lang, [string, string]>; body: Record<Lang, string>; glyph: React.ReactNode };

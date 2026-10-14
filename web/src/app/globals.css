@@ -509,10 +509,17 @@ button {
 }
 
 /* Landing feature cards: hover (or focus/tap) opens one at a time. Flex-grow animates smoothly;
-   the text is always laid out at a fixed width and only fades, so nothing reflows mid-animation. */
+   the body text is laid out at the open card's final width and only fades, so it never reflows
+   mid-animation. That width comes from the row's own width (container units): with flex-basis 0 each
+   card keeps its padding and border and shares the rest, closed ones 1 part each, the open one --vgrow parts. */
 .vcards {
+  --vgap: 16px;
+  --vpad: 22px;
+  --vborder: 1px;
+  --vgrow: 2.6;
+  container-type: inline-size;
   display: flex;
-  gap: 16px;
+  gap: var(--vgap);
 }
 .vcard {
   flex: 1 1 0;
@@ -522,13 +529,16 @@ button {
   text-align: left;
   cursor: pointer;
   align-items: stretch;
+  padding-inline: var(--vpad);
   transition: flex-grow 0.7s var(--ease-apple), background-color 0.5s var(--ease-apple), color 0.5s var(--ease-apple), border-color 0.5s var(--ease-apple);
 }
 .vcard.open {
-  flex-grow: 2.6;
+  flex-grow: var(--vgrow);
 }
+/* Closed cards are narrow: titles wrap at word breaks instead of running out of the card. */
 .vcard h3 {
-  white-space: nowrap;
+  font-size: 22px;
+  overflow-wrap: break-word;
 }
 .vcard:focus-visible {
   outline: 2px solid var(--accent);
@@ -546,7 +556,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 300px;
+  /* 7 cards, 6 gaps; see .vcards */
+  width: calc((100cqw - 6 * var(--vgap) - 14 * (var(--vpad) + var(--vborder))) * var(--vgrow) / (6 + var(--vgrow)));
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.25s var(--ease-apple), transform 0.25s var(--ease-apple);
@@ -585,16 +596,14 @@ button {
 .vcard.open .glyph svg {
   max-width: 120px;
 }
-@media (max-width: 1100px) {
+/* Below this the closed cards get too narrow for a one-word title: stack them as an accordion. */
+@media (max-width: 1260px) {
   .vcards {
     flex-direction: column;
   }
   .vcard {
     min-height: 0;
     flex: none;
-  }
-  .vcard h3 {
-    white-space: normal;
   }
   .vcard-body {
     width: auto;
