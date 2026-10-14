@@ -43,6 +43,7 @@ from nanfeng_agent.orchestrator import Agent  # noqa: E402
 from nanfeng_agent.router import ModelRouter  # noqa: E402
 
 RESULTS = ROOT / "vicente-rodriguez" / "results"
+SCENARIOS = ROOT / "vicente-rodriguez" / "data" / "scenarios"
 AGENT_TOKEN = os.environ["NANFENG_AGENT_TOKEN"]
 OWNER_PASSWORD = os.environ["NANFENG_OWNER_PASSWORD"]
 SANDBOX_OTP = "482913"
@@ -52,12 +53,17 @@ def _result(name: str) -> dict:
     return json.loads((RESULTS / f"cherry_crisis_{name}.json").read_text(encoding="utf-8"))
 
 
+def _scenario(name: str) -> dict:
+    return json.loads((SCENARIOS / f"{name}.json").read_text(encoding="utf-8"))
+
+
 class ReplayQuantBackend(Backend):
     """Real backend for everything except /quant, which answers with Vicente's committed results."""
 
-    def __init__(self, *a, forecast: dict | None = None, **kw):
+    def __init__(self, *a, forecast: dict | None = None, plan: dict | None = None, **kw):
         super().__init__(*a, **kw)
         self.forecast = forecast or _result("forecast")
+        self.plan_result = plan or _result("plan")
         self.quant_calls: list[tuple[str, dict]] = []
 
     def _send(self, method, path, json=None, params=None):
@@ -70,7 +76,9 @@ class ReplayQuantBackend(Backend):
             if path == "/quant/analysis":
                 return _result("analysis")
             if path == "/quant/plan/jobs":
-                return {"id": "plan-1", "status": "done", "result": _result("plan"), "error": None}
+                return {"id": "plan-1", "status": "done", "result": self.plan_result, "error": None}
+            if path.startswith("/quant/scenarios/"):
+                return _scenario(path.rsplit("/", 1)[-1])
             raise AssertionError(f"unexpected quant call {path}")
         return super()._send(method, path, json, params)
 

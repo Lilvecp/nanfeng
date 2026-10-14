@@ -46,6 +46,19 @@ T: dict[str, dict[str, str]] = {
         "zh": "最优方案：{plan}。成本 {cost}，银行贷款需 {default_cost}（节省 {savings}）。"
               "{coverage} 的模拟情景中现金保持在安全垫之上。",
     },
+    "plan_default": {
+        "es": "Plan: {plan}, el crédito bancario de siempre. Costo {cost}; el optimizador no encontró nada más barato "
+              "({optimal_cost}). La caja se mantiene sobre el colchón en el {coverage} de los escenarios.",
+        "en": "Plan: {plan}, the usual bank loan. Cost {cost}; the optimizer found nothing cheaper ({optimal_cost}). "
+              "Cash stays above the buffer in {coverage} of scenarios.",
+        "zh": "方案：{plan}（常规银行贷款）。成本 {cost}；优化器未找到更便宜的方案（{optimal_cost}）。"
+              "{coverage} 的模拟情景中现金保持在安全垫之上。",
+    },
+    "plan_none": {
+        "es": "No te propongo ninguna operación: {reason}. Revisa el análisis en {link}.",
+        "en": "I am not proposing any operation: {reason}. See the analysis at {link}.",
+        "zh": "我不提议任何操作：{reason}。请在 {link} 查看分析。",
+    },
     "approval": {
         "es": "Solicitud {approval_id} (nivel L{tier}) espera tu aprobación. Apruébala en {link} con el código "
               "que te llega por SMS. NanFeng nunca te pedirá ese código.",

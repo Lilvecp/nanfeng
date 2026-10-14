@@ -26,7 +26,7 @@ from .contacts import CUSTOMERS, Contact, owner_contact
 from .ingest import Document, PlannerInput, ingest
 from .planner import LLMPlanner, Plan, RulePlanner
 from .router import ModelRouter
-from .tools import TOOLS, RunContext, ToolError
+from .tools import TOOLS, RunContext, ToolError, notice_delay, scenario_from_notice
 
 _run_ids = itertools.count(1)
 
@@ -51,6 +51,7 @@ class Run:
     note: str = ""
     language: str = "en"
     memory: dict[str, Any] = field(default_factory=dict)
+    scenario_obj: dict[str, Any] | None = None  # the scenario as the notice tells it (never shown to the LLM)
 
     def summary(self) -> dict[str, Any]:
         return {"run_id": self.id, "kind": self.kind, "status": self.status, "note": self.note,
@@ -99,7 +100,7 @@ class Agent:
 
     def _ctx(self, run: Run) -> RunContext:
         return RunContext(self.backend, self.hub, self.owner, self.settings.scenario, self.settings.cockpit_url,
-                          self.settings.plan_timeout_s, memory=run.memory)
+                          self.settings.plan_timeout_s, memory=run.memory, scenario_obj=run.scenario_obj)
 
     def _tool(self, run: Run, name: str, args: dict[str, Any]) -> dict[str, Any]:
         self._guard(run)
@@ -150,20 +151,48 @@ class Agent:
         rows = (run.memory.get("ledger_query") or {}).get("rows") or []
         inv = next((r for r in rows if isinstance(r, dict) and r.get("id") == f.get("invoice_number")), None)
         if inv and f.get("new_due_date"):
-            delay = (date.fromisoformat(f["new_due_date"]) - date.fromisoformat(inv["due_date"])).days
+            delay = notice_delay(inv["due_date"], f["new_due_date"])
         prob = max(s.get("prob_negative_by_crunch_day") or 0, 0)
         return {"customer": (cust.name if cust else f.get("issuer_name", "")).replace(" (fictional)", ""),
                 "amount": templates.money(float(f.get("amount", 0)), f.get("currency", "USD"), lang),
                 "delay": delay, "prob": templates.pct(prob), "crunch_date": s.get("crunch_date", "—"), "driver": ""}
 
-    def _plan_slots(self, run: Run) -> dict[str, Any]:
+    def _plan_message(self, run: Run) -> tuple[str, dict[str, Any]]:
+        """(template, slots): "cheaper" only when the optimizer really beat the bank loan."""
         p, lang = run.memory["optimize_plan"], run.language
-        opt = p["optimal"]
-        return {"plan": " + ".join(a["summary"] for a in opt.get("actions", [])),
-                "cost": templates.money(opt["total_cost_clp"], "CLP", lang),
-                "default_cost": templates.money(p["default"]["total_cost_clp"], "CLP", lang),
-                "savings": templates.pct(p.get("savings_pct") or 0),
-                "coverage": templates.pct(opt.get("out_of_sample_coverage") or 0)}
+        opt, default = p["optimal"], p["default"]
+        if p.get("proposal") is None:
+            return "plan_none", {"reason": p.get("no_proposal_reason") or "—", "link": f"{self.settings.cockpit_url}/financing"}
+        if p.get("choice") == "default":
+            optimal_cost = opt.get("total_cost_clp")
+            return "plan_default", {
+                "plan": " + ".join(a["summary"] for a in default.get("actions", [])),
+                "cost": templates.money(default["total_cost_clp"], "CLP", lang),
+                "optimal_cost": templates.money(optimal_cost, "CLP", lang) if optimal_cost is not None else "—",
+                "coverage": templates.pct(default.get("out_of_sample_coverage") or 0)}
+        return "plan", {"plan": " + ".join(a["summary"] for a in opt.get("actions", [])),
+                        "cost": templates.money(opt["total_cost_clp"], "CLP", lang),
+                        "default_cost": templates.money(default["total_cost_clp"], "CLP", lang),
+                        "savings": templates.pct(p.get("savings_pct") or 0),
+                        "coverage": templates.pct(opt.get("out_of_sample_coverage") or 0)}
+
+    def _apply_notice(self, run: Run) -> None:
+        """A payment notice moves its invoice's date in the forecast and the plan: the scenario sent to the
+        quant engine carries the delay the notice announced (new due date − due date), not a fixed one."""
+        pi = run.planner_input
+        if pi is None or pi.fields.get("doc_type") != "payment_notice" or not pi.customer_id:
+            return
+        try:
+            base = self.backend.get(f"/quant/scenarios/{self.settings.scenario}")
+        except BackendError as exc:
+            self._trace(run, {"step": "Scenario from notice", "tool": "quant.scenario", "status": "failed",
+                              "detail": f"base scenario used: {str(exc)[:120]}"})
+            return
+        scen, note = scenario_from_notice(base if isinstance(base, dict) else {}, pi.fields)
+        run.scenario_obj = scen
+        self._trace(run, {"step": "Scenario from notice", "tool": "quant.scenario", "model": "rules",
+                          "status": "done" if scen is not None else "skipped",
+                          "detail": note if scen is not None else f"base scenario used: {note}"})
 
     # --- entry points --------------------------------------------------------------------------
 
@@ -188,6 +217,7 @@ class Agent:
                                rules=rules, verify=f" ({verify})" if verify else "")
             return self._finish(run, "blocked", f"{pi.doc_id}: {rules}")
 
+        self._apply_notice(run)
         run.plan = self.planner.plan(pi, self.settings.scenario)
         self._trace(run, {"step": "Plan", "tool": f"planner.{run.plan.planner}", "model": run.plan.model or "rules",
                           "cost_usd": run.plan.cost_usd,
@@ -210,7 +240,8 @@ class Agent:
                 if step.tool == "forecast_run" and self._at_risk(run) and run.planner_input.customer_id:
                     self._notify_owner(run, "alert", **self._alert_slots(run))
                 if step.tool == "optimize_plan":
-                    self._notify_owner(run, "plan", **self._plan_slots(run))
+                    template, slots = self._plan_message(run)
+                    self._notify_owner(run, template, **slots)
         except Halt as exc:
             self._notify_owner(run, "halted")
             return self._finish(run, "halted", str(exc))
