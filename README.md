@@ -47,7 +47,7 @@ The web also runs alone (`cd web && npm ci && npm run dev`): with no backend it 
 
 | Suite | Command | Result | CI job |
 |---|---|---|---|
-| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd backend && pip install -e ".[dev]" && pytest -q` | 124 passed | Backend tests |
+| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd backend && pip install -e ".[dev]" && pytest -q` | 127 passed | Backend tests |
 | Red team regression gate (46 attacks against the API) | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 46` | 46/46 stopped | Backend tests |
 | OpenAPI contract is up to date | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
 | Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd renato-lenis && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 113 passed | Agent tests |

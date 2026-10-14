@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import audit, autoreset, seed
+from . import anchoring, audit, autoreset, seed
 from .bank import BankError
 from .config import DEMO_OWNER_PASSWORD, PLACEHOLDER_AGENT_TOKEN, get_settings
 from .db import SessionLocal
@@ -28,6 +28,8 @@ async def lifespan(app: FastAPI):
         with SessionLocal() as db:
             seed.seed(db)
             seed.seed_security(db)
+        # off the boot path; kept on app.state so the task is not garbage-collected mid-flight
+        app.state.opening_anchor = asyncio.create_task(asyncio.to_thread(anchoring.anchor_opening))
     idle_reset = asyncio.create_task(autoreset.run_forever()) if s.demo and s.sandbox_idle_reset_s > 0 else None
     yield
     if idle_reset:

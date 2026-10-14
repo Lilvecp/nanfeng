@@ -73,3 +73,33 @@ def test_chain_failure_does_not_undo_the_approval(client, chain, monkeypatch):
     assert client.post("/audit/anchor").status_code == 502
     types = [e["type"] for e in client.get("/agent/events/recent").json()]
     assert "audit.anchor_failed" in types
+
+
+def test_seeded_sandbox_is_anchored_before_any_approval(client, chain):
+    anchoring.anchor_opening()
+    [anchor] = client.get("/audit/anchors").json()
+    assert anchor["backend"] == "evm" and anchor["from_seq"] == 1
+    assert client.get(f"/audit/anchors/{anchor['id']}/chain").json()["valid"] is True
+    anchoring.anchor_opening()  # nothing new since: no second transaction
+    assert len(client.get("/audit/anchors").json()) == 1
+
+
+def test_anchoring_the_opening_state_does_not_trigger_an_idle_reset(client, chain):
+    from datetime import datetime, timedelta, timezone
+
+    from app import autoreset, seed
+    from app.db import SessionLocal
+    from app.models import AuditEntry
+    from sqlalchemy import select
+
+    with SessionLocal() as db:
+        seed.reset(db)  # the opening state alone, without the fixture's sign-in
+    anchoring.anchor_opening()
+    with SessionLocal() as db:
+        assert [e.kind for e in db.scalars(select(AuditEntry).order_by(AuditEntry.seq))][-1] == "audit.anchored"
+        assert not autoreset.needs_reset(db, datetime.now(timezone.utc) + timedelta(days=1), 60)
+
+
+def test_no_opening_anchor_without_a_chain(client):
+    anchoring.anchor_opening()  # local backend: the demo works with no chain and sends nothing
+    assert client.get("/audit/anchors").json() == []

@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from . import audit
 from .config import get_settings
+from .db import SessionLocal
 from .events import broker
 from .models import Anchor, AuditEntry
 
@@ -123,6 +124,23 @@ def anchor_pending(db: Session) -> Anchor | None:
         broker.publish("audit.anchored", {"anchor_id": a.id, "from_seq": a.from_seq, "to_seq": a.to_seq,
                                           "merkle_root": root, **receipt})
         return a
+
+
+def anchor_opening() -> None:
+    """Anchors the freshly seeded sandbox (seeding, the blocked 08:47 attack, the pending request) on
+    chain, so a visitor of the public demo sees a real anchor before anyone approves anything. EVM
+    backend only; best effort: a failure is logged and the next anchor covers the same entries."""
+    if get_settings().anchor_backend != "evm":
+        return
+    with SessionLocal() as db:
+        head = db.scalars(select(AuditEntry).order_by(AuditEntry.seq.desc()).limit(1)).first()
+        if head is None or head.kind == "audit.anchored":
+            return  # nothing since the last anchor but its own record: no transaction for that
+        try:
+            anchor_pending(db)
+            db.commit()
+        except AnchorError:
+            db.rollback()
 
 
 def check_on_chain(a: Anchor) -> dict:

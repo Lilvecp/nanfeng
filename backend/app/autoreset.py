@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import seed, state
+from . import anchoring, seed, state
 from .config import get_settings
 from .db import SessionLocal
 from .events import broker
@@ -25,8 +25,9 @@ from .schemas import ApprovalCreate
 log = logging.getLogger(__name__)
 
 # What the opening state writes by itself: seeding, the 08:47 blocked attack and the agent's request.
-# The agent asking again for the same pending plan (approval.repeated) does not move the story on either.
-OPENING_KINDS = {"sandbox.seeded", "security.attack_blocked", "security.flagged", "approval.created",
+# The agent asking again for the same pending plan (approval.repeated) does not move the story on either,
+# nor does anchoring that opening state on chain.
+OPENING_KINDS = {"audit.anchored", "sandbox.seeded", "security.attack_blocked", "security.flagged", "approval.created",
                  "approval.repeated", "approval.otp_sent", "approval.otp_not_sent"}
 
 
@@ -65,6 +66,7 @@ def reset_if_idle(now: datetime | None = None) -> bool:
         if plan is not None:
             # no SMS for a request nobody is looking at: the owner asks for a code when they open it
             approvals.create_approval(plan, db, actor="agent", send_code=False)
+    anchoring.anchor_opening()
     broker.publish("sandbox.reset", {"by": "idle"})
     log.info("Sandbox reset after %ss idle", s.sandbox_idle_reset_s)
     return True
