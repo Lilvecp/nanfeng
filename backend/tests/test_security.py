@@ -102,6 +102,27 @@ def test_unknown_issuer_is_suspicious(client):
     assert r["verdict"] == "suspicious" and r["rules"] == ["unknown-payee"]
 
 
+SHANGHAI = "Shanghai Hongxin Fresh Fruit Import Co."
+
+
+def test_customer_notice_from_its_own_domain_is_clean(client):
+    """The Cherry Crisis notice (10:12) comes from the domain on file: it must keep passing."""
+    r = client.post("/security/check-payee", json={"doc_id": "DOC-1012", "source": "email", "issuer_name": SHANGHAI,
+                                                   "sender_domain": "ap@hongxin-fruit.example"}).json()
+    assert r["verdict"] == "clean" and r["details"]["customer_id"] == "C-SHA" and r["payee_id"] is None
+
+
+def test_spoofed_customer_notice_from_a_lookalike_domain_is_blocked(client):
+    """A late-payment notice can make the agent borrow CLP 140M: a look-alike sender is an attack."""
+    r = client.post("/security/check-payee", json={"doc_id": "DOC-X", "source": "email", "issuer_name": SHANGHAI,
+                                                   "sender_domain": "ap@hongxin-fruit.co"}).json()
+    assert r["verdict"] == "malicious" and r["rules"] == ["domain-mismatch"] and r["details"]["lookalike"] == "yes"
+    assert "security.attack_blocked" in [e["kind"] for e in client.get("/audit/entries").json()]
+    other = client.post("/security/check-payee", json={"doc_id": "DOC-Y", "issuer_name": SHANGHAI,
+                                                       "sender_domain": "hongxin.ap@gmail.com"}).json()
+    assert other["verdict"] == "suspicious" and other["rules"] == ["domain-mismatch"]
+
+
 def test_security_routes_need_the_agent_token(client, monkeypatch):
     from app.config import get_settings
 

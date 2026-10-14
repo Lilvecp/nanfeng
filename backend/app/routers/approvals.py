@@ -1,6 +1,7 @@
 """Approval Center API: every money movement enters here, gets a policy tier, and runs in the
 sandbox bank either right away (L1/L2) or after the owner approves with OTP (L3)."""
 
+import hashlib
 import threading
 
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -18,7 +19,18 @@ from ..security import is_agent, require_agent
 router = APIRouter(tags=["approvals"])
 # One execution at a time: two different approvals running together must not read the same balance.
 _exec_lock = threading.Lock()
+# New money: one financing request waits for the owner at a time; a newer plan replaces the older one.
+FINANCING = {"loan", "factoring"}
 
+
+def fingerprint(operations: list[dict]) -> str:
+    """Same operations, same request: the channel, the action label and the wording do not make it new.
+    Computed from the stored operations, so no column (and no migration) holds it."""
+    return hashlib.sha256(audit.canonical(operations).encode()).hexdigest()
+
+
+def _financing(operations: list[dict]) -> bool:
+    return any(o.get("op") in FINANCING for o in operations)
 
 
 def _get(db: Session, approval_id: str) -> Approval:
@@ -77,14 +89,25 @@ def create_approval(body: ApprovalCreate, db: Session, actor: str, send_code: bo
         checks.append(policy.OpCheck(o.op, amount, payee, allowlisted, changed, hit))
     amount_clp = sum(c.amount_clp for c in checks)
 
+    operations = [o.model_dump() for o in body.operations]
     # The decision and the execution it allows must see the same history (cumulative limits).
     with policy.lock:
+        # Idempotent: the agent re-running after a sandbox reset, or a retry on another channel, gets the
+        # request already waiting for the owner, not a second one (and no second code on their phone).
+        pending = list(db.scalars(select(Approval).where(Approval.status == "pending").order_by(Approval.created_at)))
+        fp = fingerprint(operations)
+        same = next((a for a in pending if fingerprint(a.operations) == fp), None)
+        if same is not None:
+            audit.append(db, actor, "approval.repeated", {"approval_id": same.id, "action": body.action,
+                                                          "channel": body.channel})
+            return same
+
         now = utcnow()
         decision = policy.decide(checks, policy.load_history(db, now), now, state.kill_switch_on(db))
         n = (db.scalar(select(func.count()).select_from(Approval)) or 0) + 1
         appr = Approval(
             id=f"{'APR' if decision.tier == 3 else 'AUT'}-{n:04d}", action=body.action,
-            operations=[o.model_dump() for o in body.operations], amount_clp=amount_clp, tier=decision.tier,
+            operations=operations, amount_clp=amount_clp, tier=decision.tier,
             status="pending", otp_attempts_left=get_settings().otp_max_attempts,
             channel=body.channel, explanation=body.explanation, note=decision.reason,
         )
@@ -97,6 +120,27 @@ def create_approval(body: ApprovalCreate, db: Session, actor: str, send_code: bo
             _run(db, appr, actor)
         db.commit()  # the final status must be visible to the next request's history
 
+        # Two financing plans pending side by side would let one OTP-approved click take two loans: the
+        # newer plan replaces the older one. Same claim as reject(), so an approval in progress wins.
+        superseded = []
+        if appr.status == "pending" and _financing(operations):
+            for old in pending:
+                if not _financing(old.operations):
+                    continue
+                claimed = db.execute(
+                    update(Approval)
+                    .where(Approval.id == old.id, Approval.status == "pending", Approval.decided_at.is_(None))
+                    .values(status="rejected", decided_at=utcnow(), note=f"superseded by {appr.id}")
+                ).rowcount
+                if claimed:
+                    superseded.append(old)
+            db.commit()
+            for old in superseded:
+                db.refresh(old)
+
+    for old in superseded:
+        audit.append(db, actor, "approval.superseded", {"approval_id": old.id, "superseded_by": appr.id})
+        broker.publish("approval.rejected", _out(old))
     audit.append(db, actor, "approval.created", {
         "approval_id": appr.id, "action": appr.action, "tier": appr.tier, "amount_clp": amount_clp,
         "status": appr.status, "policy_reason": decision.reason, "policy_rules": decision.rules,

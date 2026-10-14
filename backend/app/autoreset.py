@@ -25,8 +25,9 @@ from .schemas import ApprovalCreate
 log = logging.getLogger(__name__)
 
 # What the opening state writes by itself: seeding, the 08:47 blocked attack and the agent's request.
+# The agent asking again for the same pending plan (approval.repeated) does not move the story on either.
 OPENING_KINDS = {"sandbox.seeded", "security.attack_blocked", "security.flagged", "approval.created",
-                 "approval.otp_sent", "approval.otp_not_sent"}
+                 "approval.repeated", "approval.otp_sent", "approval.otp_not_sent"}
 
 
 def _plan_to_restore(db: Session) -> ApprovalCreate | None:

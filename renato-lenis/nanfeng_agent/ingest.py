@@ -132,6 +132,14 @@ def ingest(doc: Document, backend: Backend, router: ModelRouter | None = None) -
     payee = Verdict(verdict="skipped")
     if customer is None or fields.get("bank_account"):
         payee = _check_payee(doc, fields, backend, step)
+    elif doc.sender_domain:
+        # A customer's notice pays nobody, but a 45-day delay makes the agent borrow: the sender must be the
+        # customer's domain on file. A look-alike is blocked; any other domain is not the customer.
+        sender = _check_payee(doc, fields, backend, step)
+        if sender.verdict != "clean":
+            payee = sender
+    if customer is not None and "domain-mismatch" in payee.rules:
+        customer = None  # not from the customer: planned as a stranger's document (read-only, the owner decides)
 
     pi = PlannerInput(doc_id=doc.doc_id, provenance=provenance, fields=fields,
                       customer_id=customer.id if customer else None, guard=guard, payee_check=payee,
