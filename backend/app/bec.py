@@ -15,6 +15,21 @@ from sqlalchemy.orm import Session
 
 from .models import Payee, PayeeAccount, PayeeProfile
 
+# Customers (the importers that owe us). We never pay them, so there is no account on file to compare;
+# what a late-payment notice can fake is the sender. Their notice can move the agent to borrow (a 45-day
+# delay is a CLP 140M loan), so it must come from the domain on file. Same master data as the agent's
+# contacts (renato-lenis/nanfeng_agent/contacts.py); every company and domain is fictional.
+CUSTOMERS = [
+    {"id": "C-SHA", "name": "Shanghai Hongxin Fresh Fruit Import Co.", "aliases": ("shanghai hongxin", "hongxin"),
+     "email_domain": "hongxin-fruit.example"},
+    {"id": "C-HK", "name": "Kowloon Premium Fruits Ltd.", "aliases": ("kowloon premium",),
+     "email_domain": "kowloon-premium.example"},
+    {"id": "C-GZ", "name": "Guangzhou Lingnan Produce Trading Co.", "aliases": ("guangzhou lingnan",),
+     "email_domain": "lingnan-produce.example"},
+    {"id": "C-MIA", "name": "Miami Orchard Distributors LLC", "aliases": ("miami orchard",),
+     "email_domain": "miami-orchard.example"},
+]
+
 LEGAL_SUFFIX = re.compile(r"\b(spa|s\.?a\.?|ltda\.?|limitada|llc|ltd\.?|co\.?|inc\.?|eirl)\b|\(fictional\)")
 
 
@@ -60,6 +75,32 @@ def match_payee(db: Session, issuer_name: str = "", tax_id: str = "") -> Payee |
     return None
 
 
+def match_customer(issuer_name: str) -> dict | None:
+    target = _words(issuer_name)
+    if not target:
+        return None
+    for c in CUSTOMERS:
+        if any(a in target for a in c["aliases"]) or SequenceMatcher(None, target, _words(c["name"])).ratio() >= 0.8:
+            return c
+    return None
+
+
+def _check_customer(customer: dict, sender_domain: str, bank_account: str) -> dict:
+    """A customer's notice: the sender domain must be the one on file (look-alike = spoofed notice)."""
+    rules: list[str] = []
+    details: dict[str, str] = {"customer_id": customer["id"]}
+    if bank_account:
+        rules.append("unknown-payee")  # we never pay a customer: an account in their notice is not on file
+    if sender_domain and _domain(sender_domain) != customer["email_domain"]:
+        rules.append("domain-mismatch")
+        details["domain_on_file"] = customer["email_domain"]
+        details["domain_in_message"] = _domain(sender_domain)
+        if lookalike(_domain(sender_domain), customer["email_domain"]):
+            details["lookalike"] = "yes"
+    verdict = "malicious" if details.get("lookalike") else ("suspicious" if rules else "clean")
+    return {"verdict": verdict, "rules": rules, "payee_id": None, "details": details, "verify_by": None}
+
+
 def _utc(ts: datetime) -> datetime:
     return ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)
 
@@ -82,6 +123,8 @@ def check_payee(db: Session, issuer_name: str = "", sender_domain: str = "", ban
     details: dict[str, str] = {}
     payee = match_payee(db, issuer_name, tax_id)
     if payee is None:
+        if customer := match_customer(issuer_name):
+            return _check_customer(customer, sender_domain, bank_account)
         rules.append("unknown-payee")
         return {"verdict": "suspicious", "rules": rules, "payee_id": None, "details": details, "verify_by": None}
 

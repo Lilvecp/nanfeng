@@ -27,9 +27,14 @@ NO_RUN = {"es": "Todavía no he ejecutado nada hoy. Cuando llegue un documento o
           "zh": "今天我还没有执行任何操作。收到文件或您请求简报后，我会解释每一步。"}
 
 
-def intent(question: str) -> str:
+def match(question: str) -> str | None:
+    """The intent a question asks about, or None if it matches none (it is not a question for us)."""
     q = question.lower()
-    return next((name for name, rx in INTENTS if re.search(rx, q)), "did")
+    return next((name for name, rx in INTENTS if re.search(rx, q)), None)
+
+
+def intent(question: str) -> str:
+    return match(question) or "did"
 
 
 def _facts(run: Run) -> dict[str, Any]:
@@ -45,6 +50,8 @@ def _facts(run: Run) -> dict[str, Any]:
         f["plan"] = {"actions": [a["summary"] for a in p["optimal"].get("actions", [])],
                      "cost_clp": p["optimal"]["total_cost_clp"], "default_cost_clp": p["default"]["total_cost_clp"],
                      "savings_pct": p.get("savings_pct"), "coverage": p["optimal"].get("out_of_sample_coverage"),
+                     "choice": p.get("choice", "optimal"), "no_proposal_reason": p.get("no_proposal_reason") or "",
+                     "default_actions": [a["summary"] for a in p["default"].get("actions", [])],
                      "why": [{"product": e.get("name") or e.get("product"), "selected": e.get("selected"), "reason": e.get("reason")}
                              for e in (p.get("explanation") or [])][:9]}
     if run.approvals:
@@ -81,6 +88,17 @@ def _template_answer(kind: str, f: dict[str, Any], lang: str) -> str:
         return L(f"Descarté las otras opciones así (motivos del optimizador): {lines}.",
                  f"Here is why the other options lost (the optimizer's reasons): {lines}.",
                  f"其他方案落选的原因（优化器给出）：{lines}。")
+    if kind in ("plan", "alternatives") and plan and plan["choice"] == "none":
+        return L(f"No propuse ninguna operación: {plan['no_proposal_reason']}. Nada se mueve sin un plan que el banco pueda ejecutar entero.",
+                 f"I proposed no operation: {plan['no_proposal_reason']}. Nothing moves without a plan the bank can execute in full.",
+                 f"我没有提议任何操作：{plan['no_proposal_reason']}。银行无法完整执行的方案，不会动用任何资金。")
+    if kind in ("plan", "alternatives") and plan and plan["choice"] == "default":
+        cost = templates.money(plan["default_cost_clp"], "CLP", lang)
+        return L(f"Propuse {' + '.join(plan['default_actions'])}, el crédito bancario de siempre ({cost}): el optimizador "
+                 f"no encontró una mezcla más barata, así que no te vendo ningún ahorro.",
+                 f"I proposed {' + '.join(plan['default_actions'])}, the usual bank loan ({cost}): the optimizer found no "
+                 f"cheaper mix, so I claim no savings.",
+                 f"我提议了 {' + '.join(plan['default_actions'])}（常规银行贷款，{cost}）：优化器没有找到更便宜的组合，因此不声称任何节省。")
     if kind in ("plan", "alternatives") and plan:
         return L(f"Elegí {' + '.join(plan['actions'])} porque es la mezcla más barata que mantiene la caja sobre el colchón: "
                  f"{templates.money(plan['cost_clp'], 'CLP', 'es')} vs {templates.money(plan['default_cost_clp'], 'CLP', 'es')} "

@@ -235,3 +235,67 @@ def test_health_report_sends_the_engine_findings_on_whatsapp(api, agent, hub, ow
     es = api.post("/report", json={"language": "es", "send": False}, headers=owner).json()
     assert "Salud del negocio" in es["text"] and es["delivery"] is None
     assert "business_analysis" in [s["tool"] for s in api.get(f"/runs/{out['run']['run_id']}", headers=owner).json()["trace"]]
+
+
+# --- "WHY" from the owner's WhatsApp (W1) ------------------------------------------------------
+
+OWNER_PHONE = "+56 9 1234 5678"
+
+
+@pytest.fixture()
+def owner_api(settings, backend, hub):
+    from dataclasses import replace
+
+    from nanfeng_agent.orchestrator import Agent
+    from nanfeng_agent.router import ModelRouter
+
+    agent = Agent(replace(settings, owner_phone=OWNER_PHONE), backend=backend, router=ModelRouter(""), hub=hub)
+    with TestClient(create_app(AgentService(agent), listen=False)) as c:
+        yield c, agent
+
+
+def _wa(text, sender="+56912345678"):
+    return {"channel": "whatsapp", "from": sender, "text": text}
+
+
+def test_owner_asks_why_on_whatsapp_and_gets_the_real_answer(owner_api, hub):
+    api, agent = owner_api
+    run = api.post("/inbound/zavu", json=_wa(fixtures.SHANGHAI_NOTICE, "+8613800000001"), headers=AGENT).json()
+    runs_before = len(agent.runs)
+
+    out = api.post("/inbound/zavu", json=_wa("WHY the PAE?"), headers=AGENT).json()
+    assert out["status"] == "answered" and out["intent"] == "plan" and out["run_id"] == run["run_id"]
+    assert len(agent.runs) == runs_before  # a question starts no run, no forecast
+    reply = hub.outbox[-1]
+    assert reply.channel == "whatsapp" and reply.message.kind == "answer"
+    assert reply.message.to == agent.owner.channels["whatsapp"]
+    assert "Pre-export loan in USD (PAE)" in reply.message.text and "45% cheaper" in reply.message.text
+
+
+def test_approve_on_whatsapp_only_explains_the_approval_stays_pending(owner_api, client, hub):
+    api, agent = owner_api
+    run = api.post("/inbound/zavu", json=_wa(fixtures.SHANGHAI_NOTICE, "+8613800000001"), headers=AGENT).json()
+    appr_id = run["approvals"][0]["id"]
+
+    out = api.post("/inbound/zavu", json=_wa(f"APPROVE {appr_id} {SANDBOX_OTP}"), headers=AGENT).json()
+    assert out["status"] == "answered" and out["intent"] == "tier"
+    assert "never approve" in hub.outbox[-1].message.text
+    assert agent.backend.get(f"/approvals/{appr_id}")["status"] == "pending"
+
+
+def test_why_from_another_phone_is_a_document(owner_api):
+    api, agent = owner_api
+    out = api.post("/inbound/zavu", json=_wa("why?", "+8613800000009"), headers=AGENT).json()
+    assert out.get("run_id", "").startswith("RUN-") and out["status"] != "answered"
+
+
+def test_owner_forwarding_a_notice_still_runs_the_agent(owner_api):
+    api, _ = owner_api
+    out = api.post("/inbound/zavu", json=_wa(fixtures.SHANGHAI_NOTICE), headers=AGENT).json()
+    assert out["status"] == "awaiting_approval"
+
+
+def test_owner_question_needs_a_configured_owner_phone(api, agent):
+    assert agent.settings.owner_phone == ""
+    out = api.post("/inbound/zavu", json=_wa("why?", "+56900000000"), headers=AGENT).json()
+    assert out["status"] != "answered"

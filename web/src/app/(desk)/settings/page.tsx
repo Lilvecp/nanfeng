@@ -25,7 +25,7 @@ const TX = {
     l1Limit: "CLP 0 · no payments", l1Scope: "Reminders, quotes", l2Scope: "Allowlisted payees · FX ≤ ¥500k", l3Scope: "Any, with owner code", perAction: "per action", perMonth: "per month",
     allow: "Beneficiary allowlist", add: "+ Add (L3)", addToast: "Adding a payee is L3: owner code + call-back. Available once the bank API is connected.", payCols: ["Name", "Bank", "Account", "Currency", "Added"], remove: "Remove",
     removed: (n: string) => `${n} removed · the agent can no longer pay it`, noPayees: "NO PAYEES → THE AGENT CAN DRAFT BUT NEVER PAY",
-    approvalCh: "Approval channels", waOtp: "WhatsApp + SMS code", webAuth: "Web + authenticator", voice: "Voice (blocked by policy)",
+    approvalCh: "Approval channels", waOtp: "WhatsApp + one-time code (sandbox code in the demo)", webAuth: "Web + authenticator", voice: "Voice (blocked by policy)",
     languages: "Languages", owner: "Owner", importers: "Importers",
     connected: "Connected channels", up: "Up", sim: "Simulated", connect: "Connect", roadmap: "LINE and KakaoTalk adapters are on the roadmap", bankApi: "Banco Pacífico API", bankSandbox: "Sandbox",
     diff: (dirty: boolean) => `policy.diff · ${dirty ? "unsaved" : "clean"}`,
@@ -38,7 +38,7 @@ const TX = {
     l1Limit: "CLP 0 · sin pagos", l1Scope: "Recordatorios, cotizaciones", l2Scope: "Cuentas autorizadas · FX ≤ ¥500k", l3Scope: "Cualquiera, con código del dueño", perAction: "por acción", perMonth: "por mes",
     allow: "Cuentas autorizadas", add: "+ Agregar (L3)", addToast: "Agregar una cuenta es L3: código del dueño + llamada de verificación. Disponible al conectar la API del banco.", payCols: ["Nombre", "Banco", "Cuenta", "Moneda", "Agregada"], remove: "Quitar",
     removed: (n: string) => `${n} quitada · el agente ya no puede pagarle`, noPayees: "SIN CUENTAS → EL AGENTE PUEDE PREPARAR PERO NUNCA PAGAR",
-    approvalCh: "Canales de aprobación", waOtp: "WhatsApp + código SMS", webAuth: "Web + autenticador", voice: "Voz (bloqueada por política)",
+    approvalCh: "Canales de aprobación", waOtp: "WhatsApp + código de un solo uso (código sandbox en la demo)", webAuth: "Web + autenticador", voice: "Voz (bloqueada por política)",
     languages: "Idiomas", owner: "Dueño", importers: "Importadores",
     connected: "Canales conectados", up: "Activo", sim: "Simulado", connect: "Conectar", roadmap: "Los adaptadores de LINE y KakaoTalk están en el roadmap", bankApi: "API Banco Pacífico", bankSandbox: "Sandbox",
     diff: (dirty: boolean) => `policy.diff · ${dirty ? "sin guardar" : "sin cambios"}`,
@@ -51,7 +51,7 @@ const TX = {
     l1Limit: "CLP 0 · 不可付款", l1Scope: "提醒、报价", l2Scope: "白名单收款方 · 外汇 ≤ ¥500k", l3Scope: "任何操作，需企业主验证码", perAction: "单笔", perMonth: "每月",
     allow: "收款方白名单", add: "+ 添加（L3）", addToast: "添加收款方属于 L3：需企业主验证码并回电核实。接入银行 API 后开放。", payCols: ["名称", "银行", "账户", "币种", "添加日期"], remove: "移除",
     removed: (n: string) => `已移除 ${n} · 代理无法再向其付款`, noPayees: "无收款方 → 代理只能起草，永远无法付款",
-    approvalCh: "审批渠道", waOtp: "WhatsApp + 短信验证码", webAuth: "网页 + 身份验证器", voice: "语音（策略禁止）",
+    approvalCh: "审批渠道", waOtp: "WhatsApp + 一次性验证码（演示中为沙盒验证码）", webAuth: "网页 + 身份验证器", voice: "语音（策略禁止）",
     languages: "语言", owner: "企业主", importers: "进口商",
     connected: "已连接渠道", up: "正常", sim: "模拟", connect: "连接", roadmap: "LINE 和 KakaoTalk 适配器已列入路线图", bankApi: "Banco Pacífico API", bankSandbox: "沙盒",
     diff: (dirty: boolean) => `policy.diff · ${dirty ? "未保存" : "无更改"}`,
@@ -60,8 +60,8 @@ const TX = {
 
 type Payee = { name: string; bank: string; acct: string; ccy: string; added: string };
 const PAYEES: Payee[] = [
-  { name: "Cartonera Sur Ltda.", bank: "Banco Pacífico", acct: "•••• 2210", ccy: "CLP", added: "2026-03-02" },
-  { name: "Frío Rancagua SpA", bank: "Banco Andino", acct: "•••• 7781", ccy: "CLP", added: "2025-11-18" },
+  { name: "Cartonera Sur Ltda.", bank: "Banco Andino", acct: "•••• 2117", ccy: "CLP", added: "2026-03-02" },
+  { name: "Frío Austral Logística SpA", bank: "Banco Sur", acct: "•••• 1203", ccy: "CLP", added: "2025-11-18" },
   { name: "Pacific Reefer Lines", bank: "HSBC HK", acct: "•••• 0934", ccy: "USD", added: "2025-12-05" },
 ];
 
@@ -205,7 +205,7 @@ export default function SettingsPage() {
               <div className="card-h"><span className="h3">{x.connected}</span></div>
               <div className="tbl-wrap"><table className="tbl"><tbody>
                 <tr><td>WhatsApp Business</td><td className="r"><span className="badge ok">{x.up}</span></td></tr>
-                <tr><td>SMS gateway</td><td className="r"><span className="badge ok">{x.up}</span></td></tr>
+                <tr><td>SMS gateway</td><td className="r"><span className="badge warn">{x.sim}</span></td></tr>
                 <tr><td>WeCom</td><td className="r"><span className="badge warn">{x.sim}</span></td></tr>
                 <tr><td>LINE · KakaoTalk</td><td className="r"><button className="btn btn-secondary btn-sm" type="button" onClick={() => notify(x.roadmap)}>{x.connect}</button></td></tr>
                 <tr><td>{x.bankApi}</td><td className="r"><span className="badge acc">{x.bankSandbox}</span></td></tr>

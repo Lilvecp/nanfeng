@@ -25,8 +25,8 @@ const RT_NAME: Record<string, Record<Exclude<Lang, "en">, string>> = {
 
 const TX = {
   en: {
-    blockedToday: "Blocked today", chain: "Chain", broken: "BROKEN @", verified: "VERIFIED", unchecked: "NOT CHECKED YET", lastAnchor: "Last anchor",
-    sec: "SEC-0038 · Blocked · 08:47:12", blocked: "Blocked", notified: "Owner notified · SMS 08:47:15", reviewedB: "Reviewed",
+    blockedToday: "Blocked today", chain: "Chain", broken: "BROKEN @", verified: "VERIFIED", unchecked: "NOT CHECKED YET", lastAnchor: "Last anchor", noAnchor: "none yet", sandboxAnchor: "sandbox · not on chain", sandboxRows: "Sandbox data · not from the live API",
+    sec: "SEC-0038 · Blocked · 08:47:12", blocked: "Blocked", notified: "Quarantined · never reached the planner", reviewedB: "Reviewed",
     title: "Invoice with changed bank account + hidden prompt injection",
     body: "An invoice \"from\" Frío Austral, our cold-storage supplier: look-alike sender domain, a bank account that differs from the one on file, and white-on-white text telling the AI to pay without asking. Quarantined; it never reached the planner.",
     open: "Open document", mark: "Mark reviewed", unmark: "Mark unreviewed",
@@ -38,8 +38,8 @@ const TX = {
     chainOk: (n: number) => `Chain verified · ${n} events · no gaps`, chainBroken: (n: number | null) => `Chain broken at seq ${n}`, offline: "Backend unreachable · could not verify",
   },
   es: {
-    blockedToday: "Bloqueados hoy", chain: "Cadena", broken: "ROTA EN", verified: "VERIFICADA", unchecked: "SIN VERIFICAR AÚN", lastAnchor: "Último anclaje",
-    sec: "SEC-0038 · Bloqueado · 08:47:12", blocked: "Bloqueado", notified: "Dueño avisado · SMS 08:47:15", reviewedB: "Revisado",
+    blockedToday: "Bloqueados hoy", chain: "Cadena", broken: "ROTA EN", verified: "VERIFICADA", unchecked: "SIN VERIFICAR AÚN", lastAnchor: "Último anclaje", noAnchor: "ninguno aún", sandboxAnchor: "sandbox · no está en la cadena", sandboxRows: "Datos de sandbox · no vienen de la API en vivo",
+    sec: "SEC-0038 · Bloqueado · 08:47:12", blocked: "Bloqueado", notified: "En cuarentena · nunca llegó al planificador", reviewedB: "Revisado",
     title: "Factura con cuenta bancaria cambiada e instrucción oculta",
     body: "Una factura \"de\" Frío Austral, nuestro proveedor de frío: dominio del remitente parecido al real, una cuenta distinta de la registrada y un texto blanco sobre blanco que le pedía a la IA pagar sin preguntar. Quedó en cuarentena y nunca llegó al planificador.",
     open: "Abrir documento", mark: "Marcar como revisado", unmark: "Marcar como no revisado",
@@ -51,8 +51,8 @@ const TX = {
     chainOk: (n: number) => `Cadena verificada · ${n} eventos · sin huecos`, chainBroken: (n: number | null) => `Cadena rota en el evento ${n}`, offline: "Sin conexión con el servidor · no se pudo verificar",
   },
   zh: {
-    blockedToday: "今日拦截", chain: "审计链", broken: "断裂于", verified: "已验证", unchecked: "尚未验证", lastAnchor: "最近锚定",
-    sec: "SEC-0038 · 已拦截 · 08:47:12", blocked: "已拦截", notified: "已短信通知企业主 · 08:47:15", reviewedB: "已复核",
+    blockedToday: "今日拦截", chain: "审计链", broken: "断裂于", verified: "已验证", unchecked: "尚未验证", lastAnchor: "最近锚定", noAnchor: "暂无", sandboxAnchor: "沙盒 · 未上链", sandboxRows: "沙盒数据 · 非在线 API",
+    sec: "SEC-0038 · 已拦截 · 08:47:12", blocked: "已拦截", notified: "已隔离 · 从未到达规划代理", reviewedB: "已复核",
     title: "银行账户被更改并夹带隐藏指令的发票",
     body: "一张“来自”冷链供应商 Frío Austral 的发票：发件人域名仿冒，收款账户与档案不符，还有白底白字要求 AI 不经询问直接付款。文件已隔离，从未到达规划代理。",
     open: "打开文件", mark: "标记为已复核", unmark: "标记为未复核",
@@ -91,11 +91,13 @@ function toRow(e: AuditEntry, anchors: Anchor[], tiers: Map<string, number>): Au
   };
 }
 
+// Sandbox rows (no backend): illustrative entries labelled as sandbox data, never a real anchor.
+const SANDBOX = "sandbox";
 const AUDIT: AuditRow[] = [
-  { seq: 1042, time: "10:15:06", event: "approval.request pae.loan USD 142.4k", tier: 3, prev: "5d02…e4b1", hash: "a71f…0c9e", anchor: "pending · 10:30" },
-  { seq: 1041, time: "10:14:58", event: "optimizer.select PAE-USD", tier: 0, prev: "9c4a…71f0", hash: "5d02…e4b1", anchor: "pending · 10:30" },
-  { seq: 1038, time: "08:47:12", event: "doc.block bank-detail swap", tier: 0, prev: "0f6d…9a13", hash: "e3b8…22ad", anchor: "0x51b8…09d4", bad: true },
-  { seq: 1031, time: "08:30:40", event: "reminder.send WeCom", tier: 1, prev: "2b19…d8f4", hash: "71aa…c5e0", anchor: "0x51b8…09d4" },
+  { seq: 1042, time: "10:15:06", event: "approval.request pae.loan USD 142.4k", tier: 3, prev: "5d02…e4b1", hash: "a71f…0c9e", anchor: "pending" },
+  { seq: 1041, time: "10:14:58", event: "optimizer.select PAE-USD", tier: 0, prev: "9c4a…71f0", hash: "5d02…e4b1", anchor: "pending" },
+  { seq: 1038, time: "08:47:12", event: "security.attack_blocked SEC-0038 bank-change", tier: 0, prev: "0f6d…9a13", hash: "e3b8…22ad", anchor: SANDBOX, bad: true },
+  { seq: 1031, time: "08:30:40", event: "reminder.send WeCom", tier: 1, prev: "2b19…d8f4", hash: "71aa…c5e0", anchor: SANDBOX },
 ];
 
 export default function SecurityPage() {
@@ -131,7 +133,7 @@ export default function SecurityPage() {
         }
         setLive({
           rows: entries.slice(-12).reverse().map((e) => toRow(e, anchors, tiers)),
-          lastAnchor: last ? (last.tx_hash ? short(last.tx_hash) : `${last.backend} #${last.id}`) : "none yet",
+          lastAnchor: last ? (last.tx_hash ? short(last.tx_hash) : `${last.backend} #${last.id}`) : "",
           onChain: anchors.some((x) => x.backend === "evm"),
           blocked: new Set(entries.filter((e) => e.kind === "security.attack_blocked").map((e) => String((e.payload as Record<string, unknown>).doc_id))).size,
         });
@@ -144,9 +146,9 @@ export default function SecurityPage() {
 
   const mockRows: AuditRow[] = approval === "approved"
     ? [
-        { seq: 1044, time: "10:16:09", event: "anchor.merkle root batch 1031–1043", tier: 0, prev: "c90e…77b2", hash: "f41d…a0e3", anchor: SANDBOX_RECEIPT.tx },
-        { seq: SANDBOX_RECEIPT.seq, time: "10:16:02", event: "pae.loan.execute USD 142.4k (sandbox)", tier: 3, prev: "a71f…0c9e", hash: SANDBOX_RECEIPT.hash, anchor: SANDBOX_RECEIPT.tx },
-        ...AUDIT.map((r) => (r.anchor.startsWith("pending") ? { ...r, anchor: SANDBOX_RECEIPT.tx } : r)),
+        { seq: 1044, time: "10:16:09", event: "anchor.merkle root batch 1031–1043 (sandbox)", tier: 0, prev: "c90e…77b2", hash: "f41d…a0e3", anchor: SANDBOX },
+        { seq: SANDBOX_RECEIPT.seq, time: "10:16:02", event: "pae.loan.execute USD 142.4k (sandbox)", tier: 3, prev: "a71f…0c9e", hash: SANDBOX_RECEIPT.hash, anchor: SANDBOX },
+        ...AUDIT.map((r) => (r.anchor === "pending" ? { ...r, anchor: SANDBOX } : r)),
       ]
     : AUDIT;
   const rows = live?.rows ?? mockRows;
@@ -169,16 +171,16 @@ export default function SecurityPage() {
     timer.current = setTimeout(() => {
       setVerify("ok");
       setCheckedAt(fmtLocal(new Date().toISOString(), false).slice(0, 5));
-      notify(x.chainOk(rows[0].seq));
+      notify(`${x.chainOk(rows.length)} · ${x.sandboxRows}`);
     }, 1200);
   };
 
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">{x.blockedToday}</span><span className="v down">{live ? live.blocked : 2}</span></div>
+        <div className="tick"><span className="l">{x.blockedToday}</span><span className="v down">{live ? live.blocked : 1}</span></div>
         <div className="tick"><span className="l">{x.chain}</span>{verify === "broken" ? <span className="v down">{x.broken} {brokenAt}</span> : verify === "ok" && checkedAt ? <span className="v up">{x.verified} {checkedAt}</span> : <span className="v">{verify === "running" ? x.verifying : x.unchecked}</span>}</div>
-        <div className="tick"><span className="l">{x.lastAnchor}</span><span className="v">{live ? live.lastAnchor : approval === "approved" ? SANDBOX_RECEIPT.tx : "0x51b8…09d4"}</span></div>
+        <div className="tick"><span className="l">{x.lastAnchor}</span><span className={`v${live?.lastAnchor ? "" : " muted"}`}>{live ? live.lastAnchor || x.noAnchor : x.sandboxAnchor}</span></div>
       </Topbar>
 
       <div className="content">
@@ -244,7 +246,8 @@ export default function SecurityPage() {
 
         <div className="card" data-guide="sec-audit">
           <div className="card-h">
-            <span className="h3">{x.chainTitle(live && !live.onChain ? x.local : x.sepolia)}</span>
+            <span className="h3">{x.chainTitle(!live ? x.sandboxAnchor : live.onChain ? x.sepolia : x.local)}</span>
+            {!live && <span className="badge" style={{ color: "var(--warn)" }}>{x.sandboxRows}</span>}
             <button className="btn btn-secondary btn-sm" type="button" disabled={verify === "running"} onClick={runVerify}>
               {verify === "running" ? <>{x.verifying}<span className="blink">_</span></> : verify === "ok" ? x.ok : verify === "broken" ? x.bad : x.verify} <span className="key">V</span>
             </button>
@@ -258,7 +261,7 @@ export default function SecurityPage() {
                   <td><span className={`tier t${r.tier}`}><b>L{r.tier}</b></span></td>
                   <td className="num muted">{r.prev}</td><td className="num">{r.hash}</td>
                   <td>{verify === "running" ? <span className="skel" style={{ display: "inline-block", width: 32, height: 10 }} /> : verify === "broken" && brokenAt !== null && r.seq >= brokenAt ? <span className="badge crit">FAIL</span> : <span className="badge ok">OK</span>}</td>
-                  <td className={`num${r.anchor.startsWith("pending") ? " muted" : ""}`}>{r.href ? <a href={r.href} target="_blank" rel="noopener noreferrer">{r.anchor}</a> : r.anchor.replace("pending", x.pendingA)}</td>
+                  <td className={`num${r.href ? "" : " muted"}`}>{r.href ? <a href={r.href} target="_blank" rel="noopener noreferrer">{r.anchor}</a> : r.anchor === SANDBOX ? x.sandboxAnchor : r.anchor.replace("pending", x.pendingA)}</td>
                 </tr>
               ))}
             </tbody>

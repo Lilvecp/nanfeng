@@ -34,6 +34,7 @@ from pydantic import BaseModel, Field
 
 from . import __version__, explain
 from .backend import BackendError
+from .channels import OutboundMessage, UnknownChannel
 from .config import Settings
 from .inbound import from_zavu, unwrap, verify_signature
 from .ingest import Document
@@ -45,6 +46,11 @@ log = logging.getLogger("nanfeng_agent")
 MAX_UPLOAD_BYTES = 4 * 1024 * 1024
 SEEN_EVENTS = 1000  # Zavu retries a delivery up to 5 times: remember recent event ids
 RESUME_EVENTS = {"approval.approved", "approval.rejected", "approval.locked", "approval.failed"}
+MAX_QUESTION_CHARS = 300  # longer owner messages are documents (a forwarded notice), not questions
+
+
+def _digits(phone: str) -> str:
+    return "".join(ch for ch in phone if ch.isdigit())
 
 
 class AgentService:
@@ -76,8 +82,34 @@ class AgentService:
             raise HTTPException(422, f"cannot read the message: {exc.__class__.__name__}") from exc
         if not doc.ocr_text.strip():
             return {"status": "ignored", "reason": "empty message"}
+        if self.is_owner_question(message, doc):
+            return self.answer_owner(doc)
         with self.lock:
             return self.agent.handle_document(doc).summary()
+
+    def is_owner_question(self, message: dict[str, Any], doc: Document) -> bool:
+        """"WHY" from the owner's own phone: a short text (no attachment) that asks about one of the
+        explain intents. Approving never happens here: the OTP goes to the cockpit, never through the agent."""
+        owner = _digits(self.agent.settings.owner_phone)
+        return (bool(owner) and doc.source in ("whatsapp", "sms") and _digits(doc.sender_phone) == owner
+                and not message.get("media") and len(doc.ocr_text.strip()) <= MAX_QUESTION_CHARS
+                and explain.match(doc.ocr_text) is not None)
+
+    def answer_owner(self, doc: Document) -> dict[str, Any]:
+        agent = self.agent
+        with self.lock:
+            target = next((r for r in reversed(list(agent.runs.values())) if r.kind == "document"), None)
+            out = explain.answer(doc.ocr_text.strip(), target, agent.settings.owner_language)
+            try:
+                d = agent.hub.send_to(agent.owner, OutboundMessage(to="", text=out["answer"],
+                                                                   language=agent.settings.owner_language,
+                                                                   kind="answer"), channels=(doc.source,))
+                delivery = d.public()
+            except UnknownChannel:
+                delivery = None
+        agent.backend.publish("agent.answer", {"run_id": out["run_id"], "intent": out["intent"],
+                                               "channel": doc.source, "status": delivery and delivery.get("status")})
+        return {"status": "answered", "intent": out["intent"], "run_id": out["run_id"], "delivery": delivery}
 
     def forget(self, event_id: str | None) -> None:
         """A delivery that failed before running can be retried."""

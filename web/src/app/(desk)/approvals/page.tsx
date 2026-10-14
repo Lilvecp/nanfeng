@@ -17,7 +17,7 @@ const PAE = S.arena.find((a) => a.product === "Pre-export loan in USD (PAE)")!;
 // Copy for the request card (fe-11). Numbers come from the quant engine (lib/scenario.ts).
 const TX = {
   en: {
-    plain: `In plain words: you are approving a loan of ${usd(N.loanUsd)} that arrives on ${longDate(N.crunchDate)} to pay the harvest wages. It costs ${pesos(N.planCost)}, ${pesos(N.savings)} less than a regular bank loan. To confirm, type the 6-digit code we sent you by SMS.`,
+    plain: `In plain words: you are approving a loan of ${usd(N.loanUsd)} that arrives on ${longDate(N.crunchDate)} to pay the harvest wages. It costs ${pesos(N.planCost)}, ${pesos(N.savings)} less than a regular bank loan. To confirm, type the 6-digit one-time code (in this sandbox it is the sandbox code shown below).`,
     queue: "Queue", awaiting: "1 ACTION AWAITING YOU", clear: "NOTHING PENDING", approvedAt: (t: string) => `Approved ${t} · code verified`, back: "Back home", audit: "Audit log", compare: "Compare options", expires: "code valid for", reasonPh: "> call the importer first", reasonReq: "Write a short reason so the agent knows what to try next.",
     filters: { all: "ALL", approved: "APPROVED", rejected: "REJECTED", auto: "AUTO" } as Record<Filter, string>, dec: { approved: "Approved", rejected: "Rejected", auto: "Auto" } as Record<HistoryRow["decision"], string>,
     cols: ["Time", "ID", "Action", "Level", "Amount", "Decision", "Channel", "Note"], none: "NO ACTIONS IN RANGE",
@@ -28,13 +28,13 @@ const TX = {
     rejectedBody: (r: string) => `Reason: “${r}”. The agent is preparing the next-cheapest option (export factoring) and will ask again.`,
     verifying: `Verifying with ${N.lender}`,
     status: { pending: "Pending", approved: "Approved", rejected: "Rejected" }, tierL3: "OWNER+CODE", risk: "Risk: medium", executed: "Executed", ttl: "Expires in", eac: "Annual cost",
-    errLen: "Type all 6 digits of the code.", errLock: "Too many wrong codes. Send yourself a new code to try again.", errBad: (n: number) => `That code didn't match. ${n} ${n === 1 ? "attempt" : "attempts"} left; check the SMS and try again.`,
+    errLen: "Type all 6 digits of the code.", errLock: "Too many wrong codes. Send yourself a new code to try again.", errBad: (n: number) => `That code didn't match. ${n} ${n === 1 ? "attempt" : "attempts"} left; check the code and try again.`,
     otpGroup: "One-time code", digit: "Digit", filter: "Filter",
     resend: "Send a new code", resetSandbox: "Reset the sandbox", reassure: `Cash stays above the safety buffer in ${N.coverage} of scenarios · sandbox · no real funds move`,
     notes: {} as Record<string, string>,
   },
   es: {
-    plain: `En simple: estás aprobando un crédito de ${usd(N.loanUsd, "es")} que llega el ${longDate(N.crunchDate, "es")} para pagar los sueldos de la cosecha. Cuesta ${pesos(N.planCost, "es")}, ${pesos(N.savings, "es")} menos que un crédito normal del banco. Para confirmar, escribe el código de 6 dígitos que te llegó por SMS.`,
+    plain: `En simple: estás aprobando un crédito de ${usd(N.loanUsd, "es")} que llega el ${longDate(N.crunchDate, "es")} para pagar los sueldos de la cosecha. Cuesta ${pesos(N.planCost, "es")}, ${pesos(N.savings, "es")} menos que un crédito normal del banco. Para confirmar, escribe el código de un solo uso de 6 dígitos (en este sandbox es el código sandbox que aparece abajo).`,
     queue: "Pendientes", awaiting: "1 ACCIÓN ESPERA TU OK", clear: "NADA PENDIENTE", approvedAt: (t: string) => `Aprobado ${t} · código verificado`, back: "Volver al inicio", audit: "Auditoría", compare: "Comparar opciones", expires: "el código vale por", reasonPh: "> primero llamar al importador", reasonReq: "Escribe un motivo corto para que el agente sepa qué probar después.",
     filters: { all: "TODO", approved: "APROBADAS", rejected: "RECHAZADAS", auto: "AUTOMÁTICAS" } as Record<Filter, string>, dec: { approved: "Aprobada", rejected: "Rechazada", auto: "Automática" } as Record<HistoryRow["decision"], string>,
     cols: ["Hora", "ID", "Acción", "Nivel", "Monto", "Decisión", "Canal", "Nota"], none: "NO HAY ACCIONES",
@@ -45,13 +45,13 @@ const TX = {
     rejectedBody: (r: string) => `Motivo: “${r}”. El agente prepara la siguiente opción más barata (factoring de exportación) y volverá a preguntar.`,
     verifying: `Verificando con ${N.lender}`,
     status: { pending: "Pendiente", approved: "Aprobada", rejected: "Rechazada" }, tierL3: "DUEÑO+CÓDIGO", risk: "Riesgo: medio", executed: "Ejecutada", ttl: "Vence en", eac: "CAE",
-    errLen: "Escribe los 6 dígitos del código.", errLock: "Demasiados códigos incorrectos. Pide un código nuevo para volver a intentarlo.", errBad: (n: number) => `El código no coincide. ${n === 1 ? "Queda 1 intento" : `Quedan ${n} intentos`}; revisa el SMS y vuelve a probar.`,
+    errLen: "Escribe los 6 dígitos del código.", errLock: "Demasiados códigos incorrectos. Pide un código nuevo para volver a intentarlo.", errBad: (n: number) => `El código no coincide. ${n === 1 ? "Queda 1 intento" : `Quedan ${n} intentos`}; revisa el código y vuelve a probar.`,
     otpGroup: "Código de un solo uso", digit: "Dígito", filter: "Filtro",
     resend: "Enviar código nuevo", resetSandbox: "Reiniciar el sandbox", reassure: `La caja queda sobre el colchón en el ${N.coverage} de los escenarios · sandbox · sin dinero real`,
     notes: { "within limit · allowlisted": "dentro del límite · cuenta autorizada", "\"Too expensive, check other options\"": "\"Muy caro, revisa otras opciones\"", "Cherry Crisis plan": "Plan Cherry Crisis" } as Record<string, string>,
   },
   zh: {
-    plain: `简单来说：您正在批准一笔 ${usd(N.loanUsd, "zh")}（${cny(N.loanClp)}）的贷款，于${longDate(N.crunchDate, "zh")}到账，用于发放采收工资。成本${pesos(N.planCost, "zh")}（${cny(N.planCost)}），比普通银行贷款少${pesos(N.savings, "zh")}（${cny(N.savings)}）。请输入短信收到的6位验证码确认。`,
+    plain: `简单来说：您正在批准一笔 ${usd(N.loanUsd, "zh")}（${cny(N.loanClp)}）的贷款，于${longDate(N.crunchDate, "zh")}到账，用于发放采收工资。成本${pesos(N.planCost, "zh")}（${cny(N.planCost)}），比普通银行贷款少${pesos(N.savings, "zh")}（${cny(N.savings)}）。请输入6位一次性验证码确认（本沙盒中即下方显示的沙盒验证码）。`,
     queue: "待处理", awaiting: "1 项操作等待您批准", clear: "无待处理事项", approvedAt: (t: string) => `已于 ${t} 批准 · 验证码已确认`, back: "返回首页", audit: "审计日志", compare: "比较方案", expires: "验证码有效期", reasonPh: "> 先致电进口商", reasonReq: "请简单写明原因，代理据此准备下一个方案。",
     filters: { all: "全部", approved: "已批准", rejected: "已拒绝", auto: "自动" } as Record<Filter, string>, dec: { approved: "已批准", rejected: "已拒绝", auto: "自动" } as Record<HistoryRow["decision"], string>,
     cols: ["时间", "编号", "操作", "级别", "金额", "决定", "渠道", "备注"], none: "暂无操作",
@@ -62,7 +62,7 @@ const TX = {
     rejectedBody: (r: string) => `原因：“${r}”。代理正在准备次优方案（出口保理），稍后将再次请求审批。`,
     verifying: `正在与 ${N.lender} 验证`,
     status: { pending: "待批准", approved: "已批准", rejected: "已拒绝" }, tierL3: "企业主+验证码", risk: "风险：中", executed: "已执行", ttl: "剩余", eac: "年化成本",
-    errLen: "请输入完整的6位验证码。", errLock: "错误次数过多。请获取新验证码后再试。", errBad: (n: number) => `验证码不正确，还剩 ${n} 次机会，请核对短信后重试。`,
+    errLen: "请输入完整的6位验证码。", errLock: "错误次数过多。请获取新验证码后再试。", errBad: (n: number) => `验证码不正确，还剩 ${n} 次机会，请核对验证码后重试。`,
     otpGroup: "一次性验证码", digit: "第几位", filter: "筛选",
     resend: "发送新验证码", resetSandbox: "重置沙盒", reassure: `${N.coverage}的情景中现金高于安全垫 · 沙盒 · 不涉及真实资金`,
     notes: { "within limit · allowlisted": "未超限额 · 白名单账户", "\"Too expensive, check other options\"": "\"太贵了，看看其他方案\"", "Cherry Crisis plan": "樱桃危机方案" } as Record<string, string>,
@@ -217,7 +217,7 @@ export default function ApprovalsPage() {
           <div className="card" data-guide="appr-authorize" style={{ borderColor: approval === "approved" ? "var(--ok)" : approval === "rejected" ? "var(--crit)" : "var(--accent)" }}>
             <div className="card-h" style={{ background: approval === "approved" ? "var(--ok-soft)" : approval === "rejected" ? "var(--crit-soft)" : "var(--accent-soft)" }}>
               <span className="h3" style={{ color: "var(--text)" }}>{t("approvals.authorize")}</span>
-              <span className="hint">SMS → +56 9 •••• 4127</span>
+              <span className="hint">{t("approvals.sandboxNoSms")}</span>
             </div>
             {approval === "approved" ? (
               <div className="card-b" style={{ gap: 12, padding: 18 }}>

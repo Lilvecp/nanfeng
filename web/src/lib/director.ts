@@ -41,9 +41,9 @@ export const SCENES: Scene[] = [
   {
     step: 3, route: "/financing", target: "fin-options", ms: 6500,
     caption: {
-      en: `${S.arena.length} financing options from ${lenders} lenders, compared in seconds: cost, term and requirements.`,
-      es: `${S.arena.length} opciones de ${lenders} prestamistas comparadas en segundos: costo, plazo y requisitos.`,
-      zh: `数秒内比较 ${lenders} 家贷款方的 ${S.arena.length} 个融资方案：成本、期限和要求。`,
+      en: `${N.products} financing products checked, ${N.eligible} eligible, from ${lenders} lenders, compared in seconds: cost, term and requirements.`,
+      es: `${N.products} productos de financiamiento revisados, ${N.eligible} elegibles, de ${lenders} prestamistas, comparados en segundos: costo, plazo y requisitos.`,
+      zh: `数秒内评估 ${N.products} 种融资产品（${N.eligible} 种符合条件，来自 ${lenders} 家贷款方）：成本、期限和要求。`,
     },
   },
   {
@@ -65,9 +65,9 @@ export const SCENES: Scene[] = [
   {
     step: 5, route: "/approvals", target: "appr-authorize", ms: 9000, action: "approve",
     caption: {
-      en: "The owner approves with a 6-digit SMS code. Without that OK, no money moves.",
-      es: "El dueño aprueba con un código SMS de 6 dígitos. Sin ese OK, no se mueve ni un peso.",
-      zh: "企业主输入 6 位短信验证码批准。没有这一步，资金不会移动。",
+      en: "The owner approves with a 6-digit one-time code (a fixed sandbox code in this demo). Without that OK, no money moves.",
+      es: "El dueño aprueba con un código de un solo uso de 6 dígitos (en esta demo, un código sandbox fijo). Sin ese OK, no se mueve ni un peso.",
+      zh: "企业主输入 6 位一次性验证码批准（本演示使用固定的沙盒验证码）。没有这一步，资金不会移动。",
     },
   },
   {

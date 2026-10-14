@@ -33,7 +33,7 @@ const TX = {
     note: "Contracted view: each invoice is paid at its due date plus any announced delay plus the customer's usual delay, at today's FX. The last column adds the 10,000-path Monte Carlo. Synthetic company.",
     fix: "See the financing plan", ask: "Ask NanFeng why",
     from: "from", to: "to",
-    send: "Send to my WhatsApp", sending: "Sending…", sent: "Sent on WhatsApp", failed: "Could not send. Try again in a moment.",
+    send: "Send to my WhatsApp", sending: "Sending…", sent: "Sent on WhatsApp", simulated: "Simulated only (sandbox channel, nothing sent)", failed: "Could not send. Try again in a moment.",
     cat: { payroll: "Payroll", supplier: "Suppliers", freight: "Freight", debt_service: "Debt service", tax: "Taxes", utilities: "Energy and water", other: "Other" } as Record<string, string>,
     bucket: (b: string) => (b === "90+" ? "after 90 days" : `in ${b} days`),
   },
@@ -48,7 +48,7 @@ const TX = {
     note: "Vista comprometida: cada factura se paga en su vencimiento más el atraso avisado y el atraso habitual del cliente, al tipo de cambio de hoy. La última columna suma el Monte Carlo de 10.000 caminos. Empresa sintética.",
     fix: "Ver el plan de financiamiento", ask: "Preguntarle a NanFeng por qué",
     from: "desde", to: "hasta",
-    send: "Enviar a mi WhatsApp", sending: "Enviando…", sent: "Enviado por WhatsApp", failed: "No se pudo enviar. Intenta de nuevo en un momento.",
+    send: "Enviar a mi WhatsApp", sending: "Enviando…", sent: "Enviado por WhatsApp", simulated: "Solo simulado (canal sandbox, no se envió nada)", failed: "No se pudo enviar. Intenta de nuevo en un momento.",
     cat: { payroll: "Nómina", supplier: "Proveedores", freight: "Flete", debt_service: "Deuda", tax: "Impuestos", utilities: "Energía y riego", other: "Otros" } as Record<string, string>,
     bucket: (b: string) => (b === "90+" ? "después de 90 días" : `en ${b} días`),
   },
@@ -63,7 +63,7 @@ const TX = {
     note: "合同视图：每张发票按到期日加上已通知的延迟和客户的常见延迟收款，按今日汇率计算。最后一列来自10,000路径蒙特卡洛。虚构企业。",
     fix: "查看融资方案", ask: "问南风为什么",
     from: "自", to: "至",
-    send: "发送到我的WhatsApp", sending: "发送中…", sent: "已通过WhatsApp发送", failed: "发送失败，请稍后再试。",
+    send: "发送到我的WhatsApp", sending: "发送中…", sent: "已通过WhatsApp发送", simulated: "仅模拟（沙盒渠道，未实际发送）", failed: "发送失败，请稍后再试。",
     cat: { payroll: "工资", supplier: "供应商", freight: "运费", debt_service: "偿债", tax: "税费", utilities: "能源与灌溉", other: "其他" } as Record<string, string>,
     bucket: (b: string) => (b === "90+" ? "90天以后" : `${b}天内`),
   },
@@ -101,12 +101,14 @@ export default function HealthPage() {
   const lang = useLang();
   const x = TX[lang];
   const live = useAgentLive();
-  const [report, setReport] = useState<"idle" | "sending" | "sent" | "failed">("idle");
+  const [report, setReport] = useState<"idle" | "sending" | "sent" | "simulated" | "failed">("idle");
   const send = async () => {
     setReport("sending");
     try {
       const r = await agent.report(lang);
-      setReport(r.delivery ? "sent" : "failed");
+      // The agent reports the channel outcome (sent | simulated | failed): only "sent" means it went out.
+      const status = r.delivery?.status;
+      setReport(status === "sent" ? "sent" : status === "simulated" ? "simulated" : "failed");
     } catch {
       setReport("failed");
     }
@@ -129,7 +131,7 @@ export default function HealthPage() {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {live && (
               <button className="btn" type="button" onClick={send} disabled={report === "sending"} aria-live="polite">
-                {report === "sending" ? x.sending : report === "sent" ? `✓ ${x.sent}` : report === "failed" ? x.failed : x.send}
+                {report === "sending" ? x.sending : report === "sent" ? `✓ ${x.sent}` : report === "simulated" ? x.simulated : report === "failed" ? x.failed : x.send}
               </button>
             )}
             <Link className="btn" href="/mission">{x.ask}</Link>

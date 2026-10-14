@@ -18,8 +18,8 @@ Feature freeze: **Sunday Oct 11, 23:59 (Chile)**. After the freeze nothing new g
 | Cost | **CLP 2.1M vs CLP 3.8M** for the default bank loan → **CLP 1.7M saved (45%)** |
 | After the plan | Cash above the buffer in 96% of 10,000 scenarios · 2% probability of negative cash |
 | Credit Passport | 34 (E) → 67 (B) |
-| Benchmark | NanFeng-Bench 50/50 cases · −41% average financing cost vs default loan |
-| Red team | 4/43 attacks stopped before → 43/43 after |
+| Benchmark | NanFeng-Bench 50/50 cases · −41% average financing cost vs default loan (25 cases with a plan) |
+| Red team | 46/46 attacks stopped (first 43: 4 → 43 as controls were built; 3 added Oct 14) |
 
 Decided on Oct 11: the web, deck and video use the engine's plan (PAE loan). The earlier "partial factoring + CNY forward, CLP 4.1M cheaper" story is retired everywhere.
 

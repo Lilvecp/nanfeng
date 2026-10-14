@@ -28,7 +28,7 @@ All prices above are **assumptions**; the deck must say so. The only measured nu
 
 ## Go-to-market
 
-1. **First corridor:** Chile → Mainland China fresh fruit (cherries are ~87% of a USD 2.6 bn season to China). One Chilean bank or factoring fintech as design partner.
+1. **First corridor:** Chile → Mainland China fresh fruit (cherries are ~87% of a USD 2.8 bn season to China). One Chilean bank or factoring fintech as design partner.
 2. **Same corridor, other side:** Chinese importers and their banks (WeCom channel, CNY reminders).
 3. **APEC:** the problem — exporters paid late and financed expensively — is the same in every APEC economy. A new corridor is a new channel adapter and a new product catalog, not a new agent.
 

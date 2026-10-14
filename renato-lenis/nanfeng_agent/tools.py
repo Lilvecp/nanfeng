@@ -13,7 +13,9 @@ Money tools never execute: they post to `POST /approvals` and the backend's poli
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -34,6 +36,43 @@ class RunContext:
     plan_timeout_s: float = 90.0
     channel: str = "WA"
     memory: dict[str, Any] = field(default_factory=dict)  # tool results of this run, by tool name
+    # The company's scenario with the delay the notice announced (scenario_from_notice). The LLM only ever
+    # sees and names the id; the quant tools send this object when they are asked for that id.
+    scenario_obj: dict[str, Any] | None = None
+
+    def scenario_for(self, scenario_id: str) -> str | dict[str, Any]:
+        return self.scenario_obj if self.scenario_obj is not None and scenario_id == self.scenario else scenario_id
+
+
+MAX_NOTICE_DELAY_DAYS = 180
+
+
+def notice_delay(due_date: str, new_due_date: str) -> int:
+    """Days between the invoice's due date and the date the notice announces, clamped to 0-180."""
+    days = (date.fromisoformat(new_due_date) - date.fromisoformat(due_date)).days
+    return max(0, min(days, MAX_NOTICE_DELAY_DAYS))
+
+
+def scenario_from_notice(base: dict[str, Any], fields: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
+    """The company's scenario as the notice tells it: no announced delays except the one in the notice.
+
+    Returns (scenario, note); scenario is None when the notice cannot be applied (the base scenario is
+    used then). Only the receivable's `announced_delay_days` changes: the engine reads it per invoice,
+    so a 45-day notice reproduces the committed Cherry Crisis numbers exactly."""
+    invoice, new_due = fields.get("invoice_number"), fields.get("new_due_date")
+    if not invoice or not new_due:
+        return None, "notice has no invoice or new due date"
+    inv = next((r for r in base.get("receivables", []) if r.get("id") == invoice), None)
+    if inv is None:
+        return None, f"{invoice} is not in the books"
+    try:
+        delay = notice_delay(inv["due_date"], str(new_due))
+    except (KeyError, TypeError, ValueError):
+        return None, f"bad new due date {str(new_due)[:20]}"
+    scen = deepcopy(base)
+    for r in scen["receivables"]:
+        r["announced_delay_days"] = delay if r.get("id") == invoice else 0
+    return scen, f"{invoice} +{delay} days"
 
 
 class Args(BaseModel):
@@ -123,7 +162,7 @@ def ledger_query(ctx: RunContext, a: LedgerArgs) -> dict[str, Any]:
 
 
 def forecast_run(ctx: RunContext, a: ForecastArgs) -> dict[str, Any]:
-    body: dict[str, Any] = {"scenario": a.scenario}
+    body: dict[str, Any] = {"scenario": ctx.scenario_for(a.scenario)}
     if a.overrides:
         body["overrides"] = a.overrides.model_dump(exclude_none=True)
     res = ctx.backend.post("/quant/forecast", body)
@@ -141,19 +180,79 @@ def business_analysis(ctx: RunContext, a: AnalysisArgs) -> dict[str, Any]:
 
 
 def financing_quote(ctx: RunContext, a: QuoteArgs) -> dict[str, Any]:
-    res = ctx.backend.post("/quant/quote", a.model_dump(exclude_none=True))
-    eligible = [q for q in res.get("quotes", []) if q.get("eligible")]
+    res = ctx.backend.post("/quant/quote", {**a.model_dump(exclude_none=True), "scenario": ctx.scenario_for(a.scenario)})
+    # A forward hedges the CNY and brings no cash: it is checked, but never counted as a way to fund the need.
+    eligible = [q for q in res.get("quotes", []) if q.get("eligible") and q.get("kind") != "forward"]
     return {**res, "detail": f"{len(res.get('quotes', []))} options, {len(eligible)} eligible · "
                              f"need {templates.money(res.get('amount_clp', 0), 'CLP')} on {res.get('need_date')}"}
 
 
 def optimize_plan(ctx: RunContext, a: PlanArgs) -> dict[str, Any]:
-    res = ctx.backend.plan({"scenario": a.scenario, "confidence": a.confidence, "channel": ctx.channel},
-                           timeout_s=ctx.plan_timeout_s)
-    opt = res["optimal"]
-    detail = " + ".join(x["summary"] for x in opt.get("actions", [])) or "no action needed"
-    return {**res, "detail": f"{detail} · {templates.money(opt['total_cost_clp'], 'CLP')} vs "
-                             f"{templates.money(res['default']['total_cost_clp'], 'CLP')}"}
+    res = ctx.backend.plan({"scenario": ctx.scenario_for(a.scenario), "confidence": a.confidence,
+                            "channel": ctx.channel}, timeout_s=ctx.plan_timeout_s)
+    opt, default = res["optimal"], res["default"]
+    choice, proposal, reason = _choose(ctx, res)
+    if choice == "default":
+        detail = " + ".join(x["summary"] for x in default.get("actions", []))
+        detail += f" · {_cost(default)} (the optimizer found nothing cheaper: {_cost(opt)})"
+    else:
+        detail = " + ".join(x["summary"] for x in opt.get("actions", [])) or "no action needed"
+        detail += f" · {_cost(opt)} vs {_cost(default)}"
+    if proposal is None:
+        detail += f" · nothing to propose: {reason}"
+    return {**res, "choice": choice, "proposal": proposal, "no_proposal_reason": reason, "detail": detail}
+
+
+def _cost(p: dict[str, Any]) -> str:
+    return templates.money(p["total_cost_clp"], "CLP") if p.get("total_cost_clp") is not None else "no feasible plan"
+
+
+def _choose(ctx: RunContext, res: dict[str, Any]) -> tuple[str, dict[str, Any] | None, str]:
+    """(choice, approval body or None, reason). Guards on what the MILP returned:
+    - the optimal mix costs more than the default bank loan (a short time-limited solve can): propose the
+      default loan and never call it cheaper;
+    - the plan has no operation, or one the sandbox cannot execute (the engine lists those in
+      `unsupported` and leaves them out): propose nothing rather than half a plan, and say so."""
+    opt, default = res["optimal"], res["default"]
+    opt_cost, def_cost = opt.get("total_cost_clp"), default.get("total_cost_clp")
+    if def_cost is not None and (opt_cost is None or opt_cost > def_cost):
+        req = _default_request(ctx, res)
+        if req is None:
+            return "default", None, "the default bank loan's lender is not in the sandbox bank"
+        return "default", req, ""
+    req = res.get("approval_request")
+    if opt_cost is None or not req:
+        return "none", None, "the optimizer found no feasible plan"
+    if req.get("unsupported"):
+        ops = ", ".join(sorted({str(u.get("op")) for u in req["unsupported"]}))
+        return "none", None, f"the plan needs operations the bank cannot execute here ({ops})"
+    if not req.get("operations"):
+        return "none", None, "no financing needed"
+    return "optimal", req, ""
+
+
+def _default_request(ctx: RunContext, res: dict[str, Any]) -> dict[str, Any] | None:
+    """The default bank loan as a POST /approvals body. Sandbox lenders are named "<lender> · <product>"."""
+    default = res["default"]
+    try:
+        lenders = {r["name"]: r["id"] for r in ctx.backend.get("/bank/lenders")}
+    except (BackendError, KeyError, TypeError):
+        return None
+    ops = []
+    for x in default.get("actions", []):
+        lender_id = lenders.get(f"{x.get('lender')} · {x.get('product')}")
+        if x.get("kind") != "loan" or not lender_id:
+            return None
+        ops.append({"op": "loan", "params": {"lender_id": lender_id, "amount_clp": x["amount_clp"],
+                                             "term_days": x["term_days"]}})
+    if not ops:
+        return None
+    head = (res.get("forecast") or {}).get("headline", "")
+    plan = " + ".join(x["summary"] for x in default["actions"])
+    return {"action": default["actions"][0].get("product", "Working capital loan"), "operations": ops,
+            "explanation": f"{head}. Plan: {plan}. Cost {templates.money(default['total_cost_clp'], 'CLP')}: the "
+                           f"default bank loan, the optimizer found nothing cheaper.".lstrip(". "),
+            "unsupported": []}
 
 
 def anchor_audit(ctx: RunContext, a: NoArgs) -> dict[str, Any]:
@@ -213,11 +312,13 @@ def request_factoring(ctx: RunContext, a: FactoringArgs) -> dict[str, Any]:
 
 
 def propose_plan(ctx: RunContext, a: NoArgs) -> dict[str, Any]:
-    """Proposes exactly what the MILP chose: the plan's approval_request, untouched by any LLM."""
+    """Proposes exactly what the MILP chose (or the default bank loan when that is cheaper), untouched by any LLM."""
     plan = ctx.memory.get("optimize_plan")
-    if not plan or not plan.get("approval_request"):
+    if not plan:
         raise ToolError("run optimize_plan first: there is no plan to propose")
-    req = plan["approval_request"]
+    req = plan.get("proposal")
+    if req is None:
+        return {"proposed": False, "detail": f"nothing proposed: {plan.get('no_proposal_reason') or 'no plan'}"}
     return _propose(ctx, req["action"], req["operations"], req.get("explanation", ""))
 
 

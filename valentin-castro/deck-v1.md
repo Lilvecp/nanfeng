@@ -25,8 +25,8 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 
 ## 2 · The problem: exporters get paid late and borrow expensive
 
-- **USD 2.6 bn** of Chilean cherries in the 2025/26 season, **~87% to China**.
-- Chilean SMEs wait **44 days** on average to get paid; **63%** of what they invoice arrives after 30 days. *(open the Bolsa de Productos ranking before quoting 63% — Vicente's note)*
+- **USD 2.8 bn** of Chilean cherries in the 2025/26 season, **~87% to China** ([FreshFruitPortal, Sep 23 2026](https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/); China share: [Bloomberg Línea](https://www.bloomberglinea.com/latinoamerica/chile/chile-registra-segunda-temporada-decepcionante-de-venta-de-cerezas-en-china-las-razones/)).
+- Chilean SMEs wait **44 days** on average to get paid; **63%** of private-sector payments arrive after 30 days ([Undersecretary of Economy, DF, Mar 2026](https://www.df.cl/opinion/columnistas/la-urgencia-de-una-cultura-de-pago-oportuno-para-las-pyme)).
 - When cash runs short, banks charge SMEs **20.06% a year** (CMF, Sep 2026).
 - Payroll is in pesos, every week; revenue is in dollars and yuan, months later.
 
@@ -64,9 +64,9 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 - Policy engine outside the LLM: L0 read · L1 notify · L2 pay within limits to allowlisted payees · **L3 new money or new payee = owner + OTP**. Kill switch.
 - Voice and the agent can never approve L3 (deepfake risk).
 - BEC: changed bank account + look-alike domain → block, call-back number, alert on another channel.
-- **Red team: 43 attacks, 4 stopped before → 43/43 after**; CI fails if a single one gets through. The same document attacks also run through the agent: none moves money.
+- **Red team: 46 attacks written by the team, 46/46 stopped**; CI fails if a single one gets through. The same document attacks also run through the agent: none moves money.
 - Audit log: hash chain + Merkle root anchored on-chain (Sepolia today; FISCO BCOS if Camilo lands it).
-- **Say (Andy, 1:00):** "We assume the AI will be fooled, so it never decides. A rules engine outside the model sets the level; new money or a new beneficiary waits for the owner's one-time code, and a cloned voice can never approve. At 08:47 a fake supplier invoice changed the bank account and hid an instruction: blocked, and the owner was told on another channel. We attacked our own system forty-three ways; all forty-three are stopped, and the build fails if one ever gets through. Every step is hashed and anchored on-chain, so nobody, not even us, can rewrite what happened."
+- **Say (Andy, 1:00):** "We assume the AI will be fooled, so it never decides. A rules engine outside the model sets the level; new money or a new beneficiary waits for the owner's one-time code, and a cloned voice can never approve. At 08:47 a fake supplier invoice changed the bank account and hid an instruction: blocked, and the owner was told on another channel. We attacked our own system forty-six ways; all forty-six are stopped, and the build fails if one ever gets through. Every step is hashed and anchored on-chain, so nobody, not even us, can rewrite what happened."
 
 ## 8 · Compliance: built to be trusted with a company's money
 
@@ -89,7 +89,7 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 
 ## 10 · Results, business model, roadmap
 
-- **Results:** NanFeng-Bench 50/50 cases solved · −41% average financing cost vs the default bank loan · 43/43 attacks stopped.
+- **Results:** NanFeng-Bench 50/50 cases solved · −41% average financing cost vs the default bank loan (25 cases with a plan) · 46/46 attacks stopped.
 - **Business model (B2B2B):** banks and trade-finance fintechs license NanFeng for their SME exporters; license per active SME + success fee on financing originated (pricing to validate). See [business-model.md](business-model.md).
 - **Roadmap:** WeCom production channel · FISCO BCOS invoice registry against double financing · real lender APIs with a design partner · next corridor in APEC.
 - Close: "NanFeng doesn't advise. It acts — with your permission."
