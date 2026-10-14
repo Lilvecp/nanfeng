@@ -8,7 +8,7 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 
 | Evidence | Result |
 |----------|--------|
-| Red team, 43 outcome-based attacks in 7 categories | **4/43 stopped before → 43/43 after** ([report](redteam/results/REPORT.md)) |
+| Red team, 46 outcome-based attacks in 7 categories, written by the team itself | **46/46 stopped** (first 43: 4 → 43 as controls were built; 3 added Oct 14 were open until that day's fixes) ([report](redteam/results/REPORT.md)) |
 | Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../renato-lenis/tests/test_redteam_via_agent.py)) |
 | Automated tests | **Backend 116**: security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, invoice registry 6, live story 5, demo 5, anchoring 4. **Agent 91**, including the red team replay and the AI label. **Quant 36** |
 | CI gate | Fails the build if any of the 43 red team attacks gets through |
@@ -86,7 +86,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 | # | Risk | Impact | Why it is still open | Mitigation today |
 |---|------|--------|----------------------|------------------|
 | K1 | **Owner sign-in is a single shared password**, and demo builds show it on the sign-in screen. Anyone with the password is the owner. (Fixed: anonymous callers can no longer approve, reject, turn the kill switch off or reset the sandbox; red team API-02, API-03 stopped.) | Medium in production | One owner per company in the MVP; per-user accounts come with Supabase auth | Startup refuses the demo password outside demo builds; failed sign-ins rate limited; turning the kill switch off and approving still need the SMS code |
-| K2 | Demo Mode uses a shared sandbox code shown on screen | High if used with real money | The jury must be able to run the demo | SMS mode exists and is what the red team and evidence use |
+| K2 | Demo Mode uses a shared sandbox code shown on screen | High if used with real money | The jury must be able to run the demo | SMS mode exists and the red team covers it; the public demo and the live evidence run use the sandbox code, labelled as such on screen |
 | K3 | The document guard is heuristic, and its author also wrote the attacks | Medium | Time | It is one layer; the policy engine and OTP do not depend on it. Through the real agent, 8 of the 12 document attacks are only `suspicious`: the agent continues with typed fields and does not pay, but nothing blocks the run. A blind set from the rest of the team is next |
 | K4 | ~~Quarantined-LLM pipeline only designed~~ **Fixed**: integrated in the agent (r2-03) and red-teamed through it | — | — | — |
 | K5 | SMS OTP can be defeated by SIM swap | Medium | SMS is what SMEs have | Production: authenticator app or device binding |
@@ -100,7 +100,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 
 ```sh
 cd backend && pytest -q                                       # 116 tests
-cd ../renato-lenis && pytest -q                               # 84 agent tests, red team replay included
+cd ../renato-lenis && pytest -q                               # 113 agent tests, red team replay included
 cd ../andy-villarroel/redteam && python run.py --backend ../../backend --label after --min-stopped 43 && python report.py
 cd ../evidence && python build.py --backend ../../backend     # Cherry Crisis evidence
 python build.py --url <deployed backend> --out out-live      # same export from the live deploy

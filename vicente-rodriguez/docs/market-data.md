@@ -6,7 +6,7 @@ Figures for the problem and market slides, each with its source. Re-checked on *
 
 | Figure | Value | Source | Status |
 |---|---|---|---|
-| Chilean cherry exports, 2025/26 season | **USD 2.6 bn FOB** (Sep 2025–Feb 2026), 113.8 M boxes ≈ 569 kt; down 8% in value vs 2024/25 as prices fell | [FreshPlaza](https://www.freshplaza.com/north-america/article/9812438/chile-cherry-exports-reach-113-8-million-boxes-as-prices-fall/), [FreshFruitPortal](https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/) (Frutas de Chile data) | 🟡 |
+| Chilean cherry exports, 2025/26 season | **USD 2.8 bn** for the full season (Sep 2025–Aug 2026, FreshFruitPortal, down ~2%); USD 2.6 bn FOB for Sep 2025–Feb 2026 (FreshPlaza), 113.8 M boxes ≈ 569 kt; down 8% in value vs 2024/25 as prices fell | [FreshPlaza](https://www.freshplaza.com/north-america/article/9812438/chile-cherry-exports-reach-113-8-million-boxes-as-prices-fall/), [FreshFruitPortal](https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/) (Frutas de Chile data) | 🟡 |
 | Share going to China, 2025/26 | **~87%** of value and volume (98.9 M boxes); 92% the season before | Same sources | 🟡 |
 | Cherries in Chile's fresh-fruit exports | 60% of value, 38% of volume | [FreshFruitPortal](https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/) | 🟡 |
 | Chile's share of China's cherry imports | ~98% (2024/25) | [Produce Report](https://www.producereport.com/article/chiles-fresh-cherry-exports-china-hit-record-high) | 🟡 |
@@ -35,7 +35,7 @@ Figures for the problem and market slides, each with its source. Re-checked on *
 | Factoring as the SME fallback | Factored invoice volume up 16% as bank credit tightened (2026) | [G5 Noticias](https://g5noticias.cl/2026/07/27/ante-el-freno-del-credito-bancario-pymes-se-vuelcan-al-factoring-y-disparan-en-16-el-monto-de-sus-facturas-adelantadas/) | 🟡 |
 | Monetary policy rate | 4.50% (held 2026-09-08); GDP growth 2026 cut to 0.25–0.75% | [BCCh](https://www.bcentral.cl/en/content/-/detalle/prensa/nota-de-prensa/bcch-publica-ipom-septiembre-2026) | ✅ |
 
-**Slide line that holds up:** *"Chile ships USD 2.6 bn of cherries a season, ~87% to China. Chilean SMEs wait 44 days on average to get paid, and 63% of what they invoice to large companies is paid after the 30-day legal limit. When cash runs short, banks charge them 20% a year."* Footnote: *Bolsa de Productos / ASECH, Ranking de Pagadores (Q3 2024; 44 days: Jul 2025–Jun 2026); CMF certificate 09/2026.* Say "to large companies" and "after 30 days": the ranking only covers invoices to large payers, and "late" means past the legal term.
+**Slide line that holds up:** *"Chile ships USD 2.8 bn of cherries a season, ~87% to China. Chilean SMEs wait 44 days on average to get paid, and 63% of what they invoice to large companies is paid after the 30-day legal limit. When cash runs short, banks charge them 20% a year."* Footnote: *Bolsa de Productos / ASECH, Ranking de Pagadores (Q3 2024; 44 days: Jul 2025–Jun 2026); CMF certificate 09/2026.* Say "to large companies" and "after 30 days": the ranking only covers invoices to large payers, and "late" means past the legal term.
 
 ## Data used by the model
 

@@ -98,7 +98,7 @@ flowchart LR
 | Agent service | `renato-lenis/` | FastAPI, OpenRouter, Mistral OCR, Zavu, ElevenLabs | Reads documents and messages, plans, calls tools, proposes approvals, resumes a run when the owner decides, explains its decisions, talks to the owner and the importer |
 | Quant engine | `vicente-rodriguez/` | NumPy, SciPy, pandas, OR-Tools (CBC, SCIP) | Cash Monte Carlo, financing MILP, plan explanations, Credit Passport, business financial analysis, NanFeng-Bench, backtest, sensitivity |
 | Contracts | `contracts/` | OpenAPI 3 | `openapi.json` is generated from the backend; CI fails if it drifts. The web's types are generated from it |
-| Security tooling | `andy-villarroel/` | Python | Threat model, red team (43 attacks), evidence package builder (deliverable 06) |
+| Security tooling | `andy-villarroel/` | Python | Threat model, red team (46 attacks), evidence package builder (deliverable 06) |
 | Design | `design/private-desk/` | Static HTML | The mockups the web is built from |
 
 ### 2.2 Deployment
@@ -207,7 +207,7 @@ Built from the same receivables, shipments and payables as the forecast, with no
 
 | Check | Result |
 |---|---|
-| NanFeng-Bench: 50 scenarios with a known answer (40 stochastic, judged by an independent 50,000-path oracle; 10 deterministic, against a hand-written ledger) | **50/50**; plans 41% cheaper than the bank loan on average |
+| NanFeng-Bench: 50 scenarios with a known answer (40 stochastic, judged by an independent 50,000-path oracle; 10 deterministic, against a hand-written ledger) | **50/50**; the 25 plans built are 41% cheaper than the bank loan on average |
 | Rolling-origin FX backtest on real data 2018–2026 (204 origins) | P10–P90 covers 79–83% (nominal 80%) |
 | Cash backtest against synthetic truth | CRPS 32–39% better than a point forecast; Brier skill +53% to +62% for "will we breach the buffer" |
 | Sensitivity | savings stay 30–50% under ±30% on every rate, a missing product and confidence targets from 80% to 97.5% |
@@ -252,14 +252,14 @@ Controls, each outside the LLM:
 - **Tamper evidence**: `hash_n = SHA-256(prev_hash | seq | ts | actor | kind | payload)`; Merkle roots anchored on Sepolia with calldata `NANFENG1 | root | from_seq | to_seq`; inclusion proofs per entry; the evidence package re-checks everything without the backend's code.
 - **Double financing**: every invoice that backs a payout is registered by fingerprint first (local table and, in `evm` mode, the `InvoiceRegistry` contract); factoring fails closed if the registry cannot be read.
 
-Result: the red team's 43 outcome-based attacks went from 4/43 stopped to **43/43**, and CI fails the build if one gets through; 21 attacks replayed through the real agent move no money.
+Result: the red team's first 43 outcome-based attacks went from 4/43 stopped to 43/43; 3 more added on Oct 14 (duplicate loan approvals, a spoofed late-payment notice) got through until that day's fixes. Today **46/46** are stopped, and CI fails the build if one gets through; 21 attacks replayed through the real agent move no money.
 
 ## 6. Testing and validation
 
 | Suite | Count | Run | In CI |
 |---|---|---|---|
 | Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 116 | `cd backend && pytest -q` | Backend tests |
-| Red team gate (43 attacks against the API) | 43/43 stopped | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 43` | Backend tests |
+| Red team gate (46 attacks against the API) | 46/46 stopped | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 46` | Backend tests |
 | OpenAPI contract drift | — | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
 | Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 91 | `cd renato-lenis && pytest -q` (needs `../backend[dev]`) | Agent tests |
 | Quant engine (Monte Carlo, MILP, business analysis, bench, API) | 36 | `cd vicente-rodriguez && pytest -q` | Quant tests |
