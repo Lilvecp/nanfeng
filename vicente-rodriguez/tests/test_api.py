@@ -53,5 +53,8 @@ def test_analysis_endpoint_and_demo_artifact():
     body = r.json()
     assert body["kpis"]["lowest_cash_date"] == "2026-12-30" and body["insights"][0]["severity"] == "high"
     saved = client.get("/quant/demo/analysis").json()
-    assert saved["kpis"] == body["kpis"] and saved["insights"] == body["insights"]
+    # The saved artifact was computed on another machine: floats may differ in the last bits.
+    assert saved["kpis"].keys() == body["kpis"].keys() and saved["insights"] == body["insights"]
+    for k, v in body["kpis"].items():
+        assert saved["kpis"][k] == (pytest.approx(v, rel=1e-9) if isinstance(v, float) else v), k
     assert client.post("/quant/analysis", json={"scenario": "nope"}).status_code == 404
