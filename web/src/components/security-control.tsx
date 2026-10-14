@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { API_URL, api, type Anchor } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 
@@ -45,9 +46,9 @@ const TIERS_L: Record<Lang, { t: number; k: string; d: string }[]> = {
 };
 
 const TX = {
-  en: { aria: "How a payment request is checked", s1: "Steps 02 · 03 · 05", tiers: "Permission tiers", least: "Least privilege by default. You set every limit.", s2: "Step 04", inj: "Prompt-injection defense", prot: "Protected", r1: "Instructions hidden in invoices and emails are treated as data, not commands.", r2: "Changed bank details are quarantined; you're told by SMS.", blocked: "2 blocked today", kinds: "bank-detail swap · injected email", s3: "Step 06 · final record", audit: "On-chain audit trail", auditBody: "Every decision is hash-chained and anchored on-chain (Sepolia testnet today, FISCO BCOS next), verifiable by you and your bank.", last: "Last anchor", verified: "verified" },
-  es: { aria: "Cómo se revisa una solicitud de pago", s1: "Pasos 02 · 03 · 05", tiers: "Niveles de permiso", least: "Mínimo privilegio por defecto. Tú pones cada límite.", s2: "Paso 04", inj: "Defensa contra inyecciones", prot: "Protegido", r1: "Las instrucciones escondidas en facturas y correos se tratan como datos, no como órdenes.", r2: "Los cambios de cuenta bancaria quedan en cuarentena y te avisamos por SMS.", blocked: "2 bloqueados hoy", kinds: "cambio de cuenta · correo con inyección", s3: "Paso 06 · registro final", audit: "Auditoría on-chain", auditBody: "Cada decisión queda encadenada por hash y anclada on-chain (hoy la testnet Sepolia, después FISCO BCOS), verificable por ti y tu banco.", last: "Último anclaje", verified: "verificado" },
-  zh: { aria: "付款请求如何被检查", s1: "第 02 · 03 · 05 步", tiers: "权限级别", least: "默认最小权限，所有限额由您设定。", s2: "第 04 步", inj: "提示注入防护", prot: "已防护", r1: "发票和邮件中隐藏的指令只作为数据处理，绝不当作命令。", r2: "银行账户变更会被隔离，并通过短信通知您。", blocked: "今日拦截2次", kinds: "银行账户替换 · 注入攻击邮件", s3: "第 06 步 · 最终记录", audit: "链上审计记录", auditBody: "每项决策都经哈希链接并锚定上链（目前为 Sepolia 测试网，下一步为 FISCO BCOS），您和银行都可核实。", last: "最近锚定", verified: "已验证" },
+  en: { aria: "How a payment request is checked", s1: "Steps 02 · 03 · 05", tiers: "Permission tiers", least: "Least privilege by default. You set every limit.", s2: "Step 04", inj: "Prompt-injection defense", prot: "Protected", r1: "Instructions hidden in invoices and emails are treated as data, not commands.", r2: "Changed bank details are quarantined; you're told by SMS.", blocked: "Demo: 1 invoice blocked", kinds: "bank-detail swap + hidden instruction", s3: "Step 06 · final record", audit: "On-chain audit trail", auditBody: "Every decision is hash-chained and anchored on-chain (Sepolia testnet today, FISCO BCOS next), verifiable by you and your bank.", last: "Last anchor", none: "none yet", offline: "live API not reachable", local: "local" },
+  es: { aria: "Cómo se revisa una solicitud de pago", s1: "Pasos 02 · 03 · 05", tiers: "Niveles de permiso", least: "Mínimo privilegio por defecto. Tú pones cada límite.", s2: "Paso 04", inj: "Defensa contra inyecciones", prot: "Protegido", r1: "Las instrucciones escondidas en facturas y correos se tratan como datos, no como órdenes.", r2: "Los cambios de cuenta bancaria quedan en cuarentena y te avisamos por SMS.", blocked: "Demo: 1 factura bloqueada", kinds: "cambio de cuenta + instrucción oculta", s3: "Paso 06 · registro final", audit: "Auditoría on-chain", auditBody: "Cada decisión queda encadenada por hash y anclada on-chain (hoy la testnet Sepolia, después FISCO BCOS), verificable por ti y tu banco.", last: "Último anclaje", none: "ninguno aún", offline: "sin conexión con la API en vivo", local: "local" },
+  zh: { aria: "付款请求如何被检查", s1: "第 02 · 03 · 05 步", tiers: "权限级别", least: "默认最小权限，所有限额由您设定。", s2: "第 04 步", inj: "提示注入防护", prot: "已防护", r1: "发票和邮件中隐藏的指令只作为数据处理，绝不当作命令。", r2: "银行账户变更会被隔离，并通过短信通知您。", blocked: "演示：拦截1张发票", kinds: "银行账户替换 + 隐藏指令", s3: "第 06 步 · 最终记录", audit: "链上审计记录", auditBody: "每项决策都经哈希链接并锚定上链（目前为 Sepolia 测试网，下一步为 FISCO BCOS），您和银行都可核实。", last: "最近锚定", none: "暂无", offline: "无法连接在线 API", local: "本地" },
 };
 
 export function SecurityControl() {
@@ -57,6 +58,22 @@ export function SecurityControl() {
   const root = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
   const [focus, setFocus] = useState<ModuleId | null>(null);
+  // The last anchor as the live API reports it (GET /audit/anchors, newest first); never a canned hash.
+  const [anchor, setAnchor] = useState<Anchor | null | "offline" | undefined>(undefined);
+  useEffect(() => {
+    if (!API_URL) return;
+    let cancelled = false;
+    api.audit.anchors()
+      .then((list) => !cancelled && setAnchor(list[0] ?? null))
+      .catch(() => !cancelled && setAnchor("offline"));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const lastAnchor = !API_URL || anchor === "offline" ? x.offline
+    : anchor === undefined ? "…"
+    : anchor === null ? x.none
+    : null;
 
   // The request walks through the six steps while the panel is on screen.
   useEffect(() => {
@@ -129,7 +146,20 @@ export function SecurityControl() {
           <div className="scc-chain" aria-hidden="true">
             <span /><i /><span /><i /><span className="sealed" />
           </div>
-          <span className="mono small muted">{x.last} Sepolia 0x51b8…09d4 · <span className="up">{x.verified}</span></span>
+          <span className="mono small muted">
+            {x.last}{" "}
+            {lastAnchor ?? (anchor && typeof anchor === "object" && (
+              <>
+                {anchor.backend === "evm" ? "Sepolia" : x.local}{" "}
+                {anchor.tx_hash
+                  ? anchor.explorer_url
+                    ? <a href={anchor.explorer_url} target="_blank" rel="noopener noreferrer">{`${anchor.tx_hash.slice(0, 6)}…${anchor.tx_hash.slice(-4)}`}</a>
+                    : `${anchor.tx_hash.slice(0, 6)}…${anchor.tx_hash.slice(-4)}`
+                  : `#${anchor.id}`}
+                {" · "}seq {anchor.from_seq}–{anchor.to_seq}
+              </>
+            ))}
+          </span>
         </section>
       </div>
     </div>

@@ -14,30 +14,32 @@ import { N, S, SHORT_CUSTOMER, clpFull, usd } from "./scenario";
 //   (resetDemo / finishDemo), still fully offline.
 // Runs only when the viewer plays or picks a step, never on page load, and always in order.
 
-const eligible = S.arena.filter((a) => a.covers_need).length;
+// Every step is tagged "Replay": these are scripted steps posted to /demo/step, not a measured agent
+// run, so they carry no latency or cost. The only timing is the solver's own (quant engine output).
+const R = "Replay · ";
 
 export const AGENT_STEPS: Record<number, DemoAgentStep[]> = {
   1: [
-    { step: "Read the importer's email (OCR)", tool: "ocr.extract", model: "Mistral OCR", latency_s: 2.8, cost_usd: 0.004,
+    { step: `${R}Read the importer's email (OCR)`, tool: "ocr.extract", model: "Mistral OCR",
       detail: `${SHORT_CUSTOMER}: ${S.event.invoice} ${usd(N.overdueUsd)} paid ${N.delayDays} days late` },
-    { step: "Document guard", tool: "security.scan", model: "guard", latency_s: 0.2, detail: "clean: no hidden instructions" },
+    { step: `${R}Document guard`, tool: "security.scan", model: "guard", detail: "clean: no hidden instructions" },
   ],
   2: [
-    { step: "Re-ran 10,000 cash scenarios", tool: "forecast_run", model: "Monte Carlo", latency_s: 4.2,
+    { step: `${R}Re-ran 10,000 cash scenarios`, tool: "forecast_run", model: "Monte Carlo",
       detail: `P(cash < 0) ${N.pNeg} by day ${N.crunchDay} (${N.crunchDate}), harvest payroll` },
   ],
   3: [
-    { step: `Quoted ${S.arena.length} financing options`, tool: "financing_quote", tier: 1, model: "catalog", latency_s: 1.1,
-      detail: `${eligible} cover the gap · need ${clpFull(S.need?.amount_clp ?? N.loanClp)}` },
+    { step: `${R}Checked ${N.products} financing products`, tool: "financing_quote", tier: 1, model: "catalog",
+      detail: `${N.eligible} eligible · cover the gap · need ${clpFull(S.need?.amount_clp ?? N.loanClp)}` },
   ],
   4: [
-    { step: "Optimizer selected the plan", tool: "optimize_plan", model: "MILP · CBC", latency_s: S.plan.solveSeconds,
+    { step: `${R}Optimizer selected the plan`, tool: "optimize_plan", model: "MILP · CBC", latency_s: S.plan.solveSeconds,
       detail: `${usd(N.loanUsd)} PAE ${N.termDays}D · ${clpFull(N.planCost)} vs ${clpFull(N.defaultCost)} (${N.savingsPct} cheaper)` },
-    { step: "Approval requested", tool: "approvals.create", tier: 3, detail: "WhatsApp + SMS code to the owner" },
+    { step: `${R}Approval requested`, tool: "approvals.create", tier: 3, detail: "WhatsApp + one-time code (sandbox code) to the owner" },
   ],
-  5: [{ step: "Owner approved with the SMS code", tool: "approvals.approve", tier: 3, detail: "WA+OTP" }],
+  5: [{ step: `${R}Owner approved with the one-time code (sandbox code)`, tool: "approvals.approve", tier: 3, detail: "WA+OTP" }],
   6: [
-    { step: "Run complete · gap closed", tool: "forecast_run", model: "Monte Carlo", latency_s: 3.9,
+    { step: `${R}Run complete · gap closed`, tool: "forecast_run", model: "Monte Carlo",
       detail: `P(cash < 0) ${N.pNegAfterPlan} after the plan · cash above the buffer in ${N.coverage} of scenarios` },
   ],
 };

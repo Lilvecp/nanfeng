@@ -9,28 +9,24 @@ import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { N, S, cashTick, clpM, pct, usd } from "@/lib/scenario";
 
-type Step = { n: number; step: Record<Lang, string>; tool: string; tier: 0 | 1 | 3; model: string; sec: number; cost: number };
+type Step = { n: number; step: Record<Lang, string>; tool: string; tier: 0 | 1 | 3; model: string; sec: number | null };
 
+// The Cherry Crisis run as a scripted replay. Latency and cost were never measured for these steps,
+// so none are shown; the only timing is the MILP solve time, which the quant engine records itself.
+// The live event stream below (SSE) is the real run.
 const AGENT: Step[] = [
-  { n: 1, step: { en: "Read delay notice via OCR", es: "Leyó el aviso de atraso (OCR)", zh: "OCR 读取延迟通知" }, tool: "ocr.extract", tier: 0, model: "Mistral OCR", sec: 2.8, cost: 0.004 },
-  { n: 2, step: { en: "Re-ran 10,000 scenarios", es: "Recalculó 10.000 escenarios", zh: "重新模拟10,000个情景" }, tool: "montecarlo.run", tier: 0, model: "— numerical", sec: 4.2, cost: 0 },
-  { n: 3, step: { en: `Quoted ${S.arena.length} financing options`, es: `Cotizó ${S.arena.length} opciones de financiamiento`, zh: `获取${S.arena.length}份融资报价` }, tool: `bank.quote×${S.arena.length}`, tier: 1, model: "Qwen3-32B", sec: 6.1, cost: 0.011 },
-  // the solver time is the quant engine's own measurement
-  { n: 4, step: { en: "Optimizer selected plan", es: "El optimizador eligió el plan", zh: "优化器选定方案" }, tool: "optimize_plan", tier: 0, model: "MILP OR-Tools CBC", sec: Math.round(S.plan.solveSeconds * 10) / 10, cost: 0 },
+  { n: 1, step: { en: "Read delay notice via OCR", es: "Leyó el aviso de atraso (OCR)", zh: "OCR 读取延迟通知" }, tool: "ocr.extract", tier: 0, model: "Mistral OCR", sec: null },
+  { n: 2, step: { en: "Re-ran 10,000 scenarios", es: "Recalculó 10.000 escenarios", zh: "重新模拟10,000个情景" }, tool: "forecast_run", tier: 0, model: "Monte Carlo", sec: null },
+  { n: 3, step: { en: `Checked ${N.products} financing products · ${N.eligible} eligible`, es: `Revisó ${N.products} productos de financiamiento · ${N.eligible} elegibles`, zh: `评估${N.products}种融资产品 · ${N.eligible}种符合条件` }, tool: "financing_quote", tier: 1, model: "catalog", sec: null },
+  { n: 4, step: { en: "Optimizer selected plan", es: "El optimizador eligió el plan", zh: "优化器选定方案" }, tool: "optimize_plan", tier: 0, model: "MILP OR-Tools CBC", sec: Math.round(S.plan.solveSeconds * 10) / 10 },
 ];
 
-// The waterfall is drawn from the latencies, so the bars, the total and "elapsed" always agree.
-// The agent's own work fills the first AGENT_SPAN of the track; the owner's decision follows it.
+// The bars show the order of the steps, not their duration (one equal slot each).
 const AGENT_SPAN = 76;
-const ELAPSED = Math.round(AGENT.reduce((a, s) => a + s.sec, 0) * 10) / 10;
-const RUN_COST = AGENT.reduce((a, s) => a + s.cost, 0);
-const STEPS = AGENT.map((s, i) => {
-  const before = AGENT.slice(0, i).reduce((a, x) => a + x.sec, 0);
-  return { ...s, left: (before / ELAPSED) * AGENT_SPAN, width: (s.sec / ELAPSED) * AGENT_SPAN };
-});
+const SLOT = AGENT_SPAN / AGENT.length;
+const STEPS = AGENT.map((s, i) => ({ ...s, left: i * SLOT, width: SLOT }));
 const secs = (v: number, lang: Lang) => `${v.toLocaleString(lang === "es" ? "es-CL" : "en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}${lang === "zh" ? "秒" : " s"}`;
-const usdCost = (v: number, lang: Lang) => v.toLocaleString(lang === "es" ? "es-CL" : "en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
-const axis = (lang: Lang) => `0 ─────── ${secs(ELAPSED / 2, lang)} ─────── ${secs(ELAPSED, lang)} │ ${lang === "es" ? "dueño" : lang === "zh" ? "企业主" : "owner"}`;
+const axis = (lang: Lang) => `${lang === "es" ? "orden" : lang === "zh" ? "顺序" : "order"} 1 → ${AGENT.length} │ ${lang === "es" ? "dueño" : lang === "zh" ? "企业主" : "owner"}`;
 
 const FOGAPE_COST = S.explanation.find((e) => e.productId.startsWith("FOGAPE"))?.aloneCostClp ?? 0;
 const REPLIES: { match: RegExp; text: Record<Lang, string> }[] = [
@@ -51,10 +47,11 @@ const REPLIES: { match: RegExp; text: Record<Lang, string> }[] = [
 const TX = {
   en: {
     run: "Run", halted: "AGENT HALTED · KILL SWITCH", pausedS: "RUN PAUSED", complete: "RUN COMPLETE · EXECUTED", awaiting: "AWAITING APPROVAL · L3",
-    trigger: `TRIGGER email:shanghai-hongxin · START 10:12:41.032 · AGENT TIME ${secs(ELAPSED, "en").toUpperCase()} · COST USD ${usdCost(RUN_COST, "en")}`,
+    trigger: "TRIGGER email:shanghai-hongxin · SCENARIO TIME 10:12",
+    replayNote: "Scripted replay of the Cherry Crisis run · no measured latency or cost",
     resumed: "Run resumed", pausedT: "Run paused · no new tool calls", resume: "Resume", pause: "Pause", rearm: "Re-arm agent", confirm: "Confirm kill", cancel: "Cancel", kill: "Kill switch", rearmCode: "Re-arm with code", otpPh: "Code", rearmAria: "One-time code to re-arm the agent",
     stop: "STOP", stopBody: "Kill switch engaged. The agent cannot call any tool until it is re-armed. Pending approvals stay frozen; nothing executes.",
-    trace: "Execution trace · waterfall", doneL: "DONE", waiting: "WAITING ON OWNER", cols: ["#", "Step", "Tool", "Tier", "Model", axis("en"), "Latency", "Cost USD"],
+    trace: "Execution trace · waterfall", doneL: "DONE", waiting: "WAITING ON OWNER", cols: ["#", "Step", "Tool", "Tier", "Model", axis("en"), "Solver time"],
     approved: "Approved by owner (OTP)", rejected: "Rejected by owner", awaitingStep: "Awaiting approval", closed: "closed", open: "open", executedStep: "Executed in sandbox · hash anchored",
     live: "Live event stream · SSE", events: "EVENTS", liveCols: ["#", "Time", "Source", "Event", "Detail"], waitingEvents: "WAITING FOR EVENTS FROM THE AGENT",
     detail: "Step 5 · detail", executed: "Executed", openApproval: "Open approval", costL: "cost", defaultLoan: "default bank loan", whyL3: "why L3", whyL3Body: "new money · counterparty first use this season · > L2 cap CLP 25M", notified: "notified", timeout: "timeout", autoCancel: "auto-cancel, no action",
@@ -64,10 +61,11 @@ const TX = {
   },
   es: {
     run: "Corrida", halted: "AGENTE DETENIDO · FRENO DE EMERGENCIA", pausedS: "CORRIDA EN PAUSA", complete: "CORRIDA TERMINADA · EJECUTADA", awaiting: "ESPERANDO APROBACIÓN · L3",
-    trigger: `ORIGEN correo:shanghai-hongxin · INICIO 10:12:41.032 · TIEMPO DEL AGENTE ${secs(ELAPSED, "es").toUpperCase()} · COSTO USD ${usdCost(RUN_COST, "es")}`,
+    trigger: "ORIGEN correo:shanghai-hongxin · HORA DEL ESCENARIO 10:12",
+    replayNote: "Repetición guionada de la corrida Cherry Crisis · sin latencia ni costo medidos",
     resumed: "Corrida reanudada", pausedT: "Corrida en pausa · sin nuevas llamadas a herramientas", resume: "Reanudar", pause: "Pausar", rearm: "Reactivar agente", confirm: "Confirmar freno", cancel: "Cancelar", kill: "Freno de emergencia", rearmCode: "Reactivar con código", otpPh: "Código", rearmAria: "Código de un solo uso para reactivar el agente",
     stop: "ALTO", stopBody: "Freno de emergencia activado. El agente no puede usar ninguna herramienta hasta que lo reactives. Las aprobaciones pendientes quedan congeladas; nada se ejecuta.",
-    trace: "Traza de ejecución · cascada", doneL: "HECHO", waiting: "ESPERANDO AL DUEÑO", cols: ["#", "Paso", "Herramienta", "Nivel", "Modelo", axis("es"), "Latencia", "Costo USD"],
+    trace: "Traza de ejecución · cascada", doneL: "HECHO", waiting: "ESPERANDO AL DUEÑO", cols: ["#", "Paso", "Herramienta", "Nivel", "Modelo", axis("es"), "Tiempo del solver"],
     approved: "Aprobado por el dueño (código)", rejected: "Rechazado por el dueño", awaitingStep: "Esperando aprobación", closed: "cerrado", open: "abierto", executedStep: "Ejecutado en el sandbox · hash anclado",
     live: "Eventos en vivo · SSE", events: "EVENTOS", liveCols: ["#", "Hora", "Origen", "Evento", "Detalle"], waitingEvents: "ESPERANDO EVENTOS DEL AGENTE",
     detail: "Paso 5 · detalle", executed: "Ejecutado", openApproval: "Abrir aprobación", costL: "costo", defaultLoan: "crédito bancario", whyL3: "por qué L3", whyL3Body: "plata nueva · primera vez con este prestamista en la temporada · > tope L2 CLP 25M", notified: "avisado", timeout: "vence", autoCancel: "se cancela solo, sin ejecutar",
@@ -77,10 +75,11 @@ const TX = {
   },
   zh: {
     run: "运行", halted: "代理已停止 · 紧急停止", pausedS: "运行已暂停", complete: "运行完成 · 已执行", awaiting: "等待批准 · L3",
-    trigger: `触发 邮件:shanghai-hongxin · 开始 10:12:41.032 · 代理用时 ${secs(ELAPSED, "zh")} · 成本 USD ${usdCost(RUN_COST, "zh")}`,
+    trigger: "触发 邮件:shanghai-hongxin · 情景时间 10:12",
+    replayNote: "樱桃危机运行的脚本回放 · 无实测延迟或成本",
     resumed: "运行已恢复", pausedT: "运行已暂停 · 不再调用工具", resume: "恢复", pause: "暂停", rearm: "重新启用代理", confirm: "确认停止", cancel: "取消", kill: "紧急停止", rearmCode: "凭验证码恢复", otpPh: "验证码", rearmAria: "恢复代理所需的一次性验证码",
     stop: "停止", stopBody: "紧急停止已启动。重新启用之前，代理无法调用任何工具。待批事项全部冻结，不会执行任何操作。",
-    trace: "执行轨迹 · 瀑布图", doneL: "完成", waiting: "等待企业主", cols: ["#", "步骤", "工具", "级别", "模型", axis("zh"), "延迟", "成本 USD"],
+    trace: "执行轨迹 · 瀑布图", doneL: "完成", waiting: "等待企业主", cols: ["#", "步骤", "工具", "级别", "模型", axis("zh"), "求解时间"],
     approved: "企业主已批准（验证码）", rejected: "企业主已拒绝", awaitingStep: "等待批准", closed: "已关闭", open: "进行中", executedStep: "已在沙盒执行 · 哈希已锚定",
     live: "实时事件流 · SSE", events: "个事件", liveCols: ["#", "时间", "来源", "事件", "详情"], waitingEvents: "等待代理事件",
     detail: "第5步 · 详情", executed: "已执行", openApproval: "打开审批", costL: "成本", defaultLoan: "银行贷款", whyL3: "为何 L3", whyL3Body: "新增资金 · 本季首次使用该贷款方 · 超过 L2 上限 2,500万智利比索", notified: "已通知", timeout: "超时", autoCancel: "自动取消，不执行",
@@ -98,7 +97,7 @@ function describe(e: ApiEvent): string {
   if (e.type.startsWith("bank.")) return pick("receivable_id", "payee", "currency", "amount_clp", "proceeds_clp", "audit_seq");
   if (e.type === "audit.anchored") return pick("anchor_id", "from_seq", "to_seq", "backend");
   if (e.type.startsWith("quant.")) return pick("job_id", "message", "error");
-  return pick("step", "tool", "tier", "model", "cost_usd", "status", "on") || JSON.stringify(d).slice(0, 120);
+  return pick("step", "tool", "tier", "model", ...(d.cost_usd ? ["cost_usd"] : []), ...(d.latency_s ? ["latency_s"] : []), "status", "on") || JSON.stringify(d).slice(0, 120);
 }
 
 export default function MissionPage() {
@@ -108,7 +107,7 @@ export default function MissionPage() {
   const { approval, notify, mode, events, killSwitch: killed, setKillSwitch } = useDesk();
   const [paused, setPaused] = useState(false);
   const [confirmKill, setConfirmKill] = useState(false);
-  // Re-arming on the live API is L3: the owner types the one-time code (sandbox code 482913).
+  // Re-arming on the live API is L3: the owner types the one-time code (in the demo, the sandbox code).
   const [rearm, setRearm] = useState(false);
   const [rearmCode, setRearmCode] = useState("");
   const [chat, setChat] = useState<{ who: "out" | "in"; text: string }[]>([]);
@@ -171,7 +170,8 @@ export default function MissionPage() {
         )}
 
         <div className="card" data-guide="agent-trace">
-          <div className="card-h"><span className="h3">{x.trace}</span><div className="legend"><span><i className="sw" style={{ background: "var(--ok)" }} />{x.doneL}</span><span><i className="sw" style={{ background: "repeating-linear-gradient(90deg, var(--crit) 0 3px, transparent 3px 5px)" }} />{x.waiting}</span></div></div>
+          <div className="card-h"><span className="h3">{x.trace} <span className="badge" style={{ color: "var(--warn)" }} title={x.replayNote}>{t("shell.replay")}</span></span><div className="legend"><span><i className="sw" style={{ background: "var(--ok)" }} />{x.doneL}</span><span><i className="sw" style={{ background: "repeating-linear-gradient(90deg, var(--crit) 0 3px, transparent 3px 5px)" }} />{x.waiting}</span></div></div>
+          <div className="card-b" style={{ paddingTop: 0, paddingBottom: 0 }}><span className="hint">{x.replayNote}</span></div>
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr>{x.cols.map((c, i) => <th key={c} className={i >= 6 ? "r" : undefined} style={i === 5 ? { width: "32%" } : undefined}>{c}</th>)}</tr></thead>
             <tbody>
@@ -181,7 +181,7 @@ export default function MissionPage() {
                   <td><span className={`tier t${s.tier}`}><b>L{s.tier}</b></span></td>
                   <td className="num small">{s.model}</td>
                   <td><div style={{ position: "relative", height: 12, background: "var(--surface-2)" }}><div style={{ position: "absolute", left: `${s.left}%`, width: `${s.width}%`, top: 0, bottom: 0, background: "var(--ok)" }} /></div></td>
-                  <td className="r num">{secs(s.sec, lang)}</td><td className="r num">{usdCost(s.cost, lang)}</td>
+                  <td className="r num">{s.sec === null ? "—" : secs(s.sec, lang)}</td>
                 </tr>
               ))}
               <tr className={done ? undefined : "pick"}>
@@ -191,15 +191,14 @@ export default function MissionPage() {
                 <td><span className="tier t3"><b>L3</b><span>OTP</span></span></td>
                 <td className="num small">—</td>
                 <td><div style={{ position: "relative", height: 12, background: "var(--surface-2)" }}><div style={{ position: "absolute", left: `${AGENT_SPAN + 1}%`, right: done ? "6%" : 0, top: 0, bottom: 0, background: done ? "var(--ok)" : "repeating-linear-gradient(90deg, var(--crit) 0 6px, transparent 6px 9px)" }} /></div></td>
-                <td className={`r num ${done ? "" : "down"}`}>{done ? "9m 41s" : approval === "rejected" ? x.closed : x.open}</td>
-                <td className="r num">—</td>
+                <td className={`r num ${done ? "" : "down"}`}>{done ? "—" : approval === "rejected" ? x.closed : x.open}</td>
               </tr>
               {done && (
                 <tr>
                   <td className="num">6</td><td>{x.executedStep}</td><td className="num">audit.anchor</td>
-                  <td><span className="tier t0"><b>L0</b></span></td><td className="num small">Sepolia testnet</td>
+                  <td><span className="tier t0"><b>L0</b></span></td><td className="num small">—</td>
                   <td><div style={{ position: "relative", height: 12, background: "var(--surface-2)" }}><div style={{ position: "absolute", left: "94%", right: 0, top: 0, bottom: 0, background: "var(--ok)" }} /></div></td>
-                  <td className="r num">{secs(1.3, lang)}</td><td className="r num">{usdCost(0, lang)}</td>
+                  <td className="r num">—</td>
                 </tr>
               )}
             </tbody>
@@ -233,7 +232,7 @@ export default function MissionPage() {
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 12 }}>
           <div className="card">
             <div className="card-h">
-              <span className="h3">{x.detail}</span>
+              <span className="h3">{x.detail} <span className="badge" style={{ color: "var(--warn)" }} title={x.replayNote}>{t("shell.replay")}</span></span>
               {done ? <span className="badge ok">{x.executed}</span> : <Link className="btn btn-primary btn-sm" href="/approvals">{x.openApproval} <span className="key" style={{ borderColor: "currentColor", color: "inherit" }}>A</span></Link>}
             </div>
             <div className="card-b mono small" style={{ gap: 6 }}>

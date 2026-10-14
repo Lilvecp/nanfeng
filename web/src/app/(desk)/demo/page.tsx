@@ -30,7 +30,7 @@ const UI = {
     risk: "Chance of running out of cash", on: "on payroll day", before: "before the notice", payroll: "Harvest payroll", need: "To cover",
     quotes: "Cost of closing the gap with each option", quotesHint: "same goal: cash above the buffer in 90% of scenarios",
     rec: "Optimizer's pick", recTitle: `${N.termDays}-day USD pre-export loan`, ours: "This loan", bank: "Bank loan", save: "Saved",
-    wa: "Owner · WhatsApp", waPlan: `PLAN ${usd(N.loanUsd)} for ${N.termDays} days. Costs ${pesos(N.planCost)} vs ${pesos(N.defaultCost)}. Reply APPROVE or WHY`, waYes: "APPROVE", waCode: "Code sent by SMS to •••• 4127", l3: "owner + one-time code",
+    wa: "Owner · WhatsApp", waPlan: `PLAN ${usd(N.loanUsd)} for ${N.termDays} days. Costs ${pesos(N.planCost)} vs ${pesos(N.defaultCost)}. Reply APPROVE or WHY`, waYes: "APPROVE", waCode: "Sandbox code (no SMS is sent)", l3: "owner + one-time code",
   },
   es: {
     cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `Riesgo de quedar sin caja · al día ${N.crunchDay}`,
@@ -41,7 +41,7 @@ const UI = {
     risk: "Riesgo de quedar sin caja", on: "el día de los sueldos", before: "antes del aviso", payroll: "Sueldos de la cosecha", need: "Hay que cubrir",
     quotes: "Cuánto costaría cerrar la brecha con cada opción", quotesHint: "misma meta: caja sobre el colchón en el 90% de los escenarios",
     rec: "Lo que eligió el optimizador", recTitle: `Crédito de pre-exportación en USD a ${N.termDays} días`, ours: "Este crédito", bank: "Crédito bancario", save: "Ahorro",
-    wa: "Dueño · WhatsApp", waPlan: `PLAN ${usd(N.loanUsd, "es")} a ${N.termDays} días. Cuesta ${pesos(N.planCost, "es")} vs ${pesos(N.defaultCost, "es")}. Responde APROBAR o POR QUÉ`, waYes: "APROBAR", waCode: "Código enviado por SMS al •••• 4127", l3: "dueño + código de un solo uso",
+    wa: "Dueño · WhatsApp", waPlan: `PLAN ${usd(N.loanUsd, "es")} a ${N.termDays} días. Cuesta ${pesos(N.planCost, "es")} vs ${pesos(N.defaultCost, "es")}. Responde APROBAR o POR QUÉ`, waYes: "APROBAR", waCode: "Código sandbox (no se envía SMS)", l3: "dueño + código de un solo uso",
   },
   zh: {
     cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金耗尽概率 · 第${N.crunchDay}天前`,
@@ -52,7 +52,7 @@ const UI = {
     risk: "现金耗尽概率", on: "发薪日", before: "通知之前", payroll: "采收工资", need: "需补足",
     quotes: "用各方案补足缺口的成本", quotesHint: "同一目标：90%情景中现金高于安全垫",
     rec: "优化器的选择", recTitle: `${N.termDays}天期美元出口前融资`, ours: "此贷款", bank: "银行贷款", save: "节省",
-    wa: "企业主 · WhatsApp", waPlan: `方案：${usd(N.loanUsd, "zh")}，${N.termDays}天。成本${pesos(N.planCost, "zh")}，银行贷款${pesos(N.defaultCost, "zh")}。请回复“批准”或“原因”`, waYes: "批准", waCode: "验证码已短信发送至 •••• 4127", l3: "企业主 + 一次性验证码",
+    wa: "企业主 · WhatsApp", waPlan: `方案：${usd(N.loanUsd, "zh")}，${N.termDays}天。成本${pesos(N.planCost, "zh")}，银行贷款${pesos(N.defaultCost, "zh")}。请回复“批准”或“原因”`, waYes: "批准", waCode: "沙盒验证码（不发送短信）", l3: "企业主 + 一次性验证码",
   },
 };
 const LENDERS = new Set(S.arena.map((a) => a.lender)).size;
@@ -60,25 +60,25 @@ const CAPTIONS: Record<Lang, string[]> = {
   en: [
     `${SHORT_CUSTOMER} will pay ${usd(N.overdueUsd)} ${N.delayDays} days late`,
     `10,000 scenarios: ${N.pNeg} chance cash < 0 on day ${N.crunchDay}, harvest payroll`,
-    `${S.arena.length} financing quotes from ${LENDERS} lenders, compared in seconds`,
+    `${N.products} financing products checked, ${N.eligible} eligible from ${LENDERS} lenders, compared in seconds`,
     `Optimizer: ${N.termDays}-day USD pre-export loan, ${N.savingsPct} cheaper than the bank loan`,
-    "Owner approves on WhatsApp with a 6-digit SMS code",
+    "Owner approves with a 6-digit one-time code (sandbox code in this demo)",
     `Cash stays above the safety buffer in ${N.coverage} of scenarios · hash-chained · anchored on-chain`,
   ],
   es: [
     `${SHORT_CUSTOMER} pagará ${usd(N.overdueUsd, "es")} con ${N.delayDays} días de atraso`,
     `10.000 escenarios: ${N.pNeg} de probabilidad de caja < 0 el día ${N.crunchDay}, la nómina de cosecha`,
-    `${S.arena.length} cotizaciones de ${LENDERS} prestamistas, comparadas en segundos`,
+    `${N.products} productos de financiamiento revisados, ${N.eligible} elegibles de ${LENDERS} prestamistas, comparados en segundos`,
     `Optimizador: crédito de pre-exportación en USD a ${N.termDays} días, ${N.savingsPct} más barato que el crédito bancario`,
-    "El dueño aprueba por WhatsApp con un código SMS de 6 dígitos",
+    "El dueño aprueba con un código de un solo uso de 6 dígitos (código sandbox en esta demo)",
     `La caja queda sobre el colchón en el ${N.coverage} de los escenarios · hash encadenado · anclado on-chain`,
   ],
   zh: [
     `${SHORT_CUSTOMER_ZH}将推迟${N.delayDays}天支付 ${usd(N.overdueUsd, "zh")}`,
     `10,000 次模拟：第${N.crunchDay}天（采收工资日）现金为负的概率为${N.pNeg}`,
-    `数秒内比较${LENDERS}家贷款方的${S.arena.length}份融资报价`,
+    `数秒内评估${N.products}种融资产品，其中${N.eligible}种符合条件（来自${LENDERS}家贷款方）`,
     `优化器：${N.termDays}天期美元出口前融资，比银行贷款便宜${N.savingsPct}`,
-    "企业主通过 WhatsApp 输入6位短信验证码批准",
+    "企业主输入6位一次性验证码批准（本演示为沙盒验证码）",
     `${N.coverage}的情景中现金高于安全垫 · 哈希链 · 已上链锚定`,
   ],
 };

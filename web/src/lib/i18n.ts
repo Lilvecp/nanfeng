@@ -34,6 +34,12 @@ const DICT = {
   "shell.menu": { en: "Menu", es: "Menú", zh: "菜单" },
   "shell.theme": { en: "Toggle dark mode", es: "Cambiar modo oscuro", zh: "切换深色模式" },
   "shell.reset": { en: "Reset sandbox", es: "Reiniciar sandbox", zh: "重置沙盒" },
+  "shell.offline.title": { en: "Sandbox mode — not connected to the live API", es: "Modo sandbox — sin conexión con la API en vivo", zh: "沙盒模式 — 未连接在线 API" },
+  "shell.offline.slow": { en: "The API could not be reached within 6 s. Everything on screen is local sandbox data.", es: "No se pudo contactar la API en 6 s. Todo lo que ves son datos locales del sandbox.", zh: "6 秒内无法连接 API。屏幕上的内容均为本地沙盒数据。" },
+  "shell.offline.none": { en: "No API is configured. Everything on screen is local sandbox data.", es: "No hay API configurada. Todo lo que ves son datos locales del sandbox.", zh: "未配置 API。屏幕上的内容均为本地沙盒数据。" },
+  "shell.offline.retry": { en: "Retry", es: "Reintentar", zh: "重试" },
+  "shell.replay": { en: "Replay", es: "Repetición", zh: "回放" },
+  "shell.sandboxData": { en: "sandbox data", es: "datos de sandbox", zh: "沙盒数据" },
   "tick.cash": { en: "Cash", es: "Caja", zh: "现金" },
 
   // cockpit
@@ -72,6 +78,7 @@ const DICT = {
   "approvals.reason": { en: "Reject · reason (required)", es: "Rechazar · motivo (obligatorio)", zh: "拒绝 · 原因（必填）" },
   "approvals.history": { en: "History", es: "Historial", zh: "历史" },
   "approvals.sandboxCode": { en: "Sandbox code", es: "Código sandbox", zh: "沙盒验证码" },
+  "approvals.sandboxNoSms": { en: "Sandbox code · no SMS is sent", es: "Código sandbox · no se envía SMS", zh: "沙盒验证码 · 不发送短信" },
 
   // landing
   "lp.nav.product": { en: "Product", es: "Producto", zh: "产品" },

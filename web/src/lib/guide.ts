@@ -82,11 +82,11 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
       ],
     },
     "/approvals": {
-      summary: "Aquí apruebas o rechazas lo que NanFeng propone. Nada mueve plata sin el código que te llega por SMS.",
+      summary: "Aquí apruebas o rechazas lo que NanFeng propone. Nada mueve plata sin el código de un solo uso (en la demo, el código sandbox).",
       steps: [
         { target: "appr-plain", title: "En palabras simples", body: "Qué estás aprobando, cuánto cuesta y por qué, sin letra chica." },
         { target: "appr-request", title: "El detalle de la solicitud", body: `Un préstamo de ${loan} que llega el ${day}, justo para la nómina de cosecha.` },
-        { target: "appr-authorize", title: "Tu código para aprobar", body: "Escribe el código de 6 dígitos que te llegó por SMS. Si no te convence, recházalo y cuéntanos por qué." },
+        { target: "appr-authorize", title: "Tu código para aprobar", body: "Escribe el código de 6 dígitos (en la demo, el código sandbox que aparece en pantalla). Si no te convence, recházalo y cuéntanos por qué." },
         { target: "appr-history", title: "Todo queda registrado", body: "Cada decisión, tuya o automática, queda en este historial." },
       ],
     },
@@ -173,11 +173,11 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
       ],
     },
     "/approvals": {
-      summary: "在这里批准或拒绝NanFeng的提议。没有短信验证码，任何资金都不会移动。",
+      summary: "在这里批准或拒绝NanFeng的提议。没有一次性验证码（演示中为沙盒验证码），任何资金都不会移动。",
       steps: [
         { target: "appr-plain", title: "简单说明", body: "您要批准什么、费用多少、原因是什么，一目了然。" },
         { target: "appr-request", title: "申请详情", body: `一笔${loan}的贷款，于${day}到账，正好用于采收季工资。` },
-        { target: "appr-authorize", title: "输入验证码批准", body: "输入短信收到的6位验证码。如果不认同，可以拒绝并说明原因。" },
+        { target: "appr-authorize", title: "输入验证码批准", body: "输入6位验证码（演示中为屏幕上显示的沙盒验证码）。如果不认同，可以拒绝并说明原因。" },
         { target: "appr-history", title: "全部留有记录", body: "每项决定，无论是您做的还是自动执行的，都记录在这里。" },
       ],
     },
@@ -264,11 +264,11 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
       ],
     },
     "/approvals": {
-      summary: "This is where you approve or reject what NanFeng proposes. No money moves without the code you get by SMS.",
+      summary: "This is where you approve or reject what NanFeng proposes. No money moves without the one-time code (in the demo, the sandbox code).",
       steps: [
         { target: "appr-plain", title: "In plain words", body: "What you are approving, what it costs and why, with no fine print." },
         { target: "appr-request", title: "The request in detail", body: `A ${loan} loan that arrives on ${day}, right in time for the harvest payroll.` },
-        { target: "appr-authorize", title: "Your code to approve", body: "Type the 6-digit code you got by SMS. If you are not convinced, reject it and tell us why." },
+        { target: "appr-authorize", title: "Your code to approve", body: "Type the 6-digit code (in the demo, the sandbox code shown on screen). If you are not convinced, reject it and tell us why." },
         { target: "appr-history", title: "Everything is recorded", body: "Every decision, yours or automatic, stays in this history." },
       ],
     },

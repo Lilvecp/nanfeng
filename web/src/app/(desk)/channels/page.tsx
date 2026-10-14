@@ -40,7 +40,7 @@ function fullThread(lang: Lang, rc: Receipt): Bubble[] {
     { who: "out", t: "10:15", text: "POR QUÉ" },
     { who: "in", t: "10:15", text: <>Es {N.savingsPct} más barato y se paga en dólares con lo que te paguen por tus envíos. La caja queda sobre el colchón en el {N.coverage} de 10.000 escenarios.</> },
     { who: "out", t: rc.time, text: "APROBAR" },
-    { who: "in", t: rc.time, text: "Te enviamos un código por SMS al •••• 4127. Respóndelo aquí. Nunca te lo pediremos por teléfono." },
+    { who: "in", t: rc.time, text: "Responde aquí con tu código de un solo uso (en el sandbox es el código sandbox; no se envía SMS). Nunca te lo pediremos por teléfono." },
     { who: "out", t: rc.time, text: <span className="num">{SANDBOX_OTP}</span> },
     { who: "in", tone: "ok", t: rc.time, text: <><b className="up">EJECUTADO</b> ref. {rc.ref} (sandbox). La plata llega el {date}.</> },
   ];
@@ -50,7 +50,7 @@ function fullThread(lang: Lang, rc: Receipt): Bubble[] {
     { who: "out", t: "10:15", text: "原因" },
     { who: "in", t: "10:15", text: <>便宜{N.savingsPct}，并以出口美元收入偿还。10,000个情景中{N.coverage}现金高于安全垫。</> },
     { who: "out", t: rc.time, text: "批准" },
-    { who: "in", t: rc.time, text: "验证码已通过短信发送至 •••• 4127，请在此回复。我们绝不会通过电话索取。" },
+    { who: "in", t: rc.time, text: "请在此回复一次性验证码（沙盒中为沙盒验证码，不发送短信）。我们绝不会通过电话索取。" },
     { who: "out", t: rc.time, text: <span className="num">{SANDBOX_OTP}</span> },
     { who: "in", tone: "ok", t: rc.time, text: <><b className="up">已执行</b> 编号 {rc.ref}（沙盒）。资金于{date}到账。</> },
   ];
@@ -60,7 +60,7 @@ function fullThread(lang: Lang, rc: Receipt): Bubble[] {
     { who: "out", t: "10:15", text: "WHY" },
     { who: "in", t: "10:15", text: <>{N.savingsPct} cheaper and repaid in dollars with your export income. Cash stays above the buffer in {N.coverage} of 10,000 scenarios.</> },
     { who: "out", t: rc.time, text: "APPROVE" },
-    { who: "in", t: rc.time, text: "We sent a code by SMS to •••• 4127. Reply with it here. We will never ask for it by phone." },
+    { who: "in", t: rc.time, text: "Reply here with your one-time code (in the sandbox it is the sandbox code; no SMS is sent). We will never ask for it by phone." },
     { who: "out", t: rc.time, text: <span className="num">{SANDBOX_OTP}</span> },
     { who: "in", tone: "ok", t: rc.time, text: <><b className="up">EXECUTED</b> ref {rc.ref} (sandbox). Funds arrive on {date}.</> },
   ];
@@ -72,7 +72,7 @@ const TX = {
     importer: "Importer · WeCom", simulated: "Simulated", importerNote: "In the importer's language", verified: "VERIFIED BUSINESS",
     call: "Alert call · 10:13", transcriptLang: "Transcript language", play: "Play call", pause: "Pause call", seek: "Position",
     preview: "Transcript only: the audio has not been generated yet", voiced: "Voice by ElevenLabs (multilingual v2) · same numbers as the screens",
-    log: "Sent today", cols: ["Time", "Channel", "To", "Language", "Status"],
+    log: "Sent today", sandboxCode: "Sandbox code", sandboxData: "Sandbox data", cols: ["Time", "Channel", "To", "Language", "Status"],
     to: { owner: "Owner", otp: "Owner · code", importer: "Importer" }, st: { read: "Read", delivered: "Delivered", simulated: "Simulated", played: "Played", off: "Not connected" },
   },
   es: {
@@ -80,7 +80,7 @@ const TX = {
     importer: "Importador · WeCom", simulated: "Simulado", importerNote: "En el idioma del importador", verified: "EMPRESA VERIFICADA",
     call: "Llamada de alerta · 10:13", transcriptLang: "Idioma de la transcripción", play: "Reproducir llamada", pause: "Pausar llamada", seek: "Posición",
     preview: "Solo transcripción: el audio aún no se ha generado", voiced: "Voz de ElevenLabs (multilingual v2) · mismas cifras que las pantallas",
-    log: "Enviados hoy", cols: ["Hora", "Canal", "Para", "Idioma", "Estado"],
+    log: "Enviados hoy", sandboxCode: "Código sandbox", sandboxData: "Datos de sandbox", cols: ["Hora", "Canal", "Para", "Idioma", "Estado"],
     to: { owner: "Dueño", otp: "Dueño · código", importer: "Importador" }, st: { read: "Leído", delivered: "Entregado", simulated: "Simulado", played: "Escuchada", off: "Sin conectar" },
   },
   zh: {
@@ -88,7 +88,7 @@ const TX = {
     importer: "进口商 · 企业微信", simulated: "模拟", importerNote: "使用进口商的语言", verified: "已认证企业",
     call: "警报电话 · 10:13", transcriptLang: "转写语言", play: "播放通话", pause: "暂停通话", seek: "进度",
     preview: "仅有转写：音频尚未生成", voiced: "ElevenLabs 语音（multilingual v2）· 数字与界面一致",
-    log: "今日发送", cols: ["时间", "渠道", "接收方", "语言", "状态"],
+    log: "今日发送", sandboxCode: "沙盒验证码", sandboxData: "沙盒数据", cols: ["时间", "渠道", "接收方", "语言", "状态"],
     to: { owner: "企业主", otp: "企业主 · 验证码", importer: "进口商" }, st: { read: "已读", delivered: "已送达", simulated: "模拟", played: "已收听", off: "未连接" },
   },
 };
@@ -215,12 +215,12 @@ export default function ChannelsPage() {
               </div>
             </div>
             <div className="card">
-              <div className="card-h"><span className="h3">{x.log}</span></div>
+              <div className="card-h"><span className="h3">{x.log}</span><span className="badge" style={{ color: "var(--warn)" }}>{x.sandboxData}</span></div>
               <div className="tbl-wrap"><table className="tbl">
                 <thead><tr>{x.cols.map((c) => <th key={c}>{c}</th>)}</tr></thead>
                 <tbody>
                   <tr><td className="num">10:20</td><td>WeCom</td><td>{x.to.importer}</td><td className="num">中文</td><td><span className="badge warn">{x.st.simulated}</span></td></tr>
-                  {approval === "approved" && <tr><td className="num">{receipt.time}</td><td>SMS</td><td>{x.to.otp}</td><td className="num">—</td><td><span className="badge ok">{x.st.delivered}</span></td></tr>}
+                  {approval === "approved" && <tr><td className="num">{receipt.time}</td><td>{x.sandboxCode}</td><td>{x.to.otp}</td><td className="num">—</td><td><span className="badge warn">{x.st.simulated}</span></td></tr>}
                   <tr><td className="num">10:15</td><td>WhatsApp</td><td>{x.to.owner}</td><td className="num">{ownerLang}</td><td><span className="badge ok">{x.st.read}</span></td></tr>
                   <tr><td className="num">10:13</td><td>{lang === "es" ? "Voz" : lang === "zh" ? "语音" : "Voice"}</td><td>{x.to.owner}</td><td className="num">{ownerLang}</td><td><span className="badge ok">{x.st.played}</span></td></tr>
                   <tr><td className="num">—</td><td>LINE</td><td>—</td><td className="num">—</td><td><span className="badge">{x.st.off}</span></td></tr>

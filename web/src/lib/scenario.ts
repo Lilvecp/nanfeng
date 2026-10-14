@@ -150,6 +150,9 @@ export const N = {
   overdueUsd: S.event.amount,
   delayDays: S.event.delay_days,
   gapClp: S.need.amount_clp, // what has to be covered on payroll day
+  // Financing catalog: every product checked (9) and the ones that can cover the need in time (7).
+  products: S.explanation.length,
+  eligible: S.arena.length,
   // NanFeng-Bench and the red team, from their result files (npm run sync:scenario).
   benchCases: S.bench.cases,
   benchSolved: S.bench.solved,

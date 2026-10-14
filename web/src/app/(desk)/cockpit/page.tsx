@@ -18,7 +18,7 @@ type Answer = { q: Record<Lang, string>; a: Record<Lang, string>; href: string; 
 
 const CNY_INVOICES = S.receivables.filter((r) => r.currency === "CNY");
 const CNY_TOTAL = CNY_INVOICES.reduce((a, r) => a + r.amount, 0);
-const ELIGIBLE = S.arena.length;
+const ELIGIBLE = N.eligible;
 
 // Sandbox answers, and the fallback when the live agent is not reachable. Every number comes from the
 // quant engine's Cherry Crisis run (lib/scenario.ts).
@@ -36,9 +36,9 @@ const ANSWERS: Answer[] = [
   {
     q: { en: "Compare financing options", es: "Comparar opciones de financiamiento", zh: "比较融资方案" },
     a: {
-      en: `${ELIGIBLE} eligible products compared. The optimizer picks a ${N.termDays}-day USD pre-export loan of ${usd(N.loanUsd)}: ${clpM(N.planCost)} vs ${clpM(N.defaultCost)} for the default bank loan (${N.savingsPct} cheaper). Cash stays above the buffer in ${N.coverage} of scenarios.`,
-      es: `${ELIGIBLE} productos elegibles comparados. El optimizador elige un crédito de pre-exportación en USD a ${N.termDays} días por ${usd(N.loanUsd, "es")}: ${clpM(N.planCost, "es")} vs ${clpM(N.defaultCost, "es")} del crédito bancario (${N.savingsPct} más barato). La caja queda sobre el colchón en el ${N.coverage} de los escenarios.`,
-      zh: `比较了${ELIGIBLE}种符合条件的产品。优化器选择${N.termDays}天期美元出口前融资 ${usd(N.loanUsd, "zh")}：成本${clpM(N.planCost, "zh")}，银行贷款需${clpM(N.defaultCost, "zh")}（节省${N.savingsPct}）。${N.coverage}的情景中现金保持在安全垫之上。`,
+      en: `${N.products} products checked, ${ELIGIBLE} eligible. The optimizer picks a ${N.termDays}-day USD pre-export loan of ${usd(N.loanUsd)}: ${clpM(N.planCost)} vs ${clpM(N.defaultCost)} for the default bank loan (${N.savingsPct} cheaper). Cash stays above the buffer in ${N.coverage} of scenarios.`,
+      es: `${N.products} productos revisados, ${ELIGIBLE} elegibles. El optimizador elige un crédito de pre-exportación en USD a ${N.termDays} días por ${usd(N.loanUsd, "es")}: ${clpM(N.planCost, "es")} vs ${clpM(N.defaultCost, "es")} del crédito bancario (${N.savingsPct} más barato). La caja queda sobre el colchón en el ${N.coverage} de los escenarios.`,
+      zh: `评估了${N.products}种产品，其中${ELIGIBLE}种符合条件。优化器选择${N.termDays}天期美元出口前融资 ${usd(N.loanUsd, "zh")}：成本${clpM(N.planCost, "zh")}，银行贷款需${clpM(N.defaultCost, "zh")}（节省${N.savingsPct}）。${N.coverage}的情景中现金保持在安全垫之上。`,
     },
     href: "/financing",
     cta: { en: "Open Financing Arena", es: "Abrir comparación", zh: "打开融资比较" },
@@ -128,28 +128,28 @@ const TX = {
     monitoring: "AGENT MONITORING", actions: "ACTIONS TODAY", pNeg: `Chance of negative cash · day ${N.crunchDay}`, fromAfter: `▼ from ${N.pNeg} · 10:15`, fromBefore: `▲ from ${N.pNegBefore} before the notice`,
     crunch: "Crunch day", crunchSub: `P50 low ${clpM(S.after.minCashP50Clp)} · payroll ${clpM(N.payroll)}`, crunchDone: `buffer held in ${N.coverage} of paths`, cleared: "CLEARED",
     delayed: `Delayed +${N.delayDays}D`, passport: "Credit Passport", passportSub: "explainable score for lenders", from: "from",
-    forecast: "Cash forecast · 90D · CLP M · MC 10,000", tape: "Agent tape", threats: "2 threats blocked today", openMission: "Open agent activity",
+    forecast: "Cash forecast · 90D · CLP M · MC 10,000", tape: "Agent tape", threats: "1 threat blocked today", openMission: "Open agent activity",
     blotter: "Receivables", blotterHint: "sorted by due date", inv: "Invoice", importer: "Importer", market: "Market", amount: "Amount", due: "Due", delay: "Announced delay", action: "Action",
     pending: "Plan pending", financed: "Bridged by PAE", monitor: "Monitor", lc: "LC-backed",
-    tapeRows: { exec: "Plan executed · hash anchored", proposed: "Plan proposed", quotes: `${ELIGIBLE} quotes received`, mc: `MC re-run · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "Delay notice read (OCR)", voice: "Voice cash briefing (ES)", blk1: "Blocked: bank-detail swap", blk2: "Blocked: injected email" },
+    tapeRows: { exec: "Plan executed · hash anchored", proposed: "Plan proposed", quotes: `${ELIGIBLE} quotes received`, mc: `MC re-run · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "Delay notice read (OCR)", voice: "Voice cash briefing (ES)", blk1: "Blocked: Frío Austral invoice 4471 · bank-detail swap + hidden instruction" },
   },
   es: {
     monitoring: "AGENTE MONITOREANDO", actions: "ACCIONES HOY", pNeg: `Prob. de caja negativa · día ${N.crunchDay}`, fromAfter: `▼ desde ${N.pNeg} · 10:15`, fromBefore: `▲ desde ${N.pNegBefore} antes del aviso`,
     crunch: "Día crítico", crunchSub: `Mínimo P50 ${clpM(S.after.minCashP50Clp, "es")} · nómina ${clpM(N.payroll, "es")}`, crunchDone: `colchón respetado en ${N.coverage} de los escenarios`, cleared: "DESPEJADO",
     delayed: `Atrasado +${N.delayDays}D`, passport: "Credit Passport", passportSub: "puntaje explicable para prestamistas", from: "desde",
-    forecast: "Pronóstico de caja · 90D · CLP M · MC 10.000", tape: "Bitácora del agente", threats: "2 amenazas bloqueadas hoy", openMission: "Abrir actividad del agente",
+    forecast: "Pronóstico de caja · 90D · CLP M · MC 10.000", tape: "Bitácora del agente", threats: "1 amenaza bloqueada hoy", openMission: "Abrir actividad del agente",
     blotter: "Cuentas por cobrar", blotterHint: "por fecha de vencimiento", inv: "Factura", importer: "Importador", market: "Mercado", amount: "Monto", due: "Vence", delay: "Atraso avisado", action: "Acción",
     pending: "Plan pendiente", financed: "Cubierta con PAE", monitor: "Vigilar", lc: "Con carta de crédito",
-    tapeRows: { exec: "Plan ejecutado · hash anclado", proposed: "Plan propuesto", quotes: `${ELIGIBLE} cotizaciones recibidas`, mc: `MC re-calculado · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "Aviso de atraso leído (OCR)", voice: "Briefing de caja por voz (ES)", blk1: "Bloqueado: cambio de cuenta", blk2: "Bloqueado: correo con inyección" },
+    tapeRows: { exec: "Plan ejecutado · hash anclado", proposed: "Plan propuesto", quotes: `${ELIGIBLE} cotizaciones recibidas`, mc: `MC re-calculado · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "Aviso de atraso leído (OCR)", voice: "Briefing de caja por voz (ES)", blk1: "Bloqueada: factura 4471 de Frío Austral · cambio de cuenta + instrucción oculta" },
   },
   zh: {
     monitoring: "代理监控中", actions: "项今日操作", pNeg: `现金为负概率 · 第${N.crunchDay}天`, fromAfter: `▼ 原为 ${N.pNeg} · 10:15`, fromBefore: `▲ 通知前为 ${N.pNegBefore}`,
     crunch: "危机日", crunchSub: `P50 最低 ${clpM(S.after.minCashP50Clp, "zh")} · 工资 ${clpM(N.payroll, "zh")}`, crunchDone: `${N.coverage} 的情景保持安全垫`, cleared: "已解除",
     delayed: `延迟 +${N.delayDays}天`, passport: "信用护照", passportSub: "面向贷款方的可解释评分", from: "原为",
-    forecast: "现金预测 · 90天 · 百万智利比索 · 蒙特卡洛 10,000", tape: "代理记录", threats: "今日拦截2次威胁", openMission: "打开代理活动",
+    forecast: "现金预测 · 90天 · 百万智利比索 · 蒙特卡洛 10,000", tape: "代理记录", threats: "今日拦截1次威胁", openMission: "打开代理活动",
     blotter: "应收账款", blotterHint: "按到期日排序", inv: "发票", importer: "进口商", market: "市场", amount: "金额", due: "到期日", delay: "已通知延迟", action: "操作",
     pending: "方案待批", financed: "已由 PAE 过桥", monitor: "监控", lc: "信用证担保",
-    tapeRows: { exec: "方案已执行 · 哈希已锚定", proposed: "已提出方案", quotes: `收到${ELIGIBLE}份报价`, mc: `重新模拟 · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "已读取延迟通知（OCR）", voice: "语音现金简报（西语）", blk1: "已拦截：银行账户变更", blk2: "已拦截：注入攻击邮件" },
+    tapeRows: { exec: "方案已执行 · 哈希已锚定", proposed: "已提出方案", quotes: `收到${ELIGIBLE}份报价`, mc: `重新模拟 · P=${S.after.probNegByCrunch.toFixed(2)}`, ocr: "已读取延迟通知（OCR）", voice: "语音现金简报（西语）", blk1: "已拦截：Frío Austral 发票 4471 · 银行账户变更 + 隐藏指令" },
   },
 };
 
@@ -306,7 +306,6 @@ function CockpitDetail() {
                 <tr><td className="num muted">10:12</td><td>{x.tapeRows.ocr}</td><td className="r"><span className="tier t0"><b>L0</b></span></td></tr>
                 <tr><td className="num muted">08:47</td><td className="down">{x.tapeRows.blk1}</td><td className="r"><span className="badge crit">BLK</span></td></tr>
                 <tr><td className="num muted">08:00</td><td>{x.tapeRows.voice}</td><td className="r"><span className="tier t0"><b>L0</b></span></td></tr>
-                <tr><td className="num muted">07:51</td><td className="down">{x.tapeRows.blk2}</td><td className="r"><span className="badge crit">BLK</span></td></tr>
               </tbody>
             </table></div>
             <div className="card-b" style={{ borderTop: "1px solid var(--line)" }}>

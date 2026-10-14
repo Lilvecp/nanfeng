@@ -89,8 +89,9 @@ const TOASTS = {
 
 export const SANDBOX_OTP = "482913";
 
-/** What the sandbox bank and the audit chain return when the plan runs (Approvals, Home, Security). */
-export const SANDBOX_RECEIPT = { ref: "APR-0412", time: "10:16", seq: 1043, hash: "c90e…77b2", tx: "0x7d3a…e21c", block: "Sepolia #7,291,604" };
+/** What the sandbox bank and the audit chain return when the plan runs (Approvals, Home, Security).
+ * Sandbox only: nothing here is anchored on a real chain. */
+export const SANDBOX_RECEIPT = { ref: "APR-0412", time: "10:16", seq: 1043, hash: "c90e…77b2" };
 
 /** The executed plan as every screen quotes it: one reference, one time, one audit entry. */
 export type Receipt = { ref: string; time: string; seq: number | null; hash: string | null };
@@ -287,7 +288,8 @@ export function DeskStateProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        // A slow or sleeping backend must not hold the screen: after 6 s the desk runs on the sandbox.
+        // A slow or sleeping backend must not hold the screen: after 6 s the desk runs on the sandbox
+        // and says so (banner in components/api-gate.tsx).
         await Promise.race([
           api.health(),
           new Promise((_, fail) => setTimeout(() => fail(new Error("API timeout")), 6000)),
