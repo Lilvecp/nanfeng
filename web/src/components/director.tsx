@@ -1,5 +1,6 @@
 "use client";
 
+import { TeamCta } from "@/components/team-cta";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, api } from "@/lib/api";
@@ -20,9 +21,9 @@ const LABELS: Record<Lang, string[]> = {
   zh: ["延迟", "预测", "报价", "方案", "批准", "补足"],
 };
 const UI: Record<Lang, Record<string, string>> = {
-  en: { prev: "Previous", next: "Next", play: "Play", pause: "Pause", exit: "Exit tour", replay: "Watch again", live: "LIVE BACKEND", offline: "OFFLINE", start: "Tour the app", end: "End of the tour" },
-  es: { prev: "Anterior", next: "Siguiente", play: "Reproducir", pause: "Pausa", exit: "Salir del recorrido", replay: "Ver de nuevo", live: "BACKEND EN VIVO", offline: "SIN RED", start: "Recorrer la app", end: "Fin del recorrido" },
-  zh: { prev: "上一步", next: "下一步", play: "播放", pause: "暂停", exit: "退出导览", replay: "再看一次", live: "实时后端", offline: "离线", start: "浏览应用", end: "导览结束" },
+  en: { prev: "Previous", next: "Next", play: "Play", pause: "Pause", exit: "Exit tour", replay: "Watch again", live: "LIVE BACKEND", offline: "OFFLINE", start: "Tour the app", end: "End of the tour", team: "Meet the team" },
+  es: { prev: "Anterior", next: "Siguiente", play: "Reproducir", pause: "Pausa", exit: "Salir del recorrido", replay: "Ver de nuevo", live: "BACKEND EN VIVO", offline: "SIN RED", start: "Recorrer la app", end: "Fin del recorrido", team: "Conoce al equipo" },
+  zh: { prev: "上一步", next: "下一步", play: "播放", pause: "暂停", exit: "退出导览", replay: "再看一次", live: "实时后端", offline: "离线", start: "浏览应用", end: "导览结束", team: "认识团队" },
 };
 
 type Box = { top: number; left: number; width: number; height: number };
@@ -238,6 +239,7 @@ export function Director() {
           <button className="ctl" type="button" aria-label={u.next} title={u.next} onClick={director.next} disabled={last}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
           </button>
+          {last && !t.playing && <TeamCta compact onClick={director.stop} />}
           <button className="btn btn-secondary btn-sm" type="button" onClick={director.stop}>{u.exit}</button>
         </div>
       </div>

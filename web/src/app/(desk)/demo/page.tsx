@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { OwnerChart } from "@/components/owner-view";
 import { Receipt } from "@/components/receipt";
 import { TourButton } from "@/components/director";
+import { TeamCta } from "@/components/team-cta";
 import { Topbar } from "@/components/topbar";
 import { useDemoReplay } from "@/lib/demo-replay";
 import { SANDBOX_OTP, useDesk } from "@/lib/desk-state";
@@ -25,7 +26,7 @@ const UI = {
     cash: "Cash", exit: "Exit demo", step: "STEP", delayed: `Delayed +${N.delayDays}D`, plan: "Plan", run: "RUN CHERRY CRISIS", searching: "SEARCHING…", pae: "PAE LOAN", executed: "EXECUTED", pNeg: `Chance cash runs out · by day ${N.crunchDay}`,
     synced: "LIVE · SYNCED WITH BACKEND", offline: "OFFLINE REPLAY", reset: "Restart demo", play: "Play demo", pause: "Pause demo", next: "Next step",
     start: "Play the Cherry Crisis", startSub: "6 steps · about 25 seconds · space to pause",
-    endTitle: "Your turn", endBody: "The run left the desk approved. Reset it and approve the loan yourself with the sandbox code, or let the tour walk you through the real screens.", tryIt: "Approve it yourself",
+    endTitle: "Your turn", endBody: "The run left the desk approved. Reset it and approve the loan yourself with the sandbox code, or let the tour walk you through the real screens.", tryIt: "Approve it yourself", team: "Meet the team",
     mail: "Email from the importer · 10:12", read: "What NanFeng read", inv: "Invoice", amount: "Amount", delay: "Delay", newDate: "New date",
     risk: "Chance of running out of cash", on: "on payroll day", before: "before the notice", payroll: "Harvest payroll", need: "To cover",
     quotes: "Cost of closing the gap with each option", quotesHint: "same goal: cash above the buffer in 90% of scenarios",
@@ -36,7 +37,7 @@ const UI = {
     cash: "Caja", exit: "Salir de la demo", step: "PASO", delayed: `Atrasado +${N.delayDays}D`, plan: "Plan", run: "CORRER CHERRY CRISIS", searching: "BUSCANDO…", pae: "CRÉDITO PAE", executed: "EJECUTADO", pNeg: `Riesgo de quedar sin caja · al día ${N.crunchDay}`,
     synced: "EN VIVO · SINCRONIZADO", offline: "REPLAY SIN RED", reset: "Reiniciar demo", play: "Reproducir demo", pause: "Pausar demo", next: "Paso siguiente",
     start: "Reproducir la Cherry Crisis", startSub: "6 pasos · unos 25 segundos · espacio para pausar",
-    endTitle: "Ahora tú", endBody: "La corrida dejó el escritorio aprobado. Reinícialo y aprueba tú el crédito con el código del sandbox, o deja que el recorrido te muestre las pantallas reales.", tryIt: "Apruébalo tú",
+    endTitle: "Ahora tú", endBody: "La corrida dejó el escritorio aprobado. Reinícialo y aprueba tú el crédito con el código del sandbox, o deja que el recorrido te muestre las pantallas reales.", tryIt: "Apruébalo tú", team: "Conoce al equipo",
     mail: "Correo del importador · 10:12", read: "Lo que leyó NanFeng", inv: "Factura", amount: "Monto", delay: "Atraso", newDate: "Nueva fecha",
     risk: "Riesgo de quedar sin caja", on: "el día de los sueldos", before: "antes del aviso", payroll: "Sueldos de la cosecha", need: "Hay que cubrir",
     quotes: "Cuánto costaría cerrar la brecha con cada opción", quotesHint: "misma meta: caja sobre el colchón en el 90% de los escenarios",
@@ -47,7 +48,7 @@ const UI = {
     cash: "现金", exit: "退出演示", step: "步骤", delayed: `延迟 +${N.delayDays}天`, plan: "方案", run: "运行樱桃危机", searching: "搜索中…", pae: "PAE 贷款", executed: "已执行", pNeg: `现金耗尽概率 · 第${N.crunchDay}天前`,
     synced: "实时 · 已与后端同步", offline: "离线回放", reset: "重新开始", play: "播放演示", pause: "暂停演示", next: "下一步",
     start: "播放“樱桃危机”", startSub: "6个步骤 · 约25秒 · 空格键暂停",
-    endTitle: "轮到您了", endBody: "演示已将方案批准。重置后，用沙盒验证码亲自批准这笔贷款，或跟随导览浏览真实界面。", tryIt: "亲自批准",
+    endTitle: "轮到您了", endBody: "演示已将方案批准。重置后，用沙盒验证码亲自批准这笔贷款，或跟随导览浏览真实界面。", tryIt: "亲自批准", team: "认识团队",
     mail: "进口商邮件 · 10:12", read: "南风读取的内容", inv: "发票", amount: "金额", delay: "延迟", newDate: "新日期",
     risk: "现金耗尽概率", on: "发薪日", before: "通知之前", payroll: "采收工资", need: "需补足",
     quotes: "用各方案补足缺口的成本", quotesHint: "同一目标：90%情景中现金高于安全垫",
@@ -188,6 +189,7 @@ function DemoEnd({ lang }: { lang: Lang }) {
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button className="btn btn-primary" type="button" onClick={async () => { await resetDemo(); router.push("/approvals"); }}>{u.tryIt}</button>
         <TourButton className="btn btn-secondary" />
+        <TeamCta />
       </div>
     </div>
   );

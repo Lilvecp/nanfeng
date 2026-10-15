@@ -8,6 +8,7 @@ import { SecurityControl } from "@/components/security-control";
 import { LandingCards } from "@/components/landing-cards";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteNav } from "@/components/site-nav";
+import { TeamCta } from "@/components/team-cta";
 import { useLang, useT } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { N } from "@/lib/scenario";
@@ -152,6 +153,7 @@ export default function LandingPage() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
           {TEAM.map(([n, role]) => <span key={n} data-reveal className="chip" style={{ borderRadius: 999, padding: "10px 22px", fontSize: 14, display: "inline-flex", gap: 8, alignItems: "baseline" }}><b>{n}</b><span className="muted small">{role[lang]}</span></span>)}
         </div>
+        <div data-reveal><TeamCta /></div>
       </div></section>
 
       <FinalCta cta={t("lp.cta.demo")} footer={l("sandbox")} />
