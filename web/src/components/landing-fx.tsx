@@ -70,7 +70,7 @@ export function Ticker() {
 }
 
 /**
- * The motion layer of the landing page: entrance curtain, scroll progress bar, pointer aura,
+ * The motion layer of the landing page (the entrance curtain is components/load-curtain.tsx): scroll progress bar, pointer aura,
  * hero orbs that follow the mouse, scroll-linked parallax (--p per [data-scroll]), magnetic buttons
  * and 3D tilt with glare on cards. Everything is skipped for reduced motion and touch pointers.
  */
@@ -174,7 +174,6 @@ export function LandingFx() {
 
   return (
     <>
-      <div className="fx-curtain" aria-hidden="true"><span>南风</span></div>
       <div className="fx-progress" ref={bar} aria-hidden="true" />
       <div className="fx-aura" ref={aura} aria-hidden="true" />
     </>
