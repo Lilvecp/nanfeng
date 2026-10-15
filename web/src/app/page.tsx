@@ -6,6 +6,7 @@ import { FinalCta } from "@/components/final-cta";
 import { HeroGlobe } from "@/components/hero-globe";
 import { SecurityControl } from "@/components/security-control";
 import { LandingCards } from "@/components/landing-cards";
+import { CountUp, LandingFx, Ticker, Words } from "@/components/landing-fx";
 import { LoadCurtain } from "@/components/load-curtain";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteNav } from "@/components/site-nav";
@@ -84,15 +85,17 @@ export default function LandingPage() {
     <div className="lp">
       <ScrollReveal />
       <LoadCurtain />
+      <LandingFx />
       <SiteNav />
       <section className="cine">
-        <div className="cine-grid" aria-hidden="true" />
+        <div className="cine-grid fx-grid" aria-hidden="true" />
+        <div className="fx-orb o1" aria-hidden="true" /><div className="fx-orb o2" aria-hidden="true" /><div className="fx-orb o3" aria-hidden="true" />
         <div className="wrap" style={{ position: "relative" }}>
           <div id="top" className="hero-screen">
             <h1 className="hero-t rise" style={{ fontSize: "clamp(36px, 5.6vw, 76px)", fontWeight: 700, lineHeight: 1.08, maxWidth: 1080 }}>
-              {t("lp.hero.a")}{lang === "zh" ? "" : " "}<span className="kw">{t("lp.hero.kw")}</span>{t("lp.hero.b")}
+              <Words text={t("lp.hero.a")} />{lang === "zh" ? "" : " "}<span className="kw fx-kw"><Words text={t("lp.hero.kw")} base={6} /></span><Words text={t("lp.hero.b")} base={8} />
               <br />
-              <span style={{ color: "var(--muted)" }}>{t("lp.hero.line2")}</span>
+              <span style={{ color: "var(--muted)" }}><Words text={t("lp.hero.line2")} base={9} /></span>
             </h1>
             <p className="lead rise rise-2" style={{ textAlign: "center", maxWidth: 640, margin: "-8px auto 0" }}>{t("lp.hero.sub")}</p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", marginTop: 12 }}>
@@ -106,9 +109,11 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <Ticker />
+
       <section id="story" className="cine story-section">
         <div className="wrap" style={{ position: "relative" }}>
-          <div data-reveal="globe" style={{ display: "flex", justifyContent: "center" }}>
+          <div data-reveal="globe" data-scroll className="fx-globe" style={{ display: "flex", justifyContent: "center" }}>
             <HeroGlobe max={780} />
           </div>
         </div>
@@ -116,14 +121,14 @@ export default function LandingPage() {
 
       <section className="cine" style={{ padding: "88px 0 96px", borderTop: "1px solid var(--line)" }}>
         <div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
-          <h2 className="lp-h" data-reveal style={{ color: "var(--text)" }}>{l("deskH")}</h2>
+          <h2 className="lp-h" data-reveal style={{ color: "var(--text)" }}><Words text={l("deskH")} /></h2>
           <p className="lp-sub" data-reveal style={{ color: "var(--muted)" }}>{l("deskSub")}</p>
           <LandingCards />
         </div>
       </section>
 
       <section id="how" className="lp-section alt"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 48 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h">{l("howH")}</h2></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h"><Words text={l("howH")} /></h2></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 20 }}>
           {HOW.map((h) => (
             <div key={h.href} className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">{h.n[lang]}</span><h3 className="h2" style={{ fontSize: 24 }}>{h.h[lang]}</h3><p className="muted" style={{ margin: 0 }}>{h.p[lang]}</p><Link className="mono small" href={h.href}>{h.link[lang]} →</Link></div></div>
@@ -132,28 +137,28 @@ export default function LandingPage() {
       </div></section>
 
       <section id="channels" className="lp-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h">{l("chanH")}</h2><p className="lp-sub">{l("chanSub")}</p></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h"><Words text={l("chanH")} /></h2><p className="lp-sub">{l("chanSub")}</p></div>
         <ChannelsNetwork />
       </div></section>
 
       <section id="security" className="lp-section alt security-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 36 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h">{l("secH")}</h2></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h"><Words text={l("secH")} /></h2></div>
         <SecurityControl />
       </div></section>
 
       <section className="lp-section alt metrics-section"><div className="wrap" style={{ position: "relative", display: "flex", flexDirection: "column", gap: 28 }}>
-        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}><h2 className="lp-h" style={{ color: "var(--text)" }}>{l("benchH")}</h2><span className="badge" style={{ background: "transparent" }}>{l("benchNote")}</span></div>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}><h2 className="lp-h" style={{ color: "var(--text)" }}><Words text={l("benchH")} /></h2><span className="badge" style={{ background: "transparent" }}>{l("benchNote")}</span></div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: 0, borderTop: "1px solid var(--line)" }}>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>{N.benchSolved}/{N.benchCases}</span><span className="muted">{l("bench1")}</span></div>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--accent)", fontSize: 64 }}>−{N.benchSavingsPct}</span><span className="muted" style={{ textAlign: "center", maxWidth: 320 }}>{l("bench2")}</span></div>
-          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}>{N.rtStopped}/{N.rtAttacks}</span><span className="muted">{l("bench3")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}><CountUp text={`${N.benchSolved}/${N.benchCases}`} /></span><span className="muted">{l("bench1")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--accent)", fontSize: 64 }}><CountUp text={`−${N.benchSavingsPct}`} /></span><span className="muted" style={{ textAlign: "center", maxWidth: 320 }}>{l("bench2")}</span></div>
+          <div data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", borderLeft: "1px solid var(--line)" }}><span className="big-num" style={{ color: "var(--text)", fontSize: 64 }}><CountUp text={`${N.rtStopped}/${N.rtAttacks}`} /></span><span className="muted">{l("bench3")}</span></div>
         </div>
       </div></section>
 
       <section id="team" className="lp-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 32, alignItems: "center" }}>
-        <h2 className="lp-h" data-reveal style={{ fontSize: 34 }}>{l("teamH")}</h2>
+        <h2 className="lp-h" data-reveal style={{ fontSize: 34 }}><Words text={l("teamH")} /></h2>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center" }}>
-          {TEAM.map(([n, role]) => <span key={n} data-reveal className="chip" style={{ borderRadius: 999, padding: "10px 22px", fontSize: 14, display: "inline-flex", gap: 8, alignItems: "baseline" }}><b>{n}</b><span className="muted small">{role[lang]}</span></span>)}
+          {TEAM.map(([n, role]) => <span key={n} data-reveal className="chip fx-pop" style={{ borderRadius: 999, padding: "10px 22px", fontSize: 14, display: "inline-flex", gap: 8, alignItems: "baseline" }}><b>{n}</b><span className="muted small">{role[lang]}</span></span>)}
         </div>
         <div data-reveal><TeamCta /></div>
       </div></section>
