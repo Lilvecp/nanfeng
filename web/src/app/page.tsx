@@ -6,6 +6,7 @@ import { FinalCta } from "@/components/final-cta";
 import { HeroGlobe } from "@/components/hero-globe";
 import { SecurityControl } from "@/components/security-control";
 import { LandingCards } from "@/components/landing-cards";
+import { LoadCurtain } from "@/components/load-curtain";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { SiteNav } from "@/components/site-nav";
 import { TeamCta } from "@/components/team-cta";
@@ -82,6 +83,7 @@ export default function LandingPage() {
   return (
     <div className="lp">
       <ScrollReveal />
+      <LoadCurtain />
       <SiteNav />
       <section className="cine">
         <div className="cine-grid" aria-hidden="true" />
