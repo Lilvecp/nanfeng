@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { Logo } from "@/components/logo";
 import { LangSwitch, ThemeToggle } from "@/components/topbar";
 import { useLang } from "@/lib/i18n";
+import { useLiteClass } from "@/lib/perf";
 import type { Lang } from "@/lib/prefs";
 
 type L3 = Record<Lang, string>;
@@ -22,7 +23,7 @@ const COPY = {
     es: "Universidad del Desarrollo, Chile · FinTechathon 2026",
     zh: "智利发展大学 · FinTechathon 2026",
   },
-  hint: { en: "Hover a card for the story", es: "Pasa el mouse por una tarjeta", zh: "悬停卡片查看详情" },
+  hint: { en: "Hover or tap a card for the story", es: "Pasa el mouse o toca una tarjeta", zh: "悬停或点击卡片查看详情" },
   again: { en: "Watch the demo again", es: "Ver la demo otra vez", zh: "再看一次演示" },
   home: { en: "Back to the product", es: "Volver al producto", zh: "返回产品" },
   foot: { en: "NANFENG 南风 · SANDBOX DEMO · NO REAL FUNDS MOVE", es: "NANFENG 南风 · DEMO SANDBOX · NO SE MUEVE DINERO REAL", zh: "南风 NANFENG · 沙盒演示 · 不涉及真实资金" },
@@ -91,25 +92,36 @@ export default function AboutPage() {
   const lang = useLang();
   const stage = useRef<HTMLDivElement>(null);
 
-  // Pointer-follow glow on the stage + a light 3D tilt on the hovered card (CSS reads the variables).
+  useLiteClass();
+  // Pointer-follow glow on the stage + a light 3D tilt on the hovered card. Positions are written once per frame;
+  // the card rect is cached while the pointer stays on that card.
+  const frame = useRef(0);
+  const last = useRef<{ x: number; y: number; card: HTMLElement | null } | null>(null);
+  const rect = useRef<{ el: HTMLElement; r: DOMRect } | null>(null);
   const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const s = stage.current;
-    if (s) {
-      s.style.setProperty("--gx", `${e.clientX}px`);
-      s.style.setProperty("--gy", `${e.clientY}px`);
-    }
-    const card = (e.target as HTMLElement).closest<HTMLElement>(".about-card");
-    if (card) {
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width;
-      const y = (e.clientY - r.top) / r.height;
+    if (e.pointerType === "touch") return;
+    last.current = { x: e.clientX, y: e.clientY, card: (e.target as HTMLElement).closest<HTMLElement>(".about-card") };
+    if (frame.current) return;
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0;
+      const l = last.current;
+      if (!l) return;
+      stage.current?.style.setProperty("--gx", `${l.x}px`);
+      stage.current?.style.setProperty("--gy", `${l.y}px`);
+      const card = l.card;
+      if (!card) return;
+      if (rect.current?.el !== card) rect.current = { el: card, r: card.getBoundingClientRect() };
+      const r = rect.current.r;
+      const x = (l.x - r.left) / r.width;
+      const y = (l.y - r.top) / r.height;
       card.style.setProperty("--mx", `${x * 100}%`);
       card.style.setProperty("--my", `${y * 100}%`);
       card.style.setProperty("--ry", `${(x - 0.5) * 9}deg`);
       card.style.setProperty("--rx", `${(0.5 - y) * 7}deg`);
-    }
+    });
   };
   const onLeave = (e: React.PointerEvent<HTMLElement>) => {
+    rect.current = null;
     e.currentTarget.style.setProperty("--rx", "0deg");
     e.currentTarget.style.setProperty("--ry", "0deg");
   };
@@ -149,7 +161,7 @@ export default function AboutPage() {
           {TEAM.map((m, i) => (
             <article key={m.id} tabIndex={0} className="about-card" style={{ "--i": i } as React.CSSProperties} onPointerLeave={onLeave}>
               <div className="about-photo-wrap">
-                <Image className="about-photo" src={`/team/${m.id}.jpg`} alt={m.name} width={800} height={800} sizes="(min-width: 1100px) 22vw, 50vw" quality={92} priority />
+                <Image className="about-photo" src={`/team/${m.id}.jpg`} alt={m.name} width={800} height={800} sizes="(min-width: 1100px) 22vw, 50vw" quality={92} priority={i < 3} />
                 <div className="about-over">
                   <p>{m.bio[lang]}</p>
                   <div className="about-links">

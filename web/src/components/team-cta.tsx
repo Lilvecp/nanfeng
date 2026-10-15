@@ -14,7 +14,7 @@ export function TeamCta({ compact = false, onClick }: { compact?: boolean; onCli
     <Link href="/nosotros" className={`team-cta${compact ? " compact" : ""}`} onClick={onClick}>
       <span className="team-cta-faces" aria-hidden="true">
         {TEAM_IDS.map((id, i) => (
-          <Image key={id} src={`/team/${id}.jpg`} alt="" width={64} height={64} quality={80} style={{ "--i": i } as React.CSSProperties} />
+          <Image key={id} src={`/team/${id}.jpg`} alt="" width={64} height={64} quality={75} sizes="34px" loading="lazy" style={{ "--i": i } as React.CSSProperties} />
         ))}
       </span>
       <span className="team-cta-label">{LABEL[lang]}</span>

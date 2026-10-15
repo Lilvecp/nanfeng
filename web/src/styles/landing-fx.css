@@ -11,9 +11,9 @@
 @media (hover:none),(pointer:coarse){.fx-aura{display:none}}
 
 /* ── hero: a few slow, soft orbs; words rise in without blur ── */
-.fx-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;opacity:.22;z-index:0;background:rgb(var(--fx-navy));translate:calc(var(--mx,0)*var(--k,24px)) calc(var(--my,0)*var(--k,18px));transition:translate 1.2s var(--expo)}
+.fx-orb{position:absolute;border-radius:50%;pointer-events:none;z-index:0;opacity:.5;background:radial-gradient(circle,rgba(var(--fx-navy),.22),rgba(var(--fx-navy),.08) 45%,transparent 70%);translate:calc(var(--mx,0)*var(--k,24px)) calc(var(--my,0)*var(--k,18px));transition:translate 1.2s var(--expo);will-change:transform}
 .fx-orb.o1{width:40vw;height:40vw;left:-8vw;top:-12vw;--k:28px;animation:fx-float 26s ease-in-out infinite alternate}
-.fx-orb.o2{width:30vw;height:30vw;right:-6vw;top:8vw;opacity:.16;--k:-22px;animation:fx-float 32s ease-in-out infinite alternate-reverse}
+.fx-orb.o2{width:30vw;height:30vw;right:-6vw;top:8vw;opacity:.35;--k:-22px;animation:fx-float 32s ease-in-out infinite alternate-reverse}
 .fx-orb.o3{display:none}
 @keyframes fx-float{from{transform:translate(0,0) scale(1)}to{transform:translate(3vw,-2vw) scale(1.12)}}
 .fx-grid{translate:calc(var(--mx,0)*-8px) calc(var(--my,0)*-6px);transition:translate .9s var(--expo)}
@@ -38,7 +38,7 @@
 @keyframes fx-marquee{to{transform:translateX(-50%)}}
 
 /* ── globe: gentle scroll zoom ── */
-.fx-on .fx-globe > *{transform:scale(calc(.93 + var(--p,.5)*.12));transform-origin:50% 55%;will-change:transform}
+.fx-on .fx-globe > *{transform:scale(calc(.93 + var(--p,.5)*.12));transform-origin:50% 55%}
 
 /* ── reveals: rise + fade, no blur ── */
 html.reveal-ready .lp [data-reveal]:not([data-reveal="globe"]):not(.net-svg):not(.net-hub):not(.net-node):not(.vcard):not(.fx-pop){transform:translateY(44px);transition:opacity .9s var(--expo) var(--reveal-delay,0ms),transform 1s var(--expo) var(--reveal-delay,0ms),box-shadow .35s}
@@ -74,3 +74,16 @@ html.reveal-ready .lp .fx-pop[data-reveal][data-revealed]{opacity:1;transform:no
   .fx-tick-track,.scroll-hint,.fx-w,.fx-kw .fx-w,.hero-screen .pill-cherry,.hero-screen .pill-out{animation:none!important}
   .fx-on .fx-globe > *{transform:none}
 }
+
+/* ── performance: pause what is offscreen, drop decoration on weak/small/touch devices ── */
+.fx-hero[data-paused] .fx-orb,.fx-ticker[data-paused] .fx-tick-track,.fx-ticker[data-paused] .fx-tick-row i{animation-play-state:paused}
+.fx-hero[data-paused] .fx-orb{will-change:auto}
+#how,#channels,#security,#team,.metrics-section{content-visibility:auto;contain-intrinsic-size:auto 640px}
+.fx-lite .fx-orb,.fx-lite .fx-aura,.fx-lite .fx-progress{display:none}
+.fx-lite .fx-grid{translate:none;animation:none}
+.fx-lite .fx-globe > *{transform:none}
+.fx-lite .fx-tick-track{animation-duration:120s}
+.fx-lite .lp .pill-cherry::after{display:none}
+.fx-lite .reveal-ready .fx-w,.fx-lite .reveal-ready [data-revealed] .fx-w{transition-duration:.45s}
+html.fx-lite.reveal-ready .lp [data-reveal]:not([data-revealed]){transform:translateY(24px)}
+@media (max-width:760px){.fx-orb,.fx-aura{display:none}.hero-t .fx-w{animation-duration:.6s}}

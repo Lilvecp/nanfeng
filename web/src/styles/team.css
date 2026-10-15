@@ -1,8 +1,8 @@
 /* About us (/nosotros): the last screen of the demo. One desktop viewport, animated, on the site's own tokens. */
 .about{--gx:50vw;--gy:30vh;position:relative;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;background:var(--bg);color:var(--text);overflow:hidden;isolation:isolate}
 .about-grid-bg{position:absolute;inset:0;z-index:-3;background-image:radial-gradient(var(--line-2) 1px,transparent 1.2px);background-size:28px 28px;opacity:.55;mask-image:radial-gradient(ellipse at 50% 35%,#000 25%,transparent 75%);animation:about-fade 1.2s ease both}
-.about-glow{position:absolute;inset:0;z-index:-2;pointer-events:none;background:radial-gradient(520px circle at var(--gx) var(--gy),var(--accent-soft),transparent 62%)}
-.about-orb{position:absolute;z-index:-3;border-radius:50%;filter:blur(100px);opacity:.35;pointer-events:none;background:var(--accent-soft)}
+.about-glow{position:absolute;left:0;top:0;width:620px;height:620px;z-index:-2;pointer-events:none;background:radial-gradient(circle,var(--accent-soft),transparent 62%);opacity:.8;transform:translate3d(calc(var(--gx) - 310px),calc(var(--gy) - 310px),0);will-change:transform}
+.about-orb{position:absolute;z-index:-3;border-radius:50%;pointer-events:none;opacity:.55;background:radial-gradient(circle,var(--accent-soft),transparent 68%);will-change:transform}
 .about-orb.a{width:40vw;height:40vw;left:-12vw;top:-16vw;animation:about-drift 18s ease-in-out infinite alternate}
 .about-orb.b{width:30vw;height:30vw;right:-8vw;bottom:-12vw;opacity:.25;animation:about-drift 22s ease-in-out infinite alternate-reverse}
 .about-bar{display:flex;align-items:center;gap:12px;padding:14px clamp(16px,3vw,40px);animation:about-drop .7s cubic-bezier(.2,.8,.2,1) both}
@@ -20,13 +20,13 @@
 .about-sub{margin:0;color:var(--muted);font-size:clamp(13px,1.5svh + 4px,17px);animation:about-fade .8s .9s both}
 
 .about-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.3vw,22px);width:min(100%,1480px);perspective:1400px}
-.about-card{--rx:0deg;--ry:0deg;--mx:50%;--my:50%;position:relative;border-radius:18px;background:var(--surface);border:1px solid var(--line);overflow:hidden;outline:none;transform:rotateX(var(--rx)) rotateY(var(--ry));transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;animation:about-card 1s calc(var(--i)*120ms + .5s) cubic-bezier(.2,.8,.2,1) both;will-change:transform}
+.about-card{--rx:0deg;--ry:0deg;--mx:50%;--my:50%;position:relative;border-radius:18px;background:var(--surface);border:1px solid var(--line);overflow:hidden;outline:none;transform:rotateX(var(--rx)) rotateY(var(--ry));transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .3s;animation:about-card 1s calc(var(--i)*120ms + .5s) cubic-bezier(.2,.8,.2,1) both}
 .about-card::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(280px circle at var(--mx) var(--my),rgba(255,255,255,.14),transparent 60%)}
 .about-card:hover,.about-card:focus-visible{border-color:var(--accent);box-shadow:0 22px 48px -22px rgba(14,17,22,.45)}
 .about-card:hover::before,.about-card:focus-visible::before{opacity:1}
 .about-photo-wrap{position:relative;height:clamp(150px,34svh,330px);overflow:hidden;background:var(--surface-2)}
-.about-photo{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block;transition:transform .8s cubic-bezier(.2,.8,.2,1),filter .5s}
-.about-card:hover .about-photo,.about-card:focus-visible .about-photo{transform:scale(1.07);filter:brightness(.5)}
+.about-photo{width:100%;height:100%;object-fit:cover;object-position:50% 22%;display:block;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.about-card:hover .about-photo,.about-card:focus-visible .about-photo{transform:scale(1.06)}
 .about-over{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:14px;background:linear-gradient(0deg,rgba(14,17,22,.88),rgba(14,17,22,.3) 75%,transparent);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1)}
 .about-card:hover .about-over,.about-card:focus-visible .about-over,.about-card:focus-within .about-over{opacity:1;transform:none}
 .about-over p{margin:0;font-size:clamp(11.5px,1.5svh + 1px,14px);line-height:1.5;color:#F3F5FA}
@@ -47,21 +47,21 @@
 .about-ghost:hover{background:var(--surface-2)}
 .about-legal{color:var(--muted);letter-spacing:.08em}
 
-@keyframes about-card{from{opacity:0;transform:translateY(46px) scale(.92) rotateX(14deg);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
-@keyframes about-word{from{opacity:0;transform:translateY(.7em);filter:blur(10px)}to{opacity:1;transform:none;filter:none}}
+@keyframes about-card{from{opacity:0;transform:translateY(40px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes about-word{from{opacity:0;transform:translateY(.6em)}to{opacity:1;transform:none}}
 @keyframes about-fade{from{opacity:0}to{opacity:1}}
 @keyframes about-drop{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
 @keyframes about-line{to{width:clamp(28px,5vw,70px)}}
 @keyframes about-drift{from{transform:translate(0,0) scale(1)}to{transform:translate(6vw,4vw) scale(1.15)}}
 
 @media (max-width:1099px){.about-row{grid-template-columns:repeat(3,minmax(0,1fr))}.about-photo-wrap{height:clamp(180px,30vw,300px)}}
-@media (max-width:640px){.about-row{grid-template-columns:repeat(2,minmax(0,1fr))}.about-over{opacity:1;transform:none;justify-content:flex-end}.about-over p,.about-links{display:none}.about-hint{display:none}}
+@media (max-width:640px){.about-row{grid-template-columns:repeat(2,minmax(0,1fr))}.about-photo-wrap{height:clamp(190px,52vw,240px)}.about-tags span{white-space:normal;max-width:100%;overflow-wrap:anywhere;font-size:10px}.about-over{padding:10px}.about-over p{font-size:11.5px;line-height:1.4}.about-links{font-size:10.5px}.about-body{padding:10px 11px 12px}}
 @media (prefers-reduced-motion:reduce){.about *,.about-card{animation:none!important;transition:none!important}}
 
 /* "Meet the team" call-to-action: five faces + a pill that breathes. Used at the end of the demo, the tour and the landing. */
-.team-cta{position:relative;display:inline-flex;align-items:center;gap:14px;padding:7px 22px 7px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink)!important;font-weight:700;font-size:15px;text-decoration:none!important;overflow:hidden;box-shadow:0 8px 24px -8px rgba(14,17,22,.45);animation:team-pulse 2.6s ease-in-out infinite;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.team-cta{position:relative;display:inline-flex;align-items:center;gap:14px;padding:7px 22px 7px 8px;border-radius:999px;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.26) 50%,transparent 62%) 160% 0/260% 100% no-repeat,var(--accent);color:var(--accent-ink)!important;font-weight:700;font-size:15px;text-decoration:none!important;box-shadow:0 8px 24px -8px rgba(14,17,22,.45);animation:team-sheen 3.6s 1s ease-in-out infinite;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 .team-cta:hover{transform:translateY(-2px) scale(1.03)}
-.team-cta::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);transform:translateX(-120%);animation:team-sheen 3.4s 1s ease-in-out infinite}
+.team-cta::before{content:"";position:absolute;inset:0;border-radius:inherit;border:2px solid var(--accent);pointer-events:none;opacity:0;animation:team-ring 2.6s ease-out infinite}
 .team-cta-faces{display:inline-flex}
 .team-cta-faces img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-ink);margin-left:-11px;background:var(--surface);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .team-cta-faces img:first-child{margin-left:0}
@@ -72,10 +72,10 @@
 .team-cta:hover .team-cta-arrow{transform:translateX(4px)}
 .team-cta.compact{padding:4px 14px 4px 5px;font-size:13px;gap:9px}
 .team-cta.compact .team-cta-faces img{width:24px;height:24px;margin-left:-8px;border-width:1.5px}
-@keyframes team-pulse{0%,100%{box-shadow:0 8px 24px -8px rgba(14,17,22,.45),0 0 0 0 var(--accent-soft)}50%{box-shadow:0 8px 24px -8px rgba(14,17,22,.45),0 0 0 12px transparent}}
-@keyframes team-sheen{0%,55%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+@keyframes team-ring{0%{opacity:.55;transform:scale(1)}100%{opacity:0;transform:scale(1.22,1.7)}}
+@keyframes team-sheen{0%,50%{background-position:160% 0,0 0}100%{background-position:-60% 0,0 0}}
 @media (max-width:760px){.team-cta.compact .team-cta-faces{display:none}}
-@media (prefers-reduced-motion:reduce){.team-cta,.team-cta::after{animation:none}}
+@media (prefers-reduced-motion:reduce){.team-cta,.team-cta::before{animation:none}}
 
 /* Landing entrance curtain (components/load-curtain.tsx). */
 .load-curtain{position:fixed;inset:0;z-index:10000;background:#0E1116;display:grid;place-items:center;pointer-events:none;animation:load-curtain .95s .35s cubic-bezier(.76,0,.24,1) forwards}
@@ -83,3 +83,8 @@
 @keyframes load-curtain{0%{clip-path:inset(0 0 0 0)}99%{clip-path:inset(0 0 100% 0);visibility:visible}100%{clip-path:inset(0 0 100% 0);visibility:hidden}}
 @keyframes load-curtain-mark{0%{opacity:0;transform:scale(.92)}50%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.04)}}
 @media (prefers-reduced-motion:reduce){.load-curtain{display:none}}
+
+/* weak / small / touch devices: no ambient motion on the About page, keep the entrance */
+.fx-lite .about-orb,.fx-lite .about-glow{display:none}
+.fx-lite .team-cta::before{display:none}
+.fx-lite .about-card{transition:none}

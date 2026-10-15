@@ -87,7 +87,7 @@ export default function LandingPage() {
       <LoadCurtain />
       <LandingFx />
       <SiteNav />
-      <section className="cine">
+      <section className="cine fx-hero">
         <div className="cine-grid fx-grid" aria-hidden="true" />
         <div className="fx-orb o1" aria-hidden="true" /><div className="fx-orb o2" aria-hidden="true" /><div className="fx-orb o3" aria-hidden="true" />
         <div className="wrap" style={{ position: "relative" }}>

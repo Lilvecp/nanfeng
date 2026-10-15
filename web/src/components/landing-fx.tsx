@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "@/lib/i18n";
+import { isLite, useLiteClass } from "@/lib/perf";
 import type { Lang } from "@/lib/prefs";
 import { N } from "@/lib/scenario";
 
@@ -77,15 +78,23 @@ export function Ticker() {
 export function LandingFx() {
   const bar = useRef<HTMLDivElement>(null);
   const aura = useRef<HTMLDivElement>(null);
+  useLiteClass();
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches && !isLite();
     const root = document.documentElement;
     root.classList.add("fx-on");
     if (reduce) return () => root.classList.remove("fx-on");
+    const cleanups: (() => void)[] = [];
 
-    // scroll: progress bar + per-element progress through the viewport (0 → 1)
+    // Offscreen = paused: animated decoration (orbs, ticker) stops when it is not on screen.
+    const pausables = Array.from(document.querySelectorAll<HTMLElement>(".fx-ticker,.fx-hero"));
+    const pio = new IntersectionObserver((es) => es.forEach((e) => e.target.toggleAttribute("data-paused", !e.isIntersecting)), { rootMargin: "80px" });
+    pausables.forEach((el) => pio.observe(el));
+    cleanups.push(() => pio.disconnect());
+
+    // scroll: progress bar + per-element progress through the viewport (0 → 1). One rAF per frame, reads then writes.
     const scrollEls = Array.from(document.querySelectorAll<HTMLElement>("[data-scroll]"));
     let ticking = false;
     const onScroll = () => {
@@ -94,79 +103,83 @@ export function LandingFx() {
       requestAnimationFrame(() => {
         ticking = false;
         const max = document.documentElement.scrollHeight - window.innerHeight;
-        const y = window.scrollY;
-        bar.current?.style.setProperty("--prog", String(max > 0 ? y / max : 0));
-        root.style.setProperty("--sy", String(y));
         const vh = window.innerHeight;
-        for (const el of scrollEls) {
+        const ps = scrollEls.map((el) => {
           const r = el.getBoundingClientRect();
-          const p = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
-          el.style.setProperty("--p", p.toFixed(4));
-        }
+          return r.bottom < -200 || r.top > vh + 200 ? null : Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height)));
+        });
+        bar.current?.style.setProperty("--prog", String(max > 0 ? window.scrollY / max : 0));
+        scrollEls.forEach((el, i) => ps[i] !== null && el.style.setProperty("--p", (ps[i] as number).toFixed(3)));
       });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    cleanups.push(() => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); });
 
-    const cleanups: (() => void)[] = [];
     if (fine) {
-      // pointer aura (lerped) + mouse position for the hero orbs
-      let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty, raf = 0;
+      // pointer light (lerped, loop sleeps once it settles) + mouse position for the hero orbs (set on the hero only)
+      const hero = document.querySelector<HTMLElement>(".fx-hero");
+      let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty, raf = 0, moveRaf = 0;
       const loop = () => {
-        x += (tx - x) * 0.14;
-        y += (ty - y) * 0.14;
+        x += (tx - x) * 0.16;
+        y += (ty - y) * 0.16;
         if (aura.current) aura.current.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%)`;
-        raf = requestAnimationFrame(loop);
+        raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.4 ? requestAnimationFrame(loop) : 0;
       };
-      raf = requestAnimationFrame(loop);
+      let ev: PointerEvent | null = null;
       const onMove = (e: PointerEvent) => {
         tx = e.clientX; ty = e.clientY;
-        root.style.setProperty("--mx", String((e.clientX / innerWidth - 0.5) * 2));
-        root.style.setProperty("--my", String((e.clientY / innerHeight - 0.5) * 2));
-        const hot = (e.target as HTMLElement).closest("a,button,[data-tilt],.vcard,.chip");
-        aura.current?.toggleAttribute("data-hot", !!hot);
+        if (!raf) raf = requestAnimationFrame(loop);
+        ev = e;
+        if (moveRaf) return;
+        moveRaf = requestAnimationFrame(() => {
+          moveRaf = 0;
+          if (!ev) return;
+          if (hero && !hero.hasAttribute("data-paused")) {
+            hero.style.setProperty("--mx", String((ev.clientX / innerWidth - 0.5) * 2));
+            hero.style.setProperty("--my", String((ev.clientY / innerHeight - 0.5) * 2));
+          }
+          const hot = (ev.target as HTMLElement).closest?.("a,button,[data-tilt],.vcard,.chip");
+          aura.current?.toggleAttribute("data-hot", !!hot);
+        });
       };
       window.addEventListener("pointermove", onMove, { passive: true });
-      cleanups.push(() => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); });
+      cleanups.push(() => { cancelAnimationFrame(raf); cancelAnimationFrame(moveRaf); window.removeEventListener("pointermove", onMove); });
 
-      // magnetic buttons
-      const mags = document.querySelectorAll<HTMLElement>(".lp .pill-cherry,.lp .pill-out,.lp .pill-sm,.lp .team-cta");
-      mags.forEach((el) => {
-        const mv = (e: PointerEvent) => {
-          const r = el.getBoundingClientRect();
-          el.style.setProperty("--tx", `${(e.clientX - (r.left + r.width / 2)) * 0.18}px`);
-          el.style.setProperty("--ty", `${(e.clientY - (r.top + r.height / 2)) * 0.25}px`);
-        };
-        const lv = () => { el.style.setProperty("--tx", "0px"); el.style.setProperty("--ty", "0px"); };
-        el.classList.add("fx-mag");
-        el.addEventListener("pointermove", mv);
-        el.addEventListener("pointerleave", lv);
-        cleanups.push(() => { el.removeEventListener("pointermove", mv); el.removeEventListener("pointerleave", lv); el.classList.remove("fx-mag"); });
-      });
-
-      // 3D tilt + glare
-      const tilts = document.querySelectorAll<HTMLElement>(".lp .card,.lp .final-flow");
-      tilts.forEach((el) => {
-        const mv = (e: PointerEvent) => {
-          const r = el.getBoundingClientRect();
+      // magnetic buttons and 3D tilt: the rect is measured once on enter, writes are batched per frame
+      const bind = (els: NodeListOf<HTMLElement>, onEnterCls: string | null, apply: (el: HTMLElement, e: PointerEvent, r: DOMRect) => void, reset: (el: HTMLElement) => void) => {
+        els.forEach((el) => {
+          let r: DOMRect | null = null, f = 0, last: PointerEvent | null = null;
+          const enter = () => { r = el.getBoundingClientRect(); };
+          const mv = (e: PointerEvent) => {
+            if (!r) r = el.getBoundingClientRect();
+            last = e;
+            if (f) return;
+            f = requestAnimationFrame(() => { f = 0; if (last && r) apply(el, last, r); });
+          };
+          const lv = () => { r = null; cancelAnimationFrame(f); f = 0; reset(el); };
+          if (onEnterCls) el.classList.add(onEnterCls);
+          el.addEventListener("pointerenter", enter);
+          el.addEventListener("pointermove", mv);
+          el.addEventListener("pointerleave", lv);
+          cleanups.push(() => { cancelAnimationFrame(f); el.removeEventListener("pointerenter", enter); el.removeEventListener("pointermove", mv); el.removeEventListener("pointerleave", lv); if (onEnterCls) el.classList.remove(onEnterCls); });
+        });
+      };
+      bind(document.querySelectorAll<HTMLElement>(".lp .pill-cherry,.lp .pill-out,.lp .pill-sm,.lp .team-cta"), "fx-mag",
+        (el, e, r) => { el.style.setProperty("--tx", `${(e.clientX - (r.left + r.width / 2)) * 0.18}px`); el.style.setProperty("--ty", `${(e.clientY - (r.top + r.height / 2)) * 0.25}px`); },
+        (el) => { el.style.setProperty("--tx", "0px"); el.style.setProperty("--ty", "0px"); });
+      bind(document.querySelectorAll<HTMLElement>(".lp .card,.lp .final-flow"), null,
+        (el, e, r) => {
           const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-          el.style.setProperty("--rx", `${(0.5 - py) * 6}deg`);
-          el.style.setProperty("--ry", `${(px - 0.5) * 7}deg`);
-          el.style.setProperty("--gx", `${px * 100}%`);
-          el.style.setProperty("--gy", `${py * 100}%`);
-        };
-        const lv = () => { el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); };
-        el.setAttribute("data-tilt", "");
-        el.addEventListener("pointermove", mv);
-        el.addEventListener("pointerleave", lv);
-        cleanups.push(() => { el.removeEventListener("pointermove", mv); el.removeEventListener("pointerleave", lv); el.removeAttribute("data-tilt"); });
-      });
+          el.setAttribute("data-tilt", "");
+          el.style.setProperty("--rx", `${(0.5 - py) * 6}deg`); el.style.setProperty("--ry", `${(px - 0.5) * 7}deg`);
+          el.style.setProperty("--gx", `${px * 100}%`); el.style.setProperty("--gy", `${py * 100}%`);
+        },
+        (el) => { el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg"); });
     }
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
       cleanups.forEach((c) => c());
       root.classList.remove("fx-on");
     };

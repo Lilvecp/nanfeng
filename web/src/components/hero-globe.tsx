@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { GlobeMethods } from "react-globe.gl";
 import { MeshPhongMaterial } from "three";
 import { useLang } from "@/lib/i18n";
+import { isLite } from "@/lib/perf";
 import type { Lang } from "@/lib/prefs";
 import { N, S, clpM, shortDate, usd } from "@/lib/scenario";
 
@@ -122,6 +123,7 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
   const globe = useRef<GlobeMethods | undefined>(undefined);
   const clock = useRef(0);
   const started = useRef(false);
+  const sleepTimer = useRef(0);
   const [size, setSize] = useState(0);
   const [ready, setReady] = useState(false);
   // Next keeps visited pages alive but hidden (Activity). Hiding runs react-globe.gl's destructor,
@@ -132,6 +134,7 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
   // WCAG 2.2.2: the story loops, so the viewer can stop it (and the callout is only announced then).
   const [paused, setPaused] = useState(false);
   const [still] = useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  useEffect(() => () => window.clearTimeout(sleepTimer.current), [visible, paused, still]);
   const lang = useLang();
 
   useEffect(() => {
@@ -158,6 +161,10 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
     const g = globe.current;
     if (!ready || !g) return;
     const c = g.controls();
+    // Cap the render resolution (retina phones would draw 4x the pixels for no visible gain) and stop three.js' own loop while the globe is offscreen or paused.
+    g.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, isLite() ? 1 : 1.5));
+    sleepTimer.current = !still && (!visible || paused) ? window.setTimeout(() => g.pauseAnimation(), 400) : 0;
+    if (!sleepTimer.current) g.resumeAnimation();
     c.enableZoom = false;
     c.enableRotate = false;
     c.enablePan = false;
@@ -222,6 +229,7 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
     return () => cancelAnimationFrame(raf);
   }, [ready, visible, still, paused]);
 
+  // (the pause timer above is cleared by the effect re-running; resumeAnimation wins when visible again)
   const shown = still ? 1 : phase;
   const step = STEPS[lang][shown];
   const jump = (i: number) => {
@@ -243,7 +251,7 @@ export function HeroGlobe({ max = 780 }: { max?: number }) {
             width={size}
             height={size}
             backgroundColor="rgba(0,0,0,0)"
-            rendererConfig={{ alpha: true, antialias: true }}
+            rendererConfig={{ alpha: true, antialias: !isLite(), powerPreference: "low-power" }}
             animateIn={false}
             globeMaterial={matteMaterial()}
             globeImageUrl="/textures/earth-night.jpg"
