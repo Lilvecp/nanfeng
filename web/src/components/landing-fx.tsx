@@ -21,17 +21,23 @@ export function Words({ text, base = 0 }: { text: string; base?: number }) {
   );
 }
 
-/** "50/50", "−41%", "46/46": every number in the string counts up from zero the first time it is on screen. */
+/** "50/50", "−41%", "46/46": every number in the string counts up from zero the first time it is on screen.
+ *  The server HTML carries the real value (crawlers, link previews, no JS); it only drops to zero while still off screen. */
 export function CountUp({ text }: { text: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [k, setK] = useState(0);
+  const [k, setK] = useState(1);
   useEffect(() => {
     const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setK(1);
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
+    let primed = false;
     const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
+      if (!e.isIntersecting) {
+        if (!primed) { primed = true; setK(0); }
+        return;
+      }
       io.disconnect();
+      if (!primed) return; // already on screen at load: keep the real value, no count from zero
       const t0 = performance.now();
       const tick = (t: number) => {
         const p = Math.min(1, (t - t0) / 1600);
