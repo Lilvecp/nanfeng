@@ -1,6 +1,6 @@
-# Security Self-Assessment Report (deliverable 05, r4-09)
+# Security Self-Assessment Report
 
-**NanFeng — the autonomous CFO for SMEs that export to China** · FinTechathon 2026, Topic E · Owner: Andy Villarroel (Security & Compliance) · v2, Oct 12, 2026 (v1: Oct 10) · Final edit: Valentín
+**NanFeng — the autonomous CFO for SMEs that export to China** · FinTechathon 2026, Topic E · Author: Andy Villarroel (Security & Compliance) · Oct 16, 2026
 
 ## 1. Summary
 
@@ -9,9 +9,9 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 | Evidence | Result |
 |----------|--------|
 | Red team, 46 outcome-based attacks in 7 categories, written by the team itself | **46/46 stopped** (first 43: 4 → 43 as controls were built; 3 added Oct 14 were open until that day's fixes) ([report](../04-source-code/redteam/results/REPORT.md)) |
-| Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../04-source-code/agent/tests/test_redteam_via_agent.py)) |
-| Automated tests | **Backend 116**: security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, invoice registry 6, live story 5, demo 5, anchoring 4. **Agent 91**, including the red team replay and the AI label. **Quant 36** |
-| CI gate | Fails the build if any of the 43 red team attacks gets through |
+| Same attacks through the real agent | **21 attacks** through the real agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../04-source-code/agent/tests/test_redteam_via_agent.py)) |
+| Automated tests | **Backend 127**: security/BEC 26, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, anchoring 7, invoice registry 6, idempotency 6, live story 5, demo 5. **Agent 113**, including the red team replay and the AI label. **Quant 36** |
+| CI gate | Fails the build if any of the 46 red team attacks gets through |
 | Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](../06-execution-evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 7/7, the 08:47 attack in the anchored root, the loan as L3 executed once, and the Merkle root read back from Sepolia ([summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
 
 ## 2. Where decisions are made
@@ -88,20 +88,19 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 | K1 | **Owner sign-in is a single shared password**, and demo builds show it on the sign-in screen. Anyone with the password is the owner. (Fixed: anonymous callers can no longer approve, reject, turn the kill switch off or reset the sandbox; red team API-02, API-03 stopped.) | Medium in production | One owner per company in the MVP; per-user accounts come with Supabase auth | Startup refuses the demo password outside demo builds; failed sign-ins rate limited; turning the kill switch off and approving still need the SMS code |
 | K2 | Demo Mode uses a shared sandbox code shown on screen | High if used with real money | The jury must be able to run the demo | SMS mode exists and the red team covers it; the public demo and the live evidence run use the sandbox code, labelled as such on screen |
 | K3 | The document guard is heuristic, and its author also wrote the attacks | Medium | Time | It is one layer; the policy engine and OTP do not depend on it. Through the real agent, 8 of the 12 document attacks are only `suspicious`: the agent continues with typed fields and does not pay, but nothing blocks the run. A blind set from the rest of the team is next |
-| K4 | ~~Quarantined-LLM pipeline only designed~~ **Fixed**: integrated in the agent (r2-03) and red-teamed through it | — | — | — |
-| K5 | SMS OTP can be defeated by SIM swap | Medium | SMS is what SMEs have | Production: authenticator app or device binding |
-| K6 | Single backend instance: the policy lock and the event history live in memory | Low | Demo architecture | The kill switch is now stored in the database (a restart no longer turns it off); a distributed lock is needed before running several instances |
-| K7 | Read endpoints are public (balances, audit entries) | Low with synthetic data | Writes were closed first; reads come after the delivery (threat model F11) | Account numbers and phones masked in the audit log |
-| K8 | Sanctions list is synthetic | Low (demo) | No licensed list in a hackathon | The matching is real; production loads official lists |
-| K9 | Anchoring and the invoice registry run on an EVM testnet (Sepolia), not FISCO BCOS | Low | FISCO BCOS needs its own node (Docker) | Same Merkle format; FISCO BCOS is one more backend |
-| K10 | Policy limits change only by deploy; the Settings screen does not save to the backend yet | Low | Not in the frozen scope | Limits are versioned and logged with every decision; a write API would sit behind the owner session |
+| K4 | SMS OTP can be defeated by SIM swap | Medium | SMS is what SMEs have | Production: authenticator app or device binding |
+| K5 | Single backend instance: the policy lock and the event history live in memory | Low | Demo architecture | The kill switch is now stored in the database (a restart no longer turns it off); a distributed lock is needed before running several instances |
+| K6 | Read endpoints are public (balances, audit entries) | Low with synthetic data | Writes were closed first; reads come after the delivery (threat model F11) | Account numbers and phones masked in the audit log |
+| K7 | Sanctions list is synthetic | Low (demo) | No licensed list in a hackathon | The matching is real; production loads official lists |
+| K8 | Anchoring and the invoice registry run on an EVM testnet (Sepolia), not FISCO BCOS | Low | FISCO BCOS needs its own node (Docker) | Same Merkle format; FISCO BCOS is one more backend |
+| K9 | Policy limits change only by deploy; the Settings screen does not save to the backend yet | Low | Out of scope for the competition build | Limits are versioned and logged with every decision; a write API would sit behind the owner session |
 
 ## 6. Reproduce
 
 ```sh
-cd 04-source-code/backend && pytest -q                        # 116 tests
+cd 04-source-code/backend && pytest -q                        # 127 tests
 cd ../agent && pytest -q                                      # 113 agent tests, red team replay included
-cd ../redteam && python run.py --backend ../backend --label after --min-stopped 43 && python report.py
+cd ../redteam && python run.py --backend ../backend --label after --min-stopped 46 && python report.py
 cd ../../06-execution-evidence && python build.py --backend ../04-source-code/backend   # Cherry Crisis evidence
 python build.py --url <deployed backend> --out out-live      # same export from the live deploy
 ```

@@ -4,7 +4,7 @@
 
 NanFeng is an AI agent that acts as a financial participant for a small exporter: it reads what reaches the owner (an importer's late-payment notice, a supplier invoice), forecasts cash with a Monte Carlo engine, finds the cheapest financing with an exact optimizer, and executes it in a sandbox bank once the owner approves with a one-time code. The LLM never calculates and never decides: numbers come from deterministic tools, and a policy engine outside the LLM decides what the agent may do alone.
 
-This document covers the three parts the competition asks for: **system architecture** (section 2), **core algorithm description** (section 3, with the agent in section 4) and **security design** (section 5). Each section links to the full write-up by the module's owner.
+This document covers the three parts the competition asks for: **system architecture** (section 2), **core algorithm description** (section 3, with the agent in section 4) and **security design** (section 5). Each section links to its full write-up.
 
 | | |
 |---|---|
@@ -258,10 +258,10 @@ Result: the red team's first 43 outcome-based attacks went from 4/43 stopped to 
 
 | Suite | Count | Run | In CI |
 |---|---|---|---|
-| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 116 | `cd 04-source-code/backend && pytest -q` | Backend tests |
+| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 127 | `cd 04-source-code/backend && pytest -q` | Backend tests |
 | Red team gate (46 attacks against the API) | 46/46 stopped | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | Backend tests |
 | OpenAPI contract drift | — | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
-| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 91 | `cd 04-source-code/agent && pytest -q` (needs `../backend[dev]`) | Agent tests |
+| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 113 | `cd 04-source-code/agent && pytest -q` (needs `../backend[dev]`) | Agent tests |
 | Quant engine (Monte Carlo, MILP, business analysis, bench, API) | 36 | `cd 04-source-code/quant && pytest -q` | Quant tests |
 | NanFeng-Bench | 50/50 | `cd 04-source-code/quant && python -m nanfeng_quant bench` (~5 min) | No (results committed) |
 | Web | lint + production build | `cd 04-source-code/web && npm run lint && npm run build` | Web lint and build |

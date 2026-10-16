@@ -1,8 +1,8 @@
-# Red team (r4-06)
+# Red team
 
-43 attacks against the real NanFeng API, run in process on a freshly reset sandbox each time, judged by **outcome**: did money move without the owner, did a poisoned document pass as clean, did a secret leak?
+46 attacks against the real NanFeng API, run in process on a freshly reset sandbox each time, judged by **outcome**: did money move without the owner, did a poisoned document pass as clean, did a secret leak?
 
-**Result: 4/43 stopped before → 43/43 stopped after.** Full table: [results/REPORT.md](results/REPORT.md).
+**Result: 4/46 stopped before → 46/46 stopped after** (3 attacks added on Oct 14 count as not stopped before). Full table: [results/REPORT.md](results/REPORT.md).
 
 ## Run it
 

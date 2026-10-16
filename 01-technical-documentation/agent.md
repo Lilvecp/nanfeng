@@ -1,8 +1,8 @@
-# The agent (technical documentation · r2-11)
+# The agent
 
-**Owner:** Renato · **Code:** [`nanfeng_agent/`](../04-source-code/agent/nanfeng_agent) · **Tests:** [`tests/`](../04-source-code/agent/tests) (CI job "Agent tests")
+**Author:** Renato Lenis · **Code:** [`nanfeng_agent/`](../04-source-code/agent/nanfeng_agent) · **Tests:** [`tests/`](../04-source-code/agent/tests) (CI job "Agent tests")
 
-NanFeng's agent reads what reaches the owner (a WhatsApp photo of an invoice, an importer's email), works out what it means for cash with Vicente's quant tools, proposes the cheapest fix through Camilo's Approval Center, and tells the right people in their language. It **proposes, never approves**: every money movement goes to `POST /approvals`, where the policy engine (Andy, outside the LLM) decides the tier, and L3 waits for the owner's OTP, which never passes through the agent.
+NanFeng's agent reads what reaches the owner (a WhatsApp photo of an invoice, an importer's email), works out what it means for cash with the quant engine's tools, proposes the cheapest fix through the Approval Center, and tells the right people in their language. It **proposes, never approves**: every money movement goes to `POST /approvals`, where the policy engine (outside the LLM) decides the tier, and L3 waits for the owner's OTP, which never passes through the agent.
 
 ## Flow
 
@@ -25,22 +25,22 @@ Every step is published to Mission Control as `agent.step` (`POST /agent/events`
 
 ## Modules
 
-| Module | Task | What it does |
-|---|---|---|
-| `orchestrator.py` | r2-04 | `Agent.handle_document`, `resume`, `briefing`. Checks the kill switch before every step; caps steps and LLM spend per run |
-| `ingest.py` | r2-02 | Guard → mask → quarantined extraction → payee check → `PlannerInput` (typed fields, verdicts, provenance) |
-| `quarantine.py` | r2-03 | `ExtractedDoc` (Andy's schema, `extra="forbid"`), spotlighting with a random boundary per call, strict validation; regex extractor offline |
-| `ocr.py` | r2-02 | Mistral OCR (`mistral-ocr-latest`) + `pypdf` text layer for the `hidden-text` check |
-| `router.py` | r2-05 | OpenRouter: cheap models for `classify`/`extract`, strong for `plan`, fallbacks in order, cost (`usage.cost`) and latency per call, spend cap |
-| `planner.py` | r2-04 | `RulePlanner` (deterministic playbook) and `LLMPlanner` (strong model, every step checked against the facts, falls back to rules) |
-| `tools.py` | r2-06 | The tools below |
-| `channels/` | r2-07, r2-08, r2-12, r2-13 | `ChannelAdapter` + `ChannelHub`; Zavu (WhatsApp, SMS, email, voice), ElevenLabs voice, WeCom mock |
-| `templates.py` | r2-07 | Every outbound message, ES / EN / 中文, typed slots |
-| `contacts.py` | r2-06 | Master data for recipients (synthetic) |
-| `inbound.py` | r2-07 | Zavu webhook payload → `Document` (sender from the envelope, never the body) |
-| `service.py` | r2-09 | HTTP service (:8200): Zavu webhook, uploads, runs, "ask it why", briefing; SSE listener that resumes runs |
-| `explain.py` | r2-09 | "Ask it why": answers from the run's recorded tool results |
-| `pdfgen.py` | r2-10 | The 08:47 fake invoice as a real PDF (hidden white-on-white instruction) for tests and evidence |
+| Module | What it does |
+|---|---|
+| `orchestrator.py` | `Agent.handle_document`, `resume`, `briefing`. Checks the kill switch before every step; caps steps and LLM spend per run |
+| `ingest.py` | Guard → mask → quarantined extraction → payee check → `PlannerInput` (typed fields, verdicts, provenance) |
+| `quarantine.py` | `ExtractedDoc` (the anti-injection design's schema, `extra="forbid"`), spotlighting with a random boundary per call, strict validation; regex extractor offline |
+| `ocr.py` | Mistral OCR (`mistral-ocr-latest`) + `pypdf` text layer for the `hidden-text` check |
+| `router.py` | OpenRouter: cheap models for `classify`/`extract`, strong for `plan`, fallbacks in order, cost (`usage.cost`) and latency per call, spend cap |
+| `planner.py` | `RulePlanner` (deterministic playbook) and `LLMPlanner` (strong model, every step checked against the facts, falls back to rules) |
+| `tools.py` | The tools below |
+| `channels/` | `ChannelAdapter` + `ChannelHub`; Zavu (WhatsApp, SMS, email, voice), ElevenLabs voice, WeCom mock |
+| `templates.py` | Every outbound message, ES / EN / 中文, typed slots |
+| `contacts.py` | Master data for recipients (synthetic) |
+| `inbound.py` | Zavu webhook payload → `Document` (sender from the envelope, never the body) |
+| `service.py` | HTTP service (:8200): Zavu webhook, uploads, runs, "ask it why", briefing; SSE listener that resumes runs |
+| `explain.py` | "Ask it why": answers from the run's recorded tool results |
+| `pdfgen.py` | The 08:47 fake invoice as a real PDF (hidden white-on-white instruction) for tests and evidence |
 
 ## Tools
 
@@ -78,7 +78,7 @@ No outbound message is written by an LLM.
 
 `python -m nanfeng_agent cherry` plays it against a running backend.
 
-## Service (r2-09)
+## Service
 
 `uvicorn nanfeng_agent.service:app --port 8200`, or `docker compose up` (service `agent`).
 
@@ -95,8 +95,6 @@ No outbound message is written by an LLM.
 **Auto-resume.** A background thread follows `GET /agent/events` on the backend (with `Last-Event-ID` on reconnect, exponential backoff). On `approval.approved`, `approval.rejected`, `approval.locked` or `approval.failed` it calls `resume_approval(id)`: the run anchors the audit log and confirms to the owner, with no command. Turn it off with `NANFENG_AGENT_LISTEN=false`.
 
 **"Ask it why".** The question picks an intent (`plan`, `tier`, `alternatives`, `risk`, `blocked`, `did`; ES / EN / 中文 keywords). The answer is a template filled with the run's own tool results: the optimizer's reasons for each product, the forecast headline, the approval's tier, the guard's rules and the call-back number on file. No LLM rewrites the answer: in a live run a model gave a plausible but false reason, and no check can catch that reliably.
-
-**For the front (Valentín / Camilo).** Mission Control's "Ask it why" box and the Cockpit's ask bar can call `POST :8200/ask` instead of the canned answers; an "Upload document" button can call `POST :8200/documents`; all of them take the owner's bearer token. The agent's steps already arrive on the existing SSE stream.
 
 ## Error handling
 
@@ -166,7 +164,7 @@ Backend + quant engine + agent service on one machine, Mistral OCR live:
 3. `POST /ask` "¿Por qué elegiste el PAE?" → the plan, CLP 2,1M vs 3,8M, 45% cheaper, 96% of 10,000 scenarios.
 4. `POST /documents` with the real 08:47 PDF → Mistral OCR → `hidden-text`, `doc-instruction`, `bank-change` → blocked, no approval.
 
-## Status of the open items
+## Providers in production and design choices
 
-- **Real keys (r2-01):** Mistral OCR is live (workspace limit USD 10) and was checked on the real 08:47 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. ElevenLabs is live (Oct 13): the daily briefing was synthesized with a real call. Zavu is live with a test key and WhatsApp was tested from a team phone (Oct 13); the 24-hour window above still applies. r2-01 is closed.
-- **LangGraph:** the battle plan listed it. The orchestrator is a plain, explicit state machine instead (fewer dependencies, every transition in one file, easy to test). Swapping it in later does not change the tools or the channel layer.
+- **Real keys:** Mistral OCR is live (workspace limit USD 10) and was checked on the real 08:47 PDF: the OCR does not see the white-on-white instruction, the text layer does, the guard blocks it. OpenRouter is live (USD 5 limit): the three Cherry Crisis documents cost USD 0.023 with Sonnet 5.5 planning and Mistral Small extracting. The first live run found three bugs the mocks could not (the model dropped the brackets of a masked placeholder, the planner invented a scenario id, the ask-it-why rephrasing gave a false reason); each is fixed and has a regression test. ElevenLabs is live (Oct 13): the daily briefing was synthesized with a real call. Zavu is live with a test key and WhatsApp was tested from a team phone (Oct 13); the 24-hour window above still applies.
+- **No LangGraph:** we considered it. The orchestrator is a plain, explicit state machine instead (fewer dependencies, every transition in one file, easy to test). Swapping it in later does not change the tools or the channel layer.

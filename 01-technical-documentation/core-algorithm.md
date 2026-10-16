@@ -1,4 +1,4 @@
-# Core algorithm description (r5-11)
+# Core algorithm description
 
 Section of the technical documentation (deliverable 01) for the quant engine. Every number the agent shows comes from these deterministic tools; the LLM never calculates. Results quoted here come from `04-source-code/quant/results/` and are regenerated with `python -m nanfeng_quant demo|bench|backtest|sensitivity`.
 

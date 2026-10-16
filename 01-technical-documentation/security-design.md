@@ -1,6 +1,6 @@
 # Security design (technical documentation · deliverable 01)
 
-**Owner:** Andy · **Code:** [`04-source-code/backend/app/`](../04-source-code/backend/app) (`policy.py`, `otp.py`, `auth.py`, `guard.py`, `bec.py`, `privacy.py`, `sanctions.py`, `audit.py`, `anchoring.py`, `registry.py`) · **Tests:** `04-source-code/backend/tests/` (CI job "Backend tests") and the red team gate (43/43)
+**Author:** Andy Villarroel · **Code:** [`04-source-code/backend/app/`](../04-source-code/backend/app) (`policy.py`, `otp.py`, `auth.py`, `guard.py`, `bec.py`, `privacy.py`, `sanctions.py`, `audit.py`, `anchoring.py`, `registry.py`) · **Tests:** `04-source-code/backend/tests/` (CI job "Backend tests") and the red team gate (46/46)
 
 NanFeng lets an AI agent move a company's money, so the design starts from one assumption: **the LLM will eventually be fooled.** It is never the component that decides. The agent proposes; a deterministic policy engine outside the LLM decides the permission level; anything that creates debt, adds a beneficiary or exceeds a limit waits for the owner's session and a one-time code; every step is written to a hash chain whose Merkle roots go on a public chain.
 
@@ -86,10 +86,10 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 
 | Check | Result |
 |-------|--------|
-| Red team, 43 outcome-based attacks in 7 categories, against the API | 4/43 stopped before the controls → **43/43 after**; CI fails if one gets through |
+| Red team, 46 outcome-based attacks in 7 categories, against the API | 4/46 stopped before the controls → **46/46 after** (the first 43 went from 4 to 43 as the controls were built; 3 added on Oct 14 were open until that day's fixes); CI fails if one gets through |
 | The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`04-source-code/agent/tests/test_redteam_via_agent.py`) |
 | Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../06-execution-evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
-| Unit tests | 116 backend tests (security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, registry 6, live story 5, demo 5, anchoring 4) |
+| Unit tests | 127 backend tests (security/BEC 26, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, anchoring 7, registry 6, idempotency 6, live story 5, demo 5) |
 
 ## Known limitations
 

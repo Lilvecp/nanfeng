@@ -1,6 +1,6 @@
-# Privacy and compliance (r4-07 · r4-08 · r4-11)
+# Privacy and compliance
 
-**Owner:** Andy · **Status:** v2, Oct 12 · Source for the regulatory slide, the compliance section of the technical documentation and the Security Self-Assessment Report.
+**Author:** Andy Villarroel · **Status:** Oct 16, 2026 · Source for the regulatory slide, the compliance section of the technical documentation and the Security Self-Assessment Report.
 
 > Everything in the demo is synthetic data, declared as such. This section describes how NanFeng is built so that the same design holds when real data arrives. It is our reading of the rules, not legal advice; a lawyer reviews it before any pilot with real companies.
 
@@ -19,11 +19,11 @@
 
 | Control | Where | Status |
 |---------|-------|--------|
-| **Minimization**: the planner receives typed fields, never documents | [anti-injection-design.md](anti-injection-design.md) | Designed → Renato |
+| **Minimization**: the planner receives typed fields, never documents | [anti-injection-design.md](anti-injection-design.md), `04-source-code/agent/nanfeng_agent/ingest.py` | Done |
 | **PII masking before any LLM call**: RUT, PRC ID, phones (CL/CN), e-mails, bank accounts, IBAN become `⟦KIND_n⟧`; the mapping never leaves the backend | `04-source-code/backend/app/privacy.py`, `POST /privacy/mask` | Done |
 | **No PII in logs we publish**: audit and SSE carry masked phones and last-4 account digits; OTP never logged | `04-source-code/backend/app/otp.py`, `04-source-code/backend/app/bec.py` | Done |
-| **Encryption in transit**: HTTPS only (Vercel + backend host) | Deploy | Camilo |
-| **Encryption at rest**: managed Postgres (Supabase) encrypts storage; OTPs stored as HMAC, not plaintext | Deploy, `otp.py` | Partly done |
+| **Encryption in transit**: HTTPS only (Vercel + Railway) | Deploy | Done |
+| **Encryption at rest**: OTPs stored as HMAC, not plaintext; database encryption at rest depends on the managed Postgres host and is on the pilot checklist | Deploy, `otp.py` | Partly done |
 | **Secrets**: `.env` git-ignored, secret scanning in CI, spend limits on every provider | `.gitignore`, `.github/workflows/ci.yml` | Done |
 | **Sanctions screening** of every counterparty (payee, factored customer, lender) before money moves; a hit blocks and escalates | `04-source-code/backend/app/sanctions.py` + policy rule `sanctions_hit` | Done (synthetic watchlist) |
 | **Human in the loop** for every financing decision (L3 + OTP), with an explanation the owner can read | Policy engine | Done |
@@ -39,7 +39,7 @@
 | **Ley 21.521 "Ley Fintec"** (CMF; Open Finance System) | Regulated access to bank data and payment initiation | The sandbox bank stands in for the Open Finance APIs; production would connect through a registered provider, never screen-scraping |
 | **AML / sanctions** (UAF reporting duties for obliged entities; UN Security Council sanctions) | Screen counterparties, report suspicious operations | Sanctions screening on every counterparty; structuring detection (split payments) in the policy engine |
 
-## China (r4-11)
+## China
 
 NanFeng's user is a Chilean SME. Chinese law matters because the counterparties (importers in Shanghai, Guangzhou) are in China and the jury is WeBank.
 
@@ -60,9 +60,9 @@ NanFeng's user is a Chilean SME. Chinese law matters because the counterparties 
 | OpenRouter → model providers | Planning, classification | Masked text and typed fields only |
 | Zavu | SMS / WhatsApp: OTP, alerts, collections | Owner phone, message text |
 | ElevenLabs | Voice briefing | Briefing text (amounts, no personal data) |
-| Supabase / Vercel | Database, hosting | All backend data / front only |
+| Railway / Vercel | Database and services, web hosting | All backend data / front only |
 | EVM testnet / FISCO BCOS | Audit anchoring | Merkle roots only (hashes, no data) |
 
-## Regulatory slide (deck, r4-08)
+## Regulatory slide
 
-Final text: the Compliance slide (slide 8) of the [deck](../02-presentation-deck/NanFeng-Presentation-Deck.pdf). It claims only what the code does: PII masking before any model, human-approved money decisions (L3), structuring detection, simulated sanctions screening, the invoice registry against double financing, HMAC-stored one-time codes and the on-chain audit log. The AI-generated label for importers is built (`04-source-code/agent/tests/test_ai_label.py`) and can go on the slide. Not on the slide until built: FISCO BCOS anchoring (Sepolia today) and Ley Fintec / Open Finance connectors.
+Final text: the Compliance slide (slide 8) of the [deck](../02-presentation-deck/NanFeng-Presentation-Deck.pdf). It claims only what the code does: PII masking before any model, human-approved money decisions (L3), structuring detection, simulated sanctions screening, the invoice registry against double financing, HMAC-stored one-time codes and the on-chain audit log. The slide also shows the AI-generated label for importers (`04-source-code/agent/tests/test_ai_label.py`). Not claimed as built: FISCO BCOS anchoring (Sepolia today) and Ley Fintec / Open Finance connectors.
