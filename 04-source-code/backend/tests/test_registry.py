@@ -110,3 +110,60 @@ def test_unreachable_registry_fails_closed(client, chain, monkeypatch):
     done = run(client, FACTOR)
     assert done["status"] == "failed" and "registry_unavailable" in done["note"]
     assert all(r["financed_by"] is None for r in client.get("/bank/receivables").json())
+
+
+def test_registration_mined_after_the_wait_is_paid_on_the_next_approval(client, chain, monkeypatch):
+    """The RPC gave up waiting but the registration landed: approving again pays out once, it is not
+    refused as financed elsewhere, and no second registration is sent."""
+    from web3.exceptions import TimeExhausted
+
+    monkeypatch.setattr(get_settings(), "registry_wait_receipt_s", 5)
+    monkeypatch.setattr(chain.eth, "wait_for_transaction_receipt", lambda *a, **k: (_ for _ in ()).throw(TimeExhausted("slow")))
+    first = run(client, FACTOR)
+    assert first["status"] == "failed" and "registry_pending" in first["note"]
+    assert all(r["financed_by"] is None for r in client.get("/bank/receivables").json())
+    sent = chain.eth.get_transaction_count(chain.eth.account.from_key(get_settings().evm_private_key).address)
+
+    second = run(client, FACTOR)
+    assert second["status"] == "approved"
+    assert second["results"][0]["registry"]["tx_hash"] in first["note"]
+    assert chain.eth.get_transaction_count(chain.eth.account.from_key(get_settings().evm_private_key).address) == sent
+    assert "already_financed" in run(client, FACTOR_AGAIN)["note"]
+
+
+def test_registration_in_flight_is_not_sent_twice(client, chain, monkeypatch):
+    from web3.exceptions import TimeExhausted, TransactionNotFound
+
+    monkeypatch.setattr(get_settings(), "registry_wait_receipt_s", 5)
+    monkeypatch.setattr(chain.eth, "wait_for_transaction_receipt", lambda *a, **k: (_ for _ in ()).throw(TimeExhausted("slow")))
+    monkeypatch.setattr(registry, "lookup_on_chain", lambda fp: {"registered": False})  # not mined yet
+    monkeypatch.setattr(chain.eth, "get_transaction_receipt", lambda h: (_ for _ in ()).throw(TransactionNotFound(h)))
+    assert "registry_pending" in run(client, FACTOR)["note"]
+    sent = chain.eth.get_transaction_count(chain.eth.account.from_key(get_settings().evm_private_key).address)
+    again = run(client, FACTOR)
+    assert again["status"] == "failed" and "not mined yet" in again["note"]
+    assert chain.eth.get_transaction_count(chain.eth.account.from_key(get_settings().evm_private_key).address) == sent
+
+
+def test_anchor_and_registration_from_one_wallet_never_share_a_nonce(client, chain, monkeypatch):
+    """A load-balanced RPC answers "pending" from a node that has not seen the anchor just sent: the
+    registration still takes the next nonce instead of clashing with the anchor."""
+    monkeypatch.setattr(get_settings(), "anchor_backend", "evm")
+    wallet = chain.eth.account.from_key(get_settings().evm_private_key).address
+    stale = chain.eth.get_transaction_count(wallet, "pending")
+    real = chain.eth.get_transaction_count
+    calls = []
+
+    def lagging(address, block="latest"):
+        calls.append(block)
+        return stale if address == wallet else real(address, block)
+
+    monkeypatch.setattr(chain.eth, "get_transaction_count", lagging)
+    from app.anchoring import _last_sent
+
+    _last_sent.clear()
+    done = run(client, FACTOR)  # the factoring registers, then the approval is anchored, from the same wallet
+    assert done["status"] == "approved"
+    [anchor] = client.get("/audit/anchors").json()
+    assert chain.eth.get_transaction(anchor["tx_hash"])["nonce"] == stale + 1
+    assert chain.eth.get_transaction_receipt(done["results"][0]["registry"]["tx_hash"])["status"] == 1

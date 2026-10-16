@@ -11,6 +11,7 @@ FISCO BCOS can be added as another backend returning the same receipt shape.
 
 import logging
 import threading
+import time
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -27,6 +28,10 @@ MAGIC = b"NANFENG1"
 _lock = threading.Lock()  # one anchor at a time: keeps seq ranges and wallet nonces in order
 wallet_lock = _lock  # the invoice registry (registry.py) sends from the same wallet
 _w3 = None
+# The nonce of the last transaction this process sent, per wallet, and when. A load-balanced RPC can answer
+# "pending" from a node that has not seen that transaction yet; for a short while we trust our own count.
+_last_sent: dict[str, tuple[int, float]] = {}
+NONCE_MEMORY_S = 120
 
 
 class AnchorError(Exception):
@@ -62,25 +67,48 @@ def set_web3(w3) -> None:
     _w3 = w3
 
 
+def _nonce(w3, address: str) -> int:
+    n = w3.eth.get_transaction_count(address, "pending")
+    last = _last_sent.get(address)
+    if last and time.monotonic() - last[1] < NONCE_MEMORY_S:
+        n = max(n, last[0] + 1)
+    return n
+
+
+def send_from_wallet(w3, acct, tx: dict) -> str:
+    """Signs and sends a transaction from the anchor wallet; the caller holds `wallet_lock`. Anchors and
+    invoice registrations share this wallet, often seconds apart (an approval is anchored right before
+    its factoring registers the invoice), so the nonce comes from our own count as well as the RPC's, and
+    a nonce the node refuses is retried with the next one. Fees as for anchors: a 1 gwei tip, so the
+    transaction lands in the next blocks instead of waiting in the mempool."""
+    tx = {**tx, "from": acct.address, "chainId": w3.eth.chain_id, "nonce": _nonce(w3, acct.address)}
+    tx.setdefault("value", 0)
+    if "gas" not in tx:
+        tx["gas"] = w3.eth.estimate_gas(tx)
+    base = w3.eth.get_block("latest").get("baseFeePerGas", w3.eth.gas_price)
+    tip = w3.to_wei(1, "gwei")
+    tx["maxPriorityFeePerGas"], tx["maxFeePerGas"] = tip, 2 * base + tip
+    for attempt in range(3):
+        try:
+            tx_hash = w3.eth.send_raw_transaction(acct.sign_transaction(tx).raw_transaction).to_0x_hex()
+        except Exception as exc:
+            msg = str(exc).lower()
+            if attempt < 2 and any(k in msg for k in ("nonce", "underpriced", "already known")):
+                tx["nonce"] += 1
+                continue
+            raise
+        _last_sent[acct.address] = (tx["nonce"], time.monotonic())
+        return tx_hash
+    raise AssertionError("unreachable")
+
+
 def _anchor_evm(merkle_root: str, from_seq: int, to_seq: int) -> dict:
     s = get_settings()
     if not s.evm_private_key:
         raise AnchorError("NANFENG_EVM_PRIVATE_KEY is not set")
     w3 = web3()
     acct = w3.eth.account.from_key(s.evm_private_key)
-    tx = {
-        "from": acct.address,
-        "to": acct.address,
-        "value": 0,
-        "data": encode(merkle_root, from_seq, to_seq),
-        "nonce": w3.eth.get_transaction_count(acct.address, "pending"),
-        "chainId": w3.eth.chain_id,
-    }
-    tx["gas"] = w3.eth.estimate_gas(tx)
-    base = w3.eth.get_block("latest").get("baseFeePerGas", w3.eth.gas_price)
-    tip = w3.to_wei(1, "gwei")
-    tx["maxPriorityFeePerGas"], tx["maxFeePerGas"] = tip, 2 * base + tip
-    tx_hash = w3.eth.send_raw_transaction(acct.sign_transaction(tx).raw_transaction).to_0x_hex()
+    tx_hash = send_from_wallet(w3, acct, {"to": acct.address, "data": encode(merkle_root, from_seq, to_seq)})
     explorer = f"{s.evm_explorer_tx_url.rstrip('/')}/{tx_hash}" if s.evm_explorer_tx_url else None
     return {"backend": "evm", "tx_hash": tx_hash, "explorer_url": explorer}
 

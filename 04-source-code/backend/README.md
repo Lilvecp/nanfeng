@@ -119,6 +119,7 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 - `GET /registry` (backend, contract, chain id) · `GET /registry/invoices` · `GET /registry/invoices/{id}` (fingerprint, our record and the on-chain entry, `valid` when they match). The factoring result carries `registry` (fingerprint, tx hash, explorer link).
 - Demo builds add the sandbox's genesis hash to the identity, so Demo Mode's reset starts with a clean registry; a real deploy (`NANFENG_DEMO=false`) uses the bare invoice identity, which any financier holding the invoice can recompute.
 - Scope: the PAE loan in the Cherry Crisis plan is not tied to one invoice in the sandbox, so it is not registered; factoring and LC discounting are.
+- One wallet sends both anchors and registrations, often seconds apart (an approval is anchored right after its factoring registers the invoice). `anchoring.send_from_wallet` takes the nonce from its own count as well as the RPC's, since a load-balanced RPC may not see the previous transaction yet, and pays a 1 gwei tip so the transaction lands in the next blocks. With `NANFENG_REGISTRY_WAIT_RECEIPT_S` > 0, a registration not mined in time fails closed with `registry_pending` (nothing is paid out); approving again pays out once it is mined, without a second registration.
 
 ## For the rest of the team
 

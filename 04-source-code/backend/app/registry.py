@@ -17,6 +17,7 @@ Demo Mode reset starts a fresh sandbox instead of finding last run's invoices al
 """
 
 import json
+import time
 from pathlib import Path
 
 from eth_utils import keccak
@@ -69,32 +70,62 @@ def lookup_on_chain(fp: str) -> dict:
             "registered_at": registered_at or None, "financing": financing.rstrip(b"\0").decode(errors="replace") or None}
 
 
-def _register_evm(fp: str, receivable_id: str, financing: str) -> tuple[str, str, str | None]:
+# Registrations this process sent: fingerprint -> (tx hash, when). A registration mined after the receipt wait
+# gave up is ours, not another financier's, when the same financing is approved again; one still in flight
+# is not sent a second time (the copy would revert as "already registered").
+_sent: dict[str, tuple[str, float]] = {}
+IN_FLIGHT_S = 600
+
+
+def _in_flight(w3, tx_hash: str) -> bool:
+    from web3.exceptions import TransactionNotFound
+
+    try:
+        w3.eth.get_transaction_receipt(tx_hash)
+    except TransactionNotFound:
+        return True
+    return False
+
+
+def _register_evm(fp: str, receivable_id: str, financing: str) -> tuple[str, str | None, str | None]:
     s = get_settings()
     if not s.evm_private_key:
         raise RegistryError("registry_unavailable", "NANFENG_EVM_PRIVATE_KEY is not set", 503)
+    tx_hash = None
     try:
         w3, contract = _contract()
-        prior = lookup_on_chain(fp)
-        if prior["registered"]:
-            raise RegistryError("already_financed", f"{receivable_id} is already in the on-chain invoice registry "
-                                f"({prior['financing']}, registered by {prior['registrar']})", 409)
         acct = w3.eth.account.from_key(s.evm_private_key)
-        with anchoring.wallet_lock:  # same wallet as anchoring: one nonce at a time
-            tx = contract.functions.register(bytes.fromhex(fp[2:]), _label(financing)).build_transaction({
-                "from": acct.address, "chainId": w3.eth.chain_id,
-                "nonce": w3.eth.get_transaction_count(acct.address, "pending"),
-            })
-            tx_hash = w3.eth.send_raw_transaction(acct.sign_transaction(tx).raw_transaction).to_0x_hex()
-        if s.registry_wait_receipt_s > 0:
-            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=s.registry_wait_receipt_s)
-            if receipt["status"] != 1:
-                raise RegistryError("already_financed", f"{receivable_id}: the registry refused the registration", 409)
+        prior = lookup_on_chain(fp)
+        sent = _sent.get(fp)
+        if prior["registered"]:
+            ours = prior["registrar"] == acct.address and prior["financing"] == _label(financing).rstrip(b"\0").decode()
+            if not ours:
+                raise RegistryError("already_financed", f"{receivable_id} is already in the on-chain invoice registry "
+                                    f"({prior['financing']}, registered by {prior['registrar']})", 409)
+            tx_hash = sent[0] if sent else None  # our earlier attempt landed late: this approval is its payout
+        elif sent and time.monotonic() - sent[1] < IN_FLIGHT_S and _in_flight(w3, sent[0]):
+            tx_hash = sent[0]
+            raise RegistryError("registry_pending", f"{receivable_id}: registration {tx_hash} is not mined yet; "
+                                "nothing was paid out, approve again in a minute", 503)
+        else:
+            data = contract.encode_abi("register", args=[bytes.fromhex(fp[2:]), _label(financing)])
+            with anchoring.wallet_lock:  # same wallet as anchoring: one nonce at a time
+                tx_hash = anchoring.send_from_wallet(w3, acct, {"to": contract.address, "data": data})
+            _sent[fp] = (tx_hash, time.monotonic())
+            if s.registry_wait_receipt_s > 0:
+                receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=s.registry_wait_receipt_s)
+                if receipt["status"] != 1:
+                    raise RegistryError("already_financed", f"{receivable_id}: the registry refused the registration", 409)
     except RegistryError:
         raise
-    except Exception as exc:  # RPC down, no funds, contract not deployed...
+    except Exception as exc:  # RPC down, no funds, contract not deployed, not mined in time...
+        from web3.exceptions import TimeExhausted
+
+        if tx_hash and isinstance(exc, TimeExhausted):
+            raise RegistryError("registry_pending", f"{receivable_id}: registration {tx_hash} sent but not mined after "
+                                f"{s.registry_wait_receipt_s:g} s; nothing was paid out, approve again in a minute", 503) from exc
         raise RegistryError("registry_unavailable", f"Invoice registry unreachable: {exc.__class__.__name__}", 503) from exc
-    explorer = f"{s.evm_explorer_tx_url.rstrip('/')}/{tx_hash}" if s.evm_explorer_tx_url else None
+    explorer = f"{s.evm_explorer_tx_url.rstrip('/')}/{tx_hash}" if s.evm_explorer_tx_url and tx_hash else None
     return contract.address, tx_hash, explorer
 
 
