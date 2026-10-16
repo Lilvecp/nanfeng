@@ -16,7 +16,7 @@ This directory is a self-contained Python package, `nanfeng_quant`, plus its dat
 
 ## The problem in one page
 
-**NanFeng** is an autonomous CFO for Chilean SMEs that export to China. A cherry exporter pays its harvest crews in pesos every month, but its Chinese importers pay in USD or CNY 60–90 days after shipping, and sometimes late. One late invoice can leave the company unable to pay its payroll. NanFeng sees the cash crunch coming, finds the cheapest financing, and executes it with the owner's OTP approval over WhatsApp, voice or web.
+**NanFeng** is an AI CFO for Chilean SMEs that export to China; it acts with the owner's approval. A cherry exporter pays its harvest crews in pesos every month, but its Chinese importers pay in USD or CNY 60–90 days after shipping, and sometimes late. One late invoice can leave the company unable to pay its payroll. NanFeng sees the cash crunch coming, finds the cheapest financing, and executes it with the owner's OTP approval over WhatsApp, voice or web.
 
 The app is five layers, one per teammate:
 
@@ -304,7 +304,7 @@ See `results/backtest_summary.md` and `01-technical-documentation/core-algorithm
 
 ### r5-10 · NanFeng-Bench (Must)
 
-From `results/bench_summary.md` — 50 scenarios with a correct answer: 40 stochastic (a synthetic SME + one event: late-payment notice, peso appreciation USD −6%/CNY −8%, cherry price −15%, 40 extra hires, largest customer stops paying, or nothing) judged against an **independent oracle** (50,000 paths, another seed); 10 deterministic cases checked against an independently written ledger. A case passes only if the system (1) flags correctly whether financing is needed, (2) finds the crunch day within ±2 days, and (3) when financing is needed, returns a plan that keeps ≥ 89% of the oracle's paths above the buffer and costs no more than the bank loan.
+From `results/bench_summary.md` — 50 scenarios with a correct answer: 40 stochastic (a synthetic SME + one event: late-payment notice, peso appreciation USD −6%/CNY −8%, cherry price −15%, 40 extra hires, largest customer stops paying, or nothing) judged against an **oracle** (the same model on 50,000 paths with an independent seed); 10 deterministic cases checked against an independently written ledger. A case passes only if the system (1) flags correctly whether financing is needed, (2) finds the crunch day within ±2 days, and (3) when financing is needed, returns a plan that keeps ≥ 89% of the oracle's paths above the buffer and costs no more than the bank loan.
 
 | Metric | Result |
 |---|---|
