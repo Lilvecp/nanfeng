@@ -4,16 +4,16 @@ Everything in English. A single team member sends everything in a single email. 
 
 ## Competition package
 
-Where each item lives in the repo: the submission table in the [root README](../README.md#submission-package).
+Where each item lives in the repo: the submission table in the [root README](../../README.md#submission-package).
 
 | ID | Deliverable | Detail | Owner |
 |----|-------------|--------|-------|
-| d1 | - [x] 01 · Technical documentation | Architecture, algorithms and security design: [docs/technical-documentation.md](../docs/technical-documentation.md) | Renato · Camilo · Vicente · Andy → Valentín edits |
-| d2 | - [ ] 02 · Presentation deck | Max. 10 minutes. Made on the final product; outline in [deck-v1.md](../valentin-castro/deck-v1.md) | Valentín |
+| d1 | - [x] 01 · Technical documentation | Architecture, algorithms and security design: [01-technical-documentation/technical-documentation.md](../../01-technical-documentation/technical-documentation.md) | Renato · Camilo · Vicente · Andy → Valentín edits |
+| d2 | - [ ] 02 · Presentation deck | Max. 10 minutes. Made on the final product; outline in [deck-v1.md](../../02-presentation-deck/deck-v1.md) | Valentín |
 | d3 | - [ ] 03 · Demo video | Optional in the rules, mandatory for us (06 asks for it). Max. 5 min. Recorded on the final product | Valentín · Camilo |
-| d4 | - [x] 04 · Source code | GitHub, README, deployment and tests: [README](../README.md), [docs/deployment.md](../docs/deployment.md) | Camilo · Renato |
-| d5 | - [x] 05 · Security self-assessment | Permission levels and known risks: [security-self-assessment.md](../andy-villarroel/security-self-assessment.md) | Andy |
-| d6 | - [ ] 06 · Execution evidence | Sandbox logs + video (+ on-chain hashes). Logs and Sepolia anchor done ([out-live](../andy-villarroel/evidence/out-live/SUMMARY.md)); the video comes with d3 | Andy · Camilo |
+| d4 | - [x] 04 · Source code | GitHub, README, deployment and tests: [README](../../README.md), [04-source-code/deployment.md](../../04-source-code/deployment.md) | Camilo · Renato |
+| d5 | - [x] 05 · Security self-assessment | Permission levels and known risks: [security-self-assessment.md](../../05-security-self-assessment-report/security-self-assessment.md) | Andy |
+| d6 | - [ ] 06 · Execution evidence | Sandbox logs + video (+ on-chain hashes). Logs and Sepolia anchor done ([out-live](../../06-execution-evidence/out-live/SUMMARY.md)); the video comes with d3 | Andy · Camilo |
 
 ## UDD and organization paperwork
 

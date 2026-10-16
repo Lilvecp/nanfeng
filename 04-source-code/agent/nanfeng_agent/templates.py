@@ -2,7 +2,7 @@
 
 No LLM writes an outbound message: the slots are filled with numbers from the tools and ids from
 master data. Links only point at our own cockpit. ES and 中文 are machine-assisted; a native reader
-checks them before the video (plan/risks.md).
+checks them before the video (07-team-workspace/plan/risks.md).
 """
 
 from __future__ import annotations

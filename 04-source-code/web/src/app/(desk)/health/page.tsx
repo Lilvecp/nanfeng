@@ -10,7 +10,7 @@ import type { Lang } from "@/lib/prefs";
 import { S, cashTick, clpM, pct, shortDate } from "@/lib/scenario";
 
 // Business health (Topic E: business financial analysis). Every number comes from the quant
-// engine's business_analysis run (vicente-rodriguez/results/cherry_crisis_analysis.json, synced
+// engine's business_analysis run (quant/results/cherry_crisis_analysis.json, synced
 // into lib/scenario.ts): a contracted 90-day cash calendar built from the same receivables,
 // shipments and payables the sandbox bank holds, plus the Monte Carlo risk on each payroll.
 const A = S.analysis;

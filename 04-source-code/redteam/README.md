@@ -7,12 +7,12 @@
 ## Run it
 
 ```sh
-cd andy-villarroel/redteam
+cd 04-source-code/redteam
 # after = this checkout
-../../backend/.venv/bin/python run.py --backend ../../backend --label after --ref "$(git rev-parse --short HEAD)"
+../backend/.venv/bin/python run.py --backend ../backend --label after --ref "$(git rev-parse --short HEAD)"
 # before = Camilo's backend with the placeholder policy, in a throwaway worktree
 git worktree add /tmp/nanfeng-before 73c9ea0
-../../backend/.venv/bin/python run.py --backend /tmp/nanfeng-before/backend --label before --ref 73c9ea0
+../backend/.venv/bin/python run.py --backend /tmp/nanfeng-before/backend --label before --ref 73c9ea0
 git worktree remove /tmp/nanfeng-before
 python3 report.py   # -> results/REPORT.md
 ```

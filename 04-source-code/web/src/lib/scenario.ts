@@ -2,7 +2,7 @@ import data from "@/data/cherry-crisis.json";
 import type { Lang } from "./prefs";
 
 // Single source for every Cherry Crisis number in the web. The JSON is generated from the quant
-// engine's results (vicente-rodriguez/results) by `npm run sync:scenario`; never edit it by hand.
+// engine's results (quant/results) by `npm run sync:scenario`; never edit it by hand.
 
 export const S = data;
 

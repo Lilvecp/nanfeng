@@ -42,8 +42,8 @@ from nanfeng_agent.config import Settings  # noqa: E402
 from nanfeng_agent.orchestrator import Agent  # noqa: E402
 from nanfeng_agent.router import ModelRouter  # noqa: E402
 
-RESULTS = ROOT / "vicente-rodriguez" / "results"
-SCENARIOS = ROOT / "vicente-rodriguez" / "data" / "scenarios"
+RESULTS = ROOT / "quant" / "results"
+SCENARIOS = ROOT / "quant" / "data" / "scenarios"
 AGENT_TOKEN = os.environ["NANFENG_AGENT_TOKEN"]
 OWNER_PASSWORD = os.environ["NANFENG_OWNER_PASSWORD"]
 SANDBOX_OTP = "482913"

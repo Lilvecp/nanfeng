@@ -16,7 +16,7 @@ Full contract: [`contracts/openapi.json`](../contracts/openapi.json) (generated,
 ## Run
 
 ```sh
-# whole stack (Postgres + backend), from the repo root
+# whole stack (Postgres + backend), from 04-source-code/
 cp .env.example .env
 docker compose up --build                    # http://localhost:8000/docs
 docker compose --profile quant up --build    # + Vicente's quant engine
@@ -34,7 +34,7 @@ uv venv --python 3.12 .venv && uv pip install -e ".[dev]"   # or: python3.12 -m 
 Accounts, receivables, lenders and FX rates come from Vicente's engine so the bank matches the forecast and the MILP plan (e.g. the PAE loan, lender `LEN-PAE`). After the scenario or the catalog changes:
 
 ```sh
-cd vicente-rodriguez
+cd 04-source-code/quant
 python -c "import json; from nanfeng_quant.tools import sandbox_seed; json.dump(sandbox_seed('cherry_crisis'), open('../backend/app/data/sandbox_seed.json', 'w'), indent=1, ensure_ascii=False)"
 ```
 
@@ -137,7 +137,7 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 | `NANFENG_DEMO` / `NANFENG_OWNER_PASSWORD` | `NANFENG_DEMO=true` shows the demo password on the sign-in screen and enables `POST /bank/reset` (owner only). With `false`, set your own password: the demo one is refused at startup. |
 | `NANFENG_ALLOW_OPEN_AGENT` | Never on a deploy (local development only). |
 
-After the deploy: `cd andy-villarroel/evidence && python build.py --url <backend URL> --out out-live` exports deliverable 06 and re-checks the chain without the backend's code.
+After the deploy: `cd 06-execution-evidence && python build.py --url <backend URL> --out out-live` exports deliverable 06 and re-checks the chain without the backend's code.
 
 ## Not done yet
 

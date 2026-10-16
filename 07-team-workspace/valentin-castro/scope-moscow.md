@@ -4,7 +4,7 @@ Feature freeze: **Sunday Oct 11, 23:59 (Chile)**. After the freeze nothing new g
 
 ## The one scenario everyone uses
 
-**Cherry Crisis** · Huerto Austral Export SpA (fictional). Numbers come only from the quant engine (`vicente-rodriguez/results/cherry_crisis_story.json`, seed 7, 10,000 paths). The web copies them with `npm run sync:scenario`; the deck and video quote the table below and nothing else.
+**Cherry Crisis** · Huerto Austral Export SpA (fictional). Numbers come only from the quant engine (`04-source-code/quant/results/cherry_crisis_story.json`, seed 7, 10,000 paths). The web copies them with `npm run sync:scenario`; the deck and video quote the table below and nothing else.
 
 | Figure | Value |
 |---|---|

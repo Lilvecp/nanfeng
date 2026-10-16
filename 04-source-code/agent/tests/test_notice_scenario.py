@@ -143,7 +143,7 @@ def test_why_answer_claims_no_savings_for_the_bank_loan(agent, backend):
 @pytest.fixture()
 def quant_tools():
     pytest.importorskip("numpy")
-    sys.path.insert(0, str(ROOT / "vicente-rodriguez"))
+    sys.path.insert(0, str(ROOT / "quant"))
     try:
         from nanfeng_quant import tools
     except ImportError as exc:  # pragma: no cover - engine deps missing

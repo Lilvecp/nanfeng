@@ -1,6 +1,6 @@
 """Run the red team against a backend checkout, in process.
 
-    python run.py --backend ../../backend --label after  [--otp-mode sms]
+    python run.py --backend ../backend --label after  [--otp-mode sms]
 
 Writes results/<label>.json. `report.py` turns before/after into the markdown report.
 """

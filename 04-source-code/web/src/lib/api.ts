@@ -18,7 +18,7 @@ export type ChainCheck = { valid: boolean; entries: number; broken_at_seq: numbe
 export type ApiEvent = { id: number; type: string; ts: string; source: string; data: Record<string, unknown> };
 
 export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
-// The agent service (renato-lenis, :8200). It checks the same owner session with the backend.
+// The agent service (agent/, :8200). It checks the same owner session with the backend.
 export const AGENT_URL = (process.env.NEXT_PUBLIC_AGENT_URL ?? "").replace(/\/$/, "");
 
 export class ApiError extends Error {

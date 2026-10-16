@@ -30,10 +30,10 @@ A Chilean cherry exporter pays harvest wages in pesos every month but is paid in
 
 | Topic E | How NanFeng does it | Where |
 |---|---|---|
-| Cash-flow management with alerts | 90-day Monte Carlo forecast (10,000 paths) of every inflow and outflow; the agent alerts the owner on WhatsApp when the probability of negative cash jumps, and sends a daily voice briefing | `vicente-rodriguez/nanfeng_quant`, `renato-lenis/nanfeng_agent` |
-| Financing-option matching | Chance-constrained MILP over a catalog of 9 Chilean financing products (two kinds of export factoring, letter-of-credit discounting, confirming, a bank loan, a FOGAPE-guaranteed loan, a USD pre-export loan, a credit line, a CNY forward); compared fairly with the default bank loan | `vicente-rodriguez/nanfeng_quant`, web `/financing` |
-| Business financial analysis | Business health: 90-day cash budget by month, where the money goes, customer concentration, DSO and aging, currency exposure with a peso shock, payroll safety, and plain findings in EN / ES / 中文, also sent to the owner on WhatsApp. Plus the Credit Passport (a six-factor score a lender can recompute) and the Scenario Lab | `vicente-rodriguez/nanfeng_quant/analysis.py`, web `/health`, agent `POST /report` |
-| Acting, not advising | The agent proposes the plan as an approval request; the policy engine tiers it; the owner approves with a code; the sandbox bank executes it; the audit log is anchored on a public chain | `backend/app` |
+| Cash-flow management with alerts | 90-day Monte Carlo forecast (10,000 paths) of every inflow and outflow; the agent alerts the owner on WhatsApp when the probability of negative cash jumps, and sends a daily voice briefing | `04-source-code/quant/nanfeng_quant`, `04-source-code/agent/nanfeng_agent` |
+| Financing-option matching | Chance-constrained MILP over a catalog of 9 Chilean financing products (two kinds of export factoring, letter-of-credit discounting, confirming, a bank loan, a FOGAPE-guaranteed loan, a USD pre-export loan, a credit line, a CNY forward); compared fairly with the default bank loan | `04-source-code/quant/nanfeng_quant`, web `/financing` |
+| Business financial analysis | Business health: 90-day cash budget by month, where the money goes, customer concentration, DSO and aging, currency exposure with a peso shock, payroll safety, and plain findings in EN / ES / 中文, also sent to the owner on WhatsApp. Plus the Credit Passport (a six-factor score a lender can recompute) and the Scenario Lab | `04-source-code/quant/nanfeng_quant/analysis.py`, web `/health`, agent `POST /report` |
+| Acting, not advising | The agent proposes the plan as an approval request; the policy engine tiers it; the owner approves with a code; the sandbox bank executes it; the audit log is anchored on a public chain | `04-source-code/backend/app` |
 
 **The reference scenario, Cherry Crisis** (Huerto Austral Export SpA, fictional). Every number below comes from one run of the quant engine (seed 7, 10,000 paths) and is shared by the web, the agent, the tests and the evidence.
 
@@ -93,26 +93,26 @@ flowchart LR
 
 | Component | Directory | Stack | Responsibility |
 |---|---|---|---|
-| Web cockpit | `web/` | Next.js 16, React 19, TypeScript, Tailwind 4 | Landing, owner's simple view and full desk (Cockpit, Business health, Approvals, Financing Arena, Scenario Lab, Mission Control, Security, Channels, Documents, Settings, Demo Mode), EN / ES / 中文. Runs on the live API, or on the Cherry Crisis sandbox in the browser when no API is reachable |
-| Backend (API gateway) | `backend/` | FastAPI, SQLAlchemy, Postgres (SQLite locally), web3.py | Owner sign-in, policy engine L0–L3, step-up OTP, sandbox bank (accounts, payments, FX, factoring, loans, forwards), hash-chained audit log with Merkle anchoring, invoice registry, security endpoints (document guard, payee check, PII masking), agent event stream (SSE), proxy to the quant engine |
-| Agent service | `renato-lenis/` | FastAPI, OpenRouter, Mistral OCR, Zavu, ElevenLabs | Reads documents and messages, plans, calls tools, proposes approvals, resumes a run when the owner decides, explains its decisions, talks to the owner and the importer |
-| Quant engine | `vicente-rodriguez/` | NumPy, SciPy, pandas, OR-Tools (CBC, SCIP) | Cash Monte Carlo, financing MILP, plan explanations, Credit Passport, business financial analysis, NanFeng-Bench, backtest, sensitivity |
-| Contracts | `contracts/` | OpenAPI 3 | `openapi.json` is generated from the backend; CI fails if it drifts. The web's types are generated from it |
-| Security tooling | `andy-villarroel/` | Python | Threat model, red team (46 attacks), evidence package builder (deliverable 06) |
-| Design | `design/private-desk/` | Static HTML | The mockups the web is built from |
+| Web cockpit | `04-source-code/web/` | Next.js 16, React 19, TypeScript, Tailwind 4 | Landing, owner's simple view and full desk (Cockpit, Business health, Approvals, Financing Arena, Scenario Lab, Mission Control, Security, Channels, Documents, Settings, Demo Mode), EN / ES / 中文. Runs on the live API, or on the Cherry Crisis sandbox in the browser when no API is reachable |
+| Backend (API gateway) | `04-source-code/backend/` | FastAPI, SQLAlchemy, Postgres (SQLite locally), web3.py | Owner sign-in, policy engine L0–L3, step-up OTP, sandbox bank (accounts, payments, FX, factoring, loans, forwards), hash-chained audit log with Merkle anchoring, invoice registry, security endpoints (document guard, payee check, PII masking), agent event stream (SSE), proxy to the quant engine |
+| Agent service | `04-source-code/agent/` | FastAPI, OpenRouter, Mistral OCR, Zavu, ElevenLabs | Reads documents and messages, plans, calls tools, proposes approvals, resumes a run when the owner decides, explains its decisions, talks to the owner and the importer |
+| Quant engine | `04-source-code/quant/` | NumPy, SciPy, pandas, OR-Tools (CBC, SCIP) | Cash Monte Carlo, financing MILP, plan explanations, Credit Passport, business financial analysis, NanFeng-Bench, backtest, sensitivity |
+| Contracts | `04-source-code/contracts/` | OpenAPI 3 | `openapi.json` is generated from the backend; CI fails if it drifts. The web's types are generated from it |
+| Security tooling | `04-source-code/redteam/`, `06-execution-evidence/build.py` | Python | Red team (46 attacks), evidence package builder (deliverable 06); the threat model is in `05-security-self-assessment-report/` |
+| Design | `07-team-workspace/design/private-desk/` | Static HTML | The mockups the web is built from |
 
 ### 2.2 Deployment
 
 | Piece | Host | Address |
 |---|---|---|
 | Web | Vercel, region `hkg1` (Hong Kong, close to the jury), own domain | `https://www.nanfengcfo.com` |
-| Backend | Railway (container from `backend/Dockerfile`), own domain | `https://api.nanfengcfo.com` |
-| Agent service | Railway (container from `renato-lenis/Dockerfile`) | Railway public URL; the web reaches it through `NEXT_PUBLIC_AGENT_URL` |
-| Quant engine | Railway (container from `vicente-rodriguez/Dockerfile`), listening on Railway's private network | the web and the agent call it through the backend's `/quant` proxy |
+| Backend | Railway (container from `04-source-code/backend/Dockerfile`), own domain | `https://api.nanfengcfo.com` |
+| Agent service | Railway (container from `04-source-code/agent/Dockerfile`) | Railway public URL; the web reaches it through `NEXT_PUBLIC_AGENT_URL` |
+| Quant engine | Railway (container from `04-source-code/quant/Dockerfile`), listening on Railway's private network | the web and the agent call it through the backend's `/quant` proxy |
 | Database | Postgres | `NANFENG_DATABASE_URL` |
 | Chain | Sepolia (EVM testnet) through a public RPC | anchors readable on Etherscan |
 
-The same four services run on one machine with `docker compose up --build` (section 2 of the [deployment guide](deployment.md)). Secrets live only in the hosts' environment variables; `.env.example` lists every variable with a safe default.
+The same four services run on one machine with `docker compose up --build` (section 2 of the [deployment guide](../04-source-code/deployment.md)). Secrets live only in the hosts' environment variables; `.env.example` lists every variable with a safe default.
 
 China access: fonts, the globe library and its textures are bundled (no Google Fonts or CDN at runtime), there are no analytics or reCAPTCHA, and the web is served from Hong Kong on a domain that is not `*.vercel.app`.
 
@@ -152,7 +152,7 @@ Every agent step is published on the backend's event stream (`agent.step`, with 
 
 ### 2.4 How money moves
 
-Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations: `payment`, `fx_convert`, `factoring`, `loan`, `forward`). The backend computes the CLP exposure, asks the policy engine for a tier, and then executes immediately (L1, L2), waits for the owner (L3) or refuses (blocked). Execution writes the transactions, appends to the audit log and publishes events; an approved L3 request is anchored at once. Details: [`backend/README.md`](../backend/README.md#how-money-moves).
+Nothing calls the bank directly. Every operation is posted to `POST /approvals` as `{action, operations: [{op, params}, ...]}` (1–5 operations: `payment`, `fx_convert`, `factoring`, `loan`, `forward`). The backend computes the CLP exposure, asks the policy engine for a tier, and then executes immediately (L1, L2), waits for the owner (L3) or refuses (blocked). Execution writes the transactions, appends to the audit log and publishes events; an approved L3 request is anchored at once. Details: [`04-source-code/backend/README.md`](../04-source-code/backend/README.md#how-money-moves).
 
 ### 2.5 Extension points
 
@@ -160,16 +160,16 @@ The architecture keeps every external dependency behind one interface, so new ra
 
 | Interface | Today | Adding one more |
 |---|---|---|
-| Anchoring backend (`backend/app/anchoring.py`) | `local`, `evm` (Sepolia) | another backend class, e.g. FISCO BCOS; same Merkle format |
-| Invoice registry (`backend/app/registry.py`, `backend/chain/InvoiceRegistry.sol`) | `local`, `evm`; contract compiled for EVM version london so it also runs on older EVM chains | deploy the contract on another chain and set its address |
-| Channels (`renato-lenis/nanfeng_agent/channels/`) | Zavu (WhatsApp, SMS, email, voice), ElevenLabs, WeCom mock | a new `ChannelAdapter` |
-| Planner (`renato-lenis/nanfeng_agent/planner.py`) | LLM planner checked against the facts, rule planner as fallback | any model through OpenRouter (`NANFENG_MODEL_PLAN`) |
-| Financing catalog (`vicente-rodriguez/nanfeng_quant`) | 9 products | a product is data plus its cash-effect rule |
-| Sandbox bank operations (`backend/app`) | payment, FX, factoring, loan, forward | a new `op` goes through the same policy engine |
+| Anchoring backend (`04-source-code/backend/app/anchoring.py`) | `local`, `evm` (Sepolia) | another backend class, e.g. FISCO BCOS; same Merkle format |
+| Invoice registry (`04-source-code/backend/app/registry.py`, `04-source-code/backend/chain/InvoiceRegistry.sol`) | `local`, `evm`; contract compiled for EVM version london so it also runs on older EVM chains | deploy the contract on another chain and set its address |
+| Channels (`04-source-code/agent/nanfeng_agent/channels/`) | Zavu (WhatsApp, SMS, email, voice), ElevenLabs, WeCom mock | a new `ChannelAdapter` |
+| Planner (`04-source-code/agent/nanfeng_agent/planner.py`) | LLM planner checked against the facts, rule planner as fallback | any model through OpenRouter (`NANFENG_MODEL_PLAN`) |
+| Financing catalog (`04-source-code/quant/nanfeng_quant`) | 9 products | a product is data plus its cash-effect rule |
+| Sandbox bank operations (`04-source-code/backend/app`) | payment, FX, factoring, loan, forward | a new `op` goes through the same policy engine |
 
 ## 3. Core algorithms
 
-Full description with assumptions and results: [`vicente-rodriguez/docs/core-algorithm.md`](../vicente-rodriguez/docs/core-algorithm.md). Financial catalog and sources: [`financial-catalog.md`](../vicente-rodriguez/docs/financial-catalog.md).
+Full description with assumptions and results: [`01-technical-documentation/core-algorithm.md`](core-algorithm.md). Financial catalog and sources: [`financial-catalog.md`](../04-source-code/quant/docs/financial-catalog.md).
 
 ### 3.1 Cash Monte Carlo (90 days)
 
@@ -201,7 +201,7 @@ A transparent scorecard of six factors (probability of negative cash, buffer in 
 
 ### 3.4 Business financial analysis
 
-Built from the same receivables, shipments and payables as the forecast, with no new assumption: a *contracted* 90-day calendar (each invoice paid at its due date plus any announced delay plus the customer's median delay, at today's FX) gives the cash budget by month, outflows by category, the operating cash margin, each customer's share of inflows and the concentration index, DSO (open receivables over daily sales) with an aging table, the exposure per currency with the effect of a 10% stronger peso, and the cash before each payroll. The Monte Carlo adds the probability that cash is negative after each payroll. Fixed thresholds turn this into plain findings in EN / ES / 中文, most severe first (for the Cherry Crisis: the December payroll at 81% risk, one customer at 58% of inflows, 100% of inflows in foreign currency, DSO 68 days; debt service at 4% is reported as healthy). The contracted calendar is the same independent ledger NanFeng-Bench checks against, and a test asserts they agree. Details: [core algorithm §6](../vicente-rodriguez/docs/core-algorithm.md#6-business-financial-analysis).
+Built from the same receivables, shipments and payables as the forecast, with no new assumption: a *contracted* 90-day calendar (each invoice paid at its due date plus any announced delay plus the customer's median delay, at today's FX) gives the cash budget by month, outflows by category, the operating cash margin, each customer's share of inflows and the concentration index, DSO (open receivables over daily sales) with an aging table, the exposure per currency with the effect of a 10% stronger peso, and the cash before each payroll. The Monte Carlo adds the probability that cash is negative after each payroll. Fixed thresholds turn this into plain findings in EN / ES / 中文, most severe first (for the Cherry Crisis: the December payroll at 81% risk, one customer at 58% of inflows, 100% of inflows in foreign currency, DSO 68 days; debt service at 4% is reported as healthy). The contracted calendar is the same independent ledger NanFeng-Bench checks against, and a test asserts they agree. Details: [core algorithm §6](core-algorithm.md#6-business-financial-analysis).
 
 ### 3.5 Validation
 
@@ -214,7 +214,7 @@ Built from the same receivables, shipments and payables as the forecast, with no
 
 ## 4. The agent
 
-Full description: [`renato-lenis/docs/agent.md`](../renato-lenis/docs/agent.md).
+Full description: [`01-technical-documentation/agent.md`](agent.md).
 
 The agent **proposes and never approves**. Its pipeline for every document or message:
 
@@ -231,7 +231,7 @@ No outbound message is written by an LLM: every message comes from a template in
 
 ## 5. Security design
 
-Full description: [`andy-villarroel/docs/security-design.md`](../andy-villarroel/docs/security-design.md) · [threat model](../andy-villarroel/threat-model.md) · [anti-injection design](../andy-villarroel/anti-injection-design.md) · [privacy and compliance](../andy-villarroel/privacy-compliance.md) · [self-assessment (deliverable 05)](../andy-villarroel/security-self-assessment.md).
+Full description: [`01-technical-documentation/security-design.md`](security-design.md) · [threat model](../05-security-self-assessment-report/threat-model.md) · [anti-injection design](../05-security-self-assessment-report/anti-injection-design.md) · [privacy and compliance](../05-security-self-assessment-report/privacy-compliance.md) · [self-assessment (deliverable 05)](../05-security-self-assessment-report/security-self-assessment.md).
 
 The design starts from one assumption: **the LLM will eventually be fooled**, so it is never the component that decides.
 
@@ -245,7 +245,7 @@ The design starts from one assumption: **the LLM will eventually be fooled**, so
 
 Controls, each outside the LLM:
 
-- **Policy engine** (`backend/app/policy.py`): a pure function of the request, the history and the clock; limits are data (`GET /policy`) and every decision records the rules that fired and the policy version. Velocity, split-payment (structuring) and recent-account-change rules escalate to L3. Decision and execution run under one lock.
+- **Policy engine** (`04-source-code/backend/app/policy.py`): a pure function of the request, the history and the clock; limits are data (`GET /policy`) and every decision records the rules that fired and the policy version. Velocity, split-payment (structuring) and recent-account-change rules escalate to L3. Decision and execution run under one lock.
 - **Step-up authentication**: HMAC-signed owner session; per-approval SMS code bound to the approval and its amount (5 minutes, single use, never logged, never seen by the agent); three wrong codes lock the approval; one decision per approval even across channels; voice never approves L3; the kill switch is stored in the database and only the owner with a code can turn it off.
 - **Document guard and payee check**: deterministic rules for instructions addressed to an AI, hidden text, invisible characters, encoded payloads and urgency; bank-account changes and look-alike domains answered with the call-back number on file.
 - **Privacy**: PII masked before any LLM call; accounts and phones masked in logs; synthetic sanctions screening; Chile (Ley 21.719) and China (PIPL, generative-AI measures) mapped in the compliance doc.
@@ -258,20 +258,20 @@ Result: the red team's first 43 outcome-based attacks went from 4/43 stopped to 
 
 | Suite | Count | Run | In CI |
 |---|---|---|---|
-| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 116 | `cd backend && pytest -q` | Backend tests |
-| Red team gate (46 attacks against the API) | 46/46 stopped | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 46` | Backend tests |
-| OpenAPI contract drift | — | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
-| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 91 | `cd renato-lenis && pytest -q` (needs `../backend[dev]`) | Agent tests |
-| Quant engine (Monte Carlo, MILP, business analysis, bench, API) | 36 | `cd vicente-rodriguez && pytest -q` | Quant tests |
-| NanFeng-Bench | 50/50 | `python -m nanfeng_quant bench` (~5 min) | No (results committed) |
-| Web | lint + production build | `cd web && npm run lint && npm run build` | Web lint and build |
+| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 116 | `cd 04-source-code/backend && pytest -q` | Backend tests |
+| Red team gate (46 attacks against the API) | 46/46 stopped | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | Backend tests |
+| OpenAPI contract drift | — | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
+| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 91 | `cd 04-source-code/agent && pytest -q` (needs `../backend[dev]`) | Agent tests |
+| Quant engine (Monte Carlo, MILP, business analysis, bench, API) | 36 | `cd 04-source-code/quant && pytest -q` | Quant tests |
+| NanFeng-Bench | 50/50 | `cd 04-source-code/quant && python -m nanfeng_quant bench` (~5 min) | No (results committed) |
+| Web | lint + production build | `cd 04-source-code/web && npm run lint && npm run build` | Web lint and build |
 | Secret scanning | gitleaks | — | Secret scanning |
 
-Execution evidence (deliverable 06) is produced from a running backend with `andy-villarroel/evidence/build.py` and committed in [`andy-villarroel/evidence/out-live/`](../andy-villarroel/evidence/out-live/SUMMARY.md).
+Execution evidence (deliverable 06) is produced from a running backend with `06-execution-evidence/build.py` and committed in [`06-execution-evidence/out-live/`](../06-execution-evidence/out-live/SUMMARY.md).
 
 ## 7. Known limitations
 
-The full list with impact and mitigation is in the [self-assessment](../andy-villarroel/security-self-assessment.md#5-known-risks-honest-list) and the [algorithm's limitations](../vicente-rodriguez/docs/core-algorithm.md#5-assumptions-and-known-limitations). The main ones:
+The full list with impact and mitigation is in the [self-assessment](../05-security-self-assessment-report/security-self-assessment.md#5-known-risks-honest-list) and the [algorithm's limitations](core-algorithm.md#5-assumptions-and-known-limitations). The main ones:
 
 - All data is synthetic; delay distributions are expert assumptions and lenders are fictional (catalog rates are checked against public sources).
 - One shared owner password in the MVP; SMS codes can be defeated by SIM swap.
@@ -283,12 +283,12 @@ The full list with impact and mitigation is in the [self-assessment](../andy-vil
 
 | Topic | Document | Owner |
 |---|---|---|
-| Core algorithm | [`vicente-rodriguez/docs/core-algorithm.md`](../vicente-rodriguez/docs/core-algorithm.md) | Vicente Rodríguez |
-| Financial catalog | [`vicente-rodriguez/docs/financial-catalog.md`](../vicente-rodriguez/docs/financial-catalog.md) | Vicente Rodríguez |
-| Quant API | [`vicente-rodriguez/docs/api.md`](../vicente-rodriguez/docs/api.md) | Vicente Rodríguez |
-| Agent | [`renato-lenis/docs/agent.md`](../renato-lenis/docs/agent.md) | Renato Lenis |
-| Backend, sandbox bank, policy, chain | [`backend/README.md`](../backend/README.md) | Camilo Bufadel |
-| Web cockpit | [`web/README.md`](../web/README.md) | Valentín Castro, Camilo Bufadel |
-| Security design | [`andy-villarroel/docs/security-design.md`](../andy-villarroel/docs/security-design.md) | Andy Villarroel |
-| Threat model | [`andy-villarroel/threat-model.md`](../andy-villarroel/threat-model.md) | Andy Villarroel |
-| Deployment | [`docs/deployment.md`](deployment.md) | Camilo Bufadel |
+| Core algorithm | [`01-technical-documentation/core-algorithm.md`](core-algorithm.md) | Vicente Rodríguez |
+| Financial catalog | [`04-source-code/quant/docs/financial-catalog.md`](../04-source-code/quant/docs/financial-catalog.md) | Vicente Rodríguez |
+| Quant API | [`04-source-code/quant/docs/api.md`](../04-source-code/quant/docs/api.md) | Vicente Rodríguez |
+| Agent | [`01-technical-documentation/agent.md`](agent.md) | Renato Lenis |
+| Backend, sandbox bank, policy, chain | [`04-source-code/backend/README.md`](../04-source-code/backend/README.md) | Camilo Bufadel |
+| Web cockpit | [`04-source-code/web/README.md`](../04-source-code/web/README.md) | Valentín Castro, Camilo Bufadel |
+| Security design | [`01-technical-documentation/security-design.md`](security-design.md) | Andy Villarroel |
+| Threat model | [`05-security-self-assessment-report/threat-model.md`](../05-security-self-assessment-report/threat-model.md) | Andy Villarroel |
+| Deployment | [`04-source-code/deployment.md`](../04-source-code/deployment.md) | Camilo Bufadel |

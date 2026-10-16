@@ -3,7 +3,7 @@
 .env.*
 !.env.example
 
-# Original battle plan page (Spanish, kept local; English projection lives in plan/)
+# Original battle plan page (Spanish, kept local; English projection lives in 07-team-workspace/plan/)
 NanFeng Battle Plan.html
 
 # Python
@@ -12,7 +12,7 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 *.db
-andy-villarroel/redteam/results/ci.json
+04-source-code/redteam/results/ci.json
 
 # Competition brief (kept local)
 PDF FinTechathon.pdf

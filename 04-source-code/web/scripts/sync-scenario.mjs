@@ -1,4 +1,4 @@
-// Copies the Cherry Crisis numbers from the quant engine (vicente-rodriguez/results) into the web,
+// Copies the Cherry Crisis numbers from the quant engine (quant/results) into the web,
 // so every screen, the deck and the video use the same figures.
 // Run from web/: `npm run sync:scenario` after `python -m nanfeng_quant demo` changes the results.
 
@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const quant = join(here, "..", "..", "vicente-rodriguez");
+const quant = join(here, "..", "..", "quant");
 const out = join(here, "..", "src", "data", "cherry-crisis.json");
 
 const read = (p) => JSON.parse(readFileSync(join(quant, p), "utf8"));
@@ -18,8 +18,8 @@ const plan = read("results/cherry_crisis_plan.json");
 const input = read("data/scenarios/cherry_crisis.json");
 const bench = read("results/bench_results.json").summary;
 const analysis = read("results/cherry_crisis_analysis.json");
-// Red team before/after the guard (andy-villarroel/redteam/results), per category in report order.
-const redteam = (label) => JSON.parse(readFileSync(join(here, "..", "..", "andy-villarroel", "redteam", "results", `${label}.json`), "utf8")).results;
+// Red team before/after the guard (redteam/results), per category in report order.
+const redteam = (label) => JSON.parse(readFileSync(join(here, "..", "..", "redteam", "results", `${label}.json`), "utf8")).results;
 const rtBefore = redteam("before");
 const rtAfter = redteam("after");
 const rtCategories = [...new Set(rtAfter.map((r) => r.category))].map((name) => ({

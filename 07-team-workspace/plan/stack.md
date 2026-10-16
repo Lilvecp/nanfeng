@@ -1,6 +1,6 @@
 # Stack
 
-> Planning document (Oct 7). The system as built, with the hosts and the tools actually used, is in [docs/technical-documentation.md](../docs/technical-documentation.md#2-system-architecture). Some tools below were not used: shadcn/ui, Supabase, promptfoo / garak; FISCO BCOS is replaced by Sepolia for now.
+> Planning document (Oct 7). The system as built, with the hosts and the tools actually used, is in [01-technical-documentation/technical-documentation.md](../../01-technical-documentation/technical-documentation.md#2-system-architecture). Some tools below were not used: shadcn/ui, Supabase, promptfoo / garak; FISCO BCOS is replaced by Sepolia for now.
 
 The four marked **(given)** are the ones we already have. The rest is open source or has a free plan; everything must be listed with its license in the README (IP rule of the competition).
 

@@ -1,13 +1,13 @@
 # NanFeng web cockpit
 
-Live at **https://www.nanfengcfo.com** (Vercel, region `hkg1`; deployment in [../docs/deployment.md](../docs/deployment.md)).
+Live at **https://www.nanfengcfo.com** (Vercel, region `hkg1`; deployment in [deployment.md](../deployment.md)).
 
-The web app the jury sees: landing page plus the full cockpit, built on the **Private desk** design direction (`design/private-desk`). Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 (theme + utilities only).
+The web app the jury sees: landing page plus the full cockpit, built on the **Private desk** design direction (`07-team-workspace/design/private-desk`). Next.js 16 (App Router) · React 19 · TypeScript · Tailwind 4 (theme + utilities only).
 
 Two modes, picked automatically (badge in the top bar):
 
 - **API LIVE**: with `NEXT_PUBLIC_API_URL` set (see `.env.example`) and the backend up, Approvals (OTP, reject, history), Mission Control (kill switch, live SSE event stream) and Security (audit chain, verify, anchors) use the real API in `../backend`.
-- **Agent**: with `NEXT_PUBLIC_AGENT_URL` also set and the agent service up (`../renato-lenis`), Home gets an "Ask NanFeng" card (questions to the agent, and "Send a document": a PDF, photo or text the agent reads, forecasts on and turns into a plan or blocks), and the detailed view's ask box asks the agent. What-ifs still come from the quant engine's runs; the sandbox answers are the fallback when the agent is unreachable. The agent checks the same owner session as the backend.
+- **Agent**: with `NEXT_PUBLIC_AGENT_URL` also set and the agent service up (`../agent`), Home gets an "Ask NanFeng" card (questions to the agent, and "Send a document": a PDF, photo or text the agent reads, forecasts on and turns into a plan or blocks), and the detailed view's ask box asks the agent. What-ifs still come from the quant engine's runs; the sandbox answers are the fallback when the agent is unreachable. The agent checks the same owner session as the backend.
 - **SANDBOX**: no URL or the backend is down, so every screen runs on the Cherry Crisis mocks in the browser. Demo Mode never depends on the network.
 
 The typed client lives in `src/lib/api.ts`; types are generated from `../contracts/openapi.json` with `npm run api:types`.
@@ -15,12 +15,12 @@ The typed client lives in `src/lib/api.ts`; types are generated from `../contrac
 ## Run it
 
 ```sh
-cd web
+cd 04-source-code/web
 npm install
 npm run dev -- -p 3100   # any free port; open http://localhost:3100
 # live mode: run the backend (see ../backend/README.md), then
 NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev -- -p 3100
-# with the agent too (see ../renato-lenis/README.md)
+# with the agent too (see ../agent/README.md)
 NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_AGENT_URL=http://localhost:8200 npm run dev -- -p 3100
 ```
 

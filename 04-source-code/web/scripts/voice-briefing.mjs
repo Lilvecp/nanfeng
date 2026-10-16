@@ -16,7 +16,7 @@ const out = join(here, "..", "src", "data", "briefing.json");
 const audioDir = join(here, "..", "public", "audio");
 const textOnly = process.argv.includes("--text-only");
 
-// .env at the repo root (KEY=value lines); real environment variables win
+// .env in 04-source-code/, next to .env.example (KEY=value lines); real environment variables win
 const env = { ...Object.fromEntries((existsSync(join(root, ".env")) ? readFileSync(join(root, ".env"), "utf8") : "")
   .split(/\r?\n/).map((l) => l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/)).filter(Boolean)
   .map(([, k, v]) => [k, v.replace(/^["']|["']$/g, "")])), ...process.env };

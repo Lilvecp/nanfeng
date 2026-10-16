@@ -25,7 +25,7 @@ from .catalog import expected_collection_day, spot
 from .model import Company
 from .montecarlo import ForecastResult
 
-# Thresholds behind each insight (documented in docs/core-algorithm.md, section 6).
+# Thresholds behind each insight (documented in 01-technical-documentation/core-algorithm.md, section 6).
 TOP_CUSTOMER_HIGH = 0.40      # one customer above 40% of expected inflows
 TOP_CUSTOMER_MEDIUM = 0.25
 FOREIGN_SHARE_MEDIUM = 0.70   # 70%+ of inflows in USD / CNY

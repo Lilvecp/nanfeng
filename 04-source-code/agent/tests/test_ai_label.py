@@ -1,5 +1,5 @@
 """CAC Measures for Labelling AI-Generated Synthetic Content (in force Sept 2025): AI-written messages shown
-to people in China carry an explicit label (andy-villarroel/privacy-compliance.md). NanFeng labels every
+to people in China carry an explicit label (05-security-self-assessment-report/privacy-compliance.md). NanFeng labels every
 message it writes to an importer, in the importer's language."""
 
 import pytest

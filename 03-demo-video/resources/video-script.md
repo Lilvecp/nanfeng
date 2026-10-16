@@ -1,10 +1,10 @@
 # Demo video script · max 5:00 (r1-07, r1-11, fe-13)
 
-Recorded from the web on the deployed URL (or `npm run build && npm start` locally if the deploy is not ready), 1920×1080, light theme, browser zoom 100%. Narration in English; burned-in subtitles in **English and 中文**. Every number matches [scope-moscow.md](scope-moscow.md).
+Recorded from the web on the deployed URL (or `npm run build && npm start` locally if the deploy is not ready), 1920×1080, light theme, browser zoom 100%. Narration in English; burned-in subtitles in **English and 中文**. Every number matches [scope-moscow.md](../../07-team-workspace/valentin-castro/scope-moscow.md).
 
 Delivery: **MP4 attached to the UDD email** (or a host that opens from Mainland China). No YouTube, no Google Drive.
 
-> The 中文 lines are machine-assisted. A native reader must check them before export (plan/risks.md).
+> The 中文 lines are machine-assisted. A native reader must check them before export (07-team-workspace/plan/risks.md).
 
 | # | Time | Screen · action | Narration (EN) | 字幕 (中文) |
 |---|---|---|---|---|

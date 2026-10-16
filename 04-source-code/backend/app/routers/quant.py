@@ -1,4 +1,4 @@
-"""Gateway to Vicente's quant engine (vicente-rodriguez/docs/api.md). Paths stay the same, so the
+"""Gateway to Vicente's quant engine (quant/docs/api.md). Paths stay the same, so the
 contract he published is the contract the front and the agent see, just on our origin.
 
 /quant/plan takes 5-30 s: /quant/plan/jobs runs it in the background and reports progress on the
@@ -70,7 +70,7 @@ async def _forward(path: str, request: Request) -> Response:
                     media_type=r.headers.get("content-type", "application/json"))
 
 
-# Request and response bodies: see vicente-rodriguez/api/openapi.json.
+# Request and response bodies: see quant/api/openapi.json.
 @router.get("/{path:path}", summary="Pass-through GET (health, scenarios, demo/{artifact}, schema/scenario)")
 async def proxy_get(path: str, request: Request):
     return await _forward(path, request)

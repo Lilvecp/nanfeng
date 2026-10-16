@@ -4,8 +4,8 @@ Default: runs the Cherry Crisis scenario end to end against the backend in proce
 reads the code from an outbox) and exports what happened. With --url it only exports from a running
 backend (the deployed one, anchored on the testnet).
 
-    ../../backend/.venv/bin/python build.py --backend ../../backend
-    ../../backend/.venv/bin/python build.py --url https://api.example.com --out out-live
+    ../04-source-code/backend/.venv/bin/python build.py --backend ../04-source-code/backend
+    ../04-source-code/backend/.venv/bin/python build.py --url https://api.example.com --out out-live
 
 Output (default ./out): bank_logs.jsonl, audit_entries.json, audit_verify.json, anchors.json,
 proofs.json, run.json and SUMMARY.md.
@@ -26,7 +26,7 @@ AGENT = {"Authorization": "Bearer evidence-agent-token"}
 OWNER_PASSWORD = "evidence-owner-password"
 # Vicente's MILP plan for Cherry Crisis, exactly as his engine exports it for POST /approvals, so the
 # evidence never drifts from the forecast, the deck and the video.
-PLAN = {k: v for k, v in json.loads((HERE.parents[1] / "vicente-rodriguez" / "results" / "cherry_crisis_plan.json")
+PLAN = {k: v for k, v in json.loads((HERE.parent / "04-source-code" / "quant" / "results" / "cherry_crisis_plan.json")
                                     .read_text())["approval_request"].items() if k in ("action", "operations", "explanation")}
 NOTICE = ("Shanghai Hongxin Fresh Fruit Import Co. — Payment notice\nInvoice INV-2026-118, USD 180,000. "
           "Due to port congestion we will pay 45 days after the due date. We apologise for the delay.")
@@ -42,7 +42,7 @@ def _code(outbox: list[str]) -> str:
 
 
 def scenario(c, outbox: list[str]) -> list[dict]:
-    """The Cherry Crisis day as told in plan/overview.md and the video (BEC attack at 08:47)."""
+    """The Cherry Crisis day as told in 07-team-workspace/plan/overview.md and the video (BEC attack at 08:47)."""
     steps = []
 
     def step(time: str, what: str, r):
@@ -223,7 +223,7 @@ def main() -> None:
             export(c, out, None)
         return
 
-    backend = Path(args.backend or HERE.parents[1] / "backend").resolve()
+    backend = Path(args.backend or HERE.parent / "04-source-code" / "backend").resolve()
     work = Path(tempfile.mkdtemp())
     os.chdir(work)
     os.environ.update({

@@ -1,11 +1,11 @@
-"""Andy's red team document attacks (PI-01 … PI-12, andy-villarroel/redteam/attacks.py) replayed through
+"""Andy's red team document attacks (PI-01 … PI-12, redteam/attacks.py) replayed through
 the whole agent, not straight at the guard.
 
 Each attack is injected into the Cartonera invoice from its real sender domain. That invoice is clean and
 from a known payee, so on its own the agent pays it at L2 (see the control test). The payee check has
 nothing to catch, so only the guard and the quarantine stand between the injected text and the money.
 
-The rule under test is the one in andy-villarroel/anti-injection-design.md:
+The rule under test is the one in 05-security-self-assessment-report/anti-injection-design.md:
 - malicious: the run is blocked and nothing is extracted;
 - suspicious: extraction continues with typed fields only, and anything citing the document waits for
   the owner (L3). Here the agent does not pay the invoice at all.
@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "andy-villarroel" / "redteam"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "redteam"))
 import attacks  # noqa: E402
 
 from nanfeng_agent import fixtures  # noqa: E402

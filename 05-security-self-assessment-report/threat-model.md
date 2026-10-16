@@ -1,6 +1,6 @@
 # Threat model (r4-01)
 
-**Owner:** Andy · **Method:** STRIDE per trust boundary + OWASP Top 10 for LLM Applications (2025) · **Status:** v2, Oct 10, against branch `andy` (policy engine, OTP, BEC, guard, privacy). Red team: [redteam/results/REPORT.md](redteam/results/REPORT.md)
+**Owner:** Andy · **Method:** STRIDE per trust boundary + OWASP Top 10 for LLM Applications (2025) · **Status:** v2, Oct 10, against branch `andy` (policy engine, OTP, BEC, guard, privacy). Red team: [../04-source-code/redteam/results/REPORT.md](../04-source-code/redteam/results/REPORT.md)
 
 Feeds the Security Self-Assessment Report (deliverable 05) and the red team (r4-06). Everything is synthetic data in a sandbox bank; the threats are modelled as if it were real, because that is what the jury scores.
 
@@ -87,7 +87,7 @@ flowchart LR
 
 | Id | Risk | How NanFeng handles it | Status |
 |----|------|------------------------|--------|
-| LLM01 | Prompt injection | Quarantined LLM with typed output, spotlighting, guard, policy outside the LLM | **Done**: guard + quarantine with a random boundary per document (`renato-lenis/nanfeng_agent/quarantine.py`) + policy; 21 attacks through the agent, none moves money |
+| LLM01 | Prompt injection | Quarantined LLM with typed output, spotlighting, guard, policy outside the LLM | **Done**: guard + quarantine with a random boundary per document (`04-source-code/agent/nanfeng_agent/quarantine.py`) + policy; 21 attacks through the agent, none moves money |
 | LLM02 | Sensitive information disclosure | PII masking before LLM calls; templated outbound messages | r4-07 |
 | LLM03 | Supply chain | Pinned dependencies, licenses listed, only API models from known providers | **Done**: licenses of every library, font, dataset and service in the root README (r3-08); gitleaks in CI |
 | LLM04 | Data and model poisoning | No fine-tuning; synthetic data only; documents never become instructions | N/A by design |
@@ -102,20 +102,20 @@ flowchart LR
 
 | # | Severity | Finding | Where | Fix | Owner · when |
 |---|----------|---------|-------|-----|--------------|
-| F1 | High | No owner authentication: anyone who reaches the API can approve (with the OTP), reject, turn the kill switch off or reset the bank. | `backend/app/routers/approvals.py:105`, `:140`, `:161`; `backend/app/routers/bank.py:64` | Owner session (HMAC-signed, 8 h) on these routes; kill switch off needs session + one-time code; reset only with NANFENG_DEMO=true | Camilo · **fixed** (`4453927`, `74528af`) |
-| F2 | High | OTP is one static code shared by every approval, not bound to the amount or the approval, no server-side expiry, printed on screen. | `backend/app/config.py`; `web/src/app/(desk)/approvals/page.tsx:151` | `NANFENG_OTP_MODE=sms`: random code per approval, HMAC-bound to approval + amount, 5 min TTL, single use, sent by Zavu | Andy · **fixed** in SMS mode; the public demo must run with `sms` |
-| F3 | High | Split payments and cumulative spend were not checked: each operation was evaluated alone. | old `backend/app/policy.py` | Policy engine with request total, structuring, 24 h / 30 d limits, velocity, L3 caps | Andy · **fixed** (r4-02) |
-| F4 | Medium | Front and back disagreed on limits (L2 CLP 25M on screen, 10M in the backend). | `web/src/app/(desk)/settings/page.tsx:10` vs old policy | Engine uses the Settings values; `GET /policy` is the source of truth for the front | Andy · **fixed**; Settings reads `GET /policy` in live mode (Oct 12) |
-| F5 | Medium | A payee has one bank account and no history, so an account change cannot be detected. | `backend/app/models.py` (`Payee`) | `payee_accounts` history, `payee_profiles`, `/security/check-payee` | Andy · **fixed** |
-| F6 | Medium | Agent token check is open when the token is empty; `.env.example` ships `change-me`. | `backend/app/security.py:11` | Fail closed: no token = 401 (`NANFENG_ALLOW_OPEN_AGENT=true` for local dev only); the `change-me` placeholder is refused at startup | Andy · **fixed** (Oct 12) |
-| F7 | Medium | `POST /audit/entries` takes `actor` from the request body, so the agent can log entries as `owner`. | `backend/app/routers/audit.py` | Actor recorded as `agent[:label]` | Andy · **fixed** |
-| F8 | Low | Policy decisions and executions could race between concurrent requests. | `backend/app/routers/approvals.py` | One lock around decide + execute (single instance) | Andy · **fixed** |
-| F9 | Medium | Kill switch lives in memory: a restart silently turns the agent back on (fails open). | `backend/app/routers/approvals.py:20` | Stored in the database (`app_state`); a restart keeps it on | Camilo · **fixed** (`74528af`) |
-| F10 | Low | Kill switch only stops money operations, not the agent's other steps. | `backend/app/routers/approvals.py` | Orchestrator checks it before every step and halts the run (`renato-lenis/nanfeng_agent/orchestrator.py`, tested mid-run) | Renato · **fixed** |
+| F1 | High | No owner authentication: anyone who reaches the API can approve (with the OTP), reject, turn the kill switch off or reset the bank. | `04-source-code/backend/app/routers/approvals.py:105`, `:140`, `:161`; `04-source-code/backend/app/routers/bank.py:64` | Owner session (HMAC-signed, 8 h) on these routes; kill switch off needs session + one-time code; reset only with NANFENG_DEMO=true | Camilo · **fixed** (`4453927`, `74528af`) |
+| F2 | High | OTP is one static code shared by every approval, not bound to the amount or the approval, no server-side expiry, printed on screen. | `04-source-code/backend/app/config.py`; `04-source-code/web/src/app/(desk)/approvals/page.tsx:151` | `NANFENG_OTP_MODE=sms`: random code per approval, HMAC-bound to approval + amount, 5 min TTL, single use, sent by Zavu | Andy · **fixed** in SMS mode; the public demo must run with `sms` |
+| F3 | High | Split payments and cumulative spend were not checked: each operation was evaluated alone. | old `04-source-code/backend/app/policy.py` | Policy engine with request total, structuring, 24 h / 30 d limits, velocity, L3 caps | Andy · **fixed** (r4-02) |
+| F4 | Medium | Front and back disagreed on limits (L2 CLP 25M on screen, 10M in the backend). | `04-source-code/web/src/app/(desk)/settings/page.tsx:10` vs old policy | Engine uses the Settings values; `GET /policy` is the source of truth for the front | Andy · **fixed**; Settings reads `GET /policy` in live mode (Oct 12) |
+| F5 | Medium | A payee has one bank account and no history, so an account change cannot be detected. | `04-source-code/backend/app/models.py` (`Payee`) | `payee_accounts` history, `payee_profiles`, `/security/check-payee` | Andy · **fixed** |
+| F6 | Medium | Agent token check is open when the token is empty; `.env.example` ships `change-me`. | `04-source-code/backend/app/security.py:11` | Fail closed: no token = 401 (`NANFENG_ALLOW_OPEN_AGENT=true` for local dev only); the `change-me` placeholder is refused at startup | Andy · **fixed** (Oct 12) |
+| F7 | Medium | `POST /audit/entries` takes `actor` from the request body, so the agent can log entries as `owner`. | `04-source-code/backend/app/routers/audit.py` | Actor recorded as `agent[:label]` | Andy · **fixed** |
+| F8 | Low | Policy decisions and executions could race between concurrent requests. | `04-source-code/backend/app/routers/approvals.py` | One lock around decide + execute (single instance) | Andy · **fixed** |
+| F9 | Medium | Kill switch lives in memory: a restart silently turns the agent back on (fails open). | `04-source-code/backend/app/routers/approvals.py:20` | Stored in the database (`app_state`); a restart keeps it on | Camilo · **fixed** (`74528af`) |
+| F10 | Low | Kill switch only stops money operations, not the agent's other steps. | `04-source-code/backend/app/routers/approvals.py` | Orchestrator checks it before every step and halts the run (`04-source-code/agent/nanfeng_agent/orchestrator.py`, tested mid-run) | Renato · **fixed** |
 | F11 | Low | Read endpoints (`/audit/entries`, `/bank/*`) are public. Fine with synthetic data, not with real data. | routers | Owner session on reads once F1 lands | Camilo · after freeze |
-| F12 | Medium | Every payment wrote the payee's full bank account into the public audit log (red team EX-04). | `backend/app/bank.py` | Last four digits only | Andy · **fixed** |
-| F13 | Medium | `POST /audit/anchor` was open to anyone, and every anchor writes a new `audit.anchored` entry, so there was always something pending: an anonymous caller could send unlimited transactions from the anchoring wallet (found Oct 12: 5 anonymous calls, 5 anchors). | `backend/app/routers/audit.py` | Agent token or owner session required | Andy · **fixed** (Oct 12) |
-| F14 | Low | The OTP attempt counter was a read-modify-write: wrong codes sent in parallel each saw "3 attempts left" (40 at once: 17 compared), and a right code among them could still win after the attempts were spent. | `backend/app/routers/approvals.py` (`approve`) | Reserve the attempt with an atomic conditional UPDATE before comparing; no comparison once spent | Andy · **fixed** (Oct 13) |
+| F12 | Medium | Every payment wrote the payee's full bank account into the public audit log (red team EX-04). | `04-source-code/backend/app/bank.py` | Last four digits only | Andy · **fixed** |
+| F13 | Medium | `POST /audit/anchor` was open to anyone, and every anchor writes a new `audit.anchored` entry, so there was always something pending: an anonymous caller could send unlimited transactions from the anchoring wallet (found Oct 12: 5 anonymous calls, 5 anchors). | `04-source-code/backend/app/routers/audit.py` | Agent token or owner session required | Andy · **fixed** (Oct 12) |
+| F14 | Low | The OTP attempt counter was a read-modify-write: wrong codes sent in parallel each saw "3 attempts left" (40 at once: 17 compared), and a right code among them could still win after the attempts were spent. | `04-source-code/backend/app/routers/approvals.py` (`approve`) | Reserve the attempt with an atomic conditional UPDATE before comparing; no comparison once spent | Andy · **fixed** (Oct 13) |
 
 ## Residual risks we will declare (deliverable 05)
 

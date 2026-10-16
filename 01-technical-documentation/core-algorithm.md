@@ -1,6 +1,6 @@
 # Core algorithm description (r5-11)
 
-Section of the technical documentation (deliverable 01) for the quant engine. Every number the agent shows comes from these deterministic tools; the LLM never calculates. Results quoted here come from `results/` and are regenerated with `python -m nanfeng_quant demo|bench|backtest|sensitivity`.
+Section of the technical documentation (deliverable 01) for the quant engine. Every number the agent shows comes from these deterministic tools; the LLM never calculates. Results quoted here come from `04-source-code/quant/results/` and are regenerated with `python -m nanfeng_quant demo|bench|backtest|sensitivity`.
 
 ## 0. The problem the engine solves
 
@@ -85,9 +85,9 @@ Transparent scorecard: six factors (90-day probability of negative cash, buffer 
 
 ## 4. Validation
 
-- **NanFeng-Bench** (`results/bench_summary.md`): **50/50 passed**, 25 plans, mean savings 41% vs. the bank loan, oracle coverage ≥ 90.8%. 40 stochastic cases (synthetic SME × stress event) judged by an independent 50,000-path oracle with another seed, plus 10 deterministic cases checked against a hand-written ledger. It proves the pipeline is right (risk flag, crunch day, plans that hold out of sample, never worse than the bank loan); it does not prove the model matches reality — that is the backtest's job.
-- **Backtest** (`results/backtest_summary.md`): rolling-origin FX backtest on real data 2018–2026 (204 origins): the bootstrap's P10–P90 intervals cover 79–83% (nominal 80%) while a Gaussian random walk over-covers CNY (88–92%); nobody beats a random walk on FX point accuracy and we don't claim to. Cash backtest against synthetic truth: CRPS 32–39% better than a point forecast; P10–P90 coverage 86–90% when the model is right and **79–83%** when reality is deliberately different (fatter delay tails, more price volatility, another FX regime); Brier skill for "will we breach the buffer" +53% to +62% vs. climatology.
-- **Sensitivity** (`results/sensitivity_summary.md`): savings stay 30–50% under ±30% on every rate, a missing product (no PAE → factoring, 37% cheaper) and every confidence target from 80% to 97.5%. Forcing the bank loan to 180 days reproduces the old, inflated 80%.
+- **NanFeng-Bench** (`04-source-code/quant/results/bench_summary.md`): **50/50 passed**, 25 plans, mean savings 41% vs. the bank loan, oracle coverage ≥ 90.8%. 40 stochastic cases (synthetic SME × stress event) judged by an independent 50,000-path oracle with another seed, plus 10 deterministic cases checked against a hand-written ledger. It proves the pipeline is right (risk flag, crunch day, plans that hold out of sample, never worse than the bank loan); it does not prove the model matches reality — that is the backtest's job.
+- **Backtest** (`04-source-code/quant/results/backtest_summary.md`): rolling-origin FX backtest on real data 2018–2026 (204 origins): the bootstrap's P10–P90 intervals cover 79–83% (nominal 80%) while a Gaussian random walk over-covers CNY (88–92%); nobody beats a random walk on FX point accuracy and we don't claim to. Cash backtest against synthetic truth: CRPS 32–39% better than a point forecast; P10–P90 coverage 86–90% when the model is right and **79–83%** when reality is deliberately different (fatter delay tails, more price volatility, another FX regime); Brier skill for "will we breach the buffer" +53% to +62% vs. climatology.
+- **Sensitivity** (`04-source-code/quant/results/sensitivity_summary.md`): savings stay 30–50% under ±30% on every rate, a missing product (no PAE → factoring, 37% cheaper) and every confidence target from 80% to 97.5%. Forcing the bank loan to 180 days reproduces the old, inflated 80%.
 
 ## 5. Assumptions and known limitations
 
@@ -100,7 +100,7 @@ Transparent scorecard: six factors (90-day probability of negative cash, buffer 
 
 ## 6. Business financial analysis
 
-`nanfeng_quant/analysis.py` (`business_analysis` tool, `POST /quant/analysis`, artifact `results/cherry_crisis_analysis.json`) answers the third part of Topic E, *business financial analysis*, with the data the engine already has: the scenario's receivables, planned shipments and payables (the same records the sandbox bank is seeded with), today's FX and the Monte Carlo paths. Nothing new is assumed and nothing is fitted.
+`04-source-code/quant/nanfeng_quant/analysis.py` (`business_analysis` tool, `POST /quant/analysis`, artifact `04-source-code/quant/results/cherry_crisis_analysis.json`) answers the third part of Topic E, *business financial analysis*, with the data the engine already has: the scenario's receivables, planned shipments and payables (the same records the sandbox bank is seeded with), today's FX and the Monte Carlo paths. Nothing new is assumed and nothing is fitted.
 
 **Contracted view.** Every invoice is paid at its due date + any announced delay + the customer's median delay; each shipment pays its advance on the ship date and its balance after its terms + the median delay; amounts at today's FX and the expected cherry price. It is the deterministic ledger NanFeng-Bench uses as the independent check (`bench.ledger_cash`), and a test asserts they agree to the peso. From it:
 

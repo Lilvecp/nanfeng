@@ -1,6 +1,6 @@
 """Deploys the InvoiceRegistry contract with the anchoring wallet and prints its address.
 
-    cd backend
+    cd 04-source-code/backend
     NANFENG_EVM_RPC_URL=https://... NANFENG_EVM_PRIVATE_KEY=0x... python chain/deploy.py
 
 Then set NANFENG_REGISTRY_BACKEND=evm and NANFENG_INVOICE_REGISTRY_ADDRESS=<address>.

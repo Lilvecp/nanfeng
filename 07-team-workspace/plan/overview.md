@@ -19,7 +19,7 @@ Behind it are three things almost no team will have together: probabilistic fore
 | 10:14 | Checks 9 products (7 quotes) and the MILP picks a 60-day USD pre-export loan (PAE) of USD 142,400: CLP 2.1M vs CLP 3.8M for the default bank loan (45% cheaper). |
 | 10:15 | WhatsApp to the owner via Zavu: summary, cost, why. Approves with OTP (level L3). Executed in the sandbox and the hash goes on-chain. |
 
-_Numbers come from the quant engine's run (`vicente-rodriguez/results/cherry_crisis_story.json`); see [valentin-castro/scope-moscow.md](../valentin-castro/scope-moscow.md)._
+_Numbers come from the quant engine's run (`04-source-code/quant/results/cherry_crisis_story.json`); see [07-team-workspace/valentin-castro/scope-moscow.md](../valentin-castro/scope-moscow.md)._
 
 ## How we are scored — every rubric point has an owner
 

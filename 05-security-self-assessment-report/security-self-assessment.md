@@ -8,11 +8,11 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 
 | Evidence | Result |
 |----------|--------|
-| Red team, 46 outcome-based attacks in 7 categories, written by the team itself | **46/46 stopped** (first 43: 4 → 43 as controls were built; 3 added Oct 14 were open until that day's fixes) ([report](redteam/results/REPORT.md)) |
-| Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../renato-lenis/tests/test_redteam_via_agent.py)) |
+| Red team, 46 outcome-based attacks in 7 categories, written by the team itself | **46/46 stopped** (first 43: 4 → 43 as controls were built; 3 added Oct 14 were open until that day's fixes) ([report](../04-source-code/redteam/results/REPORT.md)) |
+| Same attacks through the real agent | **21 attacks** through Renato's agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../04-source-code/agent/tests/test_redteam_via_agent.py)) |
 | Automated tests | **Backend 116**: security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, invoice registry 6, live story 5, demo 5, anchoring 4. **Agent 91**, including the red team replay and the AI label. **Quant 36** |
 | CI gate | Fails the build if any of the 43 red team attacks gets through |
-| Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 7/7, the 08:47 attack in the anchored root, the loan as L3 executed once, and the Merkle root read back from Sepolia ([summary](evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
+| Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](../06-execution-evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 7/7, the 08:47 attack in the anchored root, the loan as L3 executed once, and the Merkle root read back from Sepolia ([summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
 
 ## 2. Where decisions are made
 
@@ -42,7 +42,7 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 
 ### How the levels are enforced
 
-- **Policy engine** (`backend/app/policy.py`): a pure function of the request, the history of executed requests and the clock. Limits are data with the same keys as the Settings screen and are published at `GET /policy`. The rules that escalate a request:
+- **Policy engine** (`04-source-code/backend/app/policy.py`): a pure function of the request, the history of executed requests and the clock. Limits are data with the same keys as the Settings screen and are published at `GET /policy`. The rules that escalate a request:
 
 | Rule | Stops |
 |------|-------|
@@ -58,12 +58,12 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 
   Decision and execution run under one lock, so two concurrent requests cannot both fit under a cumulative limit (verified by a test that fails without the lock). Every decision records the rules that fired and the policy version in the audit chain.
 
-- **One decision per approval** (`backend/app/routers/approvals.py`, Oct 13): approve and reject claim the request with an atomic `UPDATE … WHERE status = 'pending' AND decided_at IS NULL` before any money moves, so two approvals racing for the same request (the owner typing the code on the web while Demo Mode approved on WhatsApp) execute it once. The deploy's chain had shown the PAE loan disbursed twice; it can no longer happen (tests for WhatsApp + web, approve + reject). Executions of different approvals run one at a time with the account row locked on Postgres, so two credits never read the same balance. `bank.*` and `approval.*` entries carry the approval id and its tier, so the chain shows the loan as the L3 action it is.
+- **One decision per approval** (`04-source-code/backend/app/routers/approvals.py`, Oct 13): approve and reject claim the request with an atomic `UPDATE … WHERE status = 'pending' AND decided_at IS NULL` before any money moves, so two approvals racing for the same request (the owner typing the code on the web while Demo Mode approved on WhatsApp) execute it once. The deploy's chain had shown the PAE loan disbursed twice; it can no longer happen (tests for WhatsApp + web, approve + reject). Executions of different approvals run one at a time with the account row locked on Postgres, so two credits never read the same balance. `bank.*` and `approval.*` entries carry the approval id and its tier, so the chain shows the loan as the L3 action it is.
 - **Three tries, even in parallel** (threat model F14, Oct 13): each code attempt is reserved atomically before the code is compared. Before, 40 wrong codes sent at once had 17 of them compared instead of 3; now at most 3 are compared and the rest get 423 without being checked (test `test_parallel_wrong_codes_get_three_tries_in_total`).
 
-- **Step-up authentication** (`backend/app/otp.py`): in SMS mode each L3 approval gets its own random 6-digit code sent by Zavu to the owner's phone. Only `HMAC(approval id | amount | code)` is stored: the code works once, for that approval and that amount, for 5 minutes, and is never written to the audit log, the event stream or the agent's context. Three wrong codes lock the approval. Resends are rate-limited.
+- **Step-up authentication** (`04-source-code/backend/app/otp.py`): in SMS mode each L3 approval gets its own random 6-digit code sent by Zavu to the owner's phone. Only `HMAC(approval id | amount | code)` is stored: the code works once, for that approval and that amount, for 5 minutes, and is never written to the audit log, the event stream or the agent's context. Three wrong codes lock the approval. Resends are rate-limited.
 - **Voice never approves L3.** Any approval whose channel includes "voice" is refused and logged: a cloned voice costs a few seconds of audio.
-- **Owner session** (`backend/app/auth.py`): the owner signs in with a password and gets an HMAC-signed token valid for 8 hours; sign-out revokes it; failed sign-ins are rate limited (5 per 5 minutes per client). The backend refuses to start with the public demo password unless it is a demo build.
+- **Owner session** (`04-source-code/backend/app/auth.py`): the owner signs in with a password and gets an HMAC-signed token valid for 8 hours; sign-out revokes it; failed sign-ins are rate limited (5 per 5 minutes per client). The backend refuses to start with the public demo password unless it is a demo build.
 - **Kill switch**: blocks every money operation and approval. The owner or the agent may turn it on; turning it off needs the owner's session **and** a one-time code. It is stored in the database, so a restart or a deploy never turns it off.
 
 ## 4. Other controls
@@ -75,11 +75,11 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 | Bank-account changes | Only through an L3 approval that records the call-back; old accounts kept in `payee_accounts` |
 | PII minimization | `POST /privacy/mask` before any LLM call; audit and alerts show last-4 digits and masked phones |
 | Tamper evidence | SHA-256 hash chain over every audit entry, Merkle roots anchored on chain, inclusion proofs per entry. Every document the agent reads leaves its SHA-256 fingerprint in the chain (never the text) |
-| Double financing | Invoice registry (`backend/app/registry.py`): an invoice's fingerprint is registered before the bank pays out on it, in our database and (with `NANFENG_REGISTRY_BACKEND=evm`) in an on-chain contract; an invoice already registered is refused |
-| Quarantined extraction | The agent's document reader returns typed fields only; the planner never sees raw text (`renato-lenis/nanfeng_agent/quarantine.py`) |
+| Double financing | Invoice registry (`04-source-code/backend/app/registry.py`): an invoice's fingerprint is registered before the bank pays out on it, in our database and (with `NANFENG_REGISTRY_BACKEND=evm`) in an on-chain contract; an invoice already registered is refused |
+| Quarantined extraction | The agent's document reader returns typed fields only; the planner never sees raw text (`04-source-code/agent/nanfeng_agent/quarantine.py`) |
 | Secrets | `.env` git-ignored, gitleaks in CI, testnet-only anchor wallet, spend limits per provider |
 | Machine callers | Agent routes fail closed when no agent token is configured; the `.env.example` placeholder is refused at startup; anchoring needs the agent token or the owner session, so nobody else can spend the anchoring wallet (threat model F6, F13) |
-| Compliance | Ley 21.719, PIPL, CAC generative AI measures: [privacy-compliance.md](privacy-compliance.md); every message to an importer is labelled AI-generated in its language (CAC labelling measures; `renato-lenis/tests/test_ai_label.py`) |
+| Compliance | Ley 21.719, PIPL, CAC generative AI measures: [privacy-compliance.md](privacy-compliance.md); every message to an importer is labelled AI-generated in its language (CAC labelling measures; `04-source-code/agent/tests/test_ai_label.py`) |
 
 ## 5. Known risks (honest list)
 
@@ -99,9 +99,9 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 ## 6. Reproduce
 
 ```sh
-cd backend && pytest -q                                       # 116 tests
-cd ../renato-lenis && pytest -q                               # 113 agent tests, red team replay included
-cd ../andy-villarroel/redteam && python run.py --backend ../../backend --label after --min-stopped 43 && python report.py
-cd ../evidence && python build.py --backend ../../backend     # Cherry Crisis evidence
+cd 04-source-code/backend && pytest -q                        # 116 tests
+cd ../agent && pytest -q                                      # 113 agent tests, red team replay included
+cd ../redteam && python run.py --backend ../backend --label after --min-stopped 43 && python report.py
+cd ../../06-execution-evidence && python build.py --backend ../04-source-code/backend   # Cherry Crisis evidence
 python build.py --url <deployed backend> --out out-live      # same export from the live deploy
 ```

@@ -18,7 +18,7 @@ from .models import Payee, PayeeAccount, PayeeProfile
 # Customers (the importers that owe us). We never pay them, so there is no account on file to compare;
 # what a late-payment notice can fake is the sender. Their notice can move the agent to borrow (a 45-day
 # delay is a CLP 140M loan), so it must come from the domain on file. Same master data as the agent's
-# contacts (renato-lenis/nanfeng_agent/contacts.py); every company and domain is fictional.
+# contacts (agent/nanfeng_agent/contacts.py); every company and domain is fictional.
 CUSTOMERS = [
     {"id": "C-SHA", "name": "Shanghai Hongxin Fresh Fruit Import Co.", "aliases": ("shanghai hongxin", "hongxin"),
      "email_domain": "hongxin-fruit.example"},

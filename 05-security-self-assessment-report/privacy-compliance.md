@@ -20,12 +20,12 @@
 | Control | Where | Status |
 |---------|-------|--------|
 | **Minimization**: the planner receives typed fields, never documents | [anti-injection-design.md](anti-injection-design.md) | Designed → Renato |
-| **PII masking before any LLM call**: RUT, PRC ID, phones (CL/CN), e-mails, bank accounts, IBAN become `⟦KIND_n⟧`; the mapping never leaves the backend | `backend/app/privacy.py`, `POST /privacy/mask` | Done |
-| **No PII in logs we publish**: audit and SSE carry masked phones and last-4 account digits; OTP never logged | `backend/app/otp.py`, `backend/app/bec.py` | Done |
+| **PII masking before any LLM call**: RUT, PRC ID, phones (CL/CN), e-mails, bank accounts, IBAN become `⟦KIND_n⟧`; the mapping never leaves the backend | `04-source-code/backend/app/privacy.py`, `POST /privacy/mask` | Done |
+| **No PII in logs we publish**: audit and SSE carry masked phones and last-4 account digits; OTP never logged | `04-source-code/backend/app/otp.py`, `04-source-code/backend/app/bec.py` | Done |
 | **Encryption in transit**: HTTPS only (Vercel + backend host) | Deploy | Camilo |
 | **Encryption at rest**: managed Postgres (Supabase) encrypts storage; OTPs stored as HMAC, not plaintext | Deploy, `otp.py` | Partly done |
 | **Secrets**: `.env` git-ignored, secret scanning in CI, spend limits on every provider | `.gitignore`, `.github/workflows/ci.yml` | Done |
-| **Sanctions screening** of every counterparty (payee, factored customer, lender) before money moves; a hit blocks and escalates | `backend/app/sanctions.py` + policy rule `sanctions_hit` | Done (synthetic watchlist) |
+| **Sanctions screening** of every counterparty (payee, factored customer, lender) before money moves; a hit blocks and escalates | `04-source-code/backend/app/sanctions.py` + policy rule `sanctions_hit` | Done (synthetic watchlist) |
 | **Human in the loop** for every financing decision (L3 + OTP), with an explanation the owner can read | Policy engine | Done |
 | **Right to an explanation / human review** of automated decisions | Every approval stores the policy reason and rules; the owner can reject with a reason | Done |
 | **Retention**: documents and conversations deleted after 90 days in production; audit hashes kept (they contain no PII) | Policy, not yet automated | Declared |
@@ -49,7 +49,7 @@ NanFeng's user is a Chilean SME. Chinese law matters because the counterparties 
 | PIPL — sensitive personal information (financial accounts) | Specific purpose, necessity, separate consent, impact assessment (PIPIA) | Bank accounts are masked before any LLM and only used to detect fraud; a PIPIA is part of a pilot checklist |
 | PIPL — cross-border transfer (Art. 38–39) and the 2024 CAC provisions on cross-border data flows | Security assessment, standard contract or certification, with exemptions such as transfers necessary to perform a contract with the individual (e.g. cross-border trade) | NanFeng does not export personal data **out of** China: the importer sends its own invoice to the exporter, which is contract performance. No data is stored in mainland China |
 | **Interim Measures for Generative AI Services** (CAC, 2023) | Apply to generative AI services offered to the public in mainland China: lawful data, content labelling, security duties | NanFeng is a B2B tool for Chilean companies, not offered to the PRC public. The simulated WeCom channel labels every message as AI-generated anyway |
-| **Measures for Labelling AI-Generated Synthetic Content** (CAC, in force Sept 2025) | Explicit labels on AI-generated content shown to users in China | Messages to importers end with 【本消息由AI生成 · NanFeng】 (zh), "[AI-generated message · NanFeng]" (en) or "[Mensaje generado por IA · NanFeng]" (es) (`renato-lenis/nanfeng_agent/templates.py`, tested); the WeCom mirror in the cockpit shows it |
+| **Measures for Labelling AI-Generated Synthetic Content** (CAC, in force Sept 2025) | Explicit labels on AI-generated content shown to users in China | Messages to importers end with 【本消息由AI生成 · NanFeng】 (zh), "[AI-generated message · NanFeng]" (en) or "[Mensaje generado por IA · NanFeng]" (es) (`04-source-code/agent/nanfeng_agent/templates.py`, tested); the WeCom mirror in the cockpit shows it |
 | **Data Security Law** (2021) | Data classification, protection of "important data" | We hold no important data from China; trade documents only |
 
 ## Data processors (for the transparency notice)
@@ -65,4 +65,4 @@ NanFeng's user is a Chilean SME. Chinese law matters because the counterparties 
 
 ## Regulatory slide (deck, r4-08)
 
-Final text: slide 8 of [deck-v1.md](../valentin-castro/deck-v1.md). It claims only what the code does: PII masking before any model, human-approved money decisions (L3), structuring detection, simulated sanctions screening, the invoice registry against double financing, HMAC-stored one-time codes and the on-chain audit log. The AI-generated label for importers is built (`renato-lenis/tests/test_ai_label.py`) and can go on the slide. Not on the slide until built: FISCO BCOS anchoring (Sepolia today) and Ley Fintec / Open Finance connectors.
+Final text: slide 8 of [deck-v1.md](../02-presentation-deck/deck-v1.md). It claims only what the code does: PII masking before any model, human-approved money decisions (L3), structuring detection, simulated sanctions screening, the invoice registry against double financing, HMAC-stored one-time codes and the on-chain audit log. The AI-generated label for importers is built (`04-source-code/agent/tests/test_ai_label.py`) and can go on the slide. Not on the slide until built: FISCO BCOS anchoring (Sepolia today) and Ley Fintec / Open Finance connectors.

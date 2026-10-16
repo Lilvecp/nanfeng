@@ -53,10 +53,10 @@ The LLM never computes a number: it calls these tools and quotes them. That is b
 | r5-06 | Oct 12 | Should | Forecast backtest (CRPS, coverage) | ✅ Done — coverage now nominal under misspecification | `nanfeng_quant/backtest.py`, `results/backtest_summary.md` |
 | r5-05 | Oct 13 | Should | Market data with sources | ✅ Done — re-checked 2026-10-10, 2025/26 season | `docs/market-data.md` |
 | r5-10 | Oct 13 | Must | NanFeng-Bench (50 scenarios) | ✅ Done | `nanfeng_quant/bench.py`, `results/bench_summary.md` |
-| r5-11 | Oct 14 | Must | Core algorithm description | ✅ Done — ready for Valentín's English edit | `docs/core-algorithm.md` |
+| r5-11 | Oct 14 | Must | Core algorithm description | ✅ Done — ready for Valentín's English edit | `01-technical-documentation/core-algorithm.md` |
 | extra | – | – | Plan sensitivity | ✅ Done | `nanfeng_quant/sensitivity.py`, `results/sensitivity_summary.md` |
 | extra | – | – | API contract + reference server + sandbox seed + agent tool schemas | ✅ Done (D1, D2, D6) | `nanfeng_quant/api.py`, `api/`, `docs/api.md` |
-| extra | Oct 13 | – | Business financial analysis (Topic E): cash budget, customers, DSO, FX exposure, payroll safety, findings EN / ES / 中文 | ✅ Done | `nanfeng_quant/analysis.py`, `POST /quant/analysis`, `results/cherry_crisis_analysis.json`, [core-algorithm §6](docs/core-algorithm.md#6-business-financial-analysis) |
+| extra | Oct 13 | – | Business financial analysis (Topic E): cash budget, customers, DSO, FX exposure, payroll safety, findings EN / ES / 中文 | ✅ Done | `nanfeng_quant/analysis.py`, `POST /quant/analysis`, `results/cherry_crisis_analysis.json`, [core-algorithm §6](../../01-technical-documentation/core-algorithm.md#6-business-financial-analysis) |
 
 Tests: `36 passed` (`pytest`). Bench 50/50.
 
@@ -83,7 +83,7 @@ Tests: `36 passed` (`pytest`). Bench 50/50.
 
 Each decision says why and what you need to do. If you disagree, tell me and I re-run `python -m nanfeng_quant demo` in a few minutes.
 
-**D1 · The quant API contract is `api/openapi.json` — closed from the quant side (r3-02).** Camilo's gateway already proxies `/quant/*` unchanged and adds `/quant/plan/jobs`; that's the right design, so the contract stays. Changes in iteration 3 are additive only: new endpoints `GET /quant/sandbox/seed`, `GET /quant/tools`, `GET /quant/demo/story`; new fields in the plan response (`headline`, `approval_request`, `after_plan`, `credit_passport`). *Camilo:* regenerate `web/src/lib/api-types.ts` from `vicente-rodriguez/api/openapi.json` when you merge.
+**D1 · The quant API contract is `api/openapi.json` — closed from the quant side (r3-02).** Camilo's gateway already proxies `/quant/*` unchanged and adds `/quant/plan/jobs`; that's the right design, so the contract stays. Changes in iteration 3 are additive only: new endpoints `GET /quant/sandbox/seed`, `GET /quant/tools`, `GET /quant/demo/story`; new fields in the plan response (`headline`, `approval_request`, `after_plan`, `credit_passport`). *Camilo:* regenerate `web/src/lib/api-types.ts` from `quant/api/openapi.json` when you merge.
 
 **D2 · The sandbox bank is seeded from the quant engine, not from its own constants.** The plan's operations reference lender ids (`LEN-PAE`, `LEN-FACTOR`, …) and invoice ids that must exist in the bank, and the amounts must match. *Camilo:* in `backend/app/seed.py`, take `ACCOUNTS`, `RECEIVABLES`, `LENDERS` and `FX_RATES` from `GET /quant/sandbox/seed` (or a copy of it). Concretely: opening cash **CLP 176,000,000** (was 175.5M), FX **USD 983.84 / CNY 146.76** CLP (was 940 / 132), lenders `LEN-FACTOR, LEN-FINTECH, LEN-LC, LEN-ANDINO, LEN-FOGAPE, LEN-PAE, LEN-OVERDRAFT, LEN-FXDESK` with the rates in the seed (loan lenders use your `wc_loan`/`fogape` product types, so `bank.loan()` works unchanged). Confirming is not a sandbox operation yet; plans that use it list it under `approval_request.unsupported` (the Cherry Crisis plan doesn't).
 
@@ -148,7 +148,7 @@ Found in `camilo-backend:web/src`. All values are in `results/cherry_crisis_stor
 ## Quick start
 
 ```bash
-cd vicente-rodriguez
+cd 04-source-code/quant
 python -m venv .venv
 .venv/Scripts/activate          # Windows; on macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev,api]"     # numpy, scipy, pandas, ortools, fastapi, uvicorn, httpx, pytest
@@ -176,7 +176,7 @@ pytest                                        # tests
 ## Layout
 
 ```
-vicente-rodriguez/
+quant/
 ├── nanfeng_quant/
 │   ├── model.py            # scenario schema (company, customers, receivables, shipments, payables)
 │   ├── fx.py               # FX history + joint stationary block bootstrap
@@ -201,7 +201,7 @@ vicente-rodriguez/
 │   ├── synthetic/smes.json            # 50 synthetic SMEs
 │   └── fx/                            # real FX history (BCCh via mindicador.cl, FRED)
 ├── results/                # every number for the deck, docs and Demo Mode (story.json first)
-├── docs/                   # core-algorithm.md, financial-catalog.md, market-data.md, api.md
+├── docs/                   # financial-catalog.md, market-data.md, api.md (core-algorithm.md: 01-technical-documentation/)
 ├── LICENSES.md             # rows for the root README
 ├── scripts/fetch_fx.py
 └── tests/                  # test_quant.py, test_api.py
@@ -217,7 +217,7 @@ vicente-rodriguez/
 | **Valentín / Camilo** (front) | Fan chart before and after the plan, Financing Arena rows, plan actions, Scenario Lab presets with plan costs, EN/ES/中文 strings | `results/cherry_crisis_story.json` = `GET /quant/demo/story`; live: `/quant/forecast`, `/quant/plan` |
 | **Camilo** (backend) | OpenAPI contract, sandbox seed, `approval_request` already in the `POST /approvals` shape; no network at runtime | `docs/api.md`, `GET /quant/sandbox/seed` |
 | **Andy** (security) | The LLM never computes: all numbers are deterministic tool outputs with seeds. Amounts to check against L0–L3: `approval_request.operations[*].params.amount_clp` (loans), `share` × invoice (factoring), `notional` (forward) | `optimal.actions[*].cost_clp / proceeds_clp / amount_clp` |
-| **Valentín** (pitch) | Headline numbers above; market slide line in `docs/market-data.md`; doc section in `docs/core-algorithm.md` | — |
+| **Valentín** (pitch) | Headline numbers above; market slide line in `docs/market-data.md`; doc section in `01-technical-documentation/core-algorithm.md` | — |
 
 ---
 
@@ -230,16 +230,16 @@ Everything in my scope that could be done without a human is done. What remains 
 | 1 | Pull D2 (sandbox seed) and D3/D5 (front numbers) into `camilo-backend` | Camilo + Valentín | Their code, their branch |
 | 2 | Wire the tools into the orchestrator (D6, r2-09) | Renato | His code |
 | 3 | Have a native reader check the ES and 中文 strings in `story.strings` before the video | Valentín | Plan rule (risks.md) |
-| 4 | English edit of `docs/core-algorithm.md` | Valentín (r1-08) | Plan rule |
+| 4 | English edit of `01-technical-documentation/core-algorithm.md` | Valentín (r1-08) | Plan rule |
 | 5 | Update the deck line: "63% of what SMEs invoice **to large companies** is paid **after the 30-day legal limit**" with the footnote *Bolsa de Productos / ASECH, Ranking de Pagadores Q3 2024* | Valentín | Slide 2; the figure is now confirmed at the primary source (`docs/market-data.md`) |
 
-Known limits that remain (documented in `docs/core-algorithm.md` §5): synthetic companies (no real ledgers to calibrate τ, ρ and the Credit Passport weights, which are therefore declared heuristic), reference rates instead of lender quotes, no loan prepayment, no per-shipment price noise.
+Known limits that remain (documented in `01-technical-documentation/core-algorithm.md` §5): synthetic companies (no real ledgers to calibrate τ, ρ and the Credit Passport weights, which are therefore declared heuristic), reference rates instead of lender quotes, no loan prepayment, no per-shipment price noise.
 
 ### Data-and-sources checklist (closed 2026-10-12)
 
 - [x] **63% late payments:** found in the primary source, Bolsa de Productos / ASECH *Ranking de Pagadores* Q3 2024 (62.99% of the amount SMEs invoice to large companies is paid after 30 days). The two press links we cited did not contain it; replaced. The 44-day average is the Jul 2025–Jun 2026 ranking (trade press). → `docs/market-data.md`
 - [x] **Rates of the 9 products:** re-checked against CMF certificate 09/2026, Term SOFR and 2026 factoring ranges, plus the legal maximum rate for every ticket; factoring and LC source notes corrected; ticket caps added where a big ticket would exceed the legal maximum (no published number changes). → `docs/financial-catalog.md`, `test_every_credit_rate_is_under_the_legal_maximum`
-- [x] **Credit Passport weights:** declared heuristic in code, API output (`method`) and docs, with the rationale for every band; robustness to the weights measured instead of a fake calibration. → `docs/core-algorithm.md` §3
+- [x] **Credit Passport weights:** declared heuristic in code, API output (`method`) and docs, with the rationale for every band; robustness to the weights measured instead of a fake calibration. → `01-technical-documentation/core-algorithm.md` §3
 - [x] **Terms of use of mindicador.cl and FRED:** read and quoted; we comply (attribution, one-off download, no implied endorsement). → `docs/market-data.md`, `LICENSES.md`
 
 ---
@@ -251,14 +251,14 @@ Every task of the battle plan, with where its acceptance criterion is met.
 - [x] `r5-01` **Oct 8** · Must — Cherry Crisis scenario numbers + synthetic data generator: 50 exporting SMEs with cherry seasonality (Nov–Feb), customers with delay distributions, costs and debts → `data/scenarios/cherry_crisis.json`, `data/synthetic/smes.json` (50 SMEs), `nanfeng_quant/synthetic.py`
 - [x] `r5-02` **Oct 8** · Must — Real FX data CLP/USD (Banco Central de Chile) and historical USD/CNY for the bootstrap → `data/fx/`, `scripts/fetch_fx.py`
 - [x] `r5-03` **Oct 9** · Must — Catalog of realistic products (factoring, confirming, working capital, FOGAPE, letter of credit, forward) with reference rates → `data/catalog.json` (9 products, + PAE and overdraft), `docs/financial-catalog.md`
-- [x] `r5-04` **Oct 9** · Must — 90-day Monte Carlo: lognormal delay per customer, FX by log-return bootstrap, seasonality → P10/P50/P90, days to crunch, P(cash < 0) → `nanfeng_quant/montecarlo.py`, `fx.py`; `docs/core-algorithm.md` §1
+- [x] `r5-04` **Oct 9** · Must — 90-day Monte Carlo: lognormal delay per customer, FX by log-return bootstrap, seasonality → P10/P50/P90, days to crunch, P(cash < 0) → `nanfeng_quant/montecarlo.py`, `fx.py`; `01-technical-documentation/core-algorithm.md` §1
 - [x] `r5-05` **Oct 13** · Should — Market data with sources: SME financing gap, Chile → China exports, payment terms → `docs/market-data.md`
 - [x] `r5-06` **Oct 12** · Should — Backtest (CRPS and interval coverage) with numbers for the docs → `results/backtest_summary.md`
-- [x] `r5-07` **Oct 10** · Must — MILP: minimize total financing cost with cash above a buffer in the P90 scenarios, respecting credit lines, terms and collateral → `nanfeng_quant/optimizer.py`; `docs/core-algorithm.md` §2
+- [x] `r5-07` **Oct 10** · Must — MILP: minimize total financing cost with cash above a buffer in the P90 scenarios, respecting credit lines, terms and collateral → `nanfeng_quant/optimizer.py`; `01-technical-documentation/core-algorithm.md` §2
 - [x] `r5-08` **Oct 11** · Should — Explainability: which customer or variable causes the crunch and why each option is in or out → `nanfeng_quant/explain.py`; `results/cherry_crisis_summary.md`
 - [x] `r5-09` **Oct 11** · Could — Credit Passport: explainable score shared with a lender, with consent → `nanfeng_quant/credit_passport.py`, `POST /quant/passport`
 - [x] `r5-10` **Oct 13** · Must — NanFeng-Bench: 50 scenarios with a correct answer → success rate, savings vs. default loan, latency → `results/bench_summary.md` (50/50)
-- [x] `r5-11` **Oct 14** · Must — Core algorithm description with formulas, assumptions and results → `docs/core-algorithm.md` (deliverable 01, pending Valentín's English edit)
+- [x] `r5-11` **Oct 14** · Must — Core algorithm description with formulas, assumptions and results → `01-technical-documentation/core-algorithm.md` (deliverable 01, pending Valentín's English edit)
 
 ---
 
@@ -296,7 +296,7 @@ Six-factor transparent scorecard (value, sub-score, weight, points per factor); 
 
 ### r5-06 · Backtest (Should)
 
-See `results/backtest_summary.md` and `docs/core-algorithm.md` §4: FX intervals calibrated on real data (79–83% for a nominal 80%); cash CRPS 32–39% better than a point forecast; P10–P90 coverage 86–90% when the model is right and 79–83% when reality is deliberately different; Brier skill +53% to +62%.
+See `results/backtest_summary.md` and `01-technical-documentation/core-algorithm.md` §4: FX intervals calibrated on real data (79–83% for a nominal 80%); cash CRPS 32–39% better than a point forecast; P10–P90 coverage 86–90% when the model is right and 79–83% when reality is deliberately different; Brier skill +53% to +62%.
 
 ### r5-05 · Market data (Should)
 
@@ -321,7 +321,7 @@ From `results/bench_summary.md` — 50 scenarios with a correct answer: 40 stoch
 
 ### r5-11 · Core algorithm description (Must)
 
-`docs/core-algorithm.md`: the problem, formulas, the MILP, product rules, the fair comparison, validation and limitations, written for deliverable 01.
+`01-technical-documentation/core-algorithm.md`: the problem, formulas, the MILP, product rules, the fair comparison, validation and limitations, written for deliverable 01.
 
 ### Extra · Plan sensitivity
 

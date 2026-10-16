@@ -1,6 +1,6 @@
 # The agent (technical documentation · r2-11)
 
-**Owner:** Renato · **Code:** [`nanfeng_agent/`](../nanfeng_agent) · **Tests:** [`tests/`](../tests) (CI job "Agent tests")
+**Owner:** Renato · **Code:** [`nanfeng_agent/`](../04-source-code/agent/nanfeng_agent) · **Tests:** [`tests/`](../04-source-code/agent/tests) (CI job "Agent tests")
 
 NanFeng's agent reads what reaches the owner (a WhatsApp photo of an invoice, an importer's email), works out what it means for cash with Vicente's quant tools, proposes the cheapest fix through Camilo's Approval Center, and tells the right people in their language. It **proposes, never approves**: every money movement goes to `POST /approvals`, where the policy engine (Andy, outside the LLM) decides the tier, and L3 waits for the owner's OTP, which never passes through the agent.
 

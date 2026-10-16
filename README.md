@@ -13,8 +13,8 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 | **Live app** | https://www.nanfengcfo.com |
 | **API** | https://api.nanfengcfo.com/docs |
 | **Repository** | https://github.com/Lilvecp/nanfeng |
-| **Technical documentation** | [docs/technical-documentation.md](docs/technical-documentation.md) |
-| **Deployment guide** | [docs/deployment.md](docs/deployment.md) |
+| **Technical documentation** | [01-technical-documentation/technical-documentation.md](01-technical-documentation/technical-documentation.md) |
+| **Deployment guide** | [04-source-code/deployment.md](04-source-code/deployment.md) |
 
 All company, customer, invoice, lender and approval data is synthetic; no real money moves (sandbox bank, EVM testnet).
 
@@ -35,64 +35,84 @@ Security is enforced outside the LLM: a policy engine with permission levels L0�
 Needs Docker and Node 22. From the repository root:
 
 ```sh
+cd 04-source-code
 cp .env.example .env                       # set NANFENG_AGENT_TOKEN (instructions in the file)
 docker compose --profile quant up --build  # backend :8000 · agent :8200 · quant engine :8100 · Postgres
 
 cd web && cp .env.example .env.local && npm ci && npm run dev -- -p 3100   # http://localhost:3100
 ```
 
-The web also runs alone (`cd web && npm ci && npm run dev`): with no backend it plays the Cherry Crisis on an in-browser sandbox. Provider keys are optional; without them the agent uses deterministic stand-ins. Running each service without Docker, and the public deploy (Vercel + Railway), are in [docs/deployment.md](docs/deployment.md).
+The web also runs alone (`cd 04-source-code/web && npm ci && npm run dev`): with no backend it plays the Cherry Crisis on an in-browser sandbox. Provider keys are optional; without them the agent uses deterministic stand-ins. Running each service without Docker, and the public deploy (Vercel + Railway), are in [04-source-code/deployment.md](04-source-code/deployment.md).
 
 ## Tests
 
+Every command runs from the repository root.
+
 | Suite | Command | Result | CI job |
 |---|---|---|---|
-| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd backend && pip install -e ".[dev]" && pytest -q` | 127 passed | Backend tests |
-| Red team regression gate (46 attacks against the API) | `cd backend && python ../andy-villarroel/redteam/run.py --backend . --label local --min-stopped 46` | 46/46 stopped | Backend tests |
-| OpenAPI contract is up to date | `cd backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
-| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd renato-lenis && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 113 passed | Agent tests |
-| Quant engine: Monte Carlo, MILP, Credit Passport, business analysis, API | `cd vicente-rodriguez && pip install -e ".[dev]" && pytest -q` | 36 passed | Quant tests |
-| NanFeng-Bench: 50 scenarios with a known answer | `cd vicente-rodriguez && python -m nanfeng_quant bench` (~5 min) | 50/50 ([summary](vicente-rodriguez/results/bench_summary.md)) | — |
-| Web: lint and production build | `cd web && npm ci && npm run lint && npm run build` | clean | Web lint and build |
+| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 127 passed | Backend tests |
+| Red team regression gate (46 attacks against the API) | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | 46/46 stopped | Backend tests |
+| OpenAPI contract is up to date | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
+| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd 04-source-code/agent && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 113 passed | Agent tests |
+| Quant engine: Monte Carlo, MILP, Credit Passport, business analysis, API | `cd 04-source-code/quant && pip install -e ".[dev]" && pytest -q` | 36 passed | Quant tests |
+| NanFeng-Bench: 50 scenarios with a known answer | `cd 04-source-code/quant && python -m nanfeng_quant bench` (~5 min) | 50/50 ([summary](04-source-code/quant/results/bench_summary.md)) | — |
+| Web: lint and production build | `cd 04-source-code/web && npm ci && npm run lint && npm run build` | clean | Web lint and build |
 | Secret scanning | gitleaks | no findings | Secret scanning |
 
 CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every push to `main` and on every pull request.
 
 ## Submission package
 
-| # | Deliverable | Where |
-|---|---|---|
-| 01 | Technical documentation: system architecture, core algorithm, security design | [docs/technical-documentation.md](docs/technical-documentation.md), with the full sections: [core algorithm](vicente-rodriguez/docs/core-algorithm.md) · [agent](renato-lenis/docs/agent.md) · [security design](andy-villarroel/docs/security-design.md) |
-| 02 | Presentation deck (≤ 10 min) | Outline: [valentin-castro/deck-v1.md](valentin-castro/deck-v1.md). The slides are made on the final product |
-| 03 | Demo video (≤ 5 min) | Script: [valentin-castro/video-script.md](valentin-castro/video-script.md). Recorded on the final product |
-| 04 | Source code: README, repository link, deployment instructions, test cases | This README · [docs/deployment.md](docs/deployment.md) · tests in `backend/tests`, `renato-lenis/tests`, `vicente-rodriguez/tests`, `andy-villarroel/redteam` |
-| 05 | Security self-assessment: permission tiers, known-risk list | [andy-villarroel/security-self-assessment.md](andy-villarroel/security-self-assessment.md) |
-| 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [andy-villarroel/evidence/out-live/](andy-villarroel/evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · video as in 03 |
+The repository follows the submission checklist: one folder per deliverable, numbered as in the checklist, and one folder for everything else.
+
+| # | Deliverable | Folder | What is inside |
+|---|---|---|---|
+| 01 | Technical documentation: system architecture, core algorithm, security design | [01-technical-documentation/](01-technical-documentation/) | [technical-documentation.md](01-technical-documentation/technical-documentation.md) (start here), with the full sections: [core algorithm](01-technical-documentation/core-algorithm.md) · [agent](01-technical-documentation/agent.md) · [security design](01-technical-documentation/security-design.md) |
+| 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | Outline: [deck-v1.md](02-presentation-deck/deck-v1.md). The slides are made on the final product |
+| 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 4:59, 1080p, EN + 中文 subtitles, recorded in one take on the live app. Script and the pipeline that builds it in `resources/` |
+| 04 | Source code: README, repository link, deployment instructions, test cases | [04-source-code/](04-source-code/) | This README · [deployment.md](04-source-code/deployment.md) · tests in `04-source-code/backend/tests`, `04-source-code/agent/tests`, `04-source-code/quant/tests`, `04-source-code/redteam` |
+| 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
+| 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [06-execution-evidence/](06-execution-evidence/) | [out-live/](06-execution-evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · [out/](06-execution-evidence/out/SUMMARY.md) (in-process run) · video as in 03 |
+| — | Everything else | [07-team-workspace/](07-team-workspace/) | Team cards and notes, planning, design mockups, the submission kit |
 
 ## Repository structure
 
 ```
 .
-├── README.md                  # This file: overview, quick start, tests, submission map, licenses
-├── docs/
-│   ├── technical-documentation.md   # Deliverable 01: architecture, algorithms, agent, security
-│   └── deployment.md                # Local and public deployment, every variable
-├── web/                       # Web cockpit (Next.js): landing + every cockpit screen, live API or in-browser sandbox
-├── backend/                   # API gateway (FastAPI): owner sign-in, policy L0–L3, OTP, sandbox bank, audit log,
-│                              #   Merkle anchoring, invoice registry, agent SSE, quant proxy
-├── contracts/                 # OpenAPI contract (generated from the backend; CI checks it)
-├── docker-compose.yml         # One-command stack: Postgres + backend + agent (+ quant profile)
-├── .env.example               # Every backend and agent variable, with safe defaults
-├── .github/workflows/ci.yml   # Secret scanning, backend, agent, quant, web
-├── design/
-│   └── private-desk/          # Visual direction: static mockups the web app is built from
-├── plan/                      # Planning: battle plan projection, roles, timeline, deliverables checklist
-├── valentin-castro/           # R1 · Lead & Product Strategist: scope, business model, deck outline, video script
-├── renato-lenis/              # R2 · AI Agent Engineer: the agent service (nanfeng_agent), its docs and tests
-├── camilo-bufadel/            # R3 · Full-Stack & Blockchain Developer: task card (code in backend/ and web/)
-├── andy-villarroel/           # R4 · Security & Compliance Lead: threat model, red team, self-assessment, evidence
-└── vicente-rodriguez/         # R5 · Quant & Data Scientist: quant engine (nanfeng_quant), bench, docs, results
+├── README.md                              # This file: overview, quick start, tests, submission map, licenses
+├── .github/workflows/ci.yml               # Secret scanning, backend, agent, quant, web
+├── 01-technical-documentation/            # Deliverable 01
+│   ├── technical-documentation.md         #   Architecture, algorithms, agent, security (start here)
+│   ├── core-algorithm.md                  #   Forecast, optimizer, fair comparison, validation
+│   ├── agent.md                           #   Agent pipeline, tools and channels
+│   └── security-design.md                 #   Security design in full
+├── 02-presentation-deck/                  # Deliverable 02: deck outline
+├── 03-demo-video/                         # Deliverable 03
+│   ├── nanfeng-demo.mp4                   #   The demo video
+│   └── resources/                         #   Video script, and the pipeline that records and edits the video
+├── 04-source-code/                        # Deliverable 04
+│   ├── web/                               #   Web cockpit (Next.js): landing + every cockpit screen, live API or in-browser sandbox
+│   ├── backend/                           #   API gateway (FastAPI): owner sign-in, policy L0–L3, OTP, sandbox bank, audit log,
+│   │                                      #     Merkle anchoring, invoice registry, agent SSE, quant proxy
+│   ├── agent/                             #   Agent service (nanfeng_agent): documents, planner, tools, WhatsApp and voice
+│   ├── quant/                             #   Quant engine (nanfeng_quant): Monte Carlo, MILP, Credit Passport, bench, results
+│   ├── contracts/                         #   OpenAPI contract (generated from the backend; CI checks it)
+│   ├── redteam/                           #   46 attacks against the API, run by CI as a regression gate
+│   ├── docker-compose.yml                 #   One-command stack: Postgres + backend + agent (+ quant profile)
+│   ├── .env.example                       #   Every backend and agent variable, with safe defaults
+│   └── deployment.md                      #   Local and public deployment, every variable
+├── 05-security-self-assessment-report/    # Deliverable 05: self-assessment, threat model, anti-injection design, privacy and compliance
+├── 06-execution-evidence/                 # Deliverable 06: evidence exporter (build.py), live-deploy export (out-live/), in-process run (out/)
+└── 07-team-workspace/                     # Everything else
+    ├── andy-villarroel/                   #   R4 · Security & Compliance Lead: task card, daily logs
+    ├── camilo-bufadel/                    #   R3 · Full-Stack & Blockchain Developer: task card
+    ├── valentin-castro/                   #   R1 · Lead & Product Strategist: task card, status, scope, business model
+    ├── plan/                              #   Planning: battle plan projection, roles, timeline, deliverables checklist
+    ├── design/private-desk/               #   Visual direction: static mockups the web app is built from
+    └── fintechathon-kit.md                #   Submission kit (Spanish): rubric, deliverables, video script, checklist
 ```
+
+The task cards of R2 (Renato Lenis) and R5 (Vicente Rodríguez) are the READMEs of their code, [04-source-code/agent/](04-source-code/agent/README.md) and [04-source-code/quant/](04-source-code/quant/README.md).
 
 ## Team
 
@@ -119,7 +139,7 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every push to 
 
 Every library, model and dataset used is listed here with its license (IP rule of the competition). Versions are the ones installed when this list was made (Oct 2026). **All company, customer, invoice, lender and approval data is synthetic** and every company and lender is fictional. No model weights are shipped and no third-party source code is copied into the repo; the only vendored files are minified, unmodified libraries in the design mockups.
 
-### Web cockpit (`web/`)
+### Web cockpit (`04-source-code/web/`)
 
 | Package | Version | License | Used for |
 |---|---|---|---|
@@ -130,10 +150,10 @@ Every library, model and dataset used is listed here with its license (IP rule o
 | Tailwind CSS, @tailwindcss/turbopack | 4.3.3 | MIT | Styles |
 | TypeScript | 5.9.3 | Apache-2.0 | Type checking |
 | ESLint, eslint-config-next | 9.39.5 / 16.4.0 | MIT | Lint |
-| openapi-typescript | 7.4.4 | MIT | API types generated from `contracts/openapi.json` |
+| openapi-typescript | 7.4.4 | MIT | API types generated from `04-source-code/contracts/openapi.json` |
 | @types/node, @types/react, @types/react-dom, @types/three | various | MIT | Type definitions |
 
-### Backend (`backend/`)
+### Backend (`04-source-code/backend/`)
 
 | Package | Version | License | Used for |
 |---|---|---|---|
@@ -148,9 +168,9 @@ Every library, model and dataset used is listed here with its license (IP rule o
 | pytest | 9.1.1 | MIT | Tests |
 | eth-tester, py-evm | 0.14.0b1 / 0.12.1b1 | MIT | In-memory EVM for the anchoring tests |
 
-The security modules (policy engine, OTP, document guard, BEC checks, PII masking, sanctions screening, red team in `andy-villarroel/`) are our own code on top of the packages above.
+The security modules (policy engine, OTP, document guard, BEC checks, PII masking, sanctions screening, red team in `04-source-code/redteam/`) are our own code on top of the packages above.
 
-### Agent (`renato-lenis/`)
+### Agent (`04-source-code/agent/`)
 
 | Package | Version | License | Used for |
 |---|---|---|---|
@@ -162,7 +182,7 @@ The security modules (policy engine, OTP, document guard, BEC checks, PII maskin
 
 The orchestrator, planners, quarantined extraction, model router, channel layer, templates and the PDF writer are our own code. No model weights are shipped: models run at OpenRouter and Mistral under their terms (see Infrastructure below).
 
-### Quant engine (`vicente-rodriguez/`, details in its `LICENSES.md`)
+### Quant engine (`04-source-code/quant/`, details in its `LICENSES.md`)
 
 | Package | Version | License | Used for |
 |---|---|---|---|
@@ -176,12 +196,12 @@ The orchestrator, planners, quarantined extraction, model router, channel layer,
 
 | Asset | License | Where |
 |---|---|---|
-| IBM Plex Sans, IBM Plex Sans Condensed | SIL Open Font License 1.1 | Web (woff2 files committed in `web/src/fonts`, served from our own origin) and design mockups |
+| IBM Plex Sans, IBM Plex Sans Condensed | SIL Open Font License 1.1 | Web (woff2 files committed in `04-source-code/web/src/fonts`, served from our own origin) and design mockups |
 | JetBrains Mono | SIL Open Font License 1.1 | Web and design mockups |
 | `earth-night.jpg`, `earth-topology.png` (three-globe examples, NASA imagery) | Public domain (NASA) | Globe textures |
-| NanFeng logo (Sail) and all UI design | Ours | `web/src/components/logo.tsx`, `design/private-desk/` |
-| `design/private-desk/vendor/`: React / ReactDOM 18.3.1, globe.gl 2.46.2 (minified, unmodified) | MIT | Static design mockups only, not part of the app |
-| `design/private-desk/vendor/dc-runtime.js` (generated runtime) | **To confirm** (Valentín) | Static design mockups only, not part of the app |
+| NanFeng logo (Sail) and all UI design | Ours | `04-source-code/web/src/components/logo.tsx`, `07-team-workspace/design/private-desk/` |
+| `07-team-workspace/design/private-desk/vendor/`: React / ReactDOM 18.3.1, globe.gl 2.46.2 (minified, unmodified) | MIT | Static design mockups only, not part of the app |
+| `07-team-workspace/design/private-desk/vendor/dc-runtime.js` (generated runtime) | **To confirm** (Valentín) | Static design mockups only, not part of the app |
 
 ### Data
 

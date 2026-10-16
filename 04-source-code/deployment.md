@@ -1,6 +1,6 @@
 # Deployment
 
-How to run NanFeng on one machine, and how the public deploy is set up. Every variable is listed with a safe default in [`.env.example`](../.env.example) (backend and agent) and [`web/.env.example`](../web/.env.example) (web). Real values never go in the repo: locally they live in `.env` (git-ignored), on the hosts in their environment-variable settings.
+How to run NanFeng on one machine, and how the public deploy is set up. Every variable is listed with a safe default in [`.env.example`](.env.example) (backend and agent) and [`web/.env.example`](web/.env.example) (web). Real values never go in the repo: locally they live in `.env` (git-ignored), on the hosts in their environment-variable settings.
 
 ## 1. The public deploy
 
@@ -15,7 +15,7 @@ How to run NanFeng on one machine, and how the public deploy is set up. Every va
 
 ## 2. One machine, one command
 
-Needs Docker. From the repository root:
+Needs Docker. From `04-source-code/` (the folder of this guide):
 
 ```sh
 cp .env.example .env                      # then set NANFENG_AGENT_TOKEN (see the comment in the file)
@@ -42,11 +42,11 @@ Without `NEXT_PUBLIC_API_URL` (or with the backend down) the web runs on the Che
 
 ### Without Docker
 
-Python 3.12 and Node 22. Each service in its own terminal:
+Python 3.12 and Node 22. Each service in its own terminal, from `04-source-code/`:
 
 ```sh
 # quant engine (:8100)
-cd vicente-rodriguez && python -m venv .venv && .venv/bin/pip install -e ".[api,dev]"
+cd quant && python -m venv .venv && .venv/bin/pip install -e ".[api,dev]"
 .venv/bin/uvicorn nanfeng_quant.api:app --port 8100
 
 # backend (:8000), SQLite by default
@@ -54,7 +54,7 @@ cd backend && python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/uvicorn app.main:app --port 8000
 
 # agent (:8200)
-cd renato-lenis && python -m venv .venv && .venv/bin/pip install -e "../backend[dev]" -e ".[dev,service]"
+cd agent && python -m venv .venv && .venv/bin/pip install -e "../backend[dev]" -e ".[dev,service]"
 .venv/bin/uvicorn nanfeng_agent.service:app --port 8200
 ```
 
@@ -62,16 +62,16 @@ On Windows use `.venv\Scripts\` instead of `.venv/bin/`.
 
 ## 3. Deploying
 
-Each Python service is a container built from its own `Dockerfile`; any container host works. We use Railway for the three services and Vercel for the web.
+Each Python service is a container built from its own `Dockerfile`; any container host works. We use Railway for the three services and Vercel for the web. Every service's root directory on its host is its folder under `04-source-code/`.
 
 ### Quant engine
 
-- Build: `vicente-rodriguez/Dockerfile`, port 8100. It listens on IPv4 and IPv6 (`::`), so it is reachable on Railway's private network; it does not need a public domain.
+- Build: `04-source-code/quant/Dockerfile` (root directory `04-source-code/quant`), port 8100. It listens on IPv4 and IPv6 (`::`), so it is reachable on Railway's private network; it does not need a public domain.
 - No secrets.
 
 ### Backend
 
-- Build: `backend/Dockerfile`, port 8000. Attach a Postgres database.
+- Build: `04-source-code/backend/Dockerfile` (root directory `04-source-code/backend`), port 8000. Attach a Postgres database.
 
 | Variable | Value on a public deploy |
 |---|---|
@@ -86,11 +86,11 @@ Each Python service is a container built from its own `Dockerfile`; any containe
 | `NANFENG_REGISTRY_BACKEND` | `local`, or `evm` with `NANFENG_INVOICE_REGISTRY_ADDRESS` (deploy the contract once with `python chain/deploy.py`) |
 | `NANFENG_ALLOW_OPEN_AGENT` | never set on a deploy |
 
-The full security checklist for a public deploy is in [`backend/README.md`](../backend/README.md#security-checklist-for-a-public-deploy-andy).
+The full security checklist for a public deploy is in [`backend/README.md`](backend/README.md#security-checklist-for-a-public-deploy-andy).
 
 ### Agent service
 
-- Build: `renato-lenis/Dockerfile`, port 8200, public domain (the web and Zavu's webhook call it).
+- Build: `04-source-code/agent/Dockerfile` (root directory `04-source-code/agent`), port 8200, public domain (the web and Zavu's webhook call it).
 
 | Variable | Value |
 |---|---|
@@ -105,7 +105,7 @@ The full security checklist for a public deploy is in [`backend/README.md`](../b
 
 ### Web
 
-- Vercel project with root directory `web/` (framework Next.js, region from `web/vercel.json`: `hkg1`).
+- Vercel project with root directory `04-source-code/web` (framework Next.js, region from `web/vercel.json`: `hkg1`).
 - `NEXT_PUBLIC_API_URL=https://api.nanfengcfo.com` and `NEXT_PUBLIC_AGENT_URL=<agent URL>`. They are read at build time: redeploy after changing them.
 - Domain: `www.nanfengcfo.com`, with the apex redirecting to it. `*.vercel.app` is blocked in mainland China, so the jury link is always the own domain.
 
@@ -115,8 +115,8 @@ The full security checklist for a public deploy is in [`backend/README.md`](../b
 2. Re-export the execution evidence (deliverable 06) from the deployed backend and commit it:
 
    ```sh
-   cd andy-villarroel/evidence
+   cd ../06-execution-evidence
    python build.py --url https://api.nanfengcfo.com --out out-live
    ```
 
-3. Contract and tests run in CI on every push to `main` (see the root README).
+3. Contract and tests run in CI on every push to `main` (see the [root README](../README.md#tests)).

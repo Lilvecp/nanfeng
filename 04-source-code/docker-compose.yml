@@ -1,6 +1,6 @@
 # One-command stack: docker compose --profile quant up --build
 # (Postgres + backend :8000 + agent :8200 + quant engine :8100). Without the profile the quant engine
-# is left out and the backend's /quant routes answer 503. See docs/deployment.md.
+# is left out and the backend's /quant routes answer 503. See deployment.md.
 services:
   db:
     image: postgres:16-alpine
@@ -30,7 +30,7 @@ services:
         condition: service_healthy
 
   agent:
-    build: ./renato-lenis
+    build: ./agent
     env_file:
       - path: .env
         required: false
@@ -46,7 +46,7 @@ services:
     image: python:3.12-slim
     working_dir: /quant
     volumes:
-      - ./vicente-rodriguez:/quant
+      - ./quant:/quant
     command: sh -c "pip install -q -e '.[api]' && uvicorn nanfeng_quant.api:app --host 0.0.0.0 --port 8100"
     ports:
       - "8100:8100"

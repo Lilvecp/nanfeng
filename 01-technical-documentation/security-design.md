@@ -1,10 +1,10 @@
 # Security design (technical documentation · deliverable 01)
 
-**Owner:** Andy · **Code:** [`backend/app/`](../../backend/app) (`policy.py`, `otp.py`, `auth.py`, `guard.py`, `bec.py`, `privacy.py`, `sanctions.py`, `audit.py`, `anchoring.py`, `registry.py`) · **Tests:** `backend/tests/` (CI job "Backend tests") and the red team gate (43/43)
+**Owner:** Andy · **Code:** [`04-source-code/backend/app/`](../04-source-code/backend/app) (`policy.py`, `otp.py`, `auth.py`, `guard.py`, `bec.py`, `privacy.py`, `sanctions.py`, `audit.py`, `anchoring.py`, `registry.py`) · **Tests:** `04-source-code/backend/tests/` (CI job "Backend tests") and the red team gate (43/43)
 
 NanFeng lets an AI agent move a company's money, so the design starts from one assumption: **the LLM will eventually be fooled.** It is never the component that decides. The agent proposes; a deterministic policy engine outside the LLM decides the permission level; anything that creates debt, adds a beneficiary or exceeds a limit waits for the owner's session and a one-time code; every step is written to a hash chain whose Merkle roots go on a public chain.
 
-Related: [threat model](../threat-model.md) · [anti-injection design](../anti-injection-design.md) · [privacy and compliance](../privacy-compliance.md) · [self-assessment (deliverable 05)](../security-self-assessment.md) · [red team](../redteam/README.md).
+Related: [threat model](../05-security-self-assessment-report/threat-model.md) · [anti-injection design](../05-security-self-assessment-report/anti-injection-design.md) · [privacy and compliance](../05-security-self-assessment-report/privacy-compliance.md) · [self-assessment (deliverable 05)](../05-security-self-assessment-report/security-self-assessment.md) · [red team](../04-source-code/redteam/README.md).
 
 ## Flow
 
@@ -87,10 +87,10 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 | Check | Result |
 |-------|--------|
 | Red team, 43 outcome-based attacks in 7 categories, against the API | 4/43 stopped before the controls → **43/43 after**; CI fails if one gets through |
-| The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`renato-lenis/tests/test_redteam_via_agent.py`) |
-| Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
+| The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`04-source-code/agent/tests/test_redteam_via_agent.py`) |
+| Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../06-execution-evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
 | Unit tests | 116 backend tests (security/BEC 24, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, registry 6, live story 5, demo 5, anchoring 4) |
 
 ## Known limitations
 
-The honest list, with impact and mitigation, is in the [self-assessment](../security-self-assessment.md#5-known-risks-honest-list). In short: one shared owner password in the MVP; the guard is heuristic and was written by the same person as the attacks; SMS codes can be defeated by SIM swap; read endpoints are public (synthetic data); anchoring runs on Sepolia, not FISCO BCOS; the sanctions list is synthetic.
+The honest list, with impact and mitigation, is in the [self-assessment](../05-security-self-assessment-report/security-self-assessment.md#5-known-risks-honest-list). In short: one shared owner password in the MVP; the guard is heuristic and was written by the same person as the attacks; SMS codes can be defeated by SIM swap; read endpoints are public (synthetic data); anchoring runs on Sepolia, not FISCO BCOS; the sanctions list is synthetic.

@@ -7,21 +7,21 @@ The web below is on `main`; the R1 documents are on branch **`valentin-castro`**
 | Task | What | Where |
 |---|---|---|
 | r1-01, r1-02 | UDD confirmation + certificates request; email to the organization | Sent (outside the repo) |
-| r1-03 | Cherry Crisis numbers fixed: the engine's run is the single source; web, deck and video aligned | [scope-moscow.md](scope-moscow.md), `web/src/data/cherry-crisis.json`, `web/src/lib/scenario.ts` |
+| r1-03 | Cherry Crisis numbers fixed: the engine's run is the single source; web, deck and video aligned | [scope-moscow.md](scope-moscow.md), `04-source-code/web/src/data/cherry-crisis.json`, `04-source-code/web/src/lib/scenario.ts` |
 | r1-04 | Frozen MoSCoW scope and team rules | [scope-moscow.md](scope-moscow.md) |
 | r1-05 | B2B2B business model | [business-model.md](business-model.md) |
-| r1-06, r1-10 | Deck v1 outline, incl. "One agent, every market's channel" | [deck-v1.md](deck-v1.md) |
-| r1-07, r1-11 | Video script with EN narration and 中文 subtitles | [video-script.md](video-script.md) |
-| fe-03 | Cash Cockpit on the engine's real P10/P50/P90 paths (before and after the plan), receivables from the scenario, Credit Passport | `web/src/app/(desk)/cockpit` |
-| fe-05 | Approval Center for the PAE loan (USD 142,400, CLP 2.1M, 96% coverage) | `web/src/app/(desk)/approvals` |
-| fe-06 | Financing Arena: 9 products, real quotes, plan cost alone, the optimizer's reason for each | `web/src/app/(desk)/financing` |
-| fe-07 | Scenario Lab on the 9 precomputed engine runs (no more in-browser guesswork) | `web/src/app/(desk)/scenario` |
-| fe-10 (UI) | Demo Mode captions and labels with the real numbers, EN / ES / 中文 | `web/src/app/(desk)/demo` |
-| — | **Simple view for the owner** (default on Home): plain-language status, what happened, a cash chart with the payroll day, one recommendation with cost vs bank loan and an approve button, what NanFeng did today, a 3-step welcome on first visit; switch to the Detailed view keeps the full desk. Sidebar grouped into “Your business” and “Under the hood”. Approvals opens with a plain summary. EN / ES / 中文 | `web/src/components/owner-view.tsx`, `web/src/styles/owner.css` |
-| — | **Navigation and layout cleanup**: 5 sections (Home, Approvals, Financing, Messages, Security) with related screens as tabs inside them, Settings at the bottom of the sidebar, one-row top bar, company card in the sidebar; checked on desktop, laptop and 390 px phones (no page overflows), light and dark. Security shows the real red team (41/43) | `web/src/lib/sections.ts`, `web/src/components/sidebar.tsx`, `web/src/components/topbar.tsx` |
-| — | Landing: globe story, final CTA and benchmark (50/50 · −41% · 41/43) with real figures | `web/src/app/page.tsx`, `web/src/components/` |
-| fe-11 | Every screen in EN / ES / 中文, including the landing, Protection, Agent activity, Settings, charts and notices; key amounts also in yuan in the 中文 view | all of `web/src` |
-| — | **Review fixes (Oct 11)**: sandbox approval survives a reload; execution receipt after approving (reference, risk 81% → 2%, Credit Passport 34 E → 67 B, audit hash); owner WhatsApp follows the approval state; the ask box answers what-ifs from the engine's runs; Demo Mode shows one panel per step and leaves the desk approved; live countdowns; "anchored on FISCO BCOS" replaced by "Sepolia testnet today, FISCO BCOS next"; the guide stops opening tours once dismissed and stays on the sail button | `web/src/lib/desk-state.tsx`, `web/src/components/receipt.tsx`, `web/src/app/(desk)/demo` |
+| r1-06, r1-10 | Deck v1 outline, incl. "One agent, every market's channel" | [deck-v1.md](../../02-presentation-deck/deck-v1.md) |
+| r1-07, r1-11 | Video script with EN narration and 中文 subtitles | [video-script.md](../../03-demo-video/resources/video-script.md) |
+| fe-03 | Cash Cockpit on the engine's real P10/P50/P90 paths (before and after the plan), receivables from the scenario, Credit Passport | `04-source-code/web/src/app/(desk)/cockpit` |
+| fe-05 | Approval Center for the PAE loan (USD 142,400, CLP 2.1M, 96% coverage) | `04-source-code/web/src/app/(desk)/approvals` |
+| fe-06 | Financing Arena: 9 products, real quotes, plan cost alone, the optimizer's reason for each | `04-source-code/web/src/app/(desk)/financing` |
+| fe-07 | Scenario Lab on the 9 precomputed engine runs (no more in-browser guesswork) | `04-source-code/web/src/app/(desk)/scenario` |
+| fe-10 (UI) | Demo Mode captions and labels with the real numbers, EN / ES / 中文 | `04-source-code/web/src/app/(desk)/demo` |
+| — | **Simple view for the owner** (default on Home): plain-language status, what happened, a cash chart with the payroll day, one recommendation with cost vs bank loan and an approve button, what NanFeng did today, a 3-step welcome on first visit; switch to the Detailed view keeps the full desk. Sidebar grouped into “Your business” and “Under the hood”. Approvals opens with a plain summary. EN / ES / 中文 | `04-source-code/web/src/components/owner-view.tsx`, `04-source-code/web/src/styles/owner.css` |
+| — | **Navigation and layout cleanup**: 5 sections (Home, Approvals, Financing, Messages, Security) with related screens as tabs inside them, Settings at the bottom of the sidebar, one-row top bar, company card in the sidebar; checked on desktop, laptop and 390 px phones (no page overflows), light and dark. Security shows the real red team (41/43) | `04-source-code/web/src/lib/sections.ts`, `04-source-code/web/src/components/sidebar.tsx`, `04-source-code/web/src/components/topbar.tsx` |
+| — | Landing: globe story, final CTA and benchmark (50/50 · −41% · 41/43) with real figures | `04-source-code/web/src/app/page.tsx`, `04-source-code/web/src/components/` |
+| fe-11 | Every screen in EN / ES / 中文, including the landing, Protection, Agent activity, Settings, charts and notices; key amounts also in yuan in the 中文 view | all of `04-source-code/web/src` |
+| — | **Review fixes (Oct 11)**: sandbox approval survives a reload; execution receipt after approving (reference, risk 81% → 2%, Credit Passport 34 E → 67 B, audit hash); owner WhatsApp follows the approval state; the ask box answers what-ifs from the engine's runs; Demo Mode shows one panel per step and leaves the desk approved; live countdowns; "anchored on FISCO BCOS" replaced by "Sepolia testnet today, FISCO BCOS next"; the guide stops opening tours once dismissed and stays on the sail button | `04-source-code/web/src/lib/desk-state.tsx`, `04-source-code/web/src/components/receipt.tsx`, `04-source-code/web/src/app/(desk)/demo` |
 
 `npm run lint` and `npm run build` pass. Checked in the browser: Cockpit, Financing, Scenario Lab, Approvals (EN and 中文).
 
@@ -45,6 +45,6 @@ The web below is on `main`; the R1 documents are on branch **`valentin-castro`**
 
 ## Merging this branch
 
-Done on Oct 11: Camilo merged `camilo-backend` (API, sandbox bank, Sepolia anchoring, live Approvals, Mission Control and Security) into `main` on top of this branch's web, keeping the Simple view, the five sections and the one-row top bar; the top bar now also shows the API / SANDBOX badge. `main` was merged back here, so `web/` is the same on both.
+Done on Oct 11: Camilo merged `camilo-backend` (API, sandbox bank, Sepolia anchoring, live Approvals, Mission Control and Security) into `main` on top of this branch's web, keeping the Simple view, the five sections and the one-row top bar; the top bar now also shows the API / SANDBOX badge. `main` was merged back here, so `04-source-code/web/` is the same on both.
 
 If Vicente re-runs the engine, refresh the web with `cd web && npm run sync:scenario`.

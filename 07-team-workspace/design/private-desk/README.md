@@ -2,14 +2,14 @@
 
 Direction 4 of the NanFeng design exploration, and the one we build the web cockpit from. A private bank's treasury desk: porcelain and ink navy, terminal density, monospaced figures, brass for fine lines and cherry red only for cash at risk.
 
-These are static, high-fidelity mockups (fe-01). The working app built from them lives in [`web/`](../../web); this folder stays as the visual reference.
+These are static, high-fidelity mockups (fe-01). The working app built from them lives in [`04-source-code/web/`](../../../04-source-code/web); this folder stays as the visual reference.
 
 ## How to view
 
 The pages load fonts, React and the globe component from sibling folders, so serve the folder instead of opening the files directly:
 
 ```sh
-cd design/private-desk
+cd 07-team-workspace/design/private-desk
 python3 -m http.server 8000
 # open http://localhost:8000
 ```

@@ -10,7 +10,7 @@ import { useLang } from "@/lib/i18n";
 import type { Lang } from "@/lib/prefs";
 import { S } from "@/lib/scenario";
 
-// Red team results after the guard, read from andy-villarroel/redteam/results by `npm run sync:scenario`
+// Red team results after the guard, read from redteam/results by `npm run sync:scenario`
 // (the same file the landing and CI use): [category, attacks, stopped].
 const RED_TEAM: [string, number, number][] = S.redTeam.categories.map((c) => [c.name, c.attacks, c.after]);
 const RT_NAME: Record<string, Record<Exclude<Lang, "en">, string>> = {

@@ -1,7 +1,7 @@
 """Cherry Crisis sandbox state. Synthetic data, declared as such.
 
 Accounts, receivables, lenders and FX come from Vicente's engine (`sandbox_seed` in
-vicente-rodriguez/nanfeng_quant/tools.py), saved in app/data/sandbox_seed.json, so the bank, the
+quant/nanfeng_quant/tools.py), saved in app/data/sandbox_seed.json, so the bank, the
 forecast, the MILP plan and the front tell the same story. Regenerate after the scenario or the
 catalog changes (see backend/README.md). Payees are ours: the engine does not model them.
 """

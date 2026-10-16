@@ -19,17 +19,17 @@ Daily logs: [Oct 10](progress-2026-10-10.md) · [Oct 12](progress-2026-10-12.md)
 
 | Task | Where |
 |------|-------|
-| 01 Security design (technical documentation) | [docs/security-design.md](docs/security-design.md) |
-| r4-01 Threat model | [threat-model.md](threat-model.md) |
-| r4-03 Anti-injection design | [anti-injection-design.md](anti-injection-design.md) |
-| r4-02 Policy engine | [`backend/app/policy.py`](../backend/app/policy.py) · tests in [`backend/tests/test_policy.py`](../backend/tests/test_policy.py) · rules in the [backend README](../backend/README.md#policy-engine-r4-02) |
-| r4-04 BEC anti-fraud + guard | [`backend/app/bec.py`](../backend/app/bec.py), [`backend/app/guard.py`](../backend/app/guard.py), [`backend/app/routers/security.py`](../backend/app/routers/security.py) |
-| r4-05 Step-up OTP | [`backend/app/otp.py`](../backend/app/otp.py) · tests in [`backend/tests/test_otp.py`](../backend/tests/test_otp.py) |
-| r4-07 Privacy and compliance | [privacy-compliance.md](privacy-compliance.md) · [`backend/app/privacy.py`](../backend/app/privacy.py), [`backend/app/sanctions.py`](../backend/app/sanctions.py) |
-| r4-06 Red team | [redteam/](redteam/) · [results](redteam/results/REPORT.md): 46/46 stopped (first 43: 4 → 43) · through the agent: [`renato-lenis/tests/test_redteam_via_agent.py`](../renato-lenis/tests/test_redteam_via_agent.py) (21 attacks, none moves money) |
-| r4-08 / r4-11 Regulatory slide, China compliance | [privacy-compliance.md](privacy-compliance.md#regulatory-slide-deck-r4-08) |
-| r4-09 Security Self-Assessment (05) | [security-self-assessment.md](security-self-assessment.md) |
-| r4-10 Execution evidence (06) | [evidence/](evidence/) · [sample run](evidence/out/SUMMARY.md) (owner sign-in, PAE plan, 08:47 attack; bank cost = MILP cost); **live** run on the deployed backend: [out-live](evidence/out-live/SUMMARY.md), anchor on Sepolia [0x67b483e5…](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b) |
+| 01 Security design (technical documentation) | [01-technical-documentation/security-design.md](../../01-technical-documentation/security-design.md) |
+| r4-01 Threat model | [threat-model.md](../../05-security-self-assessment-report/threat-model.md) |
+| r4-03 Anti-injection design | [anti-injection-design.md](../../05-security-self-assessment-report/anti-injection-design.md) |
+| r4-02 Policy engine | [`04-source-code/backend/app/policy.py`](../../04-source-code/backend/app/policy.py) · tests in [`04-source-code/backend/tests/test_policy.py`](../../04-source-code/backend/tests/test_policy.py) · rules in the [backend README](../../04-source-code/backend/README.md#policy-engine-r4-02) |
+| r4-04 BEC anti-fraud + guard | [`04-source-code/backend/app/bec.py`](../../04-source-code/backend/app/bec.py), [`04-source-code/backend/app/guard.py`](../../04-source-code/backend/app/guard.py), [`04-source-code/backend/app/routers/security.py`](../../04-source-code/backend/app/routers/security.py) |
+| r4-05 Step-up OTP | [`04-source-code/backend/app/otp.py`](../../04-source-code/backend/app/otp.py) · tests in [`04-source-code/backend/tests/test_otp.py`](../../04-source-code/backend/tests/test_otp.py) |
+| r4-07 Privacy and compliance | [privacy-compliance.md](../../05-security-self-assessment-report/privacy-compliance.md) · [`04-source-code/backend/app/privacy.py`](../../04-source-code/backend/app/privacy.py), [`04-source-code/backend/app/sanctions.py`](../../04-source-code/backend/app/sanctions.py) |
+| r4-06 Red team | [redteam/](../../04-source-code/redteam/) · [results](../../04-source-code/redteam/results/REPORT.md): 46/46 stopped (first 43: 4 → 43) · through the agent: [`04-source-code/agent/tests/test_redteam_via_agent.py`](../../04-source-code/agent/tests/test_redteam_via_agent.py) (21 attacks, none moves money) |
+| r4-08 / r4-11 Regulatory slide, China compliance | [privacy-compliance.md](../../05-security-self-assessment-report/privacy-compliance.md#regulatory-slide-deck-r4-08) |
+| r4-09 Security Self-Assessment (05) | [security-self-assessment.md](../../05-security-self-assessment-report/security-self-assessment.md) |
+| r4-10 Execution evidence (06) | [evidence/](../../06-execution-evidence/) · [sample run](../../06-execution-evidence/out/SUMMARY.md) (owner sign-in, PAE plan, 08:47 attack; bank cost = MILP cost); **live** run on the deployed backend: [out-live](../../06-execution-evidence/out-live/SUMMARY.md), anchor on Sepolia [0x67b483e5…](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b) |
 
 ## Tasks
 
@@ -43,4 +43,4 @@ Daily logs: [Oct 10](progress-2026-10-10.md) · [Oct 12](progress-2026-10-12.md)
 - [x] `r4-08` **Oct 14** · Should — _(content ready in privacy-compliance.md; goes into Valentín's deck)_ **Regulatory slide** for the deck: which regulations we comply with and how.
 - [x] `r4-11` **Oct 14** · Should — **Compliance for China** in the deck and docs: PIPL, cross-border data transfer and the Interim Measures for generative AI (2023), plus Ley 21.719 in Chile.
 - [x] `r4-09` **Oct 15** · Must — _(v2, Oct 12)_ **Security Self-Assessment Report**: how the permission levels are implemented and an honest list of known risks.
-- [x] `r4-10` **Oct 16** · Must — _(live export from the Railway deploy, Oct 12: [out-live/SUMMARY.md](evidence/out-live/SUMMARY.md), anchor confirmed on Sepolia)_ **Execution evidence**: review logs and hashes with Camilo and assemble package 06.
+- [x] `r4-10` **Oct 16** · Must — _(live export from the Railway deploy, Oct 12: [out-live/SUMMARY.md](../../06-execution-evidence/out-live/SUMMARY.md), anchor confirmed on Sepolia)_ **Execution evidence**: review logs and hashes with Camilo and assemble package 06.
