@@ -68,7 +68,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 | # | Deliverable | Folder | What is inside |
 |---|---|---|---|
 | 01 | Technical documentation: system architecture, core algorithm, security design | [01-technical-documentation/](01-technical-documentation/) | **[NanFeng-Technical-Documentation.pdf](01-technical-documentation/NanFeng-Technical-Documentation.pdf)** (all four parts in one PDF) · Markdown: [technical-documentation.md](01-technical-documentation/technical-documentation.md) (start here), with the full sections: [core algorithm](01-technical-documentation/core-algorithm.md) · [agent](01-technical-documentation/agent.md) · [security design](01-technical-documentation/security-design.md) |
-| 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | **[NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf)**: 14 slides, 16:9, about 9 minutes spoken |
+| 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | **[NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf)**: 13 slides, 16:9, about 9 minutes spoken |
 | 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 4:59, 1080p, EN + 中文 subtitles, recorded in one take on the live app. Script and the pipeline that builds it in `resources/` |
 | 04 | Source code: README, repository link, deployment instructions, test cases | [04-source-code/](04-source-code/) | This README · [deployment.md](04-source-code/deployment.md) · tests in `04-source-code/backend/tests`, `04-source-code/agent/tests`, `04-source-code/quant/tests`, `04-source-code/redteam` |
 | 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | **[NanFeng-Security-Self-Assessment-Report.pdf](05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf)** (all four parts in one PDF) · Markdown: [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
@@ -88,7 +88,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 │   ├── agent.md                           #   Agent pipeline, tools and channels
 │   └── security-design.md                 #   Security design in full
 ├── 02-presentation-deck/                  # Deliverable 02
-│   └── NanFeng-Presentation-Deck.pdf      #   The final deck (14 slides)
+│   └── NanFeng-Presentation-Deck.pdf      #   The final deck (13 slides)
 ├── 03-demo-video/                         # Deliverable 03
 │   ├── nanfeng-demo.mp4                   #   The demo video
 │   └── resources/                         #   Video script, and the pipeline that records and edits the video
