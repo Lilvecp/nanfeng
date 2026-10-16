@@ -64,3 +64,20 @@ def test_idle_sandbox_goes_back_to_the_crisis(client):
     kinds = {e["kind"] for e in entries(client)}
     assert "bank.loan" not in kinds and "security.attack_blocked" in kinds
     assert autoreset.reset_if_idle(now + timedelta(hours=2)) is False  # opening state: nothing to undo
+
+
+def test_idle_reset_restores_the_agents_plan_not_a_request_typed_by_hand(client):
+    """An evidence run (or a visitor with the demo password) asks the owner to approve something else
+    after the agent's plan: the next visitor still starts from the agent's plan."""
+    from app.config import get_settings
+
+    agent = {"Authorization": f"Bearer {get_settings().agent_token}"}
+    assert client.post("/approvals", json=PLAN, headers=agent).status_code == 201
+    other = {"action": "factor INV-2026-109 elsewhere", "operations": [
+        {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "lender_id": "LEN-FINTECH", "share": 0.5}}]}
+    o = client.post("/approvals", json=other).json()  # the signed-in owner
+    client.post(f"/approvals/{o['id']}/approve", json={"otp": "482913"})
+    now = datetime.now(timezone.utc)
+    assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
+    [restored] = client.get("/approvals").json()
+    assert restored["action"] == PLAN["action"] and restored["status"] == "pending"

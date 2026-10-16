@@ -32,8 +32,15 @@ OPENING_KINDS = {"audit.anchored", "sandbox.seeded", "security.attack_blocked", 
 
 
 def _plan_to_restore(db: Session) -> ApprovalCreate | None:
-    """The latest owner-approval request (L3), to ask for it again after the reset."""
-    appr = db.scalars(select(Approval).where(Approval.tier == 3).order_by(Approval.created_at.desc())).first()
+    """The agent's latest owner-approval request (L3), to ask for it again after the reset. A request the
+    owner typed in by hand (a visitor trying the API, an evidence run's double-financing attempt) is not
+    the story the next visitor should start from; it is used only when the agent never asked for one."""
+    created = db.scalars(select(AuditEntry).where(AuditEntry.kind == "approval.created").order_by(AuditEntry.seq.desc()))
+    by_agent = [e.payload.get("approval_id") for e in created
+                if e.actor.split(":")[0] == "agent" and e.payload.get("tier") == 3]
+    appr = next((a for a in (db.get(Approval, i) for i in by_agent if i) if a is not None), None)
+    if appr is None:
+        appr = db.scalars(select(Approval).where(Approval.tier == 3).order_by(Approval.created_at.desc())).first()
     if appr is None:
         return None
     return ApprovalCreate(action=appr.action, operations=appr.operations, explanation=appr.explanation or "")
