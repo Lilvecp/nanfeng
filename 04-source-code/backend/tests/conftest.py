@@ -29,7 +29,7 @@ def client():
     anonymous calls pass {"Authorization": ""} or use the `anon` fixture."""
     with TestClient(app) as c:
         with SessionLocal() as db:
-            seed.reset(db)
+            seed.reset(db, keep_audit=False)
         auth._failures.clear()
         token = c.post("/auth/login", json={"password": OWNER_PASSWORD}).json()["token"]
         c.headers["Authorization"] = f"Bearer {token}"

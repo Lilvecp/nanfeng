@@ -34,7 +34,7 @@ const CARDS: Card[] = [
   {
     n: { en: "04 · TALK", es: "04 · HABLAR", zh: "04 · 沟通" },
     title: { en: ["Every", "channel"], es: ["Todos los", "canales"], zh: ["覆盖", "所有渠道"] },
-    body: { en: "WhatsApp and voice for you in Chile, WeChat/WeCom for your buyer in Shanghai, the web cockpit for the details. In English, Spanish and 中文.", es: "WhatsApp y voz para ti en Chile, WeChat/WeCom para tu cliente en Shanghái, la web para el detalle. En inglés, español y 中文.", zh: "在智利用 WhatsApp 和语音联系您，用微信/企业微信联系上海买家，网页查看详情。支持英语、西班牙语和中文。" },
+    body: { en: "WhatsApp and voice for you in Chile, WeCom (simulated) for your buyer in Shanghai, the web cockpit for the details. In English, Spanish and 中文.", es: "WhatsApp y voz para ti en Chile, WeCom (simulado) para tu cliente en Shanghái, la web para el detalle. En inglés, español y 中文.", zh: "在智利用 WhatsApp 和语音联系您，用企业微信（模拟）联系上海买家，网页查看详情。支持英语、西班牙语和中文。" },
     glyph: <svg width="56" height="56" viewBox="0 0 56 56"><path d="M8 12h28v20H20l-8 8v-8H8zM40 22h8v18h-4v6l-6-6H26v-4" stroke="currentColor" strokeWidth="3" fill="none" strokeLinejoin="round" /></svg>,
   },
   {

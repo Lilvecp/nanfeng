@@ -1,6 +1,6 @@
 # NanFeng 南风
 
-**The autonomous CFO for SMEs that export to China.**
+**The AI CFO for SMEs that export to China: it acts, with the owner's approval.**
 
 FinTechathon 2026 · International Track · Topic E: SME Finance Copilot
 
@@ -32,7 +32,7 @@ A Chilean cherry exporter learns that its largest Chinese importer will pay USD 
 | Cash-flow management with alerts | 90-day Monte Carlo forecast; WhatsApp alerts and a daily voice briefing |
 | Business financial analysis | Business health screen and WhatsApp report: cash budget by month, where the money goes, customer concentration, DSO, currency exposure, payroll safety and plain findings; Credit Passport (34 E → 67 B); Scenario Lab |
 
-Security is enforced outside the LLM: a policy engine with permission levels L0–L3, the owner's one-time code for anything that creates debt or changes a payee, a hash-chained audit log anchored on Sepolia, and a red team of 46 attacks (46/46 stopped; CI fails if one gets through). The first 43 went from 4 stopped to 43 as the controls were built; the 3 added on Oct 14 (duplicate loan approvals, a spoofed late-payment notice) got through before that day's fixes.
+Security is enforced outside the LLM: a policy engine with permission levels L0–L3, the owner's one-time code for anything that creates debt or changes a payee, a hash-chained audit log anchored on Sepolia, and a red team of 46 attacks we wrote ourselves (46/46 stopped; CI fails if one gets through). The first 43 went from 4 stopped to 43 as the controls were built; the 3 added on Oct 14 (duplicate loan approvals, a spoofed late-payment notice) got through before that day's fixes.
 
 ## Quick start
 
@@ -54,7 +54,7 @@ Every command runs from the repository root.
 
 | Suite | Command | Result | CI job |
 |---|---|---|---|
-| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 133 passed | Backend tests |
+| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 137 passed | Backend tests |
 | Red team regression gate (46 attacks against the API) | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | 46/46 stopped | Backend tests |
 | OpenAPI contract is up to date | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
 | Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd 04-source-code/agent && pip install -e "../backend[dev]" -e ../quant -e ".[dev]" && pytest -q` | 113 passed | Agent tests |

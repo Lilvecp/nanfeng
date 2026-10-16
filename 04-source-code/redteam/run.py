@@ -62,7 +62,7 @@ def main() -> None:
     with TestClient(app) as client:
         for atk in attacks.ATTACKS:
             with SessionLocal() as db:
-                seed.reset(db)
+                seed.reset(db, keep_audit=False)
             if hasattr(approvals, "_kill_switch"):  # older backends kept it in memory; newer ones in the DB
                 approvals._kill_switch["on"] = False  # (cleared by seed.reset)
             outbox.clear()

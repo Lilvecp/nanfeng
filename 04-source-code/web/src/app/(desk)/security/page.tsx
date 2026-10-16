@@ -117,7 +117,9 @@ export default function SecurityPage() {
   useEffect(() => {
     if (!isLive) return;
     let cancelled = false;
-    Promise.all([api.audit.entries(), api.audit.anchors(), api.audit.verify().catch(() => null)])
+    // The chain outlives sandbox resets, so read its newest entries (the count is the head's seq), not its first ones.
+    api.audit.verify().catch(() => null)
+      .then((check) => Promise.all([api.audit.entries(Math.max(0, (check?.entries ?? 0) - 300)), api.audit.anchors(), check]))
       .then(([entries, anchors, check]) => {
         if (cancelled) return;
         if (check) {

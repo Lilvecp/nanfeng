@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import anchoring, seed, state
+from . import anchoring, audit, seed, state
 from .config import get_settings
 from .db import SessionLocal
 from .events import broker
@@ -37,7 +37,9 @@ def _plan_to_restore(db: Session) -> tuple[ApprovalCreate, str] | None:
     double-financing attempt) is not the story the next visitor should start from; it is used only when
     the agent never asked for one, the oldest first (the opening plan, not what was typed after it), and it
     keeps its own actor, so one reset never turns it into the agent's."""
-    created = list(db.scalars(select(AuditEntry).where(AuditEntry.kind == "approval.created").order_by(AuditEntry.seq.desc())))
+    created = list(db.scalars(select(AuditEntry).where(AuditEntry.kind == "approval.created",
+                                                       AuditEntry.seq >= audit.epoch_start(db))
+                              .order_by(AuditEntry.seq.desc())))
     actor_of = {e.payload.get("approval_id"): e.actor for e in reversed(created)}
     by_agent = [e.payload.get("approval_id") for e in created
                 if e.actor.split(":")[0] == "agent" and e.payload.get("tier") == 3]
@@ -51,7 +53,8 @@ def _plan_to_restore(db: Session) -> tuple[ApprovalCreate, str] | None:
 
 
 def needs_reset(db: Session, now: datetime, idle_s: int) -> bool:
-    entries = list(db.scalars(select(AuditEntry).order_by(AuditEntry.seq)))
+    # Only this sandbox's entries: the chain outlives resets, and earlier epochs must not count as "moved on".
+    entries = list(db.scalars(select(AuditEntry).where(AuditEntry.seq >= audit.epoch_start(db)).order_by(AuditEntry.seq)))
     if not entries:
         return False
     last = datetime.fromisoformat(entries[-1].ts)

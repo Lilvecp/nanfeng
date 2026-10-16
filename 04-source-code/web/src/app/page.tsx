@@ -25,9 +25,9 @@ const L = {
   howH: { en: "Predict → Decide → Act", es: "Predecir → Decidir → Actuar", zh: "预测 → 决策 → 执行" },
   chanH: { en: "One agent, every market's channel.", es: "Un agente, el canal de cada mercado.", zh: "一个代理，覆盖每个市场的渠道。" },
   chanSub: {
-    en: "The owner approves on WhatsApp in Rancagua; the importer gets a courteous reminder on WeCom in Shanghai.",
-    es: "El dueño aprueba por WhatsApp en Rancagua; el importador recibe un recordatorio cortés por WeCom en Shanghái.",
-    zh: "企业主在兰卡瓜通过 WhatsApp 审批；上海的进口商通过企业微信收到礼貌的提醒。",
+    en: "The owner approves on WhatsApp in Rancagua; the importer gets a courteous reminder on WeCom (simulated) in Shanghai.",
+    es: "El dueño aprueba por WhatsApp en Rancagua; el importador recibe un recordatorio cortés por WeCom (simulado) en Shanghái.",
+    zh: "企业主在兰卡瓜通过 WhatsApp 审批；上海的进口商通过企业微信（模拟）收到礼貌的提醒。",
   },
   secH: { en: "An agent that can't be talked into moving your money.", es: "Un agente al que nadie puede convencer de mover tu dinero.", zh: "任何人都无法诱使它动用您的资金。" },
   benchH: { en: "Measured, not promised.", es: "Medido, no prometido.", zh: "实测结果，而非承诺。" },
@@ -74,11 +74,11 @@ const FACTS: { n: string; p: Record<Lang, string>; src: string; href?: string }[
   {
     n: "USD 2.8 bn",
     p: { en: "of Chilean cherries in the 2025/26 season, about 87% shipped to China", es: "en cerezas chilenas la temporada 2025/26, cerca del 87% enviado a China", zh: "2025/26 季智利樱桃出口额，约87%运往中国" },
-    src: "FreshFruitPortal, Frutas de Chile data, Sep 2026", href: "https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/",
+    src: "FreshFruitPortal (Frutas de Chile data, Sep 2026) and FreshPlaza, 2025/26 season", href: "https://www.freshplaza.com/north-america/article/9812438/chile-cherry-exports-reach-113-8-million-boxes-as-prices-fall/",
   },
   {
     n: "44",
-    p: { en: "days on average before a Chilean SME gets paid; the legal limit is 30 (Ley 21.131)", es: "días en promedio para que una pyme chilena cobre; el límite legal es 30 (Ley 21.131)", zh: "智利中小企业平均回款天数；法定上限为30天（第21.131号法律）" },
+    p: { en: "days on average before a Chilean SME gets paid by large domestic buyers; the legal limit is 30 (Ley 21.131)", es: "días en promedio para que una pyme chilena cobre a grandes empresas del país; el límite legal es 30 (Ley 21.131)", zh: "智利中小企业向国内大企业收款的平均天数；法定上限为30天（第21.131号法律）" },
     src: "Bolsa de Productos and ASECH, annual payers ranking, Jul 2025–Jun 2026", href: "https://www.salmonexpert.cl/asech-bolsa-de-productos-pagos/tres-productores-de-salmon-chileno-brillan-entre-los-mejores-pagadores-a-proveedores/2170908",
   },
   {
@@ -87,8 +87,8 @@ const FACTS: { n: string; p: Record<Lang, string>; src: string; href?: string }[
     src: "Bolsa de Productos and ASECH, Ranking de Pagadores, Q3 2024", href: "https://www.bolsadeproductos.cl/application/normativas/Ranking+de+pagadores+3Q2024.pdf",
   },
   {
-    n: "20%",
-    p: { en: "a year: what Chilean banks charge SMEs for a CLP loan when cash runs short", es: "al año: lo que cobran los bancos chilenos a una pyme por un crédito en pesos cuando falta caja", zh: "年利率：现金短缺时智利银行向中小企业收取的比索贷款利率" },
+    n: "20–33%",
+    p: { en: "a year: what Chilean banks charge SMEs for a CLP loan (20% for 90 days or more, 33% for less)", es: "al año: lo que cobran los bancos chilenos a una pyme por un crédito en pesos (20% a 90 días o más, 33% a menos)", zh: "年利率：智利银行向中小企业收取的比索贷款利率（90天及以上约20%，不足90天约33%）" },
     src: "CMF, interest rate certificate 09/2026",
   },
 ];
@@ -118,7 +118,7 @@ const TRY: { h: Record<Lang, string>; p: Record<Lang, string>; href: string; lin
   },
   {
     h: { en: "Try to fool it, then check the proof", es: "Intenta engañarlo y revisa la prueba", zh: "试着骗它，再查看证明" },
-    p: { en: "Send the 08:47 invoice with a hidden instruction: it is blocked before any model reads it. Security shows every step anchored on Sepolia.", es: "Envía la factura de las 08:47 con una instrucción oculta: se bloquea antes de que la lea un modelo. Seguridad muestra cada paso anclado en Sepolia.", zh: "发送 08:47 带隐藏指令的发票：它在任何模型读取前即被拦截。安全页显示每一步都已锚定在 Sepolia 上。" },
+    p: { en: "Send the 08:47 invoice with a hidden instruction: it is blocked before any language model reads it. Security shows every step anchored on Sepolia.", es: "Envía la factura de las 08:47 con una instrucción oculta: se bloquea antes de que la lea un modelo de lenguaje. Seguridad muestra cada paso anclado en Sepolia.", zh: "发送 08:47 带隐藏指令的发票：它在任何语言模型读取前即被拦截。安全页显示每一步都已锚定在 Sepolia 上。" },
     href: "/security", link: { en: "Open Security", es: "Abrir Seguridad", zh: "打开安全页" },
   },
 ];

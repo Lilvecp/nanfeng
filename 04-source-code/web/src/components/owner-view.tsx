@@ -54,7 +54,7 @@ const COPY: Record<Lang, Copy> = {
       rejected: "You turned down this morning's plan, so payroll is still at risk. Here is the next option.",
     },
     intro: {
-      title: "Welcome to NanFeng, your autonomous CFO",
+      title: "Welcome to NanFeng, your AI CFO",
       steps: [
         ["We watch your cash every day", "Your bank balance, the invoices your customers owe you and every bill you have to pay."],
         ["We warn you before money runs short", "And we look for the cheapest way to cover the gap, comparing every option on the market."],

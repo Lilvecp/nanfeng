@@ -24,7 +24,7 @@ from eth_utils import keccak
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import anchoring
+from . import anchoring, audit
 from .config import get_settings
 from .models import AuditEntry, InvoiceRegistration
 
@@ -42,7 +42,10 @@ def identity(db: Session, receivable_id: str) -> str:
     s = get_settings()
     ident = f"NANFENG-INVOICE-V1|{s.issuer_tax_id}|{DOC_TYPE}|{receivable_id}"
     if s.demo:
-        genesis = db.scalars(select(AuditEntry.hash).where(AuditEntry.seq == 1)).first() or ""
+        # Salted with the current sandbox epoch's first entry, so a demo reset can finance the same
+        # invoices again even though the on-chain registry (and the audit chain) outlive the reset.
+        start = audit.epoch_start(db)
+        genesis = db.scalars(select(AuditEntry.hash).where(AuditEntry.seq == start)).first() or ""
         ident += f"|sandbox:{genesis[:16]}"
     return ident
 

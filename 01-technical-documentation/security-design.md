@@ -77,6 +77,7 @@ Verdict: **malicious** when an attack rule meets payment details, or when two at
 - **Merkle anchoring:** the entries since the last anchor are the leaves; pairs are hashed with SHA-256 (odd levels duplicate the last node). The root goes on an EVM testnet (Sepolia) as a 0-value transaction to the anchor wallet itself, with calldata `"NANFENG1" | root (32 bytes) | from_seq | to_seq`; no contract is needed and any explorer shows it. `GET /audit/proof/{seq}` returns the inclusion proof of one entry.
 - **Document fingerprints:** every document the agent reads leaves the SHA-256 of its text in the chain (never the text), so we can prove which documents the agent saw and when.
 - **Who can anchor:** only the agent token or the owner session, so nobody else can spend the anchoring wallet (threat model F13).
+- **Resets keep the chain:** the demo's reset (button or 30-minute idle reset) reseeds the sandbox bank but never drops the audit log or its anchors; each reset opens a new epoch with a `sandbox.seeded` entry, so an approval stays provable after the sandbox moved on (threat model F18).
 
 ### 7. Invoice registry against double financing (`registry.py`)
 
@@ -89,7 +90,7 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 | Red team, 46 outcome-based attacks in 7 categories, against the API | 4/46 stopped before the controls → **46/46 after** (the first 43 went from 4 to 43 as the controls were built; 3 added on Oct 14 were open until that day's fixes); CI fails if one gets through |
 | The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`04-source-code/agent/tests/test_redteam_via_agent.py`) |
 | Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../06-execution-evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
-| Unit tests | 133 backend tests (security/BEC 26, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, anchoring 7, registry 9, idempotency 6, live story 8, demo 5) |
+| Unit tests | 137 backend tests (security/BEC 26, API 22, policy 20, owner sign-in 13, OTP 12, live story 10, registry 9, privacy 7, anchoring 7, idempotency 6, demo 5) |
 
 ## Known limitations
 

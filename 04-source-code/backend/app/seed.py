@@ -117,9 +117,17 @@ def seed_security(db: Session) -> None:
     db.commit()
 
 
-def reset(db: Session) -> None:
-    """Drops every table and reseeds: the Demo Mode reset button."""
+# What a sandbox reset keeps: the audit chain and its anchors. Everything else is the sandbox.
+KEPT_ON_RESET = ("audit_log", "anchors")
+
+
+def reset(db: Session, keep_audit: bool = True) -> None:
+    """Drops the sandbox tables and reseeds: the Demo Mode reset button and the idle reset. The audit log
+    and its anchors are kept, so the chain keeps growing across resets and an anchored entry never
+    disappears; each reset opens a new epoch with its own `sandbox.seeded` entry. `keep_audit=False`
+    wipes the chain too (tests and the red team start every case from an empty chain)."""
     db.close()
-    Base.metadata.drop_all(engine)
+    tables = [t for t in Base.metadata.sorted_tables if not keep_audit or t.name not in KEPT_ON_RESET]
+    Base.metadata.drop_all(engine, tables=tables)
     create_schema()
     seed(db)

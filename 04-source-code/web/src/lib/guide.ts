@@ -111,7 +111,7 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
       steps: [
         { target: "sec-blocked", title: "Un fraude bloqueado", body: "Llegó una factura con la cuenta bancaria cambiada y una instrucción escondida. NanFeng la detuvo y te avisó." },
         { target: "sec-permissions", title: "Qué puede hacer NanFeng solo", body: "Lo pequeño lo hace solo; pedir préstamos o agregar cuentas siempre necesita tu código." },
-        { target: "sec-audit", title: "Un registro a prueba de cambios", body: "Cada paso queda encadenado y anclado en blockchain. Si alguien lo altera, la verificación lo detecta." },
+        { target: "sec-audit", title: "Un registro que delata cualquier cambio", body: "Cada paso queda encadenado y anclado en blockchain. Si alguien lo altera, la verificación lo detecta." },
       ],
     },
     "/scenario": {
@@ -202,7 +202,7 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
       steps: [
         { target: "sec-blocked", title: "一次被拦截的欺诈", body: "一张发票更改了银行账户并藏有隐藏指令。NanFeng拦截了它并通知了您。" },
         { target: "sec-permissions", title: "NanFeng可以自行做什么", body: "小事自动处理；申请贷款或添加账户始终需要您的验证码。" },
-        { target: "sec-audit", title: "防篡改记录", body: "每一步都经过哈希链接并锚定在区块链上。一旦被篡改，验证即可发现。" },
+        { target: "sec-audit", title: "可发现篡改的记录", body: "每一步都经过哈希链接并锚定在区块链上。一旦被篡改，验证即可发现。" },
       ],
     },
     "/scenario": {
@@ -293,7 +293,7 @@ export function guideContent(lang: Lang): Record<string, GuidePage> {
       steps: [
         { target: "sec-blocked", title: "A blocked fraud", body: "An invoice arrived with a changed bank account and a hidden instruction. NanFeng stopped it and warned you." },
         { target: "sec-permissions", title: "What NanFeng may do on its own", body: "Small things it does alone; borrowing money or adding accounts always needs your code." },
-        { target: "sec-audit", title: "A tamper-proof record", body: "Every step is hash-chained and anchored on a blockchain. If anyone alters it, verification catches it." },
+        { target: "sec-audit", title: "A tamper-evident record", body: "Every step is hash-chained and anchored on a blockchain. If anyone alters it, verification catches it." },
       ],
     },
     "/scenario": {

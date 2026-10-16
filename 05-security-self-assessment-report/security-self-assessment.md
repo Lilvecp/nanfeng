@@ -1,6 +1,6 @@
 # Security Self-Assessment Report
 
-**NanFeng — the autonomous CFO for SMEs that export to China** · FinTechathon 2026, Topic E · Author: Andy Villarroel (Security & Compliance) · Oct 16, 2026
+**NanFeng — the AI CFO for SMEs that export to China, acting with the owner's approval** · FinTechathon 2026, Topic E · Author: Andy Villarroel (Security & Compliance) · Oct 16, 2026
 
 ## 1. Summary
 
@@ -10,7 +10,7 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 |----------|--------|
 | Red team, 46 outcome-based attacks in 7 categories, written by the team itself | **46/46 stopped** (first 43: 4 → 43 as controls were built; 3 added Oct 14 were open until that day's fixes) ([report](../04-source-code/redteam/results/REPORT.md)) |
 | Same attacks through the real agent | **21 attacks** through the real agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../04-source-code/agent/tests/test_redteam_via_agent.py)) |
-| Automated tests | **Backend 133**: security/BEC 26, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, anchoring 7, invoice registry 9, idempotency 6, live story 8, demo 5. **Agent 113**, including the red team replay and the AI label. **Quant 36** |
+| Automated tests | **Backend 137**: security/BEC 26, API 22, policy 20, owner sign-in 13, OTP 12, live story 10, invoice registry 9, privacy 7, anchoring 7, idempotency 6, demo 5. **Agent 113**, including the red team replay and the AI label. **Quant 36** |
 | CI gate | Fails the build if any of the 46 red team attacks gets through |
 | Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](../06-execution-evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 7/7, the 08:47 attack in the anchored root, the loan as L3 executed once, and the Merkle root read back from Sepolia ([summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
 
@@ -74,11 +74,11 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 | BEC anti-fraud | `POST /security/check-payee`: changed bank account, look-alike sender domain, unknown issuer; answers with the call-back number on file; alerts the owner on a different channel |
 | Bank-account changes | Only through an L3 approval that records the call-back; old accounts kept in `payee_accounts` |
 | PII minimization | `POST /privacy/mask` before any LLM call; audit and alerts show last-4 digits and masked phones |
-| Tamper evidence | SHA-256 hash chain over every audit entry, Merkle roots anchored on chain, inclusion proofs per entry. Every document the agent reads leaves its SHA-256 fingerprint in the chain (never the text) |
+| Tamper evidence | SHA-256 hash chain over every audit entry, Merkle roots anchored on chain, inclusion proofs per entry. Every document the agent reads leaves its SHA-256 fingerprint in the chain (never the text). Tamper-evident, not tamper-proof: an edit cannot be hidden. A sandbox reset keeps every entry and anchor and opens a new epoch (threat model F18) |
 | Double financing | Invoice registry (`04-source-code/backend/app/registry.py`): an invoice's fingerprint is registered before the bank pays out on it, in our database and (with `NANFENG_REGISTRY_BACKEND=evm`) in an on-chain contract; an invoice already registered is refused |
 | Quarantined extraction | The agent's document reader returns typed fields only; the planner never sees raw text (`04-source-code/agent/nanfeng_agent/quarantine.py`) |
 | Secrets | `.env` git-ignored, gitleaks in CI, testnet-only anchor wallet, spend limits per provider |
-| Machine callers | Agent routes fail closed when no agent token is configured; the `.env.example` placeholder is refused at startup; anchoring needs the agent token or the owner session, so nobody else can spend the anchoring wallet (threat model F6, F13) |
+| Machine callers | Agent routes fail closed when no agent token is configured; the `.env.example` placeholder is refused at startup; anchoring needs the agent token or the owner session, so nobody else can spend the anchoring wallet; running the quant engine (`POST /quant/*`, plan jobs) needs the agent token or the owner session, with at most 4 plan jobs at once (threat model F6, F13, F17) |
 | Compliance | Ley 21.719, PIPL, CAC generative AI measures: [privacy-compliance.md](privacy-compliance.md); every message to an importer is labelled AI-generated in its language (CAC labelling measures; `04-source-code/agent/tests/test_ai_label.py`) |
 
 ## 5. Known risks (honest list)
@@ -90,15 +90,19 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 | K3 | The document guard is heuristic, and its author also wrote the attacks | Medium | Time | It is one layer; the policy engine and OTP do not depend on it. Through the real agent, 8 of the 12 document attacks are only `suspicious`: the agent continues with typed fields and does not pay, but nothing blocks the run. A blind set from the rest of the team is next |
 | K4 | SMS OTP can be defeated by SIM swap | Medium | SMS is what SMEs have | Production: authenticator app or device binding |
 | K5 | Single backend instance: the policy lock and the event history live in memory | Low | Demo architecture | The kill switch is now stored in the database (a restart no longer turns it off); a distributed lock is needed before running several instances |
-| K6 | Read endpoints are public (balances, audit entries) | Low with synthetic data | Writes were closed first; reads come after the delivery (threat model F11) | Account numbers and phones masked in the audit log |
+| K6 | Read endpoints are public: balances, audit entries, approvals and the payees' full bank accounts (`/bank/payees`) | Low with synthetic data | Writes were closed first; reads come after the delivery (threat model F11) | Account numbers and phones masked in the audit log; every account is fictional |
 | K7 | Sanctions list is synthetic | Low (demo) | No licensed list in a hackathon | The matching is real; production loads official lists |
 | K8 | Anchoring and the invoice registry run on an EVM testnet (Sepolia), not FISCO BCOS | Low | FISCO BCOS needs its own node (Docker) | Same Merkle format; FISCO BCOS is one more backend |
 | K9 | Policy limits change only by deploy; the Settings screen does not save to the backend yet | Low | Out of scope for the competition build | Limits are versioned and logged with every decision; a write API would sit behind the owner session |
+| K10 | **The public demo hands out the owner's power.** The demo password is served by `GET /auth/config` and shown on the sign-in screen, and the sandbox code (`482913`) is on screen: any visitor can approve a loan, reset the sandbox or trigger anchors that spend the testnet wallet's gas | High if copied to a real deploy; Low on the demo (synthetic data, testnet) | The jury must be able to try the product without asking us for anything | `NANFENG_DEMO=false` refuses to start with the demo password and has no reset; SMS mode sends a per-approval code; the anchor wallet is testnet-only and anchors need a session or the agent token |
+| K11 | The red team gate runs with SMS codes (`NANFENG_OTP_MODE=sms`), while the public deploy runs the shared sandbox code | Medium | The gate tests the configuration we would ship; the demo needs a code anyone can type | K10 declares what the sandbox code allows; a production deploy uses SMS mode, the one the gate tests |
+| K12 | The 46 attacks were written by the team that built the defenses, and a document flagged `suspicious` counts as stopped (it is never paid without the owner, but the run is not blocked) | Medium | No external red team in a hackathon | What counts as stopped is published per category (`04-source-code/redteam/README.md`); a blind set from outside the team is the next step |
+| K13 | The OCR provider (Mistral) receives the document before PII masking; masking happens before every language-model call, not before OCR | Low with synthetic data | OCR needs the image as it is | Mistral is listed as a data processor (privacy and compliance); production would use a contract with no training on customer data, or OCR in our own infrastructure |
 
 ## 6. Reproduce
 
 ```sh
-cd 04-source-code/backend && pytest -q                        # 133 tests
+cd 04-source-code/backend && pytest -q                        # 137 tests
 cd ../agent && pytest -q                                      # 113 agent tests, red team replay included
 cd ../redteam && python run.py --backend ../backend --label after --min-stopped 46 && python report.py
 cd ../../06-execution-evidence && python build.py --backend ../04-source-code/backend   # Cherry Crisis evidence

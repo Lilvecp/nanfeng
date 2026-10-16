@@ -15,7 +15,7 @@ const CONFIGS = {
     dir: "01-technical-documentation",
     title: "Technical documentation",
     footer: "NanFeng 南风 · Technical documentation",
-    lead: "System architecture, core algorithm description and security design of NanFeng, the autonomous CFO for SMEs that export to China.",
+    lead: "System architecture, core algorithm description and security design of NanFeng, the AI CFO for SMEs that export to China, acting with the owner's approval.",
     files: ["technical-documentation.md", "core-algorithm.md", "agent.md", "security-design.md"],
   },
   security: {

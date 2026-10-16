@@ -61,9 +61,45 @@ def test_idle_sandbox_goes_back_to_the_crisis(client):
     assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
     approvals = client.get("/approvals").json()
     assert len(approvals) == 1 and approvals[0]["status"] == "pending" and approvals[0]["action"] == PLAN["action"]
-    kinds = {e["kind"] for e in entries(client)}
+    kinds = {e["kind"] for e in this_epoch(client)}
     assert "bank.loan" not in kinds and "security.attack_blocked" in kinds
     assert autoreset.reset_if_idle(now + timedelta(hours=2)) is False  # opening state: nothing to undo
+
+
+def this_epoch(client):
+    """The current sandbox's entries: everything from the latest sandbox.seeded on."""
+    es = entries(client)
+    start = max(e["seq"] for e in es if e["kind"] == "sandbox.seeded")
+    return [e for e in es if e["seq"] >= start]
+
+
+def test_a_reset_keeps_the_audit_chain_and_its_anchors(client):
+    """The log is append-only for real: a reset (button or idle) reseeds the bank but never removes an
+    entry or an anchor, so an approval stays provable after the sandbox moved on."""
+    a = client.post("/approvals", json=PLAN).json()
+    client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"})
+    anchors_before = client.get("/audit/anchors").json()
+    loan = next(e for e in entries(client) if e["kind"] == "bank.loan")
+    assert client.post("/bank/reset").json() == {"reset": True}
+
+    after = entries(client)
+    assert next(e for e in after if e["seq"] == loan["seq"])["hash"] == loan["hash"]
+    assert [e["kind"] for e in after].count("sandbox.seeded") == 2
+    assert client.get("/audit/verify").json()["valid"] is True
+    assert {x["id"] for x in anchors_before} <= {x["id"] for x in client.get("/audit/anchors").json()}
+    proof = client.get(f"/audit/proof/{loan['seq']}")
+    assert proof.status_code in (200, 404)  # 404 only if that entry was never anchored
+
+
+def test_the_idle_reset_does_not_loop_on_earlier_epochs(client):
+    """Earlier epochs hold loans and approvals; only the current sandbox decides whether to reset again,
+    so a reset sandbox is not reset (and re-anchored, spending gas) every idle period."""
+    a = client.post("/approvals", json=PLAN).json()
+    client.post(f"/approvals/{a['id']}/approve", json={"otp": "482913"})
+    now = datetime.now(timezone.utc)
+    assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
+    for h in (2, 3, 4):
+        assert autoreset.reset_if_idle(now + timedelta(hours=h)) is False
 
 
 def test_idle_reset_restores_the_agents_plan_not_a_request_typed_by_hand(client):
@@ -92,7 +128,7 @@ def test_a_request_typed_by_hand_is_never_restored_as_the_agents(client):
     client.post(f"/approvals/{o['id']}/approve", json={"otp": "482913"})
     now = datetime.now(timezone.utc)
     assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
-    created = [e for e in entries(client) if e["kind"] == "approval.created"]
+    created = [e for e in this_epoch(client) if e["kind"] == "approval.created"]
     assert [e["actor"].split(":")[0] for e in created] == ["owner"]
 
     from app.config import get_settings

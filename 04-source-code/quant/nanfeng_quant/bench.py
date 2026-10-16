@@ -2,7 +2,8 @@
 
 - 40 stochastic cases: a synthetic SME plus one stress event (late-payment notice, FX shock,
   cherry price drop, new hires, customer default, or none). The correct answer comes from an
-  independent oracle: 50,000 Monte Carlo paths with a different seed. The system under test
+  oracle: the same simulation model on 50,000 paths with an independent seed. It checks the optimizer
+  and the plans out of sample, not the model itself (that is the backtest's job). The system under test
   runs exactly as in production (10,000 paths, seed 7, MILP on 200 scenarios).
 - 10 deterministic cases: all uncertainty switched off, so the cash path, crunch day and
   minimum cash can be computed by hand with a plain ledger (independent code below).

@@ -54,9 +54,9 @@ export function CountUp({ text }: { text: string }) {
 }
 
 const TICKER: Record<Lang, string[]> = {
-  en: [`${N.pNeg} cash-out risk caught`, `${N.crunchDay} days of warning`, `${N.savingsPct} cheaper than the bank`, `${N.rtStopped}/${N.rtAttacks} attacks stopped`, `${N.benchSolved}/${N.benchCases} benchmark cases solved`, "hash-chained audit", "WhatsApp · WeCom · voice", "one-time code to move money"],
-  es: [`${N.pNeg} de riesgo detectado`, `${N.crunchDay} días de anticipación`, `${N.savingsPct} más barato que el banco`, `${N.rtStopped}/${N.rtAttacks} ataques frenados`, `${N.benchSolved}/${N.benchCases} casos resueltos`, "auditoría encadenada", "WhatsApp · WeCom · voz", "código de un uso para mover plata"],
-  zh: [`${N.pNeg} 现金风险已预警`, `提前 ${N.crunchDay} 天`, `比银行便宜 ${N.savingsPct}`, `${N.rtStopped}/${N.rtAttacks} 次攻击拦截`, `${N.benchSolved}/${N.benchCases} 基准案例通过`, "哈希链审计", "WhatsApp · 企业微信 · 语音", "一次性验证码才能动用资金"],
+  en: [`${N.pNeg} cash-out risk caught`, `${N.crunchDay} days of warning`, `${N.savingsPct} cheaper than the bank`, `${N.rtStopped}/${N.rtAttacks} own red-team attacks stopped`, `${N.benchSolved}/${N.benchCases} benchmark cases solved`, "hash-chained audit", "WhatsApp · WeCom (simulated) · voice", "one-time code to move money"],
+  es: [`${N.pNeg} de riesgo detectado`, `${N.crunchDay} días de anticipación`, `${N.savingsPct} más barato que el banco`, `${N.rtStopped}/${N.rtAttacks} ataques de nuestro red team frenados`, `${N.benchSolved}/${N.benchCases} casos resueltos`, "auditoría encadenada", "WhatsApp · WeCom (simulado) · voz", "código de un uso para mover plata"],
+  zh: [`${N.pNeg} 现金风险已预警`, `提前 ${N.crunchDay} 天`, `比银行便宜 ${N.savingsPct}`, `${N.rtStopped}/${N.rtAttacks} 次自建红队攻击已拦截`, `${N.benchSolved}/${N.benchCases} 基准案例通过`, "哈希链审计", "WhatsApp · 企业微信（模拟）· 语音", "一次性验证码才能动用资金"],
 };
 
 /** Endless strip of proof points under the hero. */

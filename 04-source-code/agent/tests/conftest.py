@@ -87,7 +87,7 @@ class ReplayQuantBackend(Backend):
 def client():
     with TestClient(app) as c:
         with SessionLocal() as db:
-            seed.reset(db)
+            seed.reset(db, keep_audit=False)
         auth._failures.clear()
         yield c
 

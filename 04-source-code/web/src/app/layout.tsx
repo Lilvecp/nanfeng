@@ -10,7 +10,7 @@ const description = "NanFeng sees the cash crunch before it happens, finds the c
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.nanfengcfo.com"),
-  title: "NanFeng 南风 · The autonomous CFO for exporters",
+  title: "NanFeng 南风 · The AI CFO for exporters, acting with your approval",
   description,
   openGraph: { type: "website", siteName: "NanFeng 南风", title: "NanFeng · The AI CFO for exporters", description, url: "/" },
   twitter: { card: "summary_large_image", title: "NanFeng · The AI CFO for exporters", description },

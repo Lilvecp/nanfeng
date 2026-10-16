@@ -1,6 +1,6 @@
 # NanFeng 南风 · Technical documentation (deliverable 01)
 
-**The autonomous CFO for SMEs that export to China.** FinTechathon 2026 · International Track · Topic E: SME Finance Copilot.
+**The AI CFO for SMEs that export to China: it acts, with the owner's approval.** FinTechathon 2026 · International Track · Topic E: SME Finance Copilot.
 
 NanFeng is an AI agent that acts as a financial participant for a small exporter: it reads what reaches the owner (an importer's late-payment notice, a supplier invoice), forecasts cash with a Monte Carlo engine, finds the cheapest financing with an exact optimizer, and executes it in a sandbox bank once the owner approves with a one-time code. The LLM never calculates and never decides: numbers come from deterministic tools, and a policy engine outside the LLM decides what the agent may do alone.
 
@@ -207,7 +207,7 @@ Built from the same receivables, shipments and payables as the forecast, with no
 
 | Check | Result |
 |---|---|
-| NanFeng-Bench: 50 scenarios with a known answer (40 stochastic, judged by an independent 50,000-path oracle; 10 deterministic, against a hand-written ledger) | **50/50**; the 25 plans built are 41% cheaper than the bank loan on average |
+| NanFeng-Bench: 50 scenarios with a known answer (40 stochastic, checked by a 50,000-path oracle: the same model with an independent seed; 10 deterministic, against a hand-written ledger) | **50/50**; the 25 plans built are 41% cheaper than the bank loan on average |
 | Rolling-origin FX backtest on real data 2018–2026 (204 origins) | P10–P90 covers 79–83% (nominal 80%) |
 | Cash backtest against synthetic truth | CRPS 32–39% better than a point forecast; Brier skill +53% to +62% for "will we breach the buffer" |
 | Sensitivity | savings stay 30–50% under ±30% on every rate, a missing product and confidence targets from 80% to 97.5% |
@@ -248,17 +248,17 @@ Controls, each outside the LLM:
 - **Policy engine** (`04-source-code/backend/app/policy.py`): a pure function of the request, the history and the clock; limits are data (`GET /policy`) and every decision records the rules that fired and the policy version. Velocity, split-payment (structuring) and recent-account-change rules escalate to L3. Decision and execution run under one lock.
 - **Step-up authentication**: HMAC-signed owner session; per-approval SMS code bound to the approval and its amount (5 minutes, single use, never logged, never seen by the agent); three wrong codes lock the approval; one decision per approval even across channels; voice never approves L3; the kill switch is stored in the database and only the owner with a code can turn it off.
 - **Document guard and payee check**: deterministic rules for instructions addressed to an AI, hidden text, invisible characters, encoded payloads and urgency; bank-account changes and look-alike domains answered with the call-back number on file.
-- **Privacy**: PII masked before any LLM call; accounts and phones masked in logs; synthetic sanctions screening; Chile (Ley 21.719) and China (PIPL, generative-AI measures) mapped in the compliance doc.
-- **Tamper evidence**: `hash_n = SHA-256(prev_hash | seq | ts | actor | kind | payload)`; Merkle roots anchored on Sepolia with calldata `NANFENG1 | root | from_seq | to_seq`; inclusion proofs per entry; the evidence package re-checks everything without the backend's code.
+- **Privacy**: PII masked before any language model call (the OCR provider sees the document and is listed as a processor); accounts and phones masked in logs; synthetic sanctions screening; Chile (Ley 21.719) and China (PIPL, generative-AI measures) mapped in the compliance doc.
+- **Tamper evidence**: `hash_n = SHA-256(prev_hash | seq | ts | actor | kind | payload)`; Merkle roots anchored on Sepolia with calldata `NANFENG1 | root | from_seq | to_seq`; inclusion proofs per entry; the evidence package re-checks everything without the backend's code. The chain is tamper-evident, not tamper-proof: an edit cannot be hidden, and a sandbox reset keeps every entry and anchor.
 - **Double financing**: every invoice that backs a payout is registered by fingerprint first (local table and, in `evm` mode, the `InvoiceRegistry` contract); factoring fails closed if the registry cannot be read.
 
-Result: the red team's first 43 outcome-based attacks went from 4/43 stopped to 43/43; 3 more added on Oct 14 (duplicate loan approvals, a spoofed late-payment notice) got through until that day's fixes. Today **46/46** are stopped, and CI fails the build if one gets through; 21 attacks replayed through the real agent move no money.
+Result: the red team's first 43 outcome-based attacks went from 4/43 stopped to 43/43; 3 more added on Oct 14 (duplicate loan approvals, a spoofed late-payment notice) got through until that day's fixes. Today **46/46** of these self-written attacks are stopped, and CI fails the build if one gets through; 21 attacks replayed through the real agent move no money.
 
 ## 6. Testing and validation
 
 | Suite | Count | Run | In CI |
 |---|---|---|---|
-| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 133 | `cd 04-source-code/backend && pytest -q` | Backend tests |
+| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 137 | `cd 04-source-code/backend && pytest -q` | Backend tests |
 | Red team gate (46 attacks against the API) | 46/46 stopped | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | Backend tests |
 | OpenAPI contract drift | — | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
 | Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 113 | `cd 04-source-code/agent && pytest -q` (needs `../backend[dev]` and `../quant`) | Agent tests |

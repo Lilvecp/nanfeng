@@ -231,3 +231,28 @@ def test_parallel_wrong_codes_get_three_tries_in_total(client):
     # once locked, even the right code is refused and nothing executes
     assert client.post(f"/approvals/{appr['id']}/approve", json={"otp": "482913"}).status_code in (409, 423)
     assert clp_balance(client) == OPENING
+
+
+def test_running_the_quant_engine_needs_the_agent_or_the_owner(client, anon, monkeypatch):
+    """The MILP costs 5-30 s of CPU: an anonymous caller cannot run it or read plan jobs; health stays public."""
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "agent_token", "agent-secret")
+    monkeypatch.setattr(get_settings(), "allow_open_agent", False)
+    agent = {"Authorization": "Bearer agent-secret"}
+    for path in ("/quant/forecast", "/quant/plan", "/quant/plan/jobs"):
+        assert anon.post(path, json={"scenario": "cherry_crisis"}).status_code == 401
+    assert anon.get("/quant/plan/jobs/plan-1").status_code == 401
+    assert client.post("/quant/forecast", json={"scenario": "cherry_crisis"}).status_code == 503  # owner: reaches the proxy
+    assert client.post("/quant/forecast", json={"scenario": "cherry_crisis"}, headers=agent).status_code == 503
+    assert anon.get("/quant/health").status_code == 503  # public, the engine is just not running in tests
+
+
+def test_plan_jobs_are_capped(client, monkeypatch):
+    from app.routers import quant
+
+    monkeypatch.setattr(quant, "_jobs", {f"plan-x{i}": {"id": f"plan-x{i}", "status": "running"} for i in range(quant.MAX_RUNNING)})
+    assert client.post("/quant/plan/jobs", json={}).status_code == 429
+    monkeypatch.setattr(quant, "_jobs", {f"plan-x{i}": {"id": f"plan-x{i}", "status": "done"} for i in range(quant.MAX_KEPT + 50)})
+    quant._forget_old_jobs()
+    assert len(quant._jobs) == quant.MAX_KEPT and "plan-x149" in quant._jobs

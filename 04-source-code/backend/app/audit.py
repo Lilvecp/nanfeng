@@ -44,6 +44,12 @@ def append(db: Session, actor: str, kind: str, payload: dict) -> AuditEntry:
     return entry
 
 
+def epoch_start(db: Session) -> int:
+    """Seq of the current sandbox's first entry: the latest `sandbox.seeded` (a reset keeps the chain and
+    opens a new epoch). 1 when the chain has none."""
+    return db.scalar(select(func.max(AuditEntry.seq)).where(AuditEntry.kind == "sandbox.seeded")) or 1
+
+
 def verify(db: Session) -> dict:
     prev = GENESIS
     count = 0
