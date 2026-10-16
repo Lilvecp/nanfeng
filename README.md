@@ -10,11 +10,15 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 
 | | |
 |---|---|
+| **Demo video (3 min)** | [03-demo-video/nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4) · [transcript](03-demo-video/transcript.md) |
+| **Deck** | [02-presentation-deck/NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf) |
 | **Live app** | https://www.nanfengcfo.com |
 | **API** | https://api.nanfengcfo.com/docs |
 | **Repository** | https://github.com/Lilvecp/nanfeng |
-| **Technical documentation** | [01-technical-documentation/technical-documentation.md](01-technical-documentation/technical-documentation.md) |
+| **Technical documentation** | [NanFeng-Technical-Documentation.pdf](01-technical-documentation/NanFeng-Technical-Documentation.pdf) · [markdown](01-technical-documentation/technical-documentation.md) |
+| **Security self-assessment** | [NanFeng-Security-Self-Assessment-Report.pdf](05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf) · [markdown](05-security-self-assessment-report/security-self-assessment.md) |
 | **Deployment guide** | [04-source-code/deployment.md](04-source-code/deployment.md) |
+| **On-chain (Sepolia)** | Anchor wallet [0x91c0…Eb77](https://sepolia.etherscan.io/address/0x91c0BDBe160E39D6c561B1b9E7EB12c2d391Eb77) (every audit-log anchor and invoice registration) · invoice registry contract [0xb553…EeEA](https://sepolia.etherscan.io/address/0xb5530B5c1b7728e347EbEd727e56d760dbaEeEeA) · checked from the outside in [06-execution-evidence/out-live/](06-execution-evidence/out-live/SUMMARY.md) |
 
 All company, customer, invoice, lender and approval data is synthetic; no real money moves (sandbox bank, EVM testnet).
 
@@ -50,10 +54,10 @@ Every command runs from the repository root.
 
 | Suite | Command | Result | CI job |
 |---|---|---|---|
-| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 127 passed | Backend tests |
+| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 130 passed | Backend tests |
 | Red team regression gate (46 attacks against the API) | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | 46/46 stopped | Backend tests |
 | OpenAPI contract is up to date | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
-| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd 04-source-code/agent && pip install -e "../backend[dev]" -e ".[dev]" && pytest -q` | 113 passed | Agent tests |
+| Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd 04-source-code/agent && pip install -e "../backend[dev]" -e ../quant -e ".[dev]" && pytest -q` | 113 passed | Agent tests |
 | Quant engine: Monte Carlo, MILP, Credit Passport, business analysis, API | `cd 04-source-code/quant && pip install -e ".[dev]" && pytest -q` | 36 passed | Quant tests |
 | NanFeng-Bench: 50 scenarios with a known answer | `cd 04-source-code/quant && python -m nanfeng_quant bench` (~5 min) | 50/50 ([summary](04-source-code/quant/results/bench_summary.md)) | — |
 | Web: lint and production build | `cd 04-source-code/web && npm ci && npm run lint && npm run build` | clean | Web lint and build |
@@ -69,7 +73,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 |---|---|---|---|
 | 01 | Technical documentation: system architecture, core algorithm, security design | [01-technical-documentation/](01-technical-documentation/) | **[NanFeng-Technical-Documentation.pdf](01-technical-documentation/NanFeng-Technical-Documentation.pdf)** (all four parts in one PDF) · Markdown: [technical-documentation.md](01-technical-documentation/technical-documentation.md) (start here), with the full sections: [core algorithm](01-technical-documentation/core-algorithm.md) · [agent](01-technical-documentation/agent.md) · [security design](01-technical-documentation/security-design.md) |
 | 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | **[NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf)**: 13 slides, 16:9, about 9 minutes spoken |
-| 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 4:59, 1080p, EN + 中文 subtitles, recorded in one take on the live app. Script and the pipeline that builds it in `resources/` |
+| 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 3:04, 1080p, EN + 中文 subtitles; the app shots are one take on the live app. [Transcript](03-demo-video/transcript.md) with time codes; the pipeline that builds it in `resources/` |
 | 04 | Source code: README, repository link, deployment instructions, test cases | [04-source-code/](04-source-code/) | This README · [deployment.md](04-source-code/deployment.md) · tests in `04-source-code/backend/tests`, `04-source-code/agent/tests`, `04-source-code/quant/tests`, `04-source-code/redteam` |
 | 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | **[NanFeng-Security-Self-Assessment-Report.pdf](05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf)** (all four parts in one PDF) · Markdown: [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
 | 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [06-execution-evidence/](06-execution-evidence/) | [out-live/](06-execution-evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · [out/](06-execution-evidence/out/SUMMARY.md) (in-process run) · video as in 03 |
@@ -90,7 +94,8 @@ The repository follows the submission checklist: one folder per deliverable, num
 ├── 02-presentation-deck/                  # Deliverable 02
 │   └── NanFeng-Presentation-Deck.pdf      #   The final deck (13 slides)
 ├── 03-demo-video/                         # Deliverable 03
-│   ├── nanfeng-demo.mp4                   #   The demo video
+│   ├── nanfeng-demo.mp4                   #   The demo video (3:04)
+│   ├── transcript.md                      #   Its narration and 中文 subtitles, with time codes
 │   └── resources/                         #   Video script, and the pipeline that records and edits the video
 ├── 04-source-code/                        # Deliverable 04
 │   ├── web/                               #   Web cockpit (Next.js): landing + every cockpit screen, live API or in-browser sandbox
@@ -128,19 +133,9 @@ The task cards of R2 (Renato Lenis) and R5 (Vicente Rodríguez) are the READMEs 
 | R4 | Andy Villarroel | Security & Compliance Lead |
 | R5 | Vicente Rodríguez | Quant & Data Scientist |
 
-## Key dates
-
-| Milestone | When |
-|-----------|------|
-| Feature freeze | Sun Oct 11 · 23:59 |
-| Internal UDD submission | Sun Oct 18 · nbarra@udd.cl |
-| Official close | Tue Oct 20 · 12:59 Chile (23:59 Beijing) |
-| Finalists announced | Oct 31 |
-| Grand final | Nov 21–23 · Shenzhen |
-
 ## Licenses
 
-Every library, model and dataset used is listed here with its license (IP rule of the competition). Versions are the ones installed when this list was made (Oct 2026). **All company, customer, invoice, lender and approval data is synthetic** and every company and lender is fictional. No model weights are shipped and no third-party source code is copied into the repo; the only vendored files are minified, unmodified libraries in the design mockups.
+Every library, model and dataset used is listed here with its license (IP rule of the competition). Versions are the ones installed when this list was made (Oct 2026). **All company, customer, invoice, lender and approval data is synthetic** and every company and lender is fictional. No model weights are shipped and no third-party source code is copied into the repo; the only vendored files are minified, unmodified libraries in the design mockups (React, ReactDOM, globe.gl).
 
 ### Web cockpit (`04-source-code/web/`)
 
@@ -195,16 +190,41 @@ The orchestrator, planners, quarantined extraction, model router, channel layer,
 | Google OR-Tools | 9.15 | Apache-2.0 | MILP modeling; bundles the **CBC** (EPL-2.0) and **SCIP** (Apache-2.0) solvers |
 | FastAPI, Uvicorn, httpx, pytest | see above | MIT / BSD-3-Clause | Quant HTTP API and tests |
 
+### Demo video pipeline (`03-demo-video/resources/pipeline/`, not part of the app)
+
+| Package or model | Version | License | Used for |
+|---|---|---|---|
+| Remotion (`remotion`, `@remotion/cli`, `@remotion/media`, `@remotion/fonts`, `@remotion/google-fonts`, `@remotion/transitions`) | 4.0.535 | Remotion License: free for individuals and companies of up to 3 people; we use it as individual students | Editing and rendering the video |
+| React, React DOM | 19.2.0 | MIT | Remotion compositions |
+| Playwright | 1.64.1 | Apache-2.0 | Recording the live take; still frames |
+| @elevenlabs/elevenlabs-js | 2.72.0 | MIT | Narration (ElevenLabs text to speech, under ElevenLabs' terms) |
+| faster-whisper, CTranslate2 | 1.2.1 / 4.8.3 | MIT | Transcribing the narration back to check pronunciation |
+| Whisper medium (`Systran/faster-whisper-medium`) | — | MIT | Model for that check; downloaded at run time, not shipped |
+| edge-tts | 7.3.1 | LGPL-3.0 | Free fallback voice, used unmodified as a library (not in the final video) |
+| MODNet portrait matting (`Xenova/modnet`, ONNX) | — | Apache-2.0 | Team portraits without their backgrounds; downloaded at run time, not shipped |
+| ONNX Runtime, NumPy | 1.31.0 / 2.5.4 | MIT / BSD-3-Clause | Running MODNet |
+| ffmpeg | system | LGPL-2.1+ / GPL-2.0+ (build dependent), run as a separate program | Loudness pass, encoding, checks |
+
+### PDF build of deliverables 01 and 05 (`07-team-workspace/pdf-build/`)
+
+| Package | Version | License | Used for |
+|---|---|---|---|
+| marked | 15.0.12 | MIT | Markdown to HTML |
+| Playwright | 1.64.1 | Apache-2.0 | HTML to PDF in Chrome |
+| Mermaid | 10.9.1 | MIT | Diagrams (loaded from jsDelivr at build time) |
+| KaTeX | 0.16.11 | MIT | Formulas (loaded from jsDelivr at build time) |
+
 ### Fonts and images
 
 | Asset | License | Where |
 |---|---|---|
-| IBM Plex Sans, IBM Plex Sans Condensed | SIL Open Font License 1.1 | Web (woff2 files committed in `04-source-code/web/src/fonts`, served from our own origin) and design mockups |
-| JetBrains Mono | SIL Open Font License 1.1 | Web and design mockups |
+| IBM Plex Sans, IBM Plex Sans Condensed | SIL Open Font License 1.1 | Web (woff2 files committed in `04-source-code/web/src/fonts`, served from our own origin), design mockups and the demo video |
+| JetBrains Mono | SIL Open Font License 1.1 | Web, design mockups and the demo video |
+| Noto Sans CJK SC (system font where the video is rendered) | SIL Open Font License 1.1 | 中文 subtitles of the demo video |
 | `earth-night.jpg`, `earth-topology.png` (three-globe examples, NASA imagery) | Public domain (NASA) | Globe textures |
 | NanFeng logo (Sail) and all UI design | Ours | `04-source-code/web/src/components/logo.tsx`, `07-team-workspace/design/private-desk/` |
 | `07-team-workspace/design/private-desk/vendor/`: React / ReactDOM 18.3.1, globe.gl 2.46.2 (minified, unmodified) | MIT | Static design mockups only, not part of the app |
-| `07-team-workspace/design/private-desk/vendor/dc-runtime.js` (generated runtime) | **To confirm** (Valentín) | Static design mockups only, not part of the app |
+| `07-team-workspace/design/private-desk/screens/` | Ours | PNG renders of every mockup screen. The runtime the design tool generated for the interactive pages (`dc-runtime.js`) is not in the repository, since its license could not be confirmed |
 
 ### Data
 

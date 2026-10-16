@@ -28,7 +28,7 @@ Status on Oct 11 and what is missing from others: [STATUS.md](STATUS.md). Drafts
 - [ ] `r1-08` **Oct 16** · Must — **Final English edit** of the technical documentation and the deck.
 - [x] `r1-11` **Oct 16** · Should — **Chinese subtitles** (in addition to English) on the demo video, for the WeBank judges.
 - [ ] `r1-12` **Oct 16** · Must — **Access test from China**: the video goes as an attached MP4 or on a host accessible there. No YouTube or Google Drive (they're blocked).
-- [ ] `r1-09` **Oct 18** · Must — **Send a single email** to nbarra@udd.cl with everything attached and the 5 certificates.
+- [ ] `r1-09` **Oct 18** · Must — **Send a single email** to the course professor with everything attached and the 5 certificates.
 
 ## Shared frontend (lead: Valentín)
 

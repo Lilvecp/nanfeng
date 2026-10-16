@@ -138,7 +138,8 @@ ${docs.map((d) => d.html).join("\n")}
 </script>
 </body></html>`;
 
-const browser = await chromium.launch({ channel: "chrome" });
+// Google Chrome when installed; otherwise the Chromium that `npx playwright install chromium` downloads
+const browser = await chromium.launch({ channel: "chrome" }).catch(() => chromium.launch());
 // Lay out at the printed column width (A4 minus 16 mm margins = 178 mm), so measurements match the PDF.
 const page = await browser.newPage({ viewport: { width: 673, height: 1000 } });
 await page.setContent(html, { waitUntil: "networkidle" });

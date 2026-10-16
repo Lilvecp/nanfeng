@@ -20,7 +20,7 @@ Projection of the NanFeng Battle Plan into the repository. The battle plan page 
 | Milestone | When |
 |-----------|------|
 | Feature freeze | Sun Oct 11 · 23:59 |
-| Internal UDD submission | Sun Oct 18 · nbarra@udd.cl |
+| Internal UDD submission | Sun Oct 18 · by email to the course professor |
 | Official close | Tue Oct 20 · 12:59 Chile (23:59 Beijing) |
 | Grand final | Nov 21–23 · Shenzhen · finalists on Oct 31 |
 
@@ -33,4 +33,4 @@ Projection of the NanFeng Battle Plan into the repository. The battle plan page 
 ## Contacts
 
 - Organization: wangyr@pbcsf.tsinghua.edu.cn
-- UDD submission: nbarra@udd.cl
+- UDD submission: by email to the course professor

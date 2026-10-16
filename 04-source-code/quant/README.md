@@ -75,7 +75,7 @@ Tests: `36 passed` (`pytest`). Bench 50/50.
 | 7 | **The backend and front used different numbers** (FX 940/132, opening cash 175.5M, lender terms, a "factoring + forward" plan, payroll CLP 38.5M on 2026-10-28, …). | `GET /quant/sandbox/seed`, `approval_request` in every plan, and `results/cherry_crisis_story.json` with every number in EN/ES/中文. See D2–D5 and the table of front fixes below. | One story everywhere once teammates pull them in. |
 | 8 | No machine-readable tool schemas for the agent. | `api/agent_tools.json` (OpenAI/OpenRouter format), `GET /quant/tools`, `tools.call` returns errors as JSON instead of raising. | Renato can wire the tools directly. |
 | 9 | The Cash Cockpit's "after the plan" chart had no data behind it. | `optimize_plan` returns `after_plan.fan_chart` and probabilities; Credit Passport before/after. | Front can draw the "resolved" overlay from real numbers (2.5% after the plan). |
-| 10 | Stamp-tax exemption of the PAE was unverified; the "60% paid late" figure had a weak source; cherry figures were a season old. | PAE exempt confirmed (DL 3.475 art. 24 no. 11, SII Ord. 2402/2016); replaced by Bolsa de Productos (63% of SME invoice value paid after 30 days, Q3 2024 report; 44 days average); 2025/26 season (USD 2.6 bn, 87% to China). | `docs/market-data.md` ready for the deck. |
+| 10 | Stamp-tax exemption of the PAE was unverified; the "60% paid late" figure had a weak source; cherry figures were a season old. | PAE exempt confirmed (DL 3.475 art. 24 no. 11, SII Ord. 2402/2016); replaced by Bolsa de Productos (63% of SME invoice value paid after 30 days, Q3 2024 report; 44 days average); 2025/26 season (USD 2.8 bn for the full season, 87% to China). | `docs/market-data.md` ready for the deck. |
 
 ---
 
@@ -300,7 +300,7 @@ See `results/backtest_summary.md` and `01-technical-documentation/core-algorithm
 
 ### r5-05 · Market data (Should)
 
-`docs/market-data.md` (re-checked 2026-10-10, 63% traced to the primary report on 2026-10-12): cherry exports USD 2.6 bn FOB in 2025/26, ~87% to China; SMEs paid in 44 days on average, 63% of what they invoice to large companies paid after 30 days (Bolsa de Productos, Q3 2024); banks charge SMEs 20.06%/yr on average (CMF); MSME finance gap USD 5.7 trillion (IFC).
+`docs/market-data.md` (re-checked 2026-10-10, 63% traced to the primary report on 2026-10-12): cherry exports USD 2.8 bn in the 2025/26 season (USD 2.6 bn FOB by February), ~87% to China; SMEs paid in 44 days on average, 63% of what they invoice to large companies paid after 30 days (Bolsa de Productos, Q3 2024); banks charge SMEs 20.06%/yr on average (CMF); MSME finance gap USD 5.7 trillion (IFC).
 
 ### r5-10 · NanFeng-Bench (Must)
 

@@ -9,4 +9,4 @@ node build.mjs ../.. tech ../../01-technical-documentation/NanFeng-Technical-Doc
 node build.mjs ../.. security ../../05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf
 ```
 
-Needs Google Chrome installed (Playwright drives it with `channel: "chrome"`) and network access for the fonts, Mermaid and KaTeX.
+Uses Google Chrome when it is installed (Playwright's `channel: "chrome"`), otherwise Playwright's Chromium (`npx playwright install chromium`). Needs network access for the fonts, Mermaid and KaTeX.

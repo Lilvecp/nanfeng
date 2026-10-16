@@ -22,5 +22,5 @@ Where each item lives in the repo: the submission table in the [root README](../
 | a1 | - [x] Team Excel + passport copies | Was due Tuesday Oct 6: confirm receipt | Valentín |
 | a2 | - [ ] Regular student certificates in English ×5 | Each one requests it; Valentín collects them | Everyone · Oct 18 |
 | a3 | - [x] Query to the organization | On-chain bonus in Topic E and registration on the platform | Valentín · Oct 8 |
-| a4 | - [ ] Single email to nbarra@udd.cl | One team member, everything attached | Valentín · Oct 18 |
+| a4 | - [ ] Single email to the course professor | One team member, everything attached | Valentín · Oct 18 |
 | a5 | - [ ] Confirm official submission | Before Oct 20 at 12:59 Chile time | Valentín · Oct 20 |

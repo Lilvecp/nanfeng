@@ -16,6 +16,8 @@ Basado en las bases oficiales (PDF FinTechathon) y en el estado real del repo y 
 
 1 · Lo que dice el PDF
 
+<a id="evaluacion"></a>
+
 ## Cómo nos evalúan
 
 Revisión online el 20 de octubre por expertos de WeBank y académicos. Todo en inglés. Los seis temas comparten la misma rúbrica.
@@ -54,6 +56,8 @@ El jurado ve archivos, no la app. Si algo no aparece en el video, en el deck o e
 
 2 · Estrategia
 
+<a id="ganar"></a>
+
 ## Cómo ganamos
 
 ### Usar las palabras del tema
@@ -82,11 +86,15 @@ Toda la entrega es en inglés. Pasar el guion y el deck por una revisión de ing
 
 3 · Submission checklist del PDF
 
+<a id="entregables"></a>
+
 ## Entregables 01–06
 
 Qué pide cada uno, dónde está hoy, qué falta y qué capturas lleva. Los IDs `C01`… están en la sección 6.
 
 4 · Entregable 03 + parte del 06
+
+<a id="video"></a>
 
 ## Guion del video demo · 5:00
 
@@ -120,11 +128,15 @@ Se agregan dos escenas que suben puntaje: **la actividad del agente** (escena 7,
 
 5 · Entregable 02
 
+<a id="deck"></a>
+
 ## Presentación · 9:30 hablados, 11 diapositivas
 
 Se entrega como PDF el 20 de octubre y se presenta en vivo en la final. Cada diapositiva dice qué va escrito, qué captura lleva y qué se dice.
 
 6 · Fotos de la web
+
+<a id="capturas"></a>
 
 ## Capturas de la web
 
@@ -150,11 +162,15 @@ Un solo set de capturas sirve para el deck y los documentos. Nombrar cada archiv
 
 7 · Para la herramienta de IA
 
+<a id="prompts"></a>
+
 ## Prompts por fase
 
 Pensados para hacer el deck por fases en cualquier herramienta de presentaciones con IA. Van en inglés porque el deck es en inglés. Pegar uno por fase, revisar y recién ahí pasar al siguiente.
 
 8 · Antes del 20 de octubre, 12:59 hora de Chile
+
+<a id="checklist"></a>
 
 ## Checklist final
 

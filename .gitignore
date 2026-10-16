@@ -16,3 +16,6 @@ __pycache__/
 
 # Competition brief (kept local)
 PDF FinTechathon.pdf
+
+# The design tool's runtime for the interactive mockups: license not confirmed, kept out of the repository
+07-team-workspace/design/private-desk/vendor/dc-runtime.js

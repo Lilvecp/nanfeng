@@ -6,7 +6,9 @@ These are static, high-fidelity mockups (fe-01). The working app built from them
 
 ## How to view
 
-The pages load fonts, React and the globe component from sibling folders, so serve the folder instead of opening the files directly:
+**[`screens/`](screens/) has a PNG of every screen** (rendered from these pages on 2026-10-16), so nothing needs to run.
+
+The interactive pages also need the runtime the design tool generated for them (`vendor/dc-runtime.js`). It is not in the repository because its license could not be confirmed; with a copy of it in `vendor/`, the pages load fonts, React and the globe component from sibling folders, so serve the folder instead of opening the files directly:
 
 ```sh
 cd 07-team-workspace/design/private-desk
@@ -44,10 +46,11 @@ Every screen except the globe has a `theme` prop (`light` default, `dark`); the 
 ```
 private-desk/
 ├── index.html   # board with all screens
+├── screens/     # a PNG of every screen
 ├── pages/       # one HTML file per screen
 ├── fonts/       # self-hosted woff2 subsets (no Google Fonts at runtime)
 ├── textures/    # NASA Earth textures for the globe
-└── vendor/      # React 18.3.1 UMD, globe.gl 2.46.2 (bundles three.js) and the mockup runtime (dc-runtime.js)
+└── vendor/      # React 18.3.1 UMD and globe.gl 2.46.2 (bundles three.js); the mockup runtime (dc-runtime.js) is not committed
 ```
 
 ## The 南风 globe
