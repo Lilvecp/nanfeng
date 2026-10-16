@@ -81,3 +81,25 @@ def test_idle_reset_restores_the_agents_plan_not_a_request_typed_by_hand(client)
     assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
     [restored] = client.get("/approvals").json()
     assert restored["action"] == PLAN["action"] and restored["status"] == "pending"
+
+
+def test_a_request_typed_by_hand_is_never_restored_as_the_agents(client):
+    """Without an agent plan the hand-made request is asked again, but as the owner's: after one more
+    reset, the agent's plan (once it exists) still wins."""
+    other = {"action": "factor INV-2026-109 elsewhere", "operations": [
+        {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "lender_id": "LEN-FINTECH", "share": 0.5}}]}
+    o = client.post("/approvals", json=other).json()  # the signed-in owner
+    client.post(f"/approvals/{o['id']}/approve", json={"otp": "482913"})
+    now = datetime.now(timezone.utc)
+    assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
+    created = [e for e in entries(client) if e["kind"] == "approval.created"]
+    assert [e["actor"].split(":")[0] for e in created] == ["owner"]
+
+    from app.config import get_settings
+    agent = {"Authorization": f"Bearer {get_settings().agent_token}"}
+    assert client.post("/approvals", json=PLAN, headers=agent).status_code == 201
+    [mine] = [a for a in client.get("/approvals").json() if a["action"] == other["action"]]
+    client.post(f"/approvals/{mine['id']}/approve", json={"otp": "482913"})
+    assert autoreset.reset_if_idle(now + timedelta(hours=3)) is True
+    [restored] = client.get("/approvals").json()
+    assert restored["action"] == PLAN["action"]

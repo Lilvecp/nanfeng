@@ -31,11 +31,13 @@ OPENING_KINDS = {"audit.anchored", "sandbox.seeded", "security.attack_blocked", 
                  "approval.repeated", "approval.otp_sent", "approval.otp_not_sent"}
 
 
-def _plan_to_restore(db: Session) -> ApprovalCreate | None:
-    """The agent's latest owner-approval request (L3), to ask for it again after the reset. A request the
-    owner typed in by hand (a visitor trying the API, an evidence run's double-financing attempt) is not
-    the story the next visitor should start from; it is used only when the agent never asked for one."""
-    created = db.scalars(select(AuditEntry).where(AuditEntry.kind == "approval.created").order_by(AuditEntry.seq.desc()))
+def _plan_to_restore(db: Session) -> tuple[ApprovalCreate, str] | None:
+    """The agent's latest owner-approval request (L3) and who asked for it, to ask for it again after the
+    reset. A request the owner typed in by hand (a visitor trying the API, an evidence run's
+    double-financing attempt) is not the story the next visitor should start from; it is used only when
+    the agent never asked for one, and it keeps its own actor, so one reset never turns it into the agent's."""
+    created = list(db.scalars(select(AuditEntry).where(AuditEntry.kind == "approval.created").order_by(AuditEntry.seq.desc())))
+    actor_of = {e.payload.get("approval_id"): e.actor for e in reversed(created)}
     by_agent = [e.payload.get("approval_id") for e in created
                 if e.actor.split(":")[0] == "agent" and e.payload.get("tier") == 3]
     appr = next((a for a in (db.get(Approval, i) for i in by_agent if i) if a is not None), None)
@@ -43,7 +45,8 @@ def _plan_to_restore(db: Session) -> ApprovalCreate | None:
         appr = db.scalars(select(Approval).where(Approval.tier == 3).order_by(Approval.created_at.desc())).first()
     if appr is None:
         return None
-    return ApprovalCreate(action=appr.action, operations=appr.operations, explanation=appr.explanation or "")
+    plan = ApprovalCreate(action=appr.action, operations=appr.operations, explanation=appr.explanation or "")
+    return plan, actor_of.get(appr.id, "owner")
 
 
 def needs_reset(db: Session, now: datetime, idle_s: int) -> bool:
@@ -68,11 +71,12 @@ def reset_if_idle(now: datetime | None = None) -> bool:
     with SessionLocal() as db:
         if not needs_reset(db, now, s.sandbox_idle_reset_s):
             return False
-        plan = _plan_to_restore(db)
+        restore = _plan_to_restore(db)
         seed.reset(db)
-        if plan is not None:
+        if restore is not None:
+            plan, actor = restore
             # no SMS for a request nobody is looking at: the owner asks for a code when they open it
-            approvals.create_approval(plan, db, actor="agent", send_code=False)
+            approvals.create_approval(plan, db, actor=actor, send_code=False)
     anchoring.anchor_opening()
     broker.publish("sandbox.reset", {"by": "idle"})
     log.info("Sandbox reset after %ss idle", s.sandbox_idle_reset_s)
