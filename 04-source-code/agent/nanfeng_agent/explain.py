@@ -22,9 +22,9 @@ INTENTS: list[tuple[str, str]] = [
     ("did", r"what did|qu[eé] hiciste|steps|pasos|did you|做了什么|步骤"),
 ]
 
-NO_RUN = {"es": "Todavía no he ejecutado nada hoy. Cuando llegue un documento o pidas el briefing, te explico cada paso.",
-          "en": "I have not run anything yet today. When a document arrives or you ask for the briefing, I explain every step.",
-          "zh": "今天我还没有执行任何操作。收到文件或您请求简报后，我会解释每一步。"}
+NO_RUN = {"es": "Todavía no he ejecutado nada desde que partí. Mándame un documento (el aviso de atraso del importador se descarga en la página) y te explico cada paso.",
+          "en": "I have not run anything yet since I started. Send me a document (the importer's late-payment notice can be downloaded from the page) and I will explain every step.",
+          "zh": "我启动后还没有执行任何操作。请发送一份文件（可在页面上下载进口商的延迟付款通知），我会解释每一步。"}
 
 
 def match(question: str) -> str | None:
