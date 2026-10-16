@@ -67,11 +67,11 @@ The repository follows the submission checklist: one folder per deliverable, num
 
 | # | Deliverable | Folder | What is inside |
 |---|---|---|---|
-| 01 | Technical documentation: system architecture, core algorithm, security design | [01-technical-documentation/](01-technical-documentation/) | [technical-documentation.md](01-technical-documentation/technical-documentation.md) (start here), with the full sections: [core algorithm](01-technical-documentation/core-algorithm.md) · [agent](01-technical-documentation/agent.md) · [security design](01-technical-documentation/security-design.md) |
-| 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | Outline: [deck-v1.md](02-presentation-deck/deck-v1.md). The slides are made on the final product |
+| 01 | Technical documentation: system architecture, core algorithm, security design | [01-technical-documentation/](01-technical-documentation/) | **[NanFeng-Technical-Documentation.pdf](01-technical-documentation/NanFeng-Technical-Documentation.pdf)** (all four parts in one PDF) · Markdown: [technical-documentation.md](01-technical-documentation/technical-documentation.md) (start here), with the full sections: [core algorithm](01-technical-documentation/core-algorithm.md) · [agent](01-technical-documentation/agent.md) · [security design](01-technical-documentation/security-design.md) |
+| 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | **[NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf)**: 14 slides, 16:9, about 9 minutes spoken |
 | 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 4:59, 1080p, EN + 中文 subtitles, recorded in one take on the live app. Script and the pipeline that builds it in `resources/` |
 | 04 | Source code: README, repository link, deployment instructions, test cases | [04-source-code/](04-source-code/) | This README · [deployment.md](04-source-code/deployment.md) · tests in `04-source-code/backend/tests`, `04-source-code/agent/tests`, `04-source-code/quant/tests`, `04-source-code/redteam` |
-| 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
+| 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | **[NanFeng-Security-Self-Assessment-Report.pdf](05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf)** (all four parts in one PDF) · Markdown: [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
 | 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [06-execution-evidence/](06-execution-evidence/) | [out-live/](06-execution-evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · [out/](06-execution-evidence/out/SUMMARY.md) (in-process run) · video as in 03 |
 | — | Everything else | [07-team-workspace/](07-team-workspace/) | Team cards and notes, planning, design mockups, the submission kit |
 
@@ -82,11 +82,13 @@ The repository follows the submission checklist: one folder per deliverable, num
 ├── README.md                              # This file: overview, quick start, tests, submission map, licenses
 ├── .github/workflows/ci.yml               # Secret scanning, backend, agent, quant, web
 ├── 01-technical-documentation/            # Deliverable 01
+│   ├── NanFeng-Technical-Documentation.pdf  #   The four documents below in one PDF
 │   ├── technical-documentation.md         #   Architecture, algorithms, agent, security (start here)
 │   ├── core-algorithm.md                  #   Forecast, optimizer, fair comparison, validation
 │   ├── agent.md                           #   Agent pipeline, tools and channels
 │   └── security-design.md                 #   Security design in full
-├── 02-presentation-deck/                  # Deliverable 02: deck outline
+├── 02-presentation-deck/                  # Deliverable 02
+│   └── NanFeng-Presentation-Deck.pdf      #   The final deck (14 slides)
 ├── 03-demo-video/                         # Deliverable 03
 │   ├── nanfeng-demo.mp4                   #   The demo video
 │   └── resources/                         #   Video script, and the pipeline that records and edits the video
@@ -102,6 +104,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 │   ├── .env.example                       #   Every backend and agent variable, with safe defaults
 │   └── deployment.md                      #   Local and public deployment, every variable
 ├── 05-security-self-assessment-report/    # Deliverable 05: self-assessment, threat model, anti-injection design, privacy and compliance
+│   └── NanFeng-Security-Self-Assessment-Report.pdf  #   The four documents in one PDF
 ├── 06-execution-evidence/                 # Deliverable 06: evidence exporter (build.py), live-deploy export (out-live/), in-process run (out/)
 └── 07-team-workspace/                     # Everything else
     ├── andy-villarroel/                   #   R4 · Security & Compliance Lead: task card, daily logs

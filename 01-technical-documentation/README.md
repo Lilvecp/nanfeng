@@ -4,6 +4,7 @@ System architecture, core algorithm description and security design (submission 
 
 | File | What | Owner |
 |---|---|---|
+| **[NanFeng-Technical-Documentation.pdf](NanFeng-Technical-Documentation.pdf)** | The four documents below in one PDF, ready to read or print | Team |
 | [technical-documentation.md](technical-documentation.md) | **Start here.** What NanFeng does, system architecture, the agent loop, algorithms, security, testing and known limitations | Team |
 | [core-algorithm.md](core-algorithm.md) | Quant engine in full: Monte Carlo cash forecast, chance-constrained MILP, fair comparison with the bank loan, validation | Vicente Rodríguez |
 | [agent.md](agent.md) | Agent in full: document intake, quarantined extraction, planner, tools, channels, service endpoints | Renato Lenis |

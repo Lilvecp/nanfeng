@@ -9,7 +9,7 @@ Where each item lives in the repo: the submission table in the [root README](../
 | ID | Deliverable | Detail | Owner |
 |----|-------------|--------|-------|
 | d1 | - [x] 01 · Technical documentation | Architecture, algorithms and security design: [01-technical-documentation/technical-documentation.md](../../01-technical-documentation/technical-documentation.md) | Renato · Camilo · Vicente · Andy → Valentín edits |
-| d2 | - [ ] 02 · Presentation deck | Max. 10 minutes. Made on the final product; outline in [deck-v1.md](../../02-presentation-deck/deck-v1.md) | Valentín |
+| d2 | - [ ] 02 · Presentation deck | Max. 10 minutes. Made on the final product; final PDF in [02-presentation-deck/](../../02-presentation-deck/), first outline in [deck-v1.md](../valentin-castro/deck-v1.md) | Valentín |
 | d3 | - [ ] 03 · Demo video | Optional in the rules, mandatory for us (06 asks for it). Max. 5 min. Recorded on the final product | Valentín · Camilo |
 | d4 | - [x] 04 · Source code | GitHub, README, deployment and tests: [README](../../README.md), [04-source-code/deployment.md](../../04-source-code/deployment.md) | Camilo · Renato |
 | d5 | - [x] 05 · Security self-assessment | Permission levels and known risks: [security-self-assessment.md](../../05-security-self-assessment-report/security-self-assessment.md) | Andy |

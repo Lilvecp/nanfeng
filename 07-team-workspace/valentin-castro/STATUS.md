@@ -10,7 +10,7 @@ The web below is on `main`; the R1 documents are on branch **`valentin-castro`**
 | r1-03 | Cherry Crisis numbers fixed: the engine's run is the single source; web, deck and video aligned | [scope-moscow.md](scope-moscow.md), `04-source-code/web/src/data/cherry-crisis.json`, `04-source-code/web/src/lib/scenario.ts` |
 | r1-04 | Frozen MoSCoW scope and team rules | [scope-moscow.md](scope-moscow.md) |
 | r1-05 | B2B2B business model | [business-model.md](business-model.md) |
-| r1-06, r1-10 | Deck v1 outline, incl. "One agent, every market's channel" | [deck-v1.md](../../02-presentation-deck/deck-v1.md) |
+| r1-06, r1-10 | Deck v1 outline, incl. "One agent, every market's channel" | [deck-v1.md](deck-v1.md) |
 | r1-07, r1-11 | Video script with EN narration and 中文 subtitles | [video-script.md](../../03-demo-video/resources/video-script.md) |
 | fe-03 | Cash Cockpit on the engine's real P10/P50/P90 paths (before and after the plan), receivables from the scenario, Credit Passport | `04-source-code/web/src/app/(desk)/cockpit` |
 | fe-05 | Approval Center for the PAE loan (USD 142,400, CLP 2.1M, 96% coverage) | `04-source-code/web/src/app/(desk)/approvals` |

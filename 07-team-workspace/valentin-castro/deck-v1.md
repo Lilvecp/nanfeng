@@ -1,6 +1,6 @@
 # Deck v1 · 10 minutes (r1-06, r1-10)
 
-Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every number from [scope-moscow.md](../07-team-workspace/valentin-castro/scope-moscow.md) or `04-source-code/quant/docs/market-data.md`. Visual style: Private desk (`07-team-workspace/design/private-desk/`), screenshots from the web on branch `valentin-castro`. No maps with borders (07-team-workspace/plan/risks.md).
+Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every number from [scope-moscow.md](scope-moscow.md) or `04-source-code/quant/docs/market-data.md`. Visual style: Private desk (`07-team-workspace/design/private-desk/`), screenshots from the web on branch `valentin-castro`. No maps with borders (07-team-workspace/plan/risks.md).
 
 | # | Slide | Time | Speaker |
 |---|---|---|---|
@@ -77,7 +77,7 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 
 - Security of the data: HTTPS only; one-time codes stored as HMAC, never in plain text; tamper-evident audit log anchored on-chain.
 - Say it plainly: sanctions list is synthetic; production loads OFAC / UN lists.
-- Source: [`05-security-self-assessment-report/privacy-compliance.md`](../05-security-self-assessment-report/privacy-compliance.md).
+- Source: [`05-security-self-assessment-report/privacy-compliance.md`](../../05-security-self-assessment-report/privacy-compliance.md).
 - **Say (Andy, 0:30):** "NanFeng never lets the AI touch money or personal data directly. The AI proposes; deterministic rules decide; the owner approves with a one-time code; every step is hashed on-chain."
 
 ## 9 · One agent, every market's channel
@@ -90,7 +90,7 @@ Target: **9:30 spoken**, 30 s of margin. English, one idea per slide, every numb
 ## 10 · Results, business model, roadmap
 
 - **Results:** NanFeng-Bench 50/50 cases solved · −41% average financing cost vs the default bank loan (25 cases with a plan) · 46/46 attacks stopped.
-- **Business model (B2B2B):** banks and trade-finance fintechs license NanFeng for their SME exporters; license per active SME + success fee on financing originated (pricing to validate). See [business-model.md](../07-team-workspace/valentin-castro/business-model.md).
+- **Business model (B2B2B):** banks and trade-finance fintechs license NanFeng for their SME exporters; license per active SME + success fee on financing originated (pricing to validate). See [business-model.md](business-model.md).
 - **Roadmap:** WeCom production channel · FISCO BCOS invoice registry against double financing · real lender APIs with a design partner · next corridor in APEC.
 - Close: "NanFeng doesn't advise. It acts — with your permission."
 

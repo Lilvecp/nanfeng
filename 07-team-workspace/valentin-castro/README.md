@@ -15,7 +15,7 @@
 
 ## Tasks
 
-Status on Oct 11 and what is missing from others: [STATUS.md](STATUS.md). Drafts: [scope-moscow.md](scope-moscow.md) · [business-model.md](business-model.md) · [deck-v1.md](../../02-presentation-deck/deck-v1.md) · [video-script.md](../../03-demo-video/resources/video-script.md).
+Status on Oct 11 and what is missing from others: [STATUS.md](STATUS.md). Drafts: [scope-moscow.md](scope-moscow.md) · [business-model.md](business-model.md) · [deck-v1.md](deck-v1.md) · [video-script.md](../../03-demo-video/resources/video-script.md).
 
 - [x] `r1-01` **Oct 8** · Must — **Confirm with UDD** that the Excel and passports arrived, and **request the regular student certificates** in English for all 5.
 - [x] `r1-02` **Oct 8** · Must — **Email the organization**: does the on-chain bonus apply to Topic E? Does FISCO BCOS or a testnet count as evidence? Who registers on fintechton.g-ican.com?
