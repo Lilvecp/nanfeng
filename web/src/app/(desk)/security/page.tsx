@@ -151,7 +151,9 @@ export default function SecurityPage() {
         ...AUDIT.map((r) => (r.anchor === "pending" ? { ...r, anchor: SANDBOX } : r)),
       ]
     : AUDIT;
-  const rows = live?.rows ?? mockRows;
+  // Live mode never shows the illustrative sandbox rows: until the API answers, the table is a skeleton.
+  const loading = isLive && !live;
+  const rows = live?.rows ?? (isLive ? [] : mockRows);
 
   const runVerify = async () => {
     setVerify("running");
@@ -178,9 +180,9 @@ export default function SecurityPage() {
   return (
     <>
       <Topbar>
-        <div className="tick"><span className="l">{x.blockedToday}</span><span className="v down">{live ? live.blocked : 1}</span></div>
+        <div className="tick"><span className="l">{x.blockedToday}</span><span className="v down">{live ? live.blocked : loading ? "…" : 1}</span></div>
         <div className="tick"><span className="l">{x.chain}</span>{verify === "broken" ? <span className="v down">{x.broken} {brokenAt}</span> : verify === "ok" && checkedAt ? <span className="v up">{x.verified} {checkedAt}</span> : <span className="v">{verify === "running" ? x.verifying : x.unchecked}</span>}</div>
-        <div className="tick"><span className="l">{x.lastAnchor}</span><span className={`v${live?.lastAnchor ? "" : " muted"}`}>{live ? live.lastAnchor || x.noAnchor : x.sandboxAnchor}</span></div>
+        <div className="tick"><span className="l">{x.lastAnchor}</span><span className={`v${live?.lastAnchor ? "" : " muted"}`}>{live ? live.lastAnchor || x.noAnchor : loading ? "…" : x.sandboxAnchor}</span></div>
       </Topbar>
 
       <div className="content">
@@ -246,8 +248,8 @@ export default function SecurityPage() {
 
         <div className="card" data-guide="sec-audit">
           <div className="card-h">
-            <span className="h3">{x.chainTitle(!live ? x.sandboxAnchor : live.onChain ? x.sepolia : x.local)}</span>
-            {!live && <span className="badge" style={{ color: "var(--warn)" }}>{x.sandboxRows}</span>}
+            <span className="h3">{x.chainTitle(loading ? "…" : !live ? x.sandboxAnchor : live.onChain ? x.sepolia : x.local)}</span>
+            {!isLive && <span className="badge" style={{ color: "var(--warn)" }}>{x.sandboxRows}</span>}
             <button className="btn btn-secondary btn-sm" type="button" disabled={verify === "running"} onClick={runVerify}>
               {verify === "running" ? <>{x.verifying}<span className="blink">_</span></> : verify === "ok" ? x.ok : verify === "broken" ? x.bad : x.verify} <span className="key">V</span>
             </button>
@@ -255,6 +257,11 @@ export default function SecurityPage() {
           <div className="tbl-wrap"><table className="tbl">
             <thead><tr>{x.cols.map((c) => <th key={c}>{c}</th>)}</tr></thead>
             <tbody>
+              {loading && [0, 1, 2, 3].map((i) => (
+                <tr key={`skel-${i}`} aria-hidden="true">
+                  {x.cols.map((c) => <td key={c}><span className="skel" style={{ display: "inline-block", width: c === x.cols[2] ? 180 : 44, height: 10 }} /></td>)}
+                </tr>
+              ))}
               {rows.map((r) => (
                 <tr key={r.seq}>
                   <td className="num">{r.seq}</td><td className="num">{r.time}</td><td className={r.bad ? "down" : undefined}>{r.event}</td>
