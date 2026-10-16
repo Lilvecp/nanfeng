@@ -52,7 +52,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -e "../backend[dev]" -e ".[dev]"
+      # the quant engine too: two agent tests replay the Cherry Crisis on the real optimizer
+      - run: pip install -e "../backend[dev]" -e ../quant -e ".[dev]"
       - run: pytest -q
 
   quant:
