@@ -12,7 +12,7 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 |---|---|
 | **Demo video (3 min)** | [03-demo-video/nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4) · [transcript](03-demo-video/transcript.md) |
 | **Deck** | [02-presentation-deck/NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf) |
-| **Live app** | https://www.nanfengcfo.com |
+| **Live app** | https://www.nanfengcfo.com · [try it in two minutes](https://www.nanfengcfo.com/#try): owner sign-in (the demo password is on the sign-in screen), then send the [importer's notice](04-source-code/web/public/samples/hongxin-payment-notice.pdf) or the [08:47 poisoned invoice](04-source-code/web/public/samples/frio-austral-invoice-4471.pdf) to the live agent |
 | **API** | https://api.nanfengcfo.com/docs |
 | **Repository** | https://github.com/Lilvecp/nanfeng |
 | **Technical documentation** | [NanFeng-Technical-Documentation.pdf](01-technical-documentation/NanFeng-Technical-Documentation.pdf) · [markdown](01-technical-documentation/technical-documentation.md) |
