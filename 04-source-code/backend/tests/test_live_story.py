@@ -103,3 +103,17 @@ def test_a_request_typed_by_hand_is_never_restored_as_the_agents(client):
     assert autoreset.reset_if_idle(now + timedelta(hours=3)) is True
     [restored] = client.get("/approvals").json()
     assert restored["action"] == PLAN["action"]
+
+
+def test_the_owners_opening_plan_outlives_a_request_typed_after_it(client):
+    """Signed in, the cockpit creates the Cherry Crisis plan as the owner's; a request typed after it
+    must not become the next visitor's opening plan."""
+    assert client.post("/approvals", json=PLAN).status_code == 201  # the signed-in owner's cockpit
+    other = {"action": "factor INV-2026-109 elsewhere", "operations": [
+        {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "lender_id": "LEN-FINTECH", "share": 0.5}}]}
+    o = client.post("/approvals", json=other).json()
+    client.post(f"/approvals/{o['id']}/approve", json={"otp": "482913"})
+    now = datetime.now(timezone.utc)
+    assert autoreset.reset_if_idle(now + timedelta(hours=1)) is True
+    [restored] = client.get("/approvals").json()
+    assert restored["action"] == PLAN["action"]

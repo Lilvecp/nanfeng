@@ -35,14 +35,15 @@ def _plan_to_restore(db: Session) -> tuple[ApprovalCreate, str] | None:
     """The agent's latest owner-approval request (L3) and who asked for it, to ask for it again after the
     reset. A request the owner typed in by hand (a visitor trying the API, an evidence run's
     double-financing attempt) is not the story the next visitor should start from; it is used only when
-    the agent never asked for one, and it keeps its own actor, so one reset never turns it into the agent's."""
+    the agent never asked for one, the oldest first (the opening plan, not what was typed after it), and it
+    keeps its own actor, so one reset never turns it into the agent's."""
     created = list(db.scalars(select(AuditEntry).where(AuditEntry.kind == "approval.created").order_by(AuditEntry.seq.desc())))
     actor_of = {e.payload.get("approval_id"): e.actor for e in reversed(created)}
     by_agent = [e.payload.get("approval_id") for e in created
                 if e.actor.split(":")[0] == "agent" and e.payload.get("tier") == 3]
     appr = next((a for a in (db.get(Approval, i) for i in by_agent if i) if a is not None), None)
-    if appr is None:
-        appr = db.scalars(select(Approval).where(Approval.tier == 3).order_by(Approval.created_at.desc())).first()
+    if appr is None:  # the opening plan (the cockpit creates it as the owner's) stays ahead of later ones
+        appr = db.scalars(select(Approval).where(Approval.tier == 3).order_by(Approval.created_at)).first()
     if appr is None:
         return None
     plan = ApprovalCreate(action=appr.action, operations=appr.operations, explanation=appr.explanation or "")
