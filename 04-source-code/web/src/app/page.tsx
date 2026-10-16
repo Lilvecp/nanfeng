@@ -68,6 +68,61 @@ const HOW: { n: Record<Lang, string>; h: Record<Lang, string>; p: Record<Lang, s
   },
 ];
 
+// The problem in public figures, each with its source (04-source-code/quant/docs/market-data.md). Nothing here is ours.
+const FACTS_H = { en: "The problem, in public numbers.", es: "El problema, en cifras públicas.", zh: "用公开数据说明问题。" } satisfies Record<Lang, string>;
+const FACTS: { n: string; p: Record<Lang, string>; src: string; href?: string }[] = [
+  {
+    n: "USD 2.8 bn",
+    p: { en: "of Chilean cherries in the 2025/26 season, about 87% shipped to China", es: "en cerezas chilenas la temporada 2025/26, cerca del 87% enviado a China", zh: "2025/26 季智利樱桃出口额，约87%运往中国" },
+    src: "FreshFruitPortal, Frutas de Chile data, Sep 2026", href: "https://www.freshfruitportal.com/news/2026/09/23/chilean-fruit-exports/",
+  },
+  {
+    n: "44",
+    p: { en: "days on average before a Chilean SME gets paid; the legal limit is 30 (Ley 21.131)", es: "días en promedio para que una pyme chilena cobre; el límite legal es 30 (Ley 21.131)", zh: "智利中小企业平均回款天数；法定上限为30天（第21.131号法律）" },
+    src: "Bolsa de Productos and ASECH, annual payers ranking, Jul 2025–Jun 2026", href: "https://www.salmonexpert.cl/asech-bolsa-de-productos-pagos/tres-productores-de-salmon-chileno-brillan-entre-los-mejores-pagadores-a-proveedores/2170908",
+  },
+  {
+    n: "63%",
+    p: { en: "of what SMEs invoice to large companies is paid after the 30-day legal term", es: "de lo que las pymes facturan a grandes empresas se paga después del plazo legal de 30 días", zh: "中小企业向大企业开具的发票金额中，超过30天法定期限才付款的比例" },
+    src: "Bolsa de Productos and ASECH, Ranking de Pagadores, Q3 2024", href: "https://www.bolsadeproductos.cl/application/normativas/Ranking+de+pagadores+3Q2024.pdf",
+  },
+  {
+    n: "20%",
+    p: { en: "a year: what Chilean banks charge SMEs for a CLP loan when cash runs short", es: "al año: lo que cobran los bancos chilenos a una pyme por un crédito en pesos cuando falta caja", zh: "年利率：现金短缺时智利银行向中小企业收取的比索贷款利率" },
+    src: "CMF, interest rate certificate 09/2026",
+  },
+];
+
+// For a judge who opens the site: the shortest path through the live product, each step on the real backend.
+const TRY_H = { en: "Try it yourself in two minutes.", es: "Pruébalo tú mismo en dos minutos.", zh: "两分钟亲自体验。" } satisfies Record<Lang, string>;
+const TRY_SUB = {
+  en: "Everything below runs on the live agent and a sandbox bank. No real funds move.",
+  es: "Todo esto corre sobre el agente en vivo y un banco sandbox. No se mueve dinero real.",
+  zh: "以下操作均在实时代理和沙盒银行上运行，不涉及真实资金。",
+} satisfies Record<Lang, string>;
+const TRY: { h: Record<Lang, string>; p: Record<Lang, string>; href: string; link: Record<Lang, string>; download?: boolean }[] = [
+  {
+    h: { en: "Sign in as the owner", es: "Entra como el dueño", zh: "以企业主身份登录" },
+    p: { en: "Owner sign-in, top right. The demo password is shown on the sign-in screen.", es: "Owner sign-in, arriba a la derecha. La contraseña del demo aparece en la pantalla de ingreso.", zh: "点击右上角 Owner sign-in，登录界面会显示演示密码。" },
+    href: "/cockpit", link: { en: "Open Home", es: "Abrir Inicio", zh: "打开首页" },
+  },
+  {
+    h: { en: "Hand the agent a document", es: "Pásale un documento al agente", zh: "把文件交给代理" },
+    p: { en: "Download the importer's late-payment notice and send it from Home. The agent forecasts, compares 9 products and proposes a plan in under a minute.", es: "Descarga el aviso de atraso del importador y envíalo desde Inicio. El agente proyecta la caja, compara 9 productos y propone un plan en menos de un minuto.", zh: "下载进口商的延迟付款通知并在首页发送。代理会在一分钟内完成预测、比较9种产品并提出方案。" },
+    href: "/samples/hongxin-payment-notice.pdf", link: { en: "Download the notice", es: "Descargar el aviso", zh: "下载通知" }, download: true,
+  },
+  {
+    h: { en: "Approve it with the code", es: "Apruébalo con el código", zh: "用验证码批准" },
+    p: { en: "Borrowing is level 3: only the owner approves, with a one-time code (the sandbox code is on screen). The agent cannot.", es: "Pedir un crédito es nivel 3: solo el dueño aprueba, con un código de un uso (en el sandbox aparece en pantalla). El agente no puede.", zh: "借款属于 L3：只有企业主可以凭一次性验证码批准（沙盒验证码显示在屏幕上），代理无权批准。" },
+    href: "/approvals", link: { en: "Open Approvals", es: "Abrir Aprobaciones", zh: "打开审批" },
+  },
+  {
+    h: { en: "Try to fool it, then check the proof", es: "Intenta engañarlo y revisa la prueba", zh: "试着骗它，再查看证明" },
+    p: { en: "Send the 08:47 invoice with a hidden instruction: it is blocked before any model reads it. Security shows every step anchored on Sepolia.", es: "Envía la factura de las 08:47 con una instrucción oculta: se bloquea antes de que la lea un modelo. Seguridad muestra cada paso anclado en Sepolia.", zh: "发送 08:47 带隐藏指令的发票：它在任何模型读取前即被拦截。安全页显示每一步都已锚定在 Sepolia 上。" },
+    href: "/security", link: { en: "Open Security", es: "Abrir Seguridad", zh: "打开安全页" },
+  },
+];
+
 const TEAM: [string, Record<Lang, string>][] = [
   ["Valentín", { en: "Lead · product", es: "Líder · producto", zh: "负责人 · 产品" }],
   ["Renato", { en: "AI agent", es: "Agente de IA", zh: "AI 代理" }],
@@ -119,6 +174,19 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section id="facts" className="lp-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}><h2 className="lp-h"><Words text={FACTS_H[lang]} /></h2></div>
+        <div className="facts-grid">
+          {FACTS.map((f) => (
+            <div key={f.n} data-reveal style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 8, alignItems: "center", textAlign: "center" }}>
+              <span className="big-num" style={{ color: "var(--text)", fontSize: "clamp(34px, 3vw, 44px)", whiteSpace: "nowrap" }}>{f.n}</span>
+              <span className="muted" style={{ maxWidth: 280 }}>{f.p[lang]}</span>
+              {f.href ? <a className="mono small" href={f.href} target="_blank" rel="noopener noreferrer" style={{ color: "var(--muted)" }}>{f.src} ↗</a> : <span className="mono small" style={{ color: "var(--muted)" }}>{f.src}</span>}
+            </div>
+          ))}
+        </div>
+      </div></section>
+
       <section className="cine" style={{ padding: "88px 0 96px", borderTop: "1px solid var(--line)" }}>
         <div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
           <h2 className="lp-h" data-reveal style={{ color: "var(--text)" }}><Words text={l("deskH")} /></h2>
@@ -132,6 +200,15 @@ export default function LandingPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: 20 }}>
           {HOW.map((h) => (
             <div key={h.href} className="card" data-reveal><div className="card-b" style={{ padding: 28, gap: 12 }}><span className="step-n">{h.n[lang]}</span><h3 className="h2" style={{ fontSize: 24 }}>{h.h[lang]}</h3><p className="muted" style={{ margin: 0 }}>{h.p[lang]}</p><Link className="mono small" href={h.href}>{h.link[lang]} →</Link></div></div>
+          ))}
+        </div>
+      </div></section>
+
+      <section id="try" className="lp-section"><div className="wrap" style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+        <div data-reveal style={{ display: "flex", flexDirection: "column", gap: 12 }}><h2 className="lp-h"><Words text={TRY_H[lang]} /></h2><p className="lp-sub">{TRY_SUB[lang]}</p></div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: 20 }}>
+          {TRY.map((s, i) => (
+            <div key={s.href} className="card" data-reveal><div className="card-b" style={{ padding: 24, gap: 10 }}><span className="step-n">{i + 1}</span><h3 className="h2" style={{ fontSize: 20 }}>{s.h[lang]}</h3><p className="muted" style={{ margin: 0 }}>{s.p[lang]}</p>{s.download ? <a className="mono small" href={s.href} download>{s.link[lang]} →</a> : <Link className="mono small" href={s.href}>{s.link[lang]} →</Link>}</div></div>
           ))}
         </div>
       </div></section>

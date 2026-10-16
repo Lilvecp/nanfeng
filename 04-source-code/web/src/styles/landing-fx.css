@@ -67,6 +67,12 @@ html.reveal-ready .lp .fx-pop[data-reveal][data-revealed]{opacity:1;transform:no
 
 /* ── metrics ── */
 .big-num{transition:transform .4s var(--spring)}
+
+/* Public figures on the landing: columns with a rule between them, stacked with a rule between rows on phones */
+.facts-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.facts-grid>div+div{border-left:1px solid var(--line)}
+@media (max-width:900px){.facts-grid{grid-template-columns:repeat(2,1fr)}.facts-grid>div:nth-child(3){border-left:0}.facts-grid>div:nth-child(n+3){border-top:1px solid var(--line)}}
+@media (max-width:560px){.facts-grid{grid-template-columns:1fr}.facts-grid>div+div{border-left:0;border-top:1px solid var(--line)}}
 .big-num:hover{transform:scale(1.04)}
 
 @media (prefers-reduced-motion:reduce){

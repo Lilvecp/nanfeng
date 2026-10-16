@@ -83,6 +83,7 @@ const DICT = {
   // landing
   "lp.nav.product": { en: "Product", es: "Producto", zh: "产品" },
   "lp.nav.how": { en: "How it works", es: "Cómo funciona", zh: "工作原理" },
+  "lp.nav.try": { en: "Try it", es: "Pruébalo", zh: "体验" },
   "lp.nav.channels": { en: "Channels", es: "Canales", zh: "渠道" },
   "lp.nav.security": { en: "Security", es: "Seguridad", zh: "安全" },
   "lp.nav.team": { en: "Team", es: "Equipo", zh: "团队" },

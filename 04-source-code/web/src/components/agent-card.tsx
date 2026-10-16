@@ -15,6 +15,7 @@ const ACCEPT = "application/pdf,image/png,image/jpeg,image/webp,text/plain";
 const COPY: Record<Lang, {
   title: string; hint: string; label: string; ph: string; ask: string; upload: string; reading: string; thinking: string;
   tooBig: string; badType: string; failed: string; status: Record<string, string>; approve: string; security: string; run: string; steps: string;
+  samples: string; sampleNotice: string; sampleInvoice: string;
 }> = {
   en: {
     title: "Ask NanFeng", hint: "The live agent answers from what it actually did, or send it a document to read.",
@@ -24,6 +25,7 @@ const COPY: Record<Lang, {
     failed: "The agent did not answer. Try again in a moment.",
     status: { awaiting_approval: "Plan ready: it needs your approval", blocked: "Blocked: this document looks like an attack", completed: "Done", failed: "Could not finish", halted: "Stopped by the kill switch" },
     approve: "Review in Approvals", security: "See why in Security", run: "Run", steps: "steps",
+    samples: "No document at hand? Download one of ours and send it:", sampleNotice: "the importer's late-payment notice", sampleInvoice: "the 08:47 supplier invoice with a hidden instruction",
   },
   es: {
     title: "Pregúntale a NanFeng", hint: "El agente en vivo responde con lo que realmente hizo, o mándale un documento para que lo lea.",
@@ -33,6 +35,7 @@ const COPY: Record<Lang, {
     failed: "El agente no respondió. Intenta de nuevo en un momento.",
     status: { awaiting_approval: "Plan listo: necesita tu aprobación", blocked: "Bloqueado: este documento parece un ataque", completed: "Listo", failed: "No pudo terminar", halted: "Detenido por el interruptor de emergencia" },
     approve: "Revisar en Aprobaciones", security: "Ver por qué en Seguridad", run: "Ejecución", steps: "pasos",
+    samples: "¿No tienes un documento a mano? Descarga uno de los nuestros y envíalo:", sampleNotice: "el aviso de atraso del importador", sampleInvoice: "la factura de las 08:47 con una instrucción oculta",
   },
   zh: {
     title: "问问南风", hint: "实时代理根据它实际执行的操作回答，或发送文件让它读取。",
@@ -42,6 +45,7 @@ const COPY: Record<Lang, {
     failed: "代理没有回应，请稍后再试。",
     status: { awaiting_approval: "方案已就绪：需要您批准", blocked: "已拦截：此文件疑似攻击", completed: "已完成", failed: "未能完成", halted: "已被紧急开关停止" },
     approve: "前往审批", security: "在安全页查看原因", run: "运行", steps: "步",
+    samples: "手头没有文件？下载我们的示例再发送：", sampleNotice: "进口商的延迟付款通知", sampleInvoice: "08:47 带隐藏指令的供应商发票",
   },
 };
 
@@ -130,6 +134,11 @@ export function AgentCard({ uploadOnly = false }: { uploadOnly?: boolean }) {
         <button className="btn btn-secondary btn-sm" type="button" onClick={() => file.current?.click()} disabled={busy !== null}>{c.upload}</button>
         <input ref={file} type="file" accept={ACCEPT} hidden onChange={upload} />
       </div>
+      <span className="owner-hint">
+        {c.samples}{" "}
+        <a href="/samples/hongxin-payment-notice.pdf" download>{c.sampleNotice}</a>{" · "}
+        <a href="/samples/frio-austral-invoice-4471.pdf" download>{c.sampleInvoice}</a>
+      </span>
       <div role="status" aria-live="polite">
         {busy && <p className="owner-hint">{busy === "upload" ? c.reading : c.thinking}</p>}
         {error && <p className="owner-hint" style={{ color: "var(--crit)" }}>{error}</p>}

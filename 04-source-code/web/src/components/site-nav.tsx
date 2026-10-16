@@ -9,6 +9,7 @@ import { useT, type I18nKey } from "@/lib/i18n";
 const LINKS: { id: string; key: I18nKey }[] = [
   { id: "top", key: "lp.nav.product" },
   { id: "how", key: "lp.nav.how" },
+  { id: "try", key: "lp.nav.try" },
   { id: "channels", key: "lp.nav.channels" },
   { id: "security", key: "lp.nav.security" },
   { id: "team", key: "lp.nav.team" },
