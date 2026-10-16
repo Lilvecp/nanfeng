@@ -54,7 +54,7 @@ Every command runs from the repository root.
 
 | Suite | Command | Result | CI job |
 |---|---|---|---|
-| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 130 passed | Backend tests |
+| Backend: security, policy, API, owner sign-in, OTP, privacy, registry, anchoring, demo | `cd 04-source-code/backend && pip install -e ".[dev]" && pytest -q` | 131 passed | Backend tests |
 | Red team regression gate (46 attacks against the API) | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | 46/46 stopped | Backend tests |
 | OpenAPI contract is up to date | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | no drift | Backend tests |
 | Agent: pipeline, Cherry Crisis, service, red team through the agent | `cd 04-source-code/agent && pip install -e "../backend[dev]" -e ../quant -e ".[dev]" && pytest -q` | 113 passed | Agent tests |

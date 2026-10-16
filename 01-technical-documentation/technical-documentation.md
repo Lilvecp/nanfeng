@@ -258,10 +258,10 @@ Result: the red team's first 43 outcome-based attacks went from 4/43 stopped to 
 
 | Suite | Count | Run | In CI |
 |---|---|---|---|
-| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 127 | `cd 04-source-code/backend && pytest -q` | Backend tests |
+| Backend (security, policy, API, sign-in, OTP, privacy, registry, anchoring, demo) | 131 | `cd 04-source-code/backend && pytest -q` | Backend tests |
 | Red team gate (46 attacks against the API) | 46/46 stopped | `cd 04-source-code/backend && python ../redteam/run.py --backend . --label local --min-stopped 46` | Backend tests |
 | OpenAPI contract drift | — | `cd 04-source-code/backend && python -m app.main ../contracts/openapi.json && git diff --exit-code ../contracts/openapi.json` | Backend tests |
-| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 113 | `cd 04-source-code/agent && pytest -q` (needs `../backend[dev]`) | Agent tests |
+| Agent (pipeline, Cherry Crisis, service, health report, red team through the agent, AI label) | 113 | `cd 04-source-code/agent && pytest -q` (needs `../backend[dev]` and `../quant`) | Agent tests |
 | Quant engine (Monte Carlo, MILP, business analysis, bench, API) | 36 | `cd 04-source-code/quant && pytest -q` | Quant tests |
 | NanFeng-Bench | 50/50 | `cd 04-source-code/quant && python -m nanfeng_quant bench` (~5 min) | No (results committed) |
 | Web | lint + production build | `cd 04-source-code/web && npm run lint && npm run build` | Web lint and build |

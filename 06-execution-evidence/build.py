@@ -1,11 +1,11 @@
-"""Execution evidence, package 06 (r4-10, Andy + Camilo).
+"""Execution evidence, package 06.
 
 Default: runs the Cherry Crisis scenario end to end against the backend in process (SMS OTP mode, owner
-reads the code from an outbox) and exports what happened. With --url it only exports from a running
-backend (the deployed one, anchored on the testnet).
+reads the code from an outbox) and exports what happened. With --url it exports from a running backend
+(the deployed one, anchored on the testnet); --run-otp first plays the owner's side there (live_run).
 
     ../04-source-code/backend/.venv/bin/python build.py --backend ../04-source-code/backend
-    ../04-source-code/backend/.venv/bin/python build.py --url https://api.example.com --out out-live
+    ../04-source-code/backend/.venv/bin/python build.py --url https://api.example.com --run-otp 482913 --out out-live
 
 Output (default ./out): bank_logs.jsonl, audit_entries.json, audit_verify.json, anchors.json,
 proofs.json, run.json and SUMMARY.md.
@@ -95,6 +95,55 @@ def scenario(c, outbox: list[str]) -> list[dict]:
     return steps
 
 
+def _wait_anchored(c, timeout_s: float = 180) -> None:
+    """Until the latest anchor is mined, so the next transaction from the wallet does not race it."""
+    import time
+
+    end = time.monotonic() + timeout_s
+    while time.monotonic() < end:
+        anchors = c.get("/audit/anchors").json()
+        if not anchors or c.get(f"/audit/anchors/{max(a['id'] for a in anchors)}/chain").json().get("confirmed"):
+            return
+        time.sleep(5)
+
+
+def live_run(c, otp: str) -> list[dict]:
+    """The owner's side of the Cherry Crisis on a running demo backend (the deploy, anchored on Sepolia):
+    the agent's pending plan approved and executed, half of INV-2026-109 factored after its fingerprint is
+    registered on chain, and the same invoice refused as already financed. The owner signs in with the
+    public demo password (GET /auth/config); `otp` is the sandbox code of the demo build."""
+    steps = []
+
+    def step(time: str, what: str, r):
+        body = r.json()
+        steps.append({"time": time, "what": what, "http": r.status_code, "result": body})
+        return body
+
+    password = c.get("/auth/config").json()["demo_password"]
+    owner = {"Authorization": "Bearer " + c.post("/auth/login", json={"password": password}).json()["token"]}
+    plan = next((a for a in c.get("/approvals", params={"status": "pending"}).json() if a["tier"] == 3), None)
+    if plan is None or plan["action"] != PLAN["action"]:
+        sys.exit("The agent's Cherry Crisis plan is not pending: the sandbox is not in its opening state "
+                 "(wait for the idle reset, or play the Demo tour up to step 4)")
+    step("10:15", f"Owner approves the agent's plan {plan['id']} ({plan['action']}) with the one-time code",
+         c.post(f"/approvals/{plan['id']}/approve", json={"otp": otp, "channel": "WEB+OTP"}, headers=owner))
+    _wait_anchored(c)  # the approval's anchor and the registration below come from the same wallet
+    f1 = step("10:20", "Factoring half of INV-2026-109 proposed (L3)", c.post("/approvals", json={
+        "action": "factoring INV-2026-109", "operations": [
+            {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "share": 0.5}}]}, headers=owner))
+    step("10:20", "Owner approves; the invoice's fingerprint is registered on chain before the bank pays out",
+         c.post(f"/approvals/{f1['id']}/approve", json={"otp": otp, "channel": "WEB+OTP"}, headers=owner))
+    f2 = step("10:21", "Same invoice offered to another lender (double financing)", c.post("/approvals", json={
+        "action": "factor INV-2026-109 again elsewhere", "operations": [
+            {"op": "factoring", "params": {"receivable_id": "INV-2026-109", "lender_id": "LEN-FINTECH", "share": 0.5}}]},
+        headers=owner))
+    step("10:21", "Even with the owner's code it is refused as already financed; no money moves",
+         c.post(f"/approvals/{f2['id']}/approve", json={"otp": otp, "channel": "WEB+OTP"}, headers=owner))
+    step("10:40", "Owner anchors everything still pending", c.post("/audit/anchor", headers=owner))
+    _wait_anchored(c)  # so the export reads every anchor back from the chain
+    return steps
+
+
 def _canonical(payload: dict) -> str:
     return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
 
@@ -176,7 +225,9 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
              (f"- Tamper test: add CLP 1 to the loan in entry {tamper[0]} and the recomputed chain breaks at "
               f"seq **{tamper[1]}**" if tamper else "- Tamper test: no loan in this export"),
              f"- Invoice registry ({(registry['backend'] or {}).get('backend', 'n/a')}): "
-             f"**{len(registry['invoices'])}** invoices registered against double financing: `registry.json`",
+             f"**{len(registry['invoices'])}** invoices registered against double financing: `registry.json`"
+             + "".join(f"\n  - {i['receivable_id']} ({i['financing']}) tx {i['explorer_url']}"
+                       for i in registry["invoices"] if i.get("explorer_url")),
              "", "## Audit entries by kind", "", "| Kind | Count |", "|------|-------|"]
     lines += [f"| `{k}` | {n} |" for k, n in sorted(kinds.items())]
     loans = [e for e in entries if e["kind"] == "bank.loan"]
@@ -212,6 +263,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--backend", help="backend directory: run the scenario in process")
     ap.add_argument("--url", help="running backend: export only")
+    ap.add_argument("--run-otp", metavar="CODE", help="with --url: first play the owner's side (live_run) with this "
+                                                      "sandbox code; sends Sepolia transactions on the deploy")
     ap.add_argument("--out", default=str(HERE / "out"))
     args = ap.parse_args()
     out = Path(args.out).resolve()
@@ -219,8 +272,8 @@ def main() -> None:
     if args.url:
         import httpx
 
-        with httpx.Client(base_url=args.url.rstrip("/"), timeout=30) as c:
-            export(c, out, None)
+        with httpx.Client(base_url=args.url.rstrip("/"), timeout=120) as c:
+            export(c, out, live_run(c, args.run_otp) if args.run_otp else None)
         return
 
     backend = Path(args.backend or HERE.parent / "04-source-code" / "backend").resolve()

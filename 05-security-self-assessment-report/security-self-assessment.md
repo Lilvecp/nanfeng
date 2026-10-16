@@ -98,9 +98,9 @@ The LLM has no tool that takes a bank account, a phone number or an approval cod
 ## 6. Reproduce
 
 ```sh
-cd 04-source-code/backend && pytest -q                        # 127 tests
+cd 04-source-code/backend && pytest -q                        # 131 tests
 cd ../agent && pytest -q                                      # 113 agent tests, red team replay included
 cd ../redteam && python run.py --backend ../backend --label after --min-stopped 46 && python report.py
 cd ../../06-execution-evidence && python build.py --backend ../04-source-code/backend   # Cherry Crisis evidence
-python build.py --url <deployed backend> --out out-live      # same export from the live deploy
+python build.py --url <deployed backend> --run-otp <sandbox code> --out out-live   # the owner's side on the live deploy, then the export
 ```

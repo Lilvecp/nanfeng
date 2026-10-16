@@ -80,7 +80,7 @@ Verdict: **malicious** when an attack rule meets payment details, or when two at
 
 ### 7. Invoice registry against double financing (`registry.py`)
 
-Before the bank pays out on an invoice (factoring, letter-of-credit discounting), its fingerprint `keccak("NANFENG-INVOICE-V1" | issuer tax id | doc type | invoice id)` is registered; an invoice already registered is refused. In `evm` mode the bank first reads the on-chain `InvoiceRegistry` contract, so an invoice financed elsewhere is refused too, and factoring fails closed if the chain is unreachable.
+Before the bank pays out on an invoice (factoring, letter-of-credit discounting), its fingerprint `keccak("NANFENG-INVOICE-V1" | issuer tax id | doc type | invoice id)` is registered; an invoice already registered is refused. In `evm` mode the bank first reads the on-chain `InvoiceRegistry` contract, so an invoice financed elsewhere is refused too, and factoring fails closed if the chain is unreachable. Anchors and registrations share one wallet, so one sender gives them their nonces (our own count as well as the RPC's, which can lag behind on a load-balanced endpoint) and a 1 gwei tip; a registration mined after the receipt wait is recognised as ours on the next approval (threat model F15).
 
 ## Validation
 
@@ -89,7 +89,7 @@ Before the bank pays out on an invoice (factoring, letter-of-credit discounting)
 | Red team, 46 outcome-based attacks in 7 categories, against the API | 4/46 stopped before the controls → **46/46 after** (the first 43 went from 4 to 43 as the controls were built; 3 added on Oct 14 were open until that day's fixes); CI fails if one gets through |
 | The same attacks through the real agent (12 document injections, 4 chat messages, 5 bank-detail swaps) | **none moves money** (`04-source-code/agent/tests/test_redteam_via_agent.py`) |
 | Execution evidence (Cherry Crisis end to end) | the bank executes exactly the CLP 2,106,329 the MILP planned; chain and Merkle proofs recomputed without the backend's code; CLP 1 changed in one entry breaks the chain there; double financing refused ([summary](../06-execution-evidence/out/SUMMARY.md)). On the live deploy: anchor confirmed on Sepolia, calldata matches the root ([live summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
-| Unit tests | 127 backend tests (security/BEC 26, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, anchoring 7, registry 6, idempotency 6, live story 5, demo 5) |
+| Unit tests | 131 backend tests (security/BEC 26, policy 20, API 20, owner sign-in 13, OTP 12, privacy 7, anchoring 7, registry 9, idempotency 6, live story 6, demo 5) |
 
 ## Known limitations
 
