@@ -2,13 +2,15 @@
 
 Default: runs the Cherry Crisis scenario end to end against the backend in process (SMS OTP mode, owner
 reads the code from an outbox) and exports what happened. With --url it exports from a running backend
-(the deployed one, anchored on the testnet); --run-otp first plays the owner's side there (live_run).
+(the deployed one, anchored on the testnet); --run-otp first plays the owner's side there (live_run), and
+--agent-url first hands the importer's real PDF to the deployed agent service, whose plan is the one approved.
 
     ../04-source-code/backend/.venv/bin/python build.py --backend ../04-source-code/backend
-    ../04-source-code/backend/.venv/bin/python build.py --url https://api.example.com --run-otp 482913 --out out-live
+    ../04-source-code/backend/.venv/bin/python build.py --url https://api.example.com --run-otp 482913 \
+        --agent-url https://agent.example.com --out out-live
 
 Output (default ./out): bank_logs.jsonl, audit_entries.json, audit_verify.json, anchors.json,
-proofs.json, run.json and SUMMARY.md.
+proofs.json, run.json (agent_run.json with --agent-url) and SUMMARY.md.
 """
 
 import argparse
@@ -107,12 +109,34 @@ def _wait_anchored(c, timeout_s: float = 180) -> None:
         time.sleep(5)
 
 
-def live_run(c, otp: str) -> list[dict]:
+NOTICE_PDF = HERE.parent / "04-source-code" / "web" / "public" / "samples" / "hongxin-payment-notice.pdf"
+
+
+def agent_run(agent_url: str, owner: dict) -> dict:
+    """Hands the Shanghai importer's late-payment notice (the PDF a judge can download from the landing) to
+    the deployed agent service, as the owner uploading it in the cockpit, and returns the run with its full
+    trace: OCR, guard, quarantined extraction, forecast, quotes, the MILP and the approval it proposed."""
+    import base64
+
+    import httpx
+
+    with httpx.Client(base_url=agent_url.rstrip("/"), timeout=300, headers=owner) as a:
+        r = a.post("/documents", json={"filename": NOTICE_PDF.name, "mime": "application/pdf", "source": "upload",
+                                       "data_base64": base64.b64encode(NOTICE_PDF.read_bytes()).decode()})
+        r.raise_for_status()
+        run = a.get(f"/runs/{r.json()['run_id']}")
+        run.raise_for_status()
+        return run.json()
+
+
+def live_run(c, otp: str, agent_url: str | None = None) -> tuple[list[dict], dict | None]:
     """The owner's side of the Cherry Crisis on a running demo backend (the deploy, anchored on Sepolia):
     the agent's pending plan approved and executed, half of INV-2026-109 factored after its fingerprint is
     registered on chain, and the same invoice refused as already financed. The owner signs in with the
-    public demo password (GET /auth/config); `otp` is the sandbox code of the demo build."""
+    public demo password (GET /auth/config); `otp` is the sandbox code of the demo build. With `agent_url`
+    the plan approved is the one the deployed agent proposes for the importer's PDF, not one already pending."""
     steps = []
+    agent = None
 
     def step(time: str, what: str, r):
         body = r.json()
@@ -121,8 +145,18 @@ def live_run(c, otp: str) -> list[dict]:
 
     password = c.get("/auth/config").json()["demo_password"]
     owner = {"Authorization": "Bearer " + c.post("/auth/login", json={"password": password}).json()["token"]}
-    plan = next((a for a in c.get("/approvals", params={"status": "pending"}).json() if a["tier"] == 3), None)
-    if plan is None or plan["action"] != PLAN["action"]:
+    if agent_url:
+        agent = agent_run(agent_url, owner)
+        steps.append({"time": "10:12", "what": f"Importer's PDF handed to the deployed agent: run {agent['run_id']}, "
+                      f"{agent['steps']} steps, planner {agent['planner']}", "http": 200,
+                      "result": {"status": agent["status"], "approvals": agent["approvals"]}})
+        ids = [x["id"] for x in agent["approvals"] if x["tier"] == 3]
+        if not ids:
+            sys.exit(f"The agent's run {agent['run_id']} proposed no L3 plan (status {agent['status']}): {agent.get('note')}")
+        plan = c.get(f"/approvals/{ids[0]}").json()
+    else:
+        plan = next((a for a in c.get("/approvals", params={"status": "pending"}).json() if a["tier"] == 3), None)
+    if plan is None or plan["action"] != PLAN["action"] or plan["status"] != "pending":
         sys.exit("The agent's Cherry Crisis plan is not pending: the sandbox is not in its opening state "
                  "(wait for the idle reset, or play the Demo tour up to step 4)")
     step("10:15", f"Owner approves the agent's plan {plan['id']} ({plan['action']}) with the one-time code",
@@ -141,7 +175,7 @@ def live_run(c, otp: str) -> list[dict]:
          c.post(f"/approvals/{f2['id']}/approve", json={"otp": otp, "channel": "WEB+OTP"}, headers=owner))
     step("10:40", "Owner anchors everything still pending", c.post("/audit/anchor", headers=owner))
     _wait_anchored(c)  # so the export reads every anchor back from the chain
-    return steps
+    return steps, agent
 
 
 def _canonical(payload: dict) -> str:
@@ -171,14 +205,27 @@ def recheck_proof(p: dict) -> bool:
     return cur.hex() == p["merkle_root"]
 
 
-def export(c, out: Path, steps: list[dict] | None) -> None:
+def all_entries(c) -> list[dict]:
+    """The whole chain, page by page: it outlives sandbox resets, so it can hold more than one page."""
+    entries: list[dict] = []
+    while True:
+        page = c.get("/audit/entries", params={"after_seq": entries[-1]["seq"] if entries else 0, "limit": 1000}).json()
+        entries += page
+        if len(page) < 1000:
+            return entries
+
+
+def export(c, out: Path, steps: list[dict] | None, agent: dict | None = None) -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "bank_logs.jsonl").write_text(c.get("/bank/logs").text)
-    entries = c.get("/audit/entries", params={"limit": 1000}).json()
+    chain = all_entries(c)
+    # This run is the current sandbox epoch (from its sandbox.seeded on); the chain is checked whole.
+    start = max((e["seq"] for e in chain if e["kind"] == "sandbox.seeded"), default=1)
+    entries = [e for e in chain if e["seq"] >= start]
     verify = c.get("/audit/verify").json()
     anchors = c.get("/audit/anchors").json()
     dump = lambda name, obj: (out / name).write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n")  # noqa: E731
-    dump("audit_entries.json", entries)
+    dump("audit_entries.json", chain)
     dump("audit_verify.json", verify)
     dump("anchors.json", anchors)
     key = [e["seq"] for e in entries if e["kind"] in ("approval.approved", "security.attack_blocked")]
@@ -186,6 +233,8 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
     dump("proofs.json", proofs)
     if steps is not None:
         dump("run.json", steps)
+    if agent is not None:
+        dump("agent_run.json", agent)
     on_chain = []
     for a in anchors:
         if a.get("tx_hash"):
@@ -196,7 +245,7 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
     registry = {"backend": reg.json() if reg.status_code == 200 else None,
                 "invoices": c.get("/registry/invoices").json() if reg.status_code == 200 else []}
     dump("registry.json", registry)
-    checked, broken = recheck_chain(entries)
+    checked, broken = recheck_chain(chain)
     tamper = None
     if loans := [e for e in entries if e["kind"] == "bank.loan"]:
         forged = json.loads(json.dumps(entries))
@@ -210,13 +259,14 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
         kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
     lines = ["# Execution evidence (deliverable 06)", "",
              "Synthetic data in the NanFeng sandbox bank. Every line below is reproducible with `build.py`.", "",
-             f"- Audit entries: **{len(entries)}**, hash chain valid: **{verify['valid']}**",
+             f"- Audit entries: **{len(chain)}** in the whole chain ({len(entries)} in this run's sandbox, from seq {start}), "
+             f"hash chain valid: **{verify['valid']}**",
              f"- Anchors: **{len(anchors)}** ({', '.join(sorted({a['backend'] for a in anchors})) or 'none'})"
              + "".join(f"\n  - seq {a['from_seq']}–{a['to_seq']} root `{a['merkle_root'][:16]}…`"
                        + (f" tx {a['explorer_url']}" if a.get("explorer_url") else "") for a in sorted(anchors, key=lambda a: a["from_seq"])),
              f"- Merkle inclusion proofs for {len(proofs)} key entries (approvals executed, attacks blocked): `proofs.json`",
              "", "## Checked here, without the backend's code", "",
-             f"- Hash chain recomputed from the published formula: **{checked}/{len(entries)}** entries match"
+             f"- Hash chain recomputed from the published formula: **{checked}/{len(chain)}** entries match"
              + (f" (first mismatch at seq {broken})" if broken else ""),
              f"- Merkle proofs recomputed from leaf to anchored root: **{sum(proofs_ok)}/{len(proofs_ok)}** valid",
              f"- Anchors read back from the chain: **{sum(1 for x in on_chain if x.get('valid'))}/{len(on_chain)}** match"
@@ -243,6 +293,14 @@ def export(c, out: Path, steps: list[dict] | None) -> None:
             same = [e for e in loans if e["payload"].get("approval_id") == lp["approval_id"]]
             lines += [f"- Runs under approval {lp['approval_id']}, tier **L{lp.get('tier')}** (the owner's code), "
                       f"executed **{len(same)}** time(s): one decision per approval, even when two channels approve at once"]
+    if agent:
+        lines += ["", "## The agent's own run", "",
+                  f"The importer's PDF went to the deployed agent service: run **{agent['run_id']}**, status "
+                  f"`{agent['status']}`, planner `{agent['planner']}`, approvals {', '.join(a['id'] + ' (L' + str(a['tier']) + ')' for a in agent['approvals'])}. "
+                  "Every step with its tool, tier and result is in `agent_run.json`.", "",
+                  "| # | Step | Tool | Status |", "|---|------|------|--------|"]
+        for i, t in enumerate(agent.get("trace", []), 1):
+            lines.append(f"| {i} | {str(t.get('step') or t.get('name') or '')[:60]} | {t.get('tool') or ''} | {t.get('status') or ''} |")
     if steps:
         lines += ["", "## Cherry Crisis run", "", "| Time | Step | HTTP | Outcome |", "|------|------|------|---------|"]
         for s in steps:
@@ -265,6 +323,8 @@ def main() -> None:
     ap.add_argument("--url", help="running backend: export only")
     ap.add_argument("--run-otp", metavar="CODE", help="with --url: first play the owner's side (live_run) with this "
                                                       "sandbox code; sends Sepolia transactions on the deploy")
+    ap.add_argument("--agent-url", help="with --run-otp: the deployed agent service; the importer's PDF is sent to it "
+                                        "and the plan it proposes is the one approved")
     ap.add_argument("--out", default=str(HERE / "out"))
     args = ap.parse_args()
     out = Path(args.out).resolve()
@@ -273,7 +333,8 @@ def main() -> None:
         import httpx
 
         with httpx.Client(base_url=args.url.rstrip("/"), timeout=120) as c:
-            export(c, out, live_run(c, args.run_otp) if args.run_otp else None)
+            steps, agent = live_run(c, args.run_otp, args.agent_url) if args.run_otp else (None, None)
+            export(c, out, steps, agent)
         return
 
     backend = Path(args.backend or HERE.parent / "04-source-code" / "backend").resolve()

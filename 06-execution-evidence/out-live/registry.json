@@ -6,5 +6,16 @@
     "document_type": "110",
     "chain_id": 11155111
   },
-  "invoices": []
+  "invoices": [
+    {
+      "fingerprint": "0xdefc5672e2a85f411fd73686b08978e2b144bf7ed0284d09f1d0152cb787f817",
+      "backend": "evm",
+      "contract_address": "0xb5530B5c1b7728e347EbEd727e56d760dbaEeEeA",
+      "tx_hash": "0x69c7bad73fd754e8a707451ca11ebba47dfb891eebecae18144f97beed454150",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x69c7bad73fd754e8a707451ca11ebba47dfb891eebecae18144f97beed454150",
+      "receivable_id": "INV-2026-109",
+      "financing": "LEN-FACTOR:factoring",
+      "created_at": "2026-10-16T22:23:37.733865+00:00"
+    }
+  ]
 }

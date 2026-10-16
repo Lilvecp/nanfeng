@@ -1,0 +1,222 @@
+{
+  "run_id": "RUN-0001",
+  "kind": "document",
+  "status": "awaiting_approval",
+  "note": "waiting for the owner's OTP approval",
+  "steps": 15,
+  "approvals": [
+    {
+      "id": "APR-0001",
+      "tier": 3,
+      "status": "pending"
+    }
+  ],
+  "deliveries": [
+    {
+      "channel": "email",
+      "to": "o•••@huerto-austral.example",
+      "status": "failed",
+      "message_id": "",
+      "mock": false,
+      "kind": "alert",
+      "language": "en"
+    },
+    {
+      "channel": "email",
+      "to": "o•••@huerto-austral.example",
+      "status": "failed",
+      "message_id": "",
+      "mock": false,
+      "kind": "plan",
+      "language": "en"
+    },
+    {
+      "channel": "wecom",
+      "to": "weco•••ap",
+      "status": "simulated",
+      "message_id": "wecom-mock-1",
+      "mock": true,
+      "kind": "collection",
+      "language": "zh"
+    },
+    {
+      "channel": "email",
+      "to": "o•••@huerto-austral.example",
+      "status": "failed",
+      "message_id": "",
+      "mock": false,
+      "kind": "approval",
+      "language": "en"
+    }
+  ],
+  "planner": "llm",
+  "trace": [
+    {
+      "tier": 0,
+      "model": "guard",
+      "cost_usd": 0.0,
+      "latency_s": 0.266,
+      "status": "done",
+      "detail": "clean []",
+      "step": "Document guard",
+      "tool": "security.scan",
+      "doc_id": "DOC-222237-001",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "mistralai/mistral-small-3.2-24b-instruct",
+      "cost_usd": 7.984375e-05,
+      "latency_s": 4.196,
+      "status": "done",
+      "detail": "payment_notice · USD 180000.00",
+      "step": "Quarantined extraction",
+      "tool": "quarantine.extract",
+      "doc_id": "DOC-222237-001",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "rules",
+      "cost_usd": 0.0,
+      "latency_s": 0.0,
+      "status": "done",
+      "detail": "INV-2026-118 +45 days",
+      "step": "Scenario from notice",
+      "tool": "quant.scenario",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "anthropic/claude-sonnet-5.5",
+      "cost_usd": 0.013118,
+      "latency_s": 0.0,
+      "status": "done",
+      "detail": "ledger_query → forecast_run → business_analysis → financing_quote → optimize_plan → propose_plan → anchor_audit → send_collection · collection reminder added",
+      "step": "Plan",
+      "tool": "planner.llm",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "sandbox bank",
+      "cost_usd": 0.0,
+      "latency_s": 0.247,
+      "status": "done",
+      "detail": "",
+      "step": "ledger_query",
+      "tool": "ledger_query",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "Monte Carlo",
+      "cost_usd": 0.0,
+      "latency_s": 1.321,
+      "status": "done",
+      "detail": "81% probability of negative cash in 19 days (2026-12-30)",
+      "step": "forecast_run",
+      "tool": "forecast_run",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 1,
+      "model": "template",
+      "cost_usd": 0.0,
+      "latency_s": 0.0,
+      "status": "done",
+      "detail": "email · failed · en",
+      "step": "Owner notified (alert)",
+      "tool": "channel.email",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "quant engine",
+      "cost_usd": 0.0,
+      "latency_s": 0.73,
+      "status": "done",
+      "detail": "7 findings (3 high) · net 90 days CLP 451.6M · DSO 68 days",
+      "step": "business_analysis",
+      "tool": "business_analysis",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "catalog",
+      "cost_usd": 0.0,
+      "latency_s": 0.727,
+      "status": "done",
+      "detail": "9 options, 7 eligible · need CLP 55.6M on 2026-12-30",
+      "step": "financing_quote",
+      "tool": "financing_quote",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "MILP · CBC",
+      "cost_usd": 0.0,
+      "latency_s": 4.035,
+      "status": "done",
+      "detail": "Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE) · CLP 2.1M vs CLP 3.8M",
+      "step": "optimize_plan",
+      "tool": "optimize_plan",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 1,
+      "model": "template",
+      "cost_usd": 0.0,
+      "latency_s": 0.0,
+      "status": "done",
+      "detail": "email · failed · en",
+      "step": "Owner notified (plan)",
+      "tool": "channel.email",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 3,
+      "model": "policy engine",
+      "cost_usd": 0.0,
+      "latency_s": 0.262,
+      "status": "done",
+      "detail": "APR-0001 · L3 · pending · CLP 140.1M",
+      "step": "propose_plan",
+      "tool": "propose_plan",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 0,
+      "model": "audit chain",
+      "cost_usd": 0.0,
+      "latency_s": 1.66,
+      "status": "done",
+      "detail": "Merkle root 79871fe67062… seq 9-13",
+      "step": "anchor_audit",
+      "tool": "anchor_audit",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 1,
+      "model": "template",
+      "cost_usd": 0.0,
+      "latency_s": 0.256,
+      "status": "done",
+      "detail": "wecom (mock) · zh · INV-2026-118",
+      "step": "send_collection",
+      "tool": "send_collection",
+      "run_id": "RUN-0001"
+    },
+    {
+      "tier": 1,
+      "model": "template",
+      "cost_usd": 0.0,
+      "latency_s": 0.0,
+      "status": "done",
+      "detail": "email · failed · en",
+      "step": "Owner notified (approval)",
+      "tool": "channel.email",
+      "run_id": "RUN-0001"
+    }
+  ]
+}

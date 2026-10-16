@@ -2,11 +2,11 @@
 
 Synthetic data in the NanFeng sandbox bank. Every line below is reproducible with `build.py`.
 
-- Audit entries: **26**, hash chain valid: **True**
+- Audit entries: **26** in the whole chain (26 in this run's sandbox, from seq 1), hash chain valid: **True**
 - Anchors: **3** (local)
-  - seq 1–11 root `ea43e9285daa7236…`
-  - seq 12–16 root `ba0308798165426c…`
-  - seq 17–25 root `16c8fa984383c3e3…`
+  - seq 1–11 root `0bf7b25358c6b3cf…`
+  - seq 12–16 root `a71406c24f98c0b8…`
+  - seq 17–25 root `3ecbd312549363d7…`
 - Merkle inclusion proofs for 7 key entries (approvals executed, attacks blocked): `proofs.json`
 
 ## Checked here, without the backend's code
@@ -60,4 +60,4 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 | 10:35 | Owner stops the agent (kill switch on) | 200 | kill switch on=True |
 | 10:35 | Agent tries to turn the kill switch back off | 403 | Only the owner can turn the kill switch off |
 | 10:35 | Anonymous caller tries to turn it off | 401 | owner_login_required |
-| 10:40 | Agent anchors everything still pending | 201 | 16c8fa984383c3e3e6a6fefb1dee18caf12b200a83ab8d0eb363246619fc |
+| 10:40 | Agent anchors everything still pending | 201 | 3ecbd312549363d70e73780f03a5e06acf69d9979849cb96eb293b703a38 |

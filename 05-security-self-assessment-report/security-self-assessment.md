@@ -12,7 +12,7 @@ NanFeng lets an AI agent move a company's money, so its security model starts fr
 | Same attacks through the real agent | **21 attacks** through the real agent (12 document injections, 4 chat / exfiltration messages, 5 bank-detail swaps): **none moves money** ([test](../04-source-code/agent/tests/test_redteam_via_agent.py)) |
 | Automated tests | **Backend 137**: security/BEC 26, API 22, policy 20, owner sign-in 13, OTP 12, live story 10, invoice registry 9, privacy 7, anchoring 7, idempotency 6, demo 5. **Agent 113**, including the red team replay and the AI label. **Quant 36** |
 | CI gate | Fails the build if any of the 46 red team attacks gets through |
-| Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](../06-execution-evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 12): the same match, chain 7/7, the 08:47 attack in the anchored root, the loan as L3 executed once, and the Merkle root read back from Sepolia ([summary](../06-execution-evidence/out-live/SUMMARY.md), [tx](https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b)) |
+| Execution evidence | Cherry Crisis end to end: the bank executes exactly the CLP 2,106,329 the MILP planned; a second financing of the same invoice is refused; the hash chain and every Merkle proof are recomputed **without the backend's code**, and adding CLP 1 to the loan breaks the chain at that entry ([evidence](../06-execution-evidence/out/SUMMARY.md)). **Live on the deploy** (Oct 16): the importer's PDF handed to the deployed agent (run RUN-0001, 15 steps, LLM planner) proposes the plan; the owner approves it and the bank executes the same CLP 2,106,329 once; INV-2026-109 is registered on Sepolia before its factoring and refused the second time; chain 25/25, 7/7 anchors read back from Sepolia ([summary](../06-execution-evidence/out-live/SUMMARY.md), [last anchor](https://sepolia.etherscan.io/tx/0x735ae05f711dd28929475544f1f3526324e5938ddfda6b0301c1577bc1a2e2da), [registration](https://sepolia.etherscan.io/tx/0x69c7bad73fd754e8a707451ca11ebba47dfb891eebecae18144f97beed454150)) |
 
 ## 2. Where decisions are made
 
@@ -106,5 +106,5 @@ cd 04-source-code/backend && pytest -q                        # 137 tests
 cd ../agent && pytest -q                                      # 113 agent tests, red team replay included
 cd ../redteam && python run.py --backend ../backend --label after --min-stopped 46 && python report.py
 cd ../../06-execution-evidence && python build.py --backend ../04-source-code/backend   # Cherry Crisis evidence
-python build.py --url <deployed backend> --run-otp <sandbox code> --out out-live   # the owner's side on the live deploy, then the export
+python build.py --url <deployed backend> --run-otp <sandbox code> --agent-url <deployed agent> --out out-live   # the agent's run and the owner's side on the live deploy, then the export
 ```

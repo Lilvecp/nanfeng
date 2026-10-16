@@ -68,7 +68,7 @@
     "http": 201,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-13T03:33:05.934557Z",
+      "created_at": "2026-10-16T22:21:18.790983Z",
       "decided_at": null,
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
@@ -116,8 +116,8 @@
     "http": 200,
     "result": {
       "id": "APR-0001",
-      "created_at": "2026-10-13T03:33:05.934557",
-      "decided_at": "2026-10-13T03:33:05.945228Z",
+      "created_at": "2026-10-16T22:21:18.790983",
+      "decided_at": "2026-10-16T22:21:18.800212Z",
       "action": "Pre-export loan in USD (PAE)",
       "operations": [
         {
@@ -152,7 +152,7 @@
           "approval_id": "APR-0001",
           "tier": 3,
           "audit_seq": 10,
-          "audit_hash": "7af76f75adfb07e5adece59cb4dfd90e1d479ce10139527b9a06a93728dd9b27"
+          "audit_hash": "e4ee6ced092aeeba9bf0b8e5a21b9e951c2fb559a8dc4c72d6ba40e011d768a0"
         }
       ]
     }
@@ -163,7 +163,7 @@
     "http": 201,
     "result": {
       "id": "APR-0002",
-      "created_at": "2026-10-13T03:33:05.948905Z",
+      "created_at": "2026-10-16T22:21:18.803576Z",
       "decided_at": null,
       "action": "factoring INV-2026-109",
       "operations": [
@@ -191,8 +191,8 @@
     "http": 200,
     "result": {
       "id": "APR-0002",
-      "created_at": "2026-10-13T03:33:05.948905",
-      "decided_at": "2026-10-13T03:33:05.970297Z",
+      "created_at": "2026-10-16T22:21:18.803576",
+      "decided_at": "2026-10-16T22:21:18.815200Z",
       "action": "factoring INV-2026-109",
       "operations": [
         {
@@ -232,7 +232,7 @@
           "approval_id": "APR-0002",
           "tier": 3,
           "audit_seq": 15,
-          "audit_hash": "d87da7d1b5e3a9ddace25141dca659fc0985d6fca4ae77b1a8e368b0f665fb80"
+          "audit_hash": "08890808b6017912561236be13c7923965a3db1888b8188b7ef8ca62d2636fbf"
         }
       ]
     }
@@ -243,7 +243,7 @@
     "http": 201,
     "result": {
       "id": "APR-0003",
-      "created_at": "2026-10-13T03:33:05.973585Z",
+      "created_at": "2026-10-16T22:21:18.818260Z",
       "decided_at": null,
       "action": "factor INV-2026-109 again elsewhere",
       "operations": [
@@ -272,8 +272,8 @@
     "http": 200,
     "result": {
       "id": "APR-0003",
-      "created_at": "2026-10-13T03:33:05.973585",
-      "decided_at": "2026-10-13T03:33:05.978525Z",
+      "created_at": "2026-10-16T22:21:18.818260",
+      "decided_at": "2026-10-16T22:21:18.822889Z",
       "action": "factor INV-2026-109 again elsewhere",
       "operations": [
         {
@@ -301,8 +301,8 @@
     "http": 201,
     "result": {
       "id": "AUT-0004",
-      "created_at": "2026-10-13T03:33:05.981262Z",
-      "decided_at": "2026-10-13T03:33:05.982203Z",
+      "created_at": "2026-10-16T22:21:18.825560Z",
+      "decided_at": "2026-10-16T22:21:18.826540Z",
       "action": "pay Cartonera 1/2",
       "operations": [
         {
@@ -333,7 +333,7 @@
           "approval_id": "AUT-0004",
           "tier": 2,
           "audit_seq": 21,
-          "audit_hash": "958ec7d7149eef4cff20b06904c36b1a1b01e57248e6a75bec433a910f92f2c4"
+          "audit_hash": "77bd6db96e7023562b9264651e6e69b4d2627939617742e352bb1a3225a7d25d"
         }
       ]
     }
@@ -344,7 +344,7 @@
     "http": 201,
     "result": {
       "id": "APR-0005",
-      "created_at": "2026-10-13T03:33:05.984396Z",
+      "created_at": "2026-10-16T22:21:18.828526Z",
       "decided_at": null,
       "action": "pay Cartonera 2/2",
       "operations": [
@@ -399,10 +399,10 @@
     "http": 201,
     "result": {
       "id": 3,
-      "created_at": "2026-10-13T03:33:05.989878Z",
+      "created_at": "2026-10-16T22:21:18.833557Z",
       "from_seq": 17,
       "to_seq": 25,
-      "merkle_root": "16c8fa984383c3e3e6a6fefb1dee18caf12b200a83ab8d0eb363246619fc64ac",
+      "merkle_root": "3ecbd312549363d70e73780f03a5e06acf69d9979849cb96eb293b703a38758b",
       "backend": "local",
       "tx_hash": null,
       "explorer_url": null

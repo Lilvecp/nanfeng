@@ -1,7 +1,7 @@
 [
   {
     "seq": 1,
-    "ts": "2026-10-13T03:32:16.070+00:00",
+    "ts": "2026-10-16T19:30:29.146+00:00",
     "actor": "system",
     "kind": "sandbox.seeded",
     "payload": {
@@ -20,11 +20,11 @@
       "synthetic": true
     },
     "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-    "hash": "625d81f93e31eef3a3c25efc9ff58d5628ea352fd877a8ed9a2e2bb8138d18d2"
+    "hash": "ffd9a6d9e17dbb2e9279509ead54c9d3b2823954def8f97a647474fc7eab55dc"
   },
   {
     "seq": 2,
-    "ts": "2026-10-13T03:32:16.082+00:00",
+    "ts": "2026-10-16T19:30:29.155+00:00",
     "actor": "security",
     "kind": "security.attack_blocked",
     "payload": {
@@ -43,12 +43,12 @@
       "source": "email",
       "verdict": "malicious"
     },
-    "prev_hash": "625d81f93e31eef3a3c25efc9ff58d5628ea352fd877a8ed9a2e2bb8138d18d2",
-    "hash": "db4c8bf18a432a0b2e6cf0e3646f4bf37be1ea3956023b31fa49534f527d7229"
+    "prev_hash": "ffd9a6d9e17dbb2e9279509ead54c9d3b2823954def8f97a647474fc7eab55dc",
+    "hash": "1d047a12adc2b2f187d30a910e01d7223a4d0b6750ff409191ff1d3f2d30af5e"
   },
   {
     "seq": 3,
-    "ts": "2026-10-13T03:32:16.090+00:00",
+    "ts": "2026-10-16T19:30:29.162+00:00",
     "actor": "security",
     "kind": "security.attack_blocked",
     "payload": {
@@ -74,13 +74,13 @@
         "call": "+56229876543"
       }
     },
-    "prev_hash": "db4c8bf18a432a0b2e6cf0e3646f4bf37be1ea3956023b31fa49534f527d7229",
-    "hash": "a05fc7ce361d1f9a66dd93a873c969bc6996d838176716bb1793f61b7b95bdaf"
+    "prev_hash": "1d047a12adc2b2f187d30a910e01d7223a4d0b6750ff409191ff1d3f2d30af5e",
+    "hash": "f33c7488fc44fd92fbe4b64174ac374f1da76537b11578d5cf1a669f582b1965"
   },
   {
     "seq": 4,
-    "ts": "2026-10-13T03:32:17.498+00:00",
-    "actor": "agent",
+    "ts": "2026-10-16T19:30:31.799+00:00",
+    "actor": "owner",
     "kind": "approval.created",
     "payload": {
       "action": "Pre-export loan in USD (PAE)",
@@ -94,12 +94,150 @@
       "status": "pending",
       "tier": 3
     },
-    "prev_hash": "a05fc7ce361d1f9a66dd93a873c969bc6996d838176716bb1793f61b7b95bdaf",
-    "hash": "05c28beb4972ec50571a750b3592803060a307a5c4547c8993dadc7f3ed183aa"
+    "prev_hash": "f33c7488fc44fd92fbe4b64174ac374f1da76537b11578d5cf1a669f582b1965",
+    "hash": "0a7b7a96427892f9d16ede5808bf5d53f8efc28fc5cd9e1354bd22908f936438"
   },
   {
     "seq": 5,
-    "ts": "2026-10-13T03:32:17.991+00:00",
+    "ts": "2026-10-16T22:20:44.656+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 1,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0xfe739f65f8164295303f1312d30bfcea1827eca5f84c6cfc62ab9533caa4f77d",
+      "from_seq": 1,
+      "merkle_root": "3e9a5ff2a43d5b79f8b8bea4ea9bc28efb5584a9263f03f644146f73ef1f970f",
+      "to_seq": 4,
+      "tx_hash": "0xfe739f65f8164295303f1312d30bfcea1827eca5f84c6cfc62ab9533caa4f77d"
+    },
+    "prev_hash": "0a7b7a96427892f9d16ede5808bf5d53f8efc28fc5cd9e1354bd22908f936438",
+    "hash": "09bcb486c27a51cd024ec91912e252cc075dd1c6d766356e0dbab2f380d80b25"
+  },
+  {
+    "seq": 6,
+    "ts": "2026-10-16T22:21:34.044+00:00",
+    "actor": "owner",
+    "kind": "auth.login",
+    "payload": {
+      "expires_at": 1792218094
+    },
+    "prev_hash": "09bcb486c27a51cd024ec91912e252cc075dd1c6d766356e0dbab2f380d80b25",
+    "hash": "c9a5e891120a4dc2f4f4b260a1b3f8cc55a8ec72f20b30717278472129c3cfc3"
+  },
+  {
+    "seq": 7,
+    "ts": "2026-10-16T22:21:37.443+00:00",
+    "actor": "security",
+    "kind": "document.received",
+    "payload": {
+      "doc_id": "DOC-222136-001",
+      "sha256": "fb1a88e02097bba0dfde2be5daa824d0c1a6210123086679085b300f5ee0eaa1",
+      "source": "upload",
+      "text_layer_sha256": "e201a8328b259968b01f801eec1df3967896055319ac05c94588e42b0bd8a523"
+    },
+    "prev_hash": "c9a5e891120a4dc2f4f4b260a1b3f8cc55a8ec72f20b30717278472129c3cfc3",
+    "hash": "97f38d77377252c4a8d42f850a67ebdc87b00ad42e7b9af82c909ea6d552c8ab"
+  },
+  {
+    "seq": 8,
+    "ts": "2026-10-16T22:22:08.208+00:00",
+    "actor": "agent",
+    "kind": "approval.repeated",
+    "payload": {
+      "action": "Pre-export loan in USD (PAE)",
+      "approval_id": "APR-0001",
+      "channel": "WA"
+    },
+    "prev_hash": "97f38d77377252c4a8d42f850a67ebdc87b00ad42e7b9af82c909ea6d552c8ab",
+    "hash": "34020721618e96d05c61909d42f5e40262f282f0374b74e08ab5be412e57a788"
+  },
+  {
+    "seq": 9,
+    "ts": "2026-10-16T22:22:10.681+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 2,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x042a6327943ce418dcf74930e3c88b44198407e67624b14f59374ed72a2d7658",
+      "from_seq": 5,
+      "merkle_root": "358739d70b9be003398d210aed0949d670b2306eabff54ee423db19ca5d12807",
+      "to_seq": 8,
+      "tx_hash": "0x042a6327943ce418dcf74930e3c88b44198407e67624b14f59374ed72a2d7658"
+    },
+    "prev_hash": "34020721618e96d05c61909d42f5e40262f282f0374b74e08ab5be412e57a788",
+    "hash": "9efc47d4630316cc408ef1fe2fb85f4358819d8dfc63894b60be99374004bd61"
+  },
+  {
+    "seq": 10,
+    "ts": "2026-10-16T22:22:25.028+00:00",
+    "actor": "owner",
+    "kind": "auth.login",
+    "payload": {
+      "expires_at": 1792218145
+    },
+    "prev_hash": "9efc47d4630316cc408ef1fe2fb85f4358819d8dfc63894b60be99374004bd61",
+    "hash": "807099471bdb82a219ec4931695aab0e722cc306155e79d3b8920bc09604ce97"
+  },
+  {
+    "seq": 11,
+    "ts": "2026-10-16T22:22:34.757+00:00",
+    "actor": "owner",
+    "kind": "auth.login",
+    "payload": {
+      "expires_at": 1792218154
+    },
+    "prev_hash": "807099471bdb82a219ec4931695aab0e722cc306155e79d3b8920bc09604ce97",
+    "hash": "1396fc54f1ef829330c7e9122a2a40c9f89a8861c6d06ce836f0acce162805e0"
+  },
+  {
+    "seq": 12,
+    "ts": "2026-10-16T22:22:38.207+00:00",
+    "actor": "security",
+    "kind": "document.received",
+    "payload": {
+      "doc_id": "DOC-222237-001",
+      "sha256": "fb1a88e02097bba0dfde2be5daa824d0c1a6210123086679085b300f5ee0eaa1",
+      "source": "upload",
+      "text_layer_sha256": "e201a8328b259968b01f801eec1df3967896055319ac05c94588e42b0bd8a523"
+    },
+    "prev_hash": "1396fc54f1ef829330c7e9122a2a40c9f89a8861c6d06ce836f0acce162805e0",
+    "hash": "4ad19cc582683a08d620e542945762295942dca97c2873b51df947fbcab84826"
+  },
+  {
+    "seq": 13,
+    "ts": "2026-10-16T22:23:07.468+00:00",
+    "actor": "agent",
+    "kind": "approval.repeated",
+    "payload": {
+      "action": "Pre-export loan in USD (PAE)",
+      "approval_id": "APR-0001",
+      "channel": "WA"
+    },
+    "prev_hash": "4ad19cc582683a08d620e542945762295942dca97c2873b51df947fbcab84826",
+    "hash": "ac76c3a200cb2fa71408343868a5a16c8e43bf3c6bfa5c46096601b6cce8c388"
+  },
+  {
+    "seq": 14,
+    "ts": "2026-10-16T22:23:09.616+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 3,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0xce85b4074ac0ab736a92838ee85b3aca9ae9763963b7fc1d2812844c90be0ce9",
+      "from_seq": 9,
+      "merkle_root": "79871fe67062eb48afafe762655be93df445cfdecacb1eeaadfe9558ea357a74",
+      "to_seq": 13,
+      "tx_hash": "0xce85b4074ac0ab736a92838ee85b3aca9ae9763963b7fc1d2812844c90be0ce9"
+    },
+    "prev_hash": "ac76c3a200cb2fa71408343868a5a16c8e43bf3c6bfa5c46096601b6cce8c388",
+    "hash": "bd160dfc8cb0d2d2f08cf377d553d8d5dbf07a3a20bc5a332999698f67e9b131"
+  },
+  {
+    "seq": 15,
+    "ts": "2026-10-16T22:23:17.412+00:00",
     "actor": "owner",
     "kind": "bank.loan",
     "payload": {
@@ -117,41 +255,193 @@
       "tier": 3,
       "transaction_id": 1
     },
-    "prev_hash": "05c28beb4972ec50571a750b3592803060a307a5c4547c8993dadc7f3ed183aa",
-    "hash": "6fde725f0235cb681fad2cf6c4f3dff97085ef13164fa1f3f73139f6c149f5fc"
+    "prev_hash": "bd160dfc8cb0d2d2f08cf377d553d8d5dbf07a3a20bc5a332999698f67e9b131",
+    "hash": "cca1f4cdffee1f8992147ca3ff605eddcac8325bc2436db7f76aefbd3091e578"
   },
   {
-    "seq": 6,
-    "ts": "2026-10-13T03:32:18.000+00:00",
+    "seq": 16,
+    "ts": "2026-10-16T22:23:17.438+00:00",
     "actor": "owner",
     "kind": "approval.approved",
     "payload": {
       "approval_id": "APR-0001",
-      "channel": "WA+OTP",
+      "channel": "WEB+OTP",
       "result_hashes": [
-        "6fde725f0235cb681fad2cf6c4f3dff97085ef13164fa1f3f73139f6c149f5fc"
+        "cca1f4cdffee1f8992147ca3ff605eddcac8325bc2436db7f76aefbd3091e578"
       ],
       "status": "approved",
       "tier": 3
     },
-    "prev_hash": "6fde725f0235cb681fad2cf6c4f3dff97085ef13164fa1f3f73139f6c149f5fc",
-    "hash": "e2bb155e2017fcc067d7335d1107e38093d2302f528971f466a7969468a0a70b"
+    "prev_hash": "cca1f4cdffee1f8992147ca3ff605eddcac8325bc2436db7f76aefbd3091e578",
+    "hash": "8e80b6bfa8d6e14c580c83c4bbc62f6bb433f45af0a6a8914ab5a9361c08c6cd"
   },
   {
-    "seq": 7,
-    "ts": "2026-10-13T03:32:20.012+00:00",
+    "seq": 17,
+    "ts": "2026-10-16T22:23:18.866+00:00",
     "actor": "system",
     "kind": "audit.anchored",
     "payload": {
-      "anchor_id": 1,
+      "anchor_id": 4,
       "backend": "evm",
-      "explorer_url": "https://sepolia.etherscan.io/tx/0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b",
-      "from_seq": 1,
-      "merkle_root": "09b1106994c6ded8617e136024c5cdb033bbd707491786dfb2ce2e69d8968369",
-      "to_seq": 6,
-      "tx_hash": "0x8b7839ee8c4fa86391f156d58378fb349489876d64f134eb35bebf7b4e11897b"
+      "explorer_url": "https://sepolia.etherscan.io/tx/0xa2296e24d4e6a6cdd3006d766c314462efc98349d94854a3e891093736de82fc",
+      "from_seq": 14,
+      "merkle_root": "0367ad28ae134b16d9c5c33d7cdf5ce520554bb4873d7a30791ac7fbcc321341",
+      "to_seq": 16,
+      "tx_hash": "0xa2296e24d4e6a6cdd3006d766c314462efc98349d94854a3e891093736de82fc"
     },
-    "prev_hash": "e2bb155e2017fcc067d7335d1107e38093d2302f528971f466a7969468a0a70b",
-    "hash": "a4a5efacae99f7760bff6d3346be040a4ac8e1f6b5c440b00e48636fa3a5283d"
+    "prev_hash": "8e80b6bfa8d6e14c580c83c4bbc62f6bb433f45af0a6a8914ab5a9361c08c6cd",
+    "hash": "d389ee5ab0d0f98b32a82588f9891bc7091f163a325f4b09751e735ece41c759"
+  },
+  {
+    "seq": 18,
+    "ts": "2026-10-16T22:23:21.024+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 5,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x1e08bf85be7624b3d137daa45aff5a5484384c1327e8736f267aa26196a38928",
+      "from_seq": 17,
+      "merkle_root": "d389ee5ab0d0f98b32a82588f9891bc7091f163a325f4b09751e735ece41c759",
+      "to_seq": 17,
+      "tx_hash": "0x1e08bf85be7624b3d137daa45aff5a5484384c1327e8736f267aa26196a38928"
+    },
+    "prev_hash": "d389ee5ab0d0f98b32a82588f9891bc7091f163a325f4b09751e735ece41c759",
+    "hash": "6787e7768d662b5768b8767fc54ff867986a77ec909fb5d0b291105bde13f31a"
+  },
+  {
+    "seq": 19,
+    "ts": "2026-10-16T22:23:27.464+00:00",
+    "actor": "owner",
+    "kind": "approval.created",
+    "payload": {
+      "action": "factoring INV-2026-109",
+      "amount_clp": 73788000.0,
+      "approval_id": "APR-0002",
+      "policy_reason": "Factoring always needs the owner's approval",
+      "policy_rules": [
+        "financing"
+      ],
+      "policy_version": 1,
+      "status": "pending",
+      "tier": 3
+    },
+    "prev_hash": "6787e7768d662b5768b8767fc54ff867986a77ec909fb5d0b291105bde13f31a",
+    "hash": "76ee373fce9f571de7945bce55653190f94507cc2f86892a0288d41700a7d34d"
+  },
+  {
+    "seq": 20,
+    "ts": "2026-10-16T22:23:37.755+00:00",
+    "actor": "owner",
+    "kind": "bank.factoring",
+    "payload": {
+      "advance_pct": 0.85,
+      "amount_clp": 73788000.0,
+      "annual_rate": 0.18,
+      "approval_id": "APR-0002",
+      "face_value_clp": 73788000.0,
+      "fee_clp": 244470.0,
+      "lender_id": "LEN-FACTOR",
+      "proceeds_clp": 62475330.0,
+      "receivable_id": "INV-2026-109",
+      "registry": {
+        "backend": "evm",
+        "contract_address": "0xb5530B5c1b7728e347EbEd727e56d760dbaEeEeA",
+        "explorer_url": "https://sepolia.etherscan.io/tx/0x69c7bad73fd754e8a707451ca11ebba47dfb891eebecae18144f97beed454150",
+        "fingerprint": "0xdefc5672e2a85f411fd73686b08978e2b144bf7ed0284d09f1d0152cb787f817",
+        "tx_hash": "0x69c7bad73fd754e8a707451ca11ebba47dfb891eebecae18144f97beed454150"
+      },
+      "share": 0.5,
+      "tier": 3,
+      "transaction_id": 2
+    },
+    "prev_hash": "76ee373fce9f571de7945bce55653190f94507cc2f86892a0288d41700a7d34d",
+    "hash": "311d294b6881a198d585e0fc3e938edbd7a4a9a0333e7da2de065290e7c1affb"
+  },
+  {
+    "seq": 21,
+    "ts": "2026-10-16T22:23:37.775+00:00",
+    "actor": "owner",
+    "kind": "approval.approved",
+    "payload": {
+      "approval_id": "APR-0002",
+      "channel": "WEB+OTP",
+      "result_hashes": [
+        "311d294b6881a198d585e0fc3e938edbd7a4a9a0333e7da2de065290e7c1affb"
+      ],
+      "status": "approved",
+      "tier": 3
+    },
+    "prev_hash": "311d294b6881a198d585e0fc3e938edbd7a4a9a0333e7da2de065290e7c1affb",
+    "hash": "b91f217eff022a8b34853f8039d64020a81107c52f8d7e9f95bf8df759521e23"
+  },
+  {
+    "seq": 22,
+    "ts": "2026-10-16T22:23:39.203+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 6,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0xcc0e57884fa205ccf706765c07ae376e21a906b9ae5d67cf5bb64dcb18c58e74",
+      "from_seq": 18,
+      "merkle_root": "40bf9669ec3e486c9d007efee3fd7c18bece27851fd5c3dfe4535140b4e5d50e",
+      "to_seq": 21,
+      "tx_hash": "0xcc0e57884fa205ccf706765c07ae376e21a906b9ae5d67cf5bb64dcb18c58e74"
+    },
+    "prev_hash": "b91f217eff022a8b34853f8039d64020a81107c52f8d7e9f95bf8df759521e23",
+    "hash": "6aefebd88a2715024b8de9f131b51dda4d676bea737d39d6c59f3b14ec46490c"
+  },
+  {
+    "seq": 23,
+    "ts": "2026-10-16T22:23:39.831+00:00",
+    "actor": "owner",
+    "kind": "approval.created",
+    "payload": {
+      "action": "factor INV-2026-109 again elsewhere",
+      "amount_clp": 73788000.0,
+      "approval_id": "APR-0003",
+      "policy_reason": "Factoring always needs the owner's approval",
+      "policy_rules": [
+        "financing"
+      ],
+      "policy_version": 1,
+      "status": "pending",
+      "tier": 3
+    },
+    "prev_hash": "6aefebd88a2715024b8de9f131b51dda4d676bea737d39d6c59f3b14ec46490c",
+    "hash": "de688af14566e8fbee3951f3791ffc8cfc002a24f3fdc915134c0b7be2fcb728"
+  },
+  {
+    "seq": 24,
+    "ts": "2026-10-16T22:23:40.464+00:00",
+    "actor": "owner",
+    "kind": "approval.approved",
+    "payload": {
+      "approval_id": "APR-0003",
+      "channel": "WEB+OTP",
+      "result_hashes": [],
+      "status": "failed",
+      "tier": 3
+    },
+    "prev_hash": "de688af14566e8fbee3951f3791ffc8cfc002a24f3fdc915134c0b7be2fcb728",
+    "hash": "6c50d96808f8e27e1beb710f375412d18367c46d6f6f0352b046192e590406d4"
+  },
+  {
+    "seq": 25,
+    "ts": "2026-10-16T22:23:42.300+00:00",
+    "actor": "system",
+    "kind": "audit.anchored",
+    "payload": {
+      "anchor_id": 7,
+      "backend": "evm",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x735ae05f711dd28929475544f1f3526324e5938ddfda6b0301c1577bc1a2e2da",
+      "from_seq": 22,
+      "merkle_root": "bac0c5bda9ce7d0a6fab086e7d33019a8373260cec1c4939db1ec4c436bd3759",
+      "to_seq": 24,
+      "tx_hash": "0x735ae05f711dd28929475544f1f3526324e5938ddfda6b0301c1577bc1a2e2da"
+    },
+    "prev_hash": "6c50d96808f8e27e1beb710f375412d18367c46d6f6f0352b046192e590406d4",
+    "hash": "82028826b923e760c7a4c81bfa8009020fdbd0db7101b4e8ef7e8904cf0ec947"
   }
 ]
