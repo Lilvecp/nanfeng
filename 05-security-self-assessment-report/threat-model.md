@@ -121,7 +121,7 @@ flowchart LR
 
 ## Residual risks
 
-- The guard classifier is probabilistic; we rely on the policy engine and the OTP, not on it.
-- Single-instance backend: the lock, SSE history and kill switch do not survive horizontal scaling.
+- The guard is rule-based and can miss an attack worded in a new way (known risk K3); we rely on the policy engine and the OTP, not on it.
+- Single-instance backend: the policy lock and the event history live in memory and do not survive horizontal scaling (the kill switch is stored in the database, F9).
 - SIM-swap against the owner's phone would defeat SMS OTP; production would add device binding or an authenticator app.
 - Sandbox only: no real bank API, so bank-side controls (callbacks, limits) are simulated.
