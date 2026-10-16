@@ -1,0 +1,305 @@
+{
+  "s10-03-sepolia": {
+    "hash": "0081ac2c5575",
+    "dur": 4.016,
+    "speech": [
+      0,
+      4.016
+    ],
+    "src": "audio/pitch/s10-03-sepolia.mp3"
+  },
+  "s13-02-tagline-a": {
+    "hash": "26ba76fae12c",
+    "dur": 1.533,
+    "speech": [
+      0,
+      1.533
+    ],
+    "src": "audio/pitch/s13-02-tagline-a.mp3"
+  },
+  "s13-02-tagline-b": {
+    "hash": "60d957923345",
+    "dur": 1.49,
+    "speech": [
+      0,
+      1.49
+    ],
+    "src": "audio/pitch/s13-02-tagline-b.mp3"
+  },
+  "s03-05a": {
+    "hash": "b4561b8ccbb4",
+    "dur": 1.55,
+    "speech": [
+      0,
+      1.273
+    ],
+    "src": "audio/pitch/s03-05a.mp3"
+  },
+  "s05-01a": {
+    "hash": "5ea9d907be22",
+    "dur": 2.15,
+    "speech": [
+      0,
+      1.928
+    ],
+    "src": "audio/pitch/s05-01a.mp3"
+  },
+  "s07-02b": {
+    "hash": "57ac1cea6b9e",
+    "dur": 4.225,
+    "speech": [
+      0.12,
+      4.225
+    ],
+    "src": "audio/pitch/s07-02b.mp3"
+  },
+  "s12-01a": {
+    "hash": "f349b9077377",
+    "dur": 2.4,
+    "speech": [
+      0,
+      2.163
+    ],
+    "src": "audio/pitch/s12-01a.mp3"
+  },
+  "s01-01": {
+    "dur": 4.457,
+    "speech": [
+      0,
+      4.457
+    ],
+    "src": "audio/s01-01.mp3"
+  },
+  "s01-02": {
+    "dur": 2.849,
+    "speech": [
+      0,
+      2.849
+    ],
+    "src": "audio/s01-02.mp3"
+  },
+  "s01-03": {
+    "dur": 3.874,
+    "speech": [
+      0,
+      3.874
+    ],
+    "src": "audio/s01-03.mp3"
+  },
+  "s01-04": {
+    "dur": 3.177,
+    "speech": [
+      0,
+      3.177
+    ],
+    "src": "audio/s01-04.mp3"
+  },
+  "s02-01": {
+    "dur": 6.461,
+    "speech": [
+      0,
+      6.461
+    ],
+    "src": "audio/s02-01.mp3"
+  },
+  "s02-04": {
+    "dur": 6.78,
+    "speech": [
+      0,
+      6.78
+    ],
+    "src": "audio/s02-04.mp3"
+  },
+  "s03-01": {
+    "dur": 3.061,
+    "speech": [
+      0,
+      3.061
+    ],
+    "src": "audio/s03-01.mp3"
+  },
+  "s03-02": {
+    "dur": 3.802,
+    "speech": [
+      0,
+      3.802
+    ],
+    "src": "audio/s03-02.mp3"
+  },
+  "s03-03": {
+    "dur": 5.857,
+    "speech": [
+      0,
+      5.857
+    ],
+    "src": "audio/s03-03.mp3"
+  },
+  "s03-04": {
+    "dur": 4.019,
+    "speech": [
+      0,
+      4.019
+    ],
+    "src": "audio/s03-04.mp3"
+  },
+  "s04-01": {
+    "dur": 7.835,
+    "speech": [
+      0,
+      6.58
+    ],
+    "src": "audio/s04-01.mp3"
+  },
+  "s04-02": {
+    "dur": 2.516,
+    "speech": [
+      0,
+      2.516
+    ],
+    "src": "audio/s04-02.mp3"
+  },
+  "s05-02": {
+    "dur": 3.821,
+    "speech": [
+      0,
+      3.821
+    ],
+    "src": "audio/s05-02.mp3"
+  },
+  "s05-03": {
+    "dur": 4.74,
+    "speech": [
+      0,
+      4.74
+    ],
+    "src": "audio/s05-03.mp3"
+  },
+  "s05-04": {
+    "dur": 4.471,
+    "speech": [
+      0,
+      4.471
+    ],
+    "src": "audio/s05-04.mp3"
+  },
+  "s08-01": {
+    "dur": 5.199,
+    "speech": [
+      0,
+      5.199
+    ],
+    "src": "audio/s08-01.mp3"
+  },
+  "s08-03": {
+    "dur": 2.675,
+    "speech": [
+      0,
+      2.675
+    ],
+    "src": "audio/s08-03.mp3"
+  },
+  "s09-01": {
+    "dur": 2.564,
+    "speech": [
+      0,
+      2.564
+    ],
+    "src": "audio/s09-01.mp3"
+  },
+  "s09-02": {
+    "dur": 5.827,
+    "speech": [
+      0,
+      5.827
+    ],
+    "src": "audio/s09-02.mp3"
+  },
+  "s10-01": {
+    "dur": 4.681,
+    "speech": [
+      0,
+      4.681
+    ],
+    "src": "audio/s10-01.mp3"
+  },
+  "s10-02": {
+    "dur": 2.3,
+    "speech": [
+      0,
+      2.3
+    ],
+    "src": "audio/s10-02.mp3"
+  },
+  "s10-05": {
+    "dur": 3.772,
+    "speech": [
+      0,
+      3.772
+    ],
+    "src": "audio/s10-05.mp3"
+  },
+  "s11-01": {
+    "dur": 7.748,
+    "speech": [
+      0,
+      7.748
+    ],
+    "src": "audio/s11-01.mp3"
+  },
+  "s11-02": {
+    "dur": 4.377,
+    "speech": [
+      0,
+      4.377
+    ],
+    "src": "audio/s11-02.mp3"
+  },
+  "s11-03": {
+    "dur": 4.737,
+    "speech": [
+      0,
+      4.009
+    ],
+    "src": "audio/s11-03.mp3"
+  },
+  "s11-04": {
+    "dur": 4.715,
+    "speech": [
+      0,
+      4.255
+    ],
+    "src": "audio/s11-04.mp3"
+  },
+  "s12-02": {
+    "dur": 8.82,
+    "speech": [
+      0,
+      8.82
+    ],
+    "src": "audio/s12-02.mp3"
+  },
+  "s13-01": {
+    "dur": 9.165,
+    "speech": [
+      0,
+      8.514
+    ],
+    "src": "audio/s13-01.mp3"
+  },
+  "s14-01": {
+    "dur": 5.429,
+    "speech": [
+      0,
+      4.67
+    ],
+    "src": "audio/s14-01.mp3"
+  },
+  "s14-04": {
+    "dur": 2.994,
+    "speech": [
+      0,
+      2.994
+    ],
+    "src": "audio/s14-04.mp3"
+  }
+}

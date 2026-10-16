@@ -1,5 +1,7 @@
 import { Composition } from "remotion";
 import "./brand";
+import { totalFrames } from "./pitch/data";
+import { Pitch } from "./pitch/Pitch";
 import { ALL, cutFrames, DemoVideo, FPS, SHORT } from "./Video";
 
 export function Root() {
@@ -11,6 +13,8 @@ export function Root() {
       {/* Deck slide 4 (≤ 2:30): the live run, the plan, the approval and its on-chain proof. */}
       <Composition id="NanFengDemoShort" component={DemoVideo} defaultProps={{ ids: SHORT, opening: false, endCard: false }}
         durationInFrames={cutFrames(SHORT, false, false)} fps={FPS} width={1920} height={1080} />
+      {/* Deliverable 03, after the judge's second review: the 3-minute pitch cut of the same take (pitch.mjs). */}
+      <Composition id="NanFengPitch" component={Pitch} durationInFrames={totalFrames()} fps={FPS} width={1920} height={1080} />
     </>
   );
 }

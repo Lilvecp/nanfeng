@@ -9,3 +9,5 @@ public/audio/sample-*
 .venv-tts/
 # voice trials from the first day, kept local
 .tts-test/
+# MODNet for assets/cutouts.py (downloaded, see that script)
+.models/

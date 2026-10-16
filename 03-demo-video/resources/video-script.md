@@ -1,4 +1,6 @@
-# Demo video script · max 5:00 (r1-07, r1-11, fe-13)
+# First script of the demo video (5-minute cut)
+
+> The submitted video is the **3-minute cut** of the same live take, reworked after a reviewer's feedback: see [the transcript](../transcript.md). This page is the first script, kept because the full cut is still built from it (`./make.sh render` in [pipeline/](pipeline/)).
 
 Recorded from the web on the deployed URL (or `npm run build && npm start` locally if the deploy is not ready), 1920×1080, light theme, browser zoom 100%. Narration in English; burned-in subtitles in **English and 中文**. Every number matches [scope-moscow.md](../../07-team-workspace/valentin-castro/scope-moscow.md).
 
@@ -8,7 +10,7 @@ Delivery: **MP4 attached to the UDD email** (or a host that opens from Mainland 
 
 | # | Time | Screen · action | Narration (EN) | 字幕 (中文) |
 |---|---|---|---|---|
-| 1 | 0:00–0:20 | Landing, globe hero playing | Chile ships two-point-six billion dollars of cherries a season, almost all of it to China. The fruit travels in three weeks. The money takes months. | 智利每季出口26亿美元樱桃，几乎全部销往中国。水果三周就到，货款却要等上几个月。 |
+| 1 | 0:00–0:20 | Landing, globe hero playing | Chile ships two-point-eight billion dollars of cherries a season, almost all of it to China. The fruit travels in three weeks. The money takes months. | 智利每季出口28亿美元樱桃，几乎全部销往中国。水果三周就到，货款却要等上几个月。 |
 | 2 | 0:20–0:40 | Home in the **Simple** view (welcome card, then the red “Your cash needs attention”) | This is Huerto Austral, a fictional exporter. The owner is a farmer, not a finance expert, so NanFeng speaks plainly: one hundred seventy-six million pesos in the bank, and a harvest payroll of two hundred thirty-eight million on December thirtieth. | 这是虚构的出口企业 Huerto Austral。企业主是农场主而非财务专家，所以南风用最简单的话说明：账上有1.76亿智利比索，12月30日要发放2.38亿比索的采收工资。 |
 | 3 | 0:40–1:05 | Messages → Documents → "Payment delay notice" | At ten-twelve, the Shanghai importer writes: one hundred eighty thousand dollars will arrive forty-five days late. NanFeng reads the notice with OCR. The language model only extracts fields; it never sees instructions. | 10:12，上海进口商来信：18万美元货款将延迟45天。南风用 OCR 读取通知；语言模型只提取字段，从不执行其中的指令。 |
 | 4 | 1:05–1:40 | Simple view (“8 in 10”, chart with the payroll marker), then switch to the **Full detail** tab: fan chart, KPI 81% | NanFeng re-runs ten thousand simulations. Eighty-one percent chance cash goes negative in nineteen days — exactly on payroll day. If Shanghai had paid on time, it would be one percent. | 南风重新运行一万次模拟：19天后，也就是发薪当天，现金为负的概率为81%。若上海客户按时付款，这一概率仅为1%。 |

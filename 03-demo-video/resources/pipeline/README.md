@@ -1,7 +1,7 @@
 # Demo video pipeline (deliverable 03)
 
 Builds the NanFeng demo video from the script in the [FinTechathon kit](../../../07-team-workspace/fintechathon-kit.md) (section 4, "Guion del video
-demo"), reworked after a judge's review. The product is recorded in one take on the live site,
+demo"), reworked after a reviewer's feedback. The product is recorded in one take on the live site,
 www.nanfengcfo.com. The voice, the EN + 中文 subtitles, the zooms, the chapter rail, the rubric
 chips and the title cards are composited in Remotion. Running it again gives the same video, so a
 change to the app or to a line only needs another run.
@@ -12,7 +12,7 @@ change to the app or to a line only needs another run.
 | Timeline | `plan.mjs`: when each line starts in its scene and how long each scene runs | `src/timeline.json` |
 | Recording | Playwright + Chrome on the GPU (Vulkan), CDP screencast at 60 fps, 1600×900 at 1.5× pixel density, clicks timed to the voice (`record/`) | `public/rec/sNN.mp4` |
 | Edit | Remotion (`src/`): zooms, spotlight, subtitles, chapter rail, chips, callouts, crossfades, title cards | `out/` (work files) |
-| Finish | ffmpeg: loudness −16 LUFS, H.264 1080p, length check ≤ 5:00 | [`03-demo-video/nanfeng-demo.mp4`](../../nanfeng-demo.mp4) |
+| Finish | ffmpeg: loudness −16 LUFS, H.264 1080p, length check ≤ 5:00 | The submitted 3-minute cut, [`03-demo-video/nanfeng-demo.mp4`](../../nanfeng-demo.mp4); the full 5-minute cut in `out/` |
 
 ## Run it
 
@@ -27,7 +27,8 @@ node tts/polish.mjs                     # every line at the same loudness, silen
 .venv-tts/bin/python tts/check.py       # optional: what a listener hears, line by line
 node record/make-notice.mjs             # the importer's PDF that scene 3 uploads
 node record/record.mjs                  # the live take (resets the public sandbox once)
-./make.sh render                        # ../../nanfeng-demo.mp4 (SHORT=1 adds out/nanfeng-demo-short.mp4)
+./make.sh pitch                         # the submitted 3-minute cut: ../../nanfeng-demo.mp4 and ../../transcript.md
+./make.sh render                        # the full 5-minute cut: out/nanfeng-demo-full.mp4 (SHORT=1 adds a 2:30 cut)
 ```
 
 - Changing the voice or a line changes the timeline: record the take again after it.
@@ -37,6 +38,45 @@ node record/record.mjs                  # the live take (resets the public sandb
 - Not in git (too large, or local only): the recorded take `public/rec/` (about 400 MB), earlier
   renders and phone copies in `out/`, `node_modules/`, `.venv-tts/` and `.env`. A fresh clone
   renders again after `node record/record.mjs`; the voice clips in `public/audio/` are committed.
+
+## The 3-minute cut (the submitted video)
+
+A reviewer's second pass (2026-10-16) asked for a 3-minute version: a jury that watches dozens of
+projects sees 3 minutes through, and stops a 5-minute one halfway. `./make.sh pitch` builds it from
+the same live take, so the sandbox is not reset again and no new Sepolia transaction is sent. It
+writes the video and its [transcript](../../transcript.md) to the top of the deliverable folder.
+
+| Piece | What it does |
+|---|---|
+| [`pitch.mjs`](pitch.mjs) | The cut: which pieces of which recorded scene play, which narration line plays where, and the motion-graphics sections. `node pitch.mjs` prints the timeline, its length and every pause between two lines longer than 1.2 s |
+| [`tts/pitch-voice.mjs`](tts/pitch-voice.mjs) | New takes in the team's voice (the deck's tagline, and "Sepolia", respelled because the voice said "Sapolia"), single sentences cut out of approved takes at the pause between sentences, and the speech span of every clip (`public/audio/pitch/`) |
+| [`src/pitch/`](src/pitch/) | The composition `NanFengPitch`: app shots (`Shot.tsx`, the recorder's zooms and callouts on the scene's own clock), the problem, results and team scenes, the title cards |
+| [`assets/cutouts.py`](assets/cutouts.py) | Team portraits without their backgrounds (MODNet, run locally), so the sign behind Vicente's photo is gone |
+| [`tts/sfx.mjs`](tts/sfx.mjs) | A small synthesised sound kit for the motion graphics (whoosh, pop, tick); `REMOTION_SFX=0` renders without it |
+| [`stills.mjs`](stills.mjs) | Single frames or a frame every N seconds, to check the picture before a full render |
+| [`check-render.py`](check-render.py) | Checks a finished render: length, loudness, silences over 1.2 s, frozen picture, and what Whisper hears against the script |
+
+```sh
+node tts/pitch-voice.mjs                      # only voices what is new or changed
+node pitch.mjs                                # the timeline and its pauses
+node stills.mjs NanFengPitch out/check --every 3
+./make.sh pitch                               # ../../nanfeng-demo.mp4
+.venv-tts/bin/python check-render.py ../../nanfeng-demo.mp4 src/pitch.json   # what a viewer sees and hears
+```
+
+Choices in the cut:
+
+- **Story.** Problem → risk spotted → best deal → you approve → on-chain proof → fraud blocked →
+  built for China → results and team. Left out: the stress test, most of "ask why", the code-by-SMS
+  line (the callout on screen says it) and the names in the narration (they are on the team cards).
+- **No dead air.** Lines are packed on their speech, not on the silence a take ends with; app pieces
+  cut inside the pauses between sentences, and a page that is still loading is cut out. The two
+  pauses over 1.2 s are on purpose: NanFeng taking the empty finance seat, and the tagline landing.
+- **Cuts.** A new page opens with a short blink (a crossfade showed two pages at once); a cut on the
+  same page carries the camera across and eases into the next zoom.
+- **The tagline** is the deck's: "NanFeng doesn't advise. It acts, with your permission." Its
+  Chinese line (南风不止于建议。它在您的授权下行动。) is machine-assisted, like the other subtitles.
+- **The end card** has no repository link while the repository is private.
 
 ## What the live take does
 

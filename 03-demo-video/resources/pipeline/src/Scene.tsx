@@ -77,7 +77,7 @@ export function Scene({ scene, chapters }: { scene: SceneT; chapters: Chapter[] 
 }
 
 /** Dims and blurs everything around a `spot` focus box, so the eye goes to the right rows. */
-function Spotlight({ scene, t, cam }: { scene: SceneT; t: number; cam: { s: number; lx: number; ly: number } }) {
+export function Spotlight({ scene, t, cam }: { scene: SceneT; t: number; cam: { s: number; lx: number; ly: number } }) {
   const sp = spotlight(scene.focus, t);
   if (!sp || sp.k <= 0) return null;
   const x0 = Math.max(0, (sp.box.x - cam.lx) * cam.s * K);
@@ -97,7 +97,7 @@ function Spotlight({ scene, t, cam }: { scene: SceneT; t: number; cam: { s: numb
 }
 
 /** "4×" while the recorder ran the scene clock faster than real time (a long agent run). */
-function FastForward({ scene, t }: { scene: SceneT; t: number }) {
+export function FastForward({ scene, t }: { scene: SceneT; t: number }) {
   const segs = scene.speed ?? [];
   let from: number | undefined, to: number | undefined, rate = 1;
   for (let i = 0; i < segs.length; i++) {
@@ -185,7 +185,7 @@ function Callout({ show, children, at = "bottom", right = false }: { show: numbe
 
 const short = (h: unknown) => (typeof h === "string" && h.length > 12 ? `${h.replace(/^0x/, "").slice(0, 4)}…${h.slice(-4)}` : String(h ?? ""));
 
-function Callouts({ scene, t, mark }: { scene: SceneT; t: number; mark: (n: string) => number | undefined }) {
+export function Callouts({ scene, t, mark }: { scene: SceneT; t: number; mark: (n: string) => number | undefined }) {
   const en = { fontFamily: F.body, fontSize: 23, fontWeight: 500, lineHeight: 1.3 } as const;
   const zh = { fontFamily: F.zh, fontSize: 19, color: "#E6D3A6", lineHeight: 1.3 } as const;
   const tag = { fontFamily: F.mono, fontSize: 15, letterSpacing: "0.08em", textTransform: "uppercase", color: C.gold } as const;
