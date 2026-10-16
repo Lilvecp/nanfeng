@@ -1,0 +1,28 @@
+{
+  "name": "nanfeng-demo-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "record": "node record/record.mjs",
+    "tts": "node tts/tts.mjs",
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts NanFengDemo out/nanfeng-demo.mp4",
+    "render:short": "remotion render src/index.ts NanFengDemoShort out/nanfeng-demo-2m30.mp4"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "2.72.0",
+    "@remotion/cli": "4.0.535",
+    "@remotion/fonts": "4.0.535",
+    "@remotion/google-fonts": "4.0.535",
+    "@remotion/media": "4.0.535",
+    "@remotion/transitions": "4.0.535",
+    "playwright": "1.64.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.535"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}

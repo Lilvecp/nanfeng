@@ -1,0 +1,1227 @@
+{
+  "voiced": true,
+  "chapters": [
+    {
+      "id": "problem",
+      "en": "The problem",
+      "zh": "问题"
+    },
+    {
+      "id": "risk",
+      "en": "Risk spotted",
+      "zh": "发现风险"
+    },
+    {
+      "id": "deal",
+      "en": "Best deal",
+      "zh": "最优方案"
+    },
+    {
+      "id": "approve",
+      "en": "You approve",
+      "zh": "您来批准"
+    },
+    {
+      "id": "proof",
+      "en": "On-chain proof",
+      "zh": "链上证明"
+    },
+    {
+      "id": "fraud",
+      "en": "Fraud blocked",
+      "zh": "拦截欺诈"
+    },
+    {
+      "id": "china",
+      "en": "Built for China",
+      "zh": "为中国打造"
+    },
+    {
+      "id": "team",
+      "en": "Results & team",
+      "zh": "成果与团队"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s01",
+      "title": "Landing · the problem",
+      "chips": [],
+      "caption": null,
+      "chapter": 0,
+      "chapterStart": true,
+      "cut": false,
+      "lead": 0,
+      "duration": 18.5,
+      "lines": [
+        {
+          "at": 1.2,
+          "say": "Chile ships two point eight billion dollars of cherries a season, almost all of it to China.",
+          "en": "Chile ships USD 2.8 billion of cherries a season, almost all of it to China.",
+          "zh": "智利每季出口28亿美元樱桃，几乎全部销往中国。",
+          "start": 1.2,
+          "end": 5.657,
+          "audio": "audio/s01-01.mp3"
+        },
+        {
+          "say": "The fruit arrives in three weeks. The money takes months.",
+          "en": "The fruit arrives in three weeks. The money takes months.",
+          "zh": "水果三周就到，货款却要等上几个月。",
+          "start": 6.107,
+          "end": 8.956,
+          "audio": "audio/s01-02.mp3"
+        },
+        {
+          "say": "For a family exporter, one late payment can mean missing payroll.",
+          "en": "For a family exporter, one late payment can mean missing payroll.",
+          "zh": "对家族出口商来说，一笔货款迟到，就可能发不出工资。",
+          "start": 9.406,
+          "end": 13.28,
+          "audio": "audio/s01-03.mp3"
+        },
+        {
+          "say": "And most of them have no finance team to see it coming.",
+          "en": "And most of them have no finance team to see it coming.",
+          "zh": "而大多数出口商没有财务团队来提前预警。",
+          "start": 13.73,
+          "end": 16.907,
+          "audio": "audio/s01-04.mp3"
+        }
+      ],
+      "focus": [],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s01.mp4",
+      "clip": 18.5
+    },
+    {
+      "id": "s02",
+      "title": "Home · the owner's morning",
+      "chips": [
+        "TC",
+        "II"
+      ],
+      "caption": {
+        "en": "Home · what the owner sees every morning",
+        "zh": "首页 · 企业主每天早上看到的内容"
+      },
+      "chapter": 0,
+      "chapterStart": false,
+      "cut": false,
+      "lead": 0,
+      "duration": 28.662,
+      "lines": [
+        {
+          "say": "Meet Huerto Austral, a fictional cherry exporter, and NanFeng, its autonomous CFO.",
+          "en": "Meet Huerto Austral, a fictional cherry exporter, and NanFeng, its autonomous CFO.",
+          "zh": "这是虚构的樱桃出口商 Huerto Austral，以及它的自主 CFO：南风。",
+          "start": 0.4,
+          "end": 6.861,
+          "audio": "audio/s02-01.mp3"
+        },
+        {
+          "say": "Every morning, NanFeng checks the cash and explains it in plain words:",
+          "en": "Every morning, NanFeng checks the cash and explains it in plain words:",
+          "zh": "每天早上，南风检查现金，并用最简单的话说明：",
+          "start": 7.311,
+          "end": 12.373,
+          "audio": "audio/s02-02.mp3"
+        },
+        {
+          "say": "one hundred seventy-six million pesos in the bank, and a two hundred thirty-eight million peso harvest payroll on December thirtieth.",
+          "en": "CLP 176 million in the bank, and a CLP 238 million harvest payroll on December 30.",
+          "zh": "账上有1.76亿智利比索，12月30日要发放2.38亿比索的采收工资。",
+          "start": 12.823,
+          "end": 20.532,
+          "audio": "audio/s02-03.mp3"
+        },
+        {
+          "say": "Then, bad news from Shanghai: the buyer will pay one hundred eighty thousand dollars forty-five days late.",
+          "en": "Then, bad news from Shanghai: the buyer will pay USD 180,000 45 days late.",
+          "zh": "随后传来上海的坏消息：买家的18万美元货款将延迟45天支付。",
+          "start": 20.982,
+          "end": 27.762,
+          "audio": "audio/s02-04.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 1.982,
+          "dur": 5.129578121999994,
+          "box": {
+            "x": 218,
+            "y": 295.921875,
+            "w": 1376,
+            "h": 183.875
+          },
+          "maxScale": 1.5
+        },
+        {
+          "t": 7.71,
+          "dur": 4.2,
+          "box": {
+            "x": 212,
+            "y": 81.9375,
+            "w": 1388,
+            "h": 223.984375
+          },
+          "maxScale": 1.5
+        },
+        {
+          "t": 13.679,
+          "dur": 2.4,
+          "box": {
+            "x": 417,
+            "y": 3.34375,
+            "w": 130.640625,
+            "h": 48.296875
+          },
+          "maxScale": 1.8
+        },
+        {
+          "t": 15.437,
+          "dur": 12.625185466999998,
+          "box": {
+            "x": 214,
+            "y": 291.921875,
+            "w": 797.78125,
+            "h": 198.09375
+          },
+          "maxScale": 1.6
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s02.mp4",
+      "clip": 28.662
+    },
+    {
+      "id": "s03",
+      "title": "Live agent · the notice",
+      "chips": [
+        "TC",
+        "II"
+      ],
+      "caption": {
+        "en": "Live agent · a real run on www.nanfengcfo.com",
+        "zh": "实时代理 · 在 www.nanfengcfo.com 上真实运行"
+      },
+      "chapter": 1,
+      "chapterStart": true,
+      "cut": true,
+      "lead": 0,
+      "duration": 29.152,
+      "lines": [
+        {
+          "at": 1,
+          "say": "The owner simply forwards the importer's letter to NanFeng.",
+          "en": "The owner simply forwards the importer's letter to NanFeng.",
+          "zh": "企业主只需把进口商的来信转给南风。",
+          "start": 1,
+          "end": 4.061,
+          "audio": "audio/s03-01.mp3"
+        },
+        {
+          "say": "From here on, this is the live agent at work, not a replay.",
+          "en": "From here on, this is the live agent at work, not a replay.",
+          "zh": "接下来是真实运行的代理，而不是回放。",
+          "start": 4.511,
+          "end": 8.313,
+          "audio": "audio/s03-02.mp3"
+        },
+        {
+          "say": "It reads the letter, re-runs ten thousand cash simulations, and prices every financing option.",
+          "en": "It reads the letter, re-runs 10,000 cash simulations, and prices every financing option.",
+          "zh": "它读取来信，重新运行一万次现金模拟，并为每种融资方案报价。",
+          "start": 8.763,
+          "end": 14.62,
+          "audio": "audio/s03-03.mp3"
+        },
+        {
+          "at": 16.5,
+          "say": "Every step is on the record: which tool, which model, how long it took.",
+          "en": "Every step is on the record: which tool, which model, how long it took.",
+          "zh": "每一步都有记录：用了哪个工具、哪个模型、耗时多久。",
+          "start": 16.5,
+          "end": 20.519,
+          "audio": "audio/s03-04.mp3"
+        },
+        {
+          "say": "All of that took under a minute. No spreadsheets, no phone calls. The plan now waits for the owner's okay.",
+          "en": "All of that took under a minute. No spreadsheets, no phone calls. The plan now waits for the owner's OK.",
+          "zh": "整个过程不到一分钟。不用表格，不用打电话。方案现在只等企业主批准。",
+          "start": 20.969,
+          "end": 28.252,
+          "audio": "audio/s03-05.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 2.639,
+          "dur": 30,
+          "box": {
+            "x": 999.78125,
+            "y": 404.3125,
+            "w": 598.21875,
+            "h": 222.9375
+          },
+          "maxScale": 1.7
+        },
+        {
+          "t": 7.557,
+          "dur": 30,
+          "box": {
+            "x": 999.78125,
+            "y": 404.3125,
+            "w": 598.21875,
+            "h": 245.4375
+          },
+          "maxScale": 1.7
+        },
+        {
+          "t": 16.36,
+          "dur": 60,
+          "box": {
+            "x": 222,
+            "y": 351.40625,
+            "w": 1368,
+            "h": 338
+          },
+          "maxScale": 1.6,
+          "spot": true
+        }
+      ],
+      "marks": [
+        {
+          "name": "upload",
+          "t": 7.379
+        },
+        {
+          "name": "live",
+          "t": 7.379
+        },
+        {
+          "name": "run-done",
+          "t": 19.914
+        }
+      ],
+      "speed": [
+        {
+          "t": 7.379,
+          "rate": 4
+        },
+        {
+          "t": 19.914,
+          "rate": 1
+        }
+      ],
+      "notes": {
+        "uploadWall": 1792126080292,
+        "run": "RUN-0005 · awaiting_approval"
+      },
+      "video": "rec/s03.mp4",
+      "clip": 28
+    },
+    {
+      "id": "s04",
+      "title": "Home · the verdict",
+      "chips": [
+        "TC"
+      ],
+      "caption": {
+        "en": "Forecast · 10,000 simulations",
+        "zh": "现金预测 · 一万次模拟"
+      },
+      "chapter": 1,
+      "chapterStart": false,
+      "cut": true,
+      "lead": 0,
+      "duration": 19.76,
+      "lines": [
+        {
+          "at": 1.4,
+          "say": "The verdict: an eighty-one percent chance that cash runs out on December thirtieth, exactly on payroll day.",
+          "en": "The verdict: an 81% chance that cash runs out on December 30, exactly on payroll day.",
+          "zh": "结论：12月30日，也就是发薪当天，现金耗尽的概率为81%。",
+          "start": 1.4,
+          "end": 9.235,
+          "audio": "audio/s04-01.mp3"
+        },
+        {
+          "say": "Before the notice, that risk was thirteen percent.",
+          "en": "Before the notice, that risk was 13%.",
+          "zh": "收到通知之前，这一风险只有13%。",
+          "start": 9.685,
+          "end": 12.201,
+          "audio": "audio/s04-02.mp3"
+        },
+        {
+          "say": "Ten thousand simulated seasons, day by day. NanFeng saw the gap nineteen days ahead.",
+          "en": "10,000 simulated seasons, day by day. NanFeng saw the gap 19 days ahead.",
+          "zh": "一万次季节模拟，逐日推演。南风提前19天发现了资金缺口。",
+          "start": 12.651,
+          "end": 18.86,
+          "audio": "audio/s04-03.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 5.044,
+          "dur": 9.5,
+          "box": {
+            "x": 213,
+            "y": 288.734375,
+            "w": 370.5,
+            "h": 132.625
+          },
+          "maxScale": 1.9
+        },
+        {
+          "t": 13.65,
+          "dur": 5.809866965999978,
+          "box": {
+            "x": 228,
+            "y": 75.359375,
+            "w": 924,
+            "h": 411.9375
+          },
+          "maxScale": 1.5
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s04.mp4",
+      "clip": 19.76
+    },
+    {
+      "id": "s05",
+      "title": "Financing · options",
+      "chips": [
+        "TC"
+      ],
+      "caption": {
+        "en": "Financing · every option compared",
+        "zh": "融资 · 比较所有方案"
+      },
+      "chapter": 2,
+      "chapterStart": true,
+      "cut": true,
+      "lead": 0,
+      "duration": 22,
+      "lines": [
+        {
+          "at": 1.4,
+          "say": "Then it shops the market for the owner: nine financing products, seven quotes.",
+          "en": "Then it shops the market for the owner: 9 financing products, 7 quotes.",
+          "zh": "接着，它替企业主货比三家：9种融资产品，7份报价。",
+          "start": 1.4,
+          "end": 6.417,
+          "audio": "audio/s05-01.mp3"
+        },
+        {
+          "say": "Its optimizer picks a sixty-day pre-export loan in dollars:",
+          "en": "Its optimizer picks a 60-day pre-export loan in dollars:",
+          "zh": "优化器选出60天期美元出口前贷款：",
+          "start": 6.867,
+          "end": 10.688,
+          "audio": "audio/s05-02.mp3"
+        },
+        {
+          "say": "two point one million pesos, against three point eight million for the usual bank loan.",
+          "en": "CLP 2.1 million, against CLP 3.8 million for the usual bank loan.",
+          "zh": "成本210万比索，而常规银行贷款需380万。",
+          "start": 11.138,
+          "end": 15.878,
+          "audio": "audio/s05-03.mp3"
+        },
+        {
+          "say": "Forty-five percent cheaper, and it explains why every other option lost.",
+          "en": "45% cheaper, and it explains why every other option lost.",
+          "zh": "便宜45%，并说明其他方案为何落选。",
+          "start": 16.328,
+          "end": 20.799,
+          "audio": "audio/s05-04.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 1.98,
+          "dur": 4.8,
+          "box": {
+            "x": 220,
+            "y": 51,
+            "w": 1372,
+            "h": 494.890625
+          },
+          "maxScale": 1.3
+        },
+        {
+          "t": 11.888,
+          "dur": 5.2,
+          "box": {
+            "x": 216,
+            "y": 200.890625,
+            "w": 757.078125,
+            "h": 594.8125
+          },
+          "maxScale": 1.6
+        },
+        {
+          "t": 16.339,
+          "dur": 5,
+          "box": {
+            "x": 961.078125,
+            "y": 200.890625,
+            "w": 634.90625,
+            "h": 594.8125
+          },
+          "maxScale": 1.4
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s05.mp4",
+      "clip": 22
+    },
+    {
+      "id": "s06",
+      "title": "Financing · what if",
+      "chips": [
+        "TC",
+        "II"
+      ],
+      "caption": {
+        "en": "What if · stress-test the season",
+        "zh": "假设情景 · 压力测试"
+      },
+      "chapter": 2,
+      "chapterStart": false,
+      "cut": true,
+      "lead": 0,
+      "duration": 15.637,
+      "lines": [
+        {
+          "at": 1,
+          "say": "Worried about a bad season? Test it in one click.",
+          "en": "Worried about a bad season? Test it in one click.",
+          "zh": "担心行情不好？一键就能测试。",
+          "start": 1,
+          "end": 3.762,
+          "audio": "audio/s06-01.mp3"
+        },
+        {
+          "say": "If cherry prices drop ten percent, the risk climbs to ninety-five percent.",
+          "en": "If cherry prices drop 10%, the risk climbs to 95%.",
+          "zh": "如果樱桃价格下跌10%，风险将升至95%。",
+          "start": 4.212,
+          "end": 9.115,
+          "audio": "audio/s06-02.mp3"
+        },
+        {
+          "say": "And it re-prices the plan for that season: still forty-four percent cheaper than a bank loan.",
+          "en": "And it re-prices the plan for that season: still 44% cheaper than a bank loan.",
+          "zh": "它还会为这种情景重新定价方案：仍比银行贷款便宜44%。",
+          "start": 9.565,
+          "end": 14.737,
+          "audio": "audio/s06-03.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 5.191,
+          "dur": 4.373654832999991,
+          "box": {
+            "x": 217,
+            "y": 217,
+            "w": 362.5,
+            "h": 142.015625
+          },
+          "maxScale": 1.9,
+          "spot": true
+        },
+        {
+          "t": 9.38,
+          "dur": 7,
+          "box": {
+            "x": 894,
+            "y": 217,
+            "w": 701,
+            "h": 142.015625
+          },
+          "maxScale": 1.9,
+          "spot": true
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s06.mp4",
+      "clip": 15.637
+    },
+    {
+      "id": "s07",
+      "title": "Ask NanFeng · why",
+      "chips": [
+        "II",
+        "SC"
+      ],
+      "caption": {
+        "en": "Ask NanFeng · live answer from the agent",
+        "zh": "问问南风 · 代理实时回答"
+      },
+      "chapter": 2,
+      "chapterStart": false,
+      "cut": true,
+      "lead": 0,
+      "duration": 15,
+      "lines": [
+        {
+          "at": 1.2,
+          "say": "And the owner can always ask why.",
+          "en": "And the owner can always ask why.",
+          "zh": "企业主随时可以问“为什么”。",
+          "start": 1.2,
+          "end": 3.121,
+          "audio": "audio/s07-01.mp3"
+        },
+        {
+          "at": 6,
+          "say": "The answer comes from what the agent actually did. Every number comes from the optimizer, not from the language model.",
+          "en": "The answer comes from what the agent actually did. Every number comes from the optimizer, not from the language model.",
+          "zh": "回答基于代理实际执行的操作；每个数字都来自优化器，而不是语言模型。",
+          "start": 6,
+          "end": 13.375,
+          "audio": "audio/s07-02.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 5.149,
+          "dur": 9,
+          "box": {
+            "x": 999.78125,
+            "y": 404.3125,
+            "w": 598.21875,
+            "h": 222.9375
+          },
+          "maxScale": 1.7
+        },
+        {
+          "t": 9.531,
+          "dur": 7,
+          "box": {
+            "x": 1022.78125,
+            "y": 582.25,
+            "w": 552.21875,
+            "h": 154.578125
+          },
+          "maxScale": 1.8,
+          "spot": true
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s07.mp4",
+      "clip": 15
+    },
+    {
+      "id": "s08",
+      "title": "Approvals · one-time code",
+      "chips": [
+        "SC",
+        "II"
+      ],
+      "caption": {
+        "en": "Approvals · owner + one-time code",
+        "zh": "审批 · 企业主 + 一次性验证码"
+      },
+      "chapter": 3,
+      "chapterStart": true,
+      "cut": true,
+      "lead": 0,
+      "duration": 17.5,
+      "lines": [
+        {
+          "at": 1.4,
+          "say": "Borrowing is a level-three action: only the owner can approve it, with a one-time code.",
+          "en": "Borrowing is a level-3 action: only the owner can approve it, with a one-time code.",
+          "zh": "借款属于 L3 级操作：只有企业主能批准，而且必须输入一次性验证码。",
+          "start": 1.4,
+          "end": 6.599,
+          "audio": "audio/s08-01.mp3"
+        },
+        {
+          "say": "In production, the code is texted to the owner's phone. This sandbox shows it on screen.",
+          "en": "In production, the code is texted to the owner's phone. This sandbox shows it on screen.",
+          "zh": "正式环境中，验证码以短信发送到企业主手机；本沙盒直接显示在屏幕上。",
+          "start": 7.049,
+          "end": 12.179,
+          "audio": "audio/s08-02.mp3"
+        },
+        {
+          "say": "The agent can propose. It can never approve.",
+          "en": "The agent can propose. It can never approve.",
+          "zh": "代理可以提议，但永远无权批准。",
+          "start": 12.629,
+          "end": 15.304,
+          "audio": "audio/s08-03.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 2.807,
+          "dur": 4.4,
+          "box": {
+            "x": 202,
+            "y": -10,
+            "w": 1408,
+            "h": 906.671875
+          },
+          "maxScale": 1.5
+        },
+        {
+          "t": 7.82,
+          "dur": 9,
+          "box": {
+            "x": 1036.390625,
+            "y": 133.03125,
+            "w": 557.59375,
+            "h": 491.953125
+          },
+          "maxScale": 1.45
+        }
+      ],
+      "marks": [
+        {
+          "name": "otp",
+          "t": 7.815
+        },
+        {
+          "name": "otp-end",
+          "t": 17.27
+        }
+      ],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s08.mp4",
+      "clip": 17.5
+    },
+    {
+      "id": "s09",
+      "title": "Executed",
+      "chips": [
+        "TC"
+      ],
+      "caption": null,
+      "chapter": 3,
+      "chapterStart": false,
+      "cut": true,
+      "lead": 0,
+      "duration": 22.046,
+      "lines": [
+        {
+          "at": 0.8,
+          "say": "Approved, and executed in the sandbox.",
+          "en": "Approved, and executed in the sandbox.",
+          "zh": "已批准，并在沙盒中执行。",
+          "start": 0.8,
+          "end": 3.364,
+          "audio": "audio/s09-01.mp3"
+        },
+        {
+          "say": "The payroll is covered, and the owner saved one point seven million pesos against a regular bank loan.",
+          "en": "The payroll is covered, and the owner saved CLP 1.7 million against a regular bank loan.",
+          "zh": "工资有了保障，与普通银行贷款相比，企业主节省了170万比索。",
+          "start": 3.814,
+          "end": 9.641,
+          "audio": "audio/s09-02.mp3"
+        },
+        {
+          "say": "Cash now stays above the safety buffer in ninety-six percent of scenarios.",
+          "en": "Cash now stays above the safety buffer in 96% of scenarios.",
+          "zh": "现在96%的情景中，现金都高于安全垫。",
+          "start": 10.091,
+          "end": 15.48,
+          "audio": "audio/s09-03.mp3"
+        },
+        {
+          "say": "From the importer's letter to a funded payroll: a few minutes, and one decision by the owner.",
+          "en": "From the importer's letter to a funded payroll: a few minutes, and one decision by the owner.",
+          "zh": "从进口商来信到工资有着落：只需几分钟，外加企业主的一个决定。",
+          "start": 15.93,
+          "end": 21.146,
+          "audio": "audio/s09-04.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 0.21,
+          "dur": 3.4,
+          "box": {
+            "x": 1053.390625,
+            "y": 188.71875,
+            "w": 523.59375,
+            "h": 264.71875
+          },
+          "maxScale": 1.6
+        },
+        {
+          "t": 5.036,
+          "dur": 5,
+          "box": {
+            "x": 267,
+            "y": 164.625,
+            "w": 1278,
+            "h": 86.203125
+          },
+          "maxScale": 1.6
+        },
+        {
+          "t": 11.817,
+          "dur": 4.6,
+          "box": {
+            "x": 563.5,
+            "y": 351.96875,
+            "w": 345.5,
+            "h": 57.390625
+          },
+          "maxScale": 1.7
+        },
+        {
+          "t": 17.669,
+          "dur": 4.077505034000032,
+          "box": {
+            "x": 999.78125,
+            "y": 463.75,
+            "w": 598.21875,
+            "h": 273.875
+          },
+          "maxScale": 1.7
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s09.mp4",
+      "clip": 22.046
+    },
+    {
+      "id": "s10",
+      "title": "Audit · on-chain anchor",
+      "chips": [
+        "ON",
+        "SC"
+      ],
+      "caption": {
+        "en": "Audit log · anchored on a public blockchain",
+        "zh": "审计日志 · 锚定在公共区块链上"
+      },
+      "chapter": 4,
+      "chapterStart": true,
+      "cut": true,
+      "lead": 0,
+      "duration": 24,
+      "lines": [
+        {
+          "at": 1.2,
+          "say": "Every step, including this approval, is sealed in a tamper-proof audit log.",
+          "en": "Every step, including this approval, is sealed in a tamper-proof audit log.",
+          "zh": "每一步，包括这次批准，都记录在防篡改的审计日志中。",
+          "start": 1.2,
+          "end": 5.881,
+          "audio": "audio/s10-01.mp3"
+        },
+        {
+          "say": "Its fingerprint is written to a public blockchain.",
+          "en": "Its fingerprint is written to a public blockchain.",
+          "zh": "日志的指纹被写入公共区块链。",
+          "start": 6.331,
+          "end": 8.631,
+          "audio": "audio/s10-02.mp3"
+        },
+        {
+          "say": "Here is that transaction on Sepolia, the Ethereum test network.",
+          "en": "Here is that transaction on Sepolia, the Ethereum test network.",
+          "zh": "这是该交易在以太坊测试网 Sepolia 上的记录。",
+          "start": 9.081,
+          "end": 12.429,
+          "audio": "audio/s10-03.mp3"
+        },
+        {
+          "at": 16,
+          "say": "Anyone can check that no step was rewritten.",
+          "en": "Anyone can check that no step was rewritten.",
+          "zh": "任何人都能核实，没有任何步骤被改写。",
+          "start": 16,
+          "end": 18.658,
+          "audio": "audio/s10-04.mp3"
+        },
+        {
+          "say": "No one can quietly change it. Not the agent, and not even us.",
+          "en": "No one can quietly change it. Not the agent, and not even us.",
+          "zh": "没有人能悄悄修改它。代理不能，连我们自己也不能。",
+          "start": 19.108,
+          "end": 22.88,
+          "audio": "audio/s10-05.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 3.116,
+          "dur": 5.2,
+          "box": {
+            "x": 223,
+            "y": 399.125,
+            "w": 1366,
+            "h": 390.3125
+          },
+          "maxScale": 1.25
+        },
+        {
+          "t": 7.272,
+          "dur": 3.4,
+          "box": {
+            "x": 221,
+            "y": 460.5,
+            "w": 1370,
+            "h": 50.9375
+          },
+          "maxScale": 1.9,
+          "spot": true
+        },
+        {
+          "t": 8.87,
+          "dur": 5,
+          "box": {
+            "x": 106,
+            "y": 335.9375,
+            "w": 1388,
+            "h": 511.75
+          },
+          "maxScale": 1.4
+        },
+        {
+          "t": 16.568,
+          "dur": 8,
+          "box": {
+            "x": 79,
+            "y": 741.9375,
+            "w": 435.5,
+            "h": 235.4375
+          },
+          "maxScale": 1.4
+        }
+      ],
+      "marks": [
+        {
+          "name": "etherscan",
+          "t": 8.851
+        },
+        {
+          "name": "input",
+          "t": 16.544
+        }
+      ],
+      "speed": [],
+      "notes": {
+        "root": "cb56f687fb18fba34a41a22be187b317ee75e28c169c6cf5fbbb3c6e04538cc1",
+        "from": 7,
+        "to": 9,
+        "tx": "0xfdb49d66ca939bca1b361767f5a6dea98258d5963899510f2350fc46c6932af2"
+      },
+      "video": "rec/s10.mp4",
+      "clip": 24
+    },
+    {
+      "id": "s11",
+      "title": "Security · fake invoice",
+      "chips": [
+        "SC"
+      ],
+      "caption": {
+        "en": "Documents · the invoice NanFeng blocked at 8:47",
+        "zh": "文件 · 南风在8:47拦截的发票"
+      },
+      "chapter": 5,
+      "chapterStart": true,
+      "cut": false,
+      "lead": 0,
+      "duration": 24.827,
+      "lines": [
+        {
+          "at": 1,
+          "say": "Fraud is the other threat. At eight forty-seven that morning, a supplier's invoice arrived with a new bank account,",
+          "en": "Fraud is the other threat. At 8:47 that morning, a supplier's invoice arrived with a new bank account,",
+          "zh": "欺诈是另一大威胁。当天早上8:47，一张供应商发票附上了新的银行账户，",
+          "start": 1,
+          "end": 8.748,
+          "audio": "audio/s11-01.mp3"
+        },
+        {
+          "say": "plus a hidden line, white on white, telling the AI to approve the payment.",
+          "en": "plus a hidden line, white on white, telling the AI to approve the payment.",
+          "zh": "还藏着一行白底白字的指令，要求 AI 批准付款。",
+          "start": 9.198,
+          "end": 13.575,
+          "audio": "audio/s11-02.mp3"
+        },
+        {
+          "say": "NanFeng quarantined it before any model could read it, and warned the owner.",
+          "en": "NanFeng quarantined it before any model could read it, and warned the owner.",
+          "zh": "南风在任何模型读取之前就将其隔离，并提醒了企业主。",
+          "start": 14.025,
+          "end": 18.762,
+          "audio": "audio/s11-03.mp3"
+        },
+        {
+          "say": "Our red team threw forty-six attacks at it. All forty-six were stopped.",
+          "en": "Our red team threw 46 attacks at it. All 46 were stopped.",
+          "zh": "我们的红队发起了46次攻击，全部被拦截。",
+          "start": 19.212,
+          "end": 23.927,
+          "audio": "audio/s11-04.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 1.812,
+          "dur": 5.6,
+          "box": {
+            "x": 678,
+            "y": 116,
+            "w": 456,
+            "h": 510
+          },
+          "maxScale": 1.6
+        },
+        {
+          "t": 9.204,
+          "dur": 4.6,
+          "box": {
+            "x": 683,
+            "y": 396.484375,
+            "w": 446,
+            "h": 114.78125
+          },
+          "maxScale": 2.2,
+          "spot": true
+        },
+        {
+          "t": 14.038,
+          "dur": 4.4,
+          "box": {
+            "x": 1132,
+            "y": 114,
+            "w": 460,
+            "h": 446.9375
+          },
+          "maxScale": 1.5
+        },
+        {
+          "t": 20.09,
+          "dur": 5.4,
+          "box": {
+            "x": 220,
+            "y": 364.125,
+            "w": 688,
+            "h": 302
+          },
+          "maxScale": 1.6
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s11.mp4",
+      "clip": 24.827
+    },
+    {
+      "id": "s12",
+      "title": "中文 · WeCom",
+      "chips": [
+        "II",
+        "SC"
+      ],
+      "caption": {
+        "en": "中文 · the same app in Chinese",
+        "zh": "中文 · 同一个应用的中文界面"
+      },
+      "chapter": 6,
+      "chapterStart": true,
+      "cut": true,
+      "lead": 0,
+      "duration": 18.5,
+      "lines": [
+        {
+          "at": 1,
+          "say": "NanFeng also speaks Chinese. Every screen switches in one click,",
+          "en": "NanFeng also speaks Chinese. Every screen switches in one click,",
+          "zh": "南风也说中文。所有界面一键切换，",
+          "start": 1,
+          "end": 5.674,
+          "audio": "audio/s12-01.mp3"
+        },
+        {
+          "at": 7.5,
+          "say": "and it writes to the importer on WeCom, China's business chat, labelling every message as AI-generated, as Chinese rules require.",
+          "en": "and it writes to the importer on WeCom, China's business chat, labelling every message as AI-generated, as Chinese rules require.",
+          "zh": "并通过企业微信用中文联系进口商，每条消息都按中国规定标注“由AI生成”。",
+          "start": 7.5,
+          "end": 16.32,
+          "audio": "audio/s12-02.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 4.723,
+          "dur": 3.4,
+          "box": {
+            "x": 212,
+            "y": 36,
+            "w": 1388,
+            "h": 1444.140625
+          },
+          "maxScale": 1.5
+        },
+        {
+          "t": 9.344,
+          "dur": 9.5,
+          "box": {
+            "x": 615.28125,
+            "y": 151.9375,
+            "w": 322,
+            "h": 628
+          },
+          "maxScale": 1.5,
+          "spot": true
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s12.mp4",
+      "clip": 18.5
+    },
+    {
+      "id": "s13",
+      "title": "Benchmark",
+      "chips": [
+        "TC",
+        "II"
+      ],
+      "caption": null,
+      "chapter": 7,
+      "chapterStart": true,
+      "cut": false,
+      "lead": 0,
+      "duration": 16,
+      "lines": [
+        {
+          "at": 1.2,
+          "say": "Across fifty benchmark cases, NanFeng solved all fifty, and cut financing costs by forty-one percent on average.",
+          "en": "Across 50 benchmark cases, NanFeng solved all 50, and cut financing costs by 41% on average.",
+          "zh": "在50个基准案例中，南风全部解决，融资成本平均降低41%。",
+          "start": 1.2,
+          "end": 10.365,
+          "audio": "audio/s13-01.mp3"
+        },
+        {
+          "say": "NanFeng doesn't just advise. It acts, with your permission.",
+          "en": "NanFeng doesn't just advise. It acts, with your permission.",
+          "zh": "南风不只是建议——它在您的授权下行动。",
+          "start": 10.815,
+          "end": 13.971,
+          "audio": "audio/s13-02.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 1.451,
+          "dur": 7.6,
+          "box": {
+            "x": 160,
+            "y": 268.734375,
+            "w": 1280,
+            "h": 298.21875
+          },
+          "maxScale": 1.25
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s13.mp4",
+      "clip": 16
+    },
+    {
+      "id": "s14",
+      "title": "The team",
+      "chips": [],
+      "caption": null,
+      "chapter": 7,
+      "chapterStart": false,
+      "cut": true,
+      "lead": 0,
+      "duration": 22.5,
+      "lines": [
+        {
+          "at": 0.8,
+          "say": "Behind NanFeng are five students from Universidad del Desarrollo, in Chile:",
+          "en": "Behind NanFeng are five students from Universidad del Desarrollo, in Chile:",
+          "zh": "南风由智利发展大学的五名学生打造：",
+          "start": 0.8,
+          "end": 6.229,
+          "audio": "audio/s14-01.mp3"
+        },
+        {
+          "say": "Valentín Castro, Renato Lenis, Camilo Bufadel, Andy Villarroel, and Vicente Rodríguez.",
+          "en": "Valentín Castro, Renato Lenis, Camilo Bufadel, Andy Villarroel and Vicente Rodríguez.",
+          "zh": "Valentín Castro、Renato Lenis、Camilo Bufadel、Andy Villarroel 和 Vicente Rodríguez。",
+          "start": 6.679,
+          "end": 12.842,
+          "audio": "audio/s14-02.mp3"
+        },
+        {
+          "say": "We built it for every family exporter that can't afford a CFO of its own.",
+          "en": "We built it for every family exporter that can't afford a CFO of its own.",
+          "zh": "我们为每一家请不起财务总监的家族出口企业打造了它。",
+          "start": 13.292,
+          "end": 17.323,
+          "audio": "audio/s14-03.mp3"
+        },
+        {
+          "say": "Try it yourself at nanfengcfo.com.",
+          "en": "Try it yourself at www.nanfengcfo.com",
+          "zh": "欢迎访问 www.nanfengcfo.com 亲自体验。",
+          "start": 17.773,
+          "end": 20.767,
+          "audio": "audio/s14-04.mp3"
+        }
+      ],
+      "focus": [
+        {
+          "t": 6.424,
+          "dur": 8.2,
+          "box": {
+            "x": 50,
+            "y": 243.65625,
+            "w": 1500,
+            "h": 487.84375
+          },
+          "maxScale": 1.3
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "video": "rec/s14.mp4",
+      "clip": 22.5
+    }
+  ],
+  "total": 298.984
+}

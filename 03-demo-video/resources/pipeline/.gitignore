@@ -1,0 +1,11 @@
+node_modules/
+.stack/
+.explore/
+.webreel/
+out/
+public/rec/
+public/audio/sample-*
+.env
+.venv-tts/
+# voice trials from the first day, kept local
+.tts-test/
