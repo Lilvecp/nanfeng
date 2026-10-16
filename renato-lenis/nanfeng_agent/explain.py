@@ -100,15 +100,15 @@ def _template_answer(kind: str, f: dict[str, Any], lang: str) -> str:
                  f"cheaper mix, so I claim no savings.",
                  f"我提议了 {' + '.join(plan['default_actions'])}（常规银行贷款，{cost}）：优化器没有找到更便宜的组合，因此不声称任何节省。")
     if kind in ("plan", "alternatives") and plan:
-        return L(f"Elegí {' + '.join(plan['actions'])} porque es la mezcla más barata que mantiene la caja sobre el colchón: "
+        return L(f"Mi plan: {' + '.join(plan['actions'])}. Lo elegí porque es la mezcla más barata que mantiene la caja sobre el colchón: "
                  f"{templates.money(plan['cost_clp'], 'CLP', 'es')} vs {templates.money(plan['default_cost_clp'], 'CLP', 'es')} "
                  f"del crédito bancario ({templates.pct(plan['savings_pct'] or 0)} más barato), y cubre el "
                  f"{templates.pct(plan['coverage'] or 0)} de 10.000 escenarios. Los números son del optimizador MILP, no míos.",
-                 f"I chose {' + '.join(plan['actions'])} because it is the cheapest mix that keeps cash above the buffer: "
+                 f"My plan: {' + '.join(plan['actions'])}. I chose it because it is the cheapest mix that keeps cash above the buffer: "
                  f"{templates.money(plan['cost_clp'], 'CLP')} vs {templates.money(plan['default_cost_clp'], 'CLP')} for the "
                  f"bank loan ({templates.pct(plan['savings_pct'] or 0)} cheaper), covering {templates.pct(plan['coverage'] or 0)} "
                  f"of 10,000 scenarios. The numbers come from the MILP optimizer, not from me.",
-                 f"我选择了 {' + '.join(plan['actions'])}，因为这是保持现金高于安全垫的最低成本组合："
+                 f"我的方案：{' + '.join(plan['actions'])}。选择它是因为这是保持现金高于安全垫的最低成本组合："
                  f"{templates.money(plan['cost_clp'], 'CLP', 'zh')}，银行贷款需 {templates.money(plan['default_cost_clp'], 'CLP', 'zh')}"
                  f"（节省 {templates.pct(plan['savings_pct'] or 0)}），覆盖 10,000 个情景中的 {templates.pct(plan['coverage'] or 0)}。数字来自 MILP 优化器。")
     if kind in ("risk", "plan") and fc:
