@@ -19,3 +19,13 @@ PDF FinTechathon.pdf
 
 # The design tool's runtime for the interactive mockups: license not confirmed, kept out of the repository
 07-team-workspace/design/private-desk/vendor/dc-runtime.js
+
+# Videos: the submitted demo video is the only one in the repository; renders, earlier versions,
+# phone copies and the recorded takes stay local (03-demo-video/resources/pipeline)
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.m4v
+*.avi
+!03-demo-video/nanfeng-demo.mp4
