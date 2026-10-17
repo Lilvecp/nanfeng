@@ -105,7 +105,7 @@
       "chapterStart": true
     },
     {
-      "id": "meet",
+      "id": "before",
       "kind": "shot",
       "start": 19.067,
       "chapter": 0,
@@ -114,67 +114,34 @@
         "II"
       ],
       "caption": {
-        "en": "Home · what the owner sees every morning",
-        "zh": "首页 · 企业主每天早上看到的内容"
+        "en": "Demo Mode, step 1 · the morning of the notice: 13% risk, no plan yet",
+        "zh": "演示模式第1步 · 通知当天上午：风险13%，尚无方案"
       },
       "pieces": [
         {
-          "from": 7.25,
-          "to": 14.1,
+          "from": 0.5,
+          "to": 16.4,
           "rate": 1,
           "at": 0,
           "join": "dip"
         }
       ],
-      "dur": 6.85,
-      "scene": "s02",
+      "dur": 15.9,
+      "scene": "p02",
       "join": "dip",
-      "video": "rec/s02.mp4",
-      "clip": 28.662,
+      "video": "rec/pitch/p02.mp4",
+      "clip": 18,
       "focus": [
         {
-          "t": 1.982,
-          "dur": 5.129578121999994,
+          "t": 8.712,
+          "dur": 9,
           "box": {
-            "x": 218,
-            "y": 295.921875,
-            "w": 1376,
-            "h": 183.875
-          },
-          "maxScale": 1.5
-        },
-        {
-          "t": 7.71,
-          "dur": 4.2,
-          "box": {
-            "x": 212,
-            "y": 81.9375,
-            "w": 1388,
-            "h": 223.984375
-          },
-          "maxScale": 1.5
-        },
-        {
-          "t": 13.679,
-          "dur": 2.4,
-          "box": {
-            "x": 417,
-            "y": 3.34375,
-            "w": 130.640625,
-            "h": 48.296875
+            "x": 1056.0625,
+            "y": 179.53125,
+            "w": 538.9375,
+            "h": 288.9375
           },
           "maxScale": 1.8
-        },
-        {
-          "t": 15.437,
-          "dur": 12.625185466999998,
-          "box": {
-            "x": 214,
-            "y": 291.921875,
-            "w": 797.78125,
-            "h": 198.09375
-          },
-          "maxScale": 1.6
         }
       ],
       "marks": [],
@@ -182,95 +149,18 @@
       "notes": {},
       "lines": [
         {
-          "clip": "s02-01",
-          "start": 0.25,
-          "end": 6.711,
-          "en": "Meet Huerto Austral, a fictional cherry exporter, and NanFeng, its autonomous CFO.",
-          "zh": "这是虚构的樱桃出口商 Huerto Austral，以及它的自主 CFO：南风。",
-          "audio": "audio/s02-01.mp3",
+          "clip": "s02-01-ai",
+          "start": 0.45,
+          "end": 8.128,
+          "en": "Meet Huerto Austral, a fictional cherry exporter, and NanFeng: an AI CFO that acts with the owner's approval.",
+          "zh": "这是虚构的樱桃出口商 Huerto Austral，以及南风：经企业主批准才行动的 AI CFO。",
+          "audio": "audio/pitch/s02-01-ai.mp3",
           "lead": 0
-        }
-      ],
-      "chapterStart": false
-    },
-    {
-      "id": "news",
-      "kind": "shot",
-      "start": 25.917,
-      "chapter": 0,
-      "chips": [
-        "TC",
-        "II"
-      ],
-      "caption": null,
-      "pieces": [
-        {
-          "from": 20.6,
-          "to": 27.95,
-          "rate": 1,
-          "at": 0,
-          "join": "cut"
-        }
-      ],
-      "dur": 7.35,
-      "scene": "s02",
-      "join": "cut",
-      "video": "rec/s02.mp4",
-      "clip": 28.662,
-      "focus": [
-        {
-          "t": 1.982,
-          "dur": 5.129578121999994,
-          "box": {
-            "x": 218,
-            "y": 295.921875,
-            "w": 1376,
-            "h": 183.875
-          },
-          "maxScale": 1.5
         },
-        {
-          "t": 7.71,
-          "dur": 4.2,
-          "box": {
-            "x": 212,
-            "y": 81.9375,
-            "w": 1388,
-            "h": 223.984375
-          },
-          "maxScale": 1.5
-        },
-        {
-          "t": 13.679,
-          "dur": 2.4,
-          "box": {
-            "x": 417,
-            "y": 3.34375,
-            "w": 130.640625,
-            "h": 48.296875
-          },
-          "maxScale": 1.8
-        },
-        {
-          "t": 15.437,
-          "dur": 12.625185466999998,
-          "box": {
-            "x": 214,
-            "y": 291.921875,
-            "w": 797.78125,
-            "h": 198.09375
-          },
-          "maxScale": 1.6
-        }
-      ],
-      "marks": [],
-      "speed": [],
-      "notes": {},
-      "lines": [
         {
           "clip": "s02-04",
-          "start": 0.38,
-          "end": 7.16,
+          "start": 8.7,
+          "end": 15.48,
           "en": "Then, bad news from Shanghai: the buyer will pay USD 180,000 45 days late.",
           "zh": "随后传来上海的坏消息：买家的18万美元货款将延迟45天支付。",
           "audio": "audio/s02-04.mp3",
@@ -282,7 +172,7 @@
     {
       "id": "agent",
       "kind": "shot",
-      "start": 33.267,
+      "start": 34.967,
       "chapter": 1,
       "chips": [
         "TC",
@@ -294,54 +184,56 @@
       },
       "pieces": [
         {
-          "from": 0.2,
-          "to": 14.75,
+          "from": 0.9,
+          "to": 12,
           "rate": 1,
           "at": 0,
-          "join": "cut"
+          "join": "dip"
         },
         {
-          "from": 16.2,
-          "to": 22.75,
+          "from": 14.15,
+          "to": 18.95,
           "rate": 1,
-          "at": 14.55,
+          "at": 11.1,
           "join": "cut"
         }
       ],
-      "dur": 21.1,
+      "dur": 15.9,
       "scene": "s03",
-      "join": "cut",
-      "video": "rec/s03.mp4",
-      "clip": 28,
+      "join": "dip",
+      "video": "rec/pitch/s03.mp4",
+      "clip": 20,
       "focus": [
         {
-          "t": 2.639,
+          "t": 0.01,
           "dur": 30,
           "box": {
             "x": 999.78125,
             "y": 404.3125,
             "w": 598.21875,
-            "h": 222.9375
+            "h": 270.625
           },
-          "maxScale": 1.7
+          "maxScale": 1.9,
+          "spot": true
         },
         {
-          "t": 7.557,
+          "t": 5.405,
           "dur": 30,
           "box": {
             "x": 999.78125,
             "y": 404.3125,
             "w": 598.21875,
-            "h": 245.4375
+            "h": 293.125
           },
-          "maxScale": 1.7
+          "maxScale": 1.9,
+          "spot": true
         },
         {
-          "t": 16.36,
+          "t": 14.526,
           "dur": 60,
           "box": {
             "x": 222,
-            "y": 351.40625,
+            "y": 175.40625,
             "w": 1368,
             "h": 338
           },
@@ -352,54 +244,45 @@
       "marks": [
         {
           "name": "upload",
-          "t": 7.379
+          "t": 5.228
         },
         {
           "name": "live",
-          "t": 7.379
+          "t": 5.228
         },
         {
           "name": "run-done",
-          "t": 19.914
+          "t": 18.707
         }
       ],
       "speed": [
         {
-          "t": 7.379,
+          "t": 5.228,
           "rate": 4
         },
         {
-          "t": 19.914,
+          "t": 18.707,
           "rate": 1
         }
       ],
       "notes": {
-        "uploadWall": 1792126080292,
-        "run": "RUN-0005 · awaiting_approval"
+        "uploadWall": 1792203123658,
+        "run": "RUN-0002 · awaiting_approval"
       },
       "lines": [
         {
           "clip": "s03-01",
-          "start": 0.8,
-          "end": 3.861,
+          "start": 0.45,
+          "end": 3.511,
           "en": "The owner simply forwards the importer's letter to NanFeng.",
           "zh": "企业主只需把进口商的来信转给南风。",
           "audio": "audio/s03-01.mp3",
           "lead": 0
         },
         {
-          "clip": "s03-02",
-          "start": 4.31,
-          "end": 8.112,
-          "en": "From here on, this is the live agent at work, not a replay.",
-          "zh": "接下来是真实运行的代理，而不是回放。",
-          "audio": "audio/s03-02.mp3",
-          "lead": 0
-        },
-        {
           "clip": "s03-03",
-          "start": 8.56,
-          "end": 14.417,
+          "start": 4.7,
+          "end": 10.557,
           "en": "It reads the letter, re-runs 10,000 cash simulations, and prices every financing option.",
           "zh": "它读取来信，重新运行一万次现金模拟，并为每种融资方案报价。",
           "audio": "audio/s03-03.mp3",
@@ -407,20 +290,11 @@
         },
         {
           "clip": "s03-04",
-          "start": 14.85,
-          "end": 18.869,
+          "start": 11.45,
+          "end": 15.469,
           "en": "Every step is on the record: which tool, which model, how long it took.",
           "zh": "每一步都有记录：用了哪个工具、哪个模型、耗时多久。",
           "audio": "audio/s03-04.mp3",
-          "lead": 0
-        },
-        {
-          "clip": "s03-05a",
-          "start": 19.32,
-          "end": 20.593,
-          "en": "All of that took under a minute.",
-          "zh": "整个过程不到一分钟。",
-          "audio": "audio/pitch/s03-05a.mp3",
           "lead": 0
         }
       ],
@@ -429,7 +303,7 @@
     {
       "id": "verdict",
       "kind": "shot",
-      "start": 54.367,
+      "start": 50.867,
       "chapter": 1,
       "chips": [
         "TC"
@@ -440,36 +314,36 @@
       },
       "pieces": [
         {
-          "from": 1,
-          "to": 11.5,
+          "from": 2.9,
+          "to": 13.2,
           "rate": 1,
           "at": 0,
           "join": "dip"
         }
       ],
-      "dur": 10.5,
+      "dur": 10.3,
       "scene": "s04",
       "join": "dip",
-      "video": "rec/s04.mp4",
-      "clip": 19.76,
+      "video": "rec/pitch/s04.mp4",
+      "clip": 15,
       "focus": [
         {
-          "t": 5.044,
+          "t": 5.014,
           "dur": 9.5,
           "box": {
             "x": 213,
-            "y": 288.734375,
+            "y": 410.515625,
             "w": 370.5,
             "h": 132.625
           },
           "maxScale": 1.9
         },
         {
-          "t": 13.65,
-          "dur": 5.809866965999978,
+          "t": 13.654,
+          "dur": 5.805920180000575,
           "box": {
             "x": 228,
-            "y": 75.359375,
+            "y": 75.140625,
             "w": 924,
             "h": 411.9375
           },
@@ -491,8 +365,8 @@
         },
         {
           "clip": "s04-02",
-          "start": 7.6,
-          "end": 10.116,
+          "start": 7.3,
+          "end": 9.816,
           "en": "Before the notice, that risk was 13%.",
           "zh": "收到通知之前，这一风险只有13%。",
           "audio": "audio/s04-02.mp3",
@@ -502,9 +376,84 @@
       "chapterStart": false
     },
     {
+      "id": "health",
+      "kind": "shot",
+      "start": 61.167,
+      "chapter": 1,
+      "chips": [
+        "TC"
+      ],
+      "caption": {
+        "en": "Business health · the whole business at a glance",
+        "zh": "经营健康 · 企业全貌一目了然"
+      },
+      "pieces": [
+        {
+          "from": 1.8,
+          "to": 14,
+          "rate": 1,
+          "at": 0,
+          "join": "dip"
+        }
+      ],
+      "dur": 12.2,
+      "scene": "p04",
+      "join": "dip",
+      "video": "rec/pitch/p04.mp4",
+      "clip": 14,
+      "focus": [
+        {
+          "t": 1.562,
+          "dur": 2.4383426569997937,
+          "box": {
+            "x": 222,
+            "y": 60,
+            "w": 1368,
+            "h": 303.5625
+          },
+          "maxScale": 1.3
+        },
+        {
+          "t": 4.12,
+          "dur": 9,
+          "box": {
+            "x": 236,
+            "y": 236,
+            "w": 1014,
+            "h": 316
+          },
+          "maxScale": 1.6
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "lines": [
+        {
+          "clip": "p04-health-a",
+          "start": 0.2,
+          "end": 2.68,
+          "en": "It also checks the health of the whole business.",
+          "zh": "它还会检查整个企业的经营健康状况。",
+          "audio": "audio/pitch/p04-health-a.mp3",
+          "lead": 0
+        },
+        {
+          "clip": "p04-health-b",
+          "start": 3.4,
+          "end": 11.558,
+          "en": "One buyer in Shanghai brings 58% of the cash due in the next 90 days, so one delay moves the whole season.",
+          "zh": "一位上海买家占未来90天应收现金的58%，一笔延迟就会牵动整个季节。",
+          "audio": "audio/pitch/p04-health-b.mp3",
+          "lead": 0
+        }
+      ],
+      "chapterStart": false
+    },
+    {
       "id": "deal",
       "kind": "shot",
-      "start": 64.867,
+      "start": 73.367,
       "chapter": 2,
       "chips": [
         "TC"
@@ -532,11 +481,11 @@
       "dur": 17,
       "scene": "s05",
       "join": "dip",
-      "video": "rec/s05.mp4",
+      "video": "rec/pitch/s05.mp4",
       "clip": 22,
       "focus": [
         {
-          "t": 1.98,
+          "t": 1.973,
           "dur": 4.8,
           "box": {
             "x": 220,
@@ -547,7 +496,7 @@
           "maxScale": 1.3
         },
         {
-          "t": 11.888,
+          "t": 11.89,
           "dur": 5.2,
           "box": {
             "x": 216,
@@ -613,9 +562,65 @@
       "chapterStart": true
     },
     {
+      "id": "whatsapp",
+      "kind": "shot",
+      "start": 90.367,
+      "chapter": 2,
+      "chips": [
+        "II"
+      ],
+      "caption": {
+        "en": "Messages · the owner's WhatsApp (recorded replay)",
+        "zh": "消息 · 企业主的 WhatsApp（录制回放）"
+      },
+      "pieces": [
+        {
+          "from": 1.9,
+          "to": 6.3,
+          "rate": 1,
+          "at": 0,
+          "join": "dip"
+        }
+      ],
+      "dur": 4.4,
+      "scene": "p06",
+      "join": "dip",
+      "video": "rec/pitch/p06.mp4",
+      "clip": 8,
+      "focus": [
+        {
+          "t": 1.671,
+          "dur": 8,
+          "box": {
+            "x": 218,
+            "y": 100,
+            "w": 538.53125,
+            "h": 693.9375
+          },
+          "maxScale": 1.5,
+          "spot": true
+        }
+      ],
+      "marks": [],
+      "speed": [],
+      "notes": {},
+      "lines": [
+        {
+          "clip": "p06-whatsapp",
+          "start": 0.4,
+          "end": 4.035,
+          "en": "The owner gets the alert and the plan on WhatsApp, and can ask why.",
+          "zh": "企业主在 WhatsApp 上收到预警和方案，还可以问“为什么”。",
+          "audio": "audio/pitch/p06-whatsapp.mp3",
+          "lead": 0
+        }
+      ],
+      "chapterStart": false
+    },
+    {
       "id": "why",
       "kind": "shot",
-      "start": 81.867,
+      "start": 94.767,
       "chapter": 2,
       "chips": [
         "II",
@@ -627,36 +632,36 @@
       },
       "pieces": [
         {
-          "from": 8.95,
-          "to": 13.75,
+          "from": 9,
+          "to": 14.4,
           "rate": 1,
           "at": 0,
           "join": "dip"
         }
       ],
-      "dur": 4.8,
+      "dur": 5.4,
       "scene": "s07",
       "join": "dip",
-      "video": "rec/s07.mp4",
-      "clip": 15,
+      "video": "rec/pitch/s07.mp4",
+      "clip": 14.5,
       "focus": [
         {
-          "t": 5.149,
+          "t": 5.169,
           "dur": 9,
           "box": {
             "x": 999.78125,
             "y": 404.3125,
             "w": 598.21875,
-            "h": 222.9375
+            "h": 270.625
           },
           "maxScale": 1.7
         },
         {
-          "t": 9.531,
+          "t": 9.339,
           "dur": 7,
           "box": {
             "x": 1022.78125,
-            "y": 582.25,
+            "y": 629.9375,
             "w": 552.21875,
             "h": 154.578125
           },
@@ -670,8 +675,8 @@
       "lines": [
         {
           "clip": "s07-02b",
-          "start": 0.2,
-          "end": 4.305,
+          "start": 0.75,
+          "end": 4.855,
           "en": "Every number comes from the optimizer, not from the language model.",
           "zh": "每个数字都来自优化器，而不是语言模型。",
           "audio": "audio/pitch/s07-02b.mp3",
@@ -683,7 +688,7 @@
     {
       "id": "approve",
       "kind": "shot",
-      "start": 86.667,
+      "start": 100.167,
       "chapter": 3,
       "chips": [
         "SC",
@@ -719,11 +724,11 @@
       "dur": 9.75,
       "scene": "s08",
       "join": "dip",
-      "video": "rec/s08.mp4",
+      "video": "rec/pitch/s08.mp4",
       "clip": 17.5,
       "focus": [
         {
-          "t": 2.807,
+          "t": 2.792,
           "dur": 4.4,
           "box": {
             "x": 202,
@@ -734,7 +739,7 @@
           "maxScale": 1.5
         },
         {
-          "t": 7.82,
+          "t": 7.833,
           "dur": 9,
           "box": {
             "x": 1036.390625,
@@ -748,11 +753,11 @@
       "marks": [
         {
           "name": "otp",
-          "t": 7.815
+          "t": 7.822
         },
         {
           "name": "otp-end",
-          "t": 17.27
+          "t": 17.439
         }
       ],
       "speed": [],
@@ -782,7 +787,7 @@
     {
       "id": "done",
       "kind": "shot",
-      "start": 96.417,
+      "start": 109.917,
       "chapter": 3,
       "chips": [
         "TC"
@@ -795,16 +800,23 @@
           "rate": 1,
           "at": 0,
           "join": "cut"
+        },
+        {
+          "from": 17.5,
+          "to": 21.9,
+          "rate": 1,
+          "at": 9.45,
+          "join": "dip"
         }
       ],
-      "dur": 9.45,
+      "dur": 13.85,
       "scene": "s09",
       "join": "cut",
-      "video": "rec/s09.mp4",
+      "video": "rec/pitch/s09.mp4",
       "clip": 22.046,
       "focus": [
         {
-          "t": 0.21,
+          "t": 0.208,
           "dur": 3.4,
           "box": {
             "x": 1053.390625,
@@ -815,7 +827,7 @@
           "maxScale": 1.6
         },
         {
-          "t": 5.036,
+          "t": 5.028,
           "dur": 5,
           "box": {
             "x": 267,
@@ -826,22 +838,22 @@
           "maxScale": 1.6
         },
         {
-          "t": 11.817,
+          "t": 11.828,
           "dur": 4.6,
           "box": {
             "x": 563.5,
-            "y": 351.96875,
+            "y": 537.75,
             "w": 345.5,
             "h": 57.390625
           },
           "maxScale": 1.7
         },
         {
-          "t": 17.669,
-          "dur": 4.077505034000032,
+          "t": 17.646,
+          "dur": 4.100484423000031,
           "box": {
             "x": 999.78125,
-            "y": 463.75,
+            "y": 464.375,
             "w": 598.21875,
             "h": 273.875
           },
@@ -869,6 +881,15 @@
           "zh": "工资有了保障，与普通银行贷款相比，企业主节省了170万比索。",
           "audio": "audio/s09-02.mp3",
           "lead": 0
+        },
+        {
+          "clip": "s09-three",
+          "start": 9.9,
+          "end": 13.459,
+          "en": "From the importer's letter to an approved loan: three minutes.",
+          "zh": "从进口商来信到贷款获批：只用了三分钟。",
+          "audio": "audio/pitch/s09-three.mp3",
+          "lead": 0
         }
       ],
       "chapterStart": false
@@ -876,7 +897,7 @@
     {
       "id": "proof",
       "kind": "shot",
-      "start": 105.867,
+      "start": 123.767,
       "chapter": 4,
       "chips": [
         "ON",
@@ -905,26 +926,33 @@
       "dur": 16.65,
       "scene": "s10",
       "join": "dip",
-      "video": "rec/s10.mp4",
+      "video": "rec/pitch/s10.mp4",
       "clip": 24,
       "focus": [
         {
-          "t": 3.116,
-          "dur": 5.2,
+          "t": 3.125,
+          "dur": 3.6,
           "box": {
             "x": 223,
-            "y": 399.125,
+            "y": 329.125,
             "w": 1366,
-            "h": 390.3125
+            "h": 460.1875
           },
-          "maxScale": 1.25
+          "maxScale": 1.25,
+          "spot": true,
+          "spotBox": {
+            "x": 226,
+            "y": 338,
+            "w": 1360,
+            "h": 340
+          }
         },
         {
-          "t": 7.272,
+          "t": 7.27,
           "dur": 3.4,
           "box": {
             "x": 221,
-            "y": 460.5,
+            "y": 390.5,
             "w": 1370,
             "h": 50.9375
           },
@@ -932,7 +960,7 @@
           "spot": true
         },
         {
-          "t": 8.87,
+          "t": 8.869,
           "dur": 5,
           "box": {
             "x": 106,
@@ -943,7 +971,7 @@
           "maxScale": 1.4
         },
         {
-          "t": 16.568,
+          "t": 16.56,
           "dur": 8,
           "box": {
             "x": 79,
@@ -957,34 +985,34 @@
       "marks": [
         {
           "name": "etherscan",
-          "t": 8.851
+          "t": 8.849
         },
         {
           "name": "input",
-          "t": 16.544
+          "t": 16.542
         }
       ],
       "speed": [],
       "notes": {
-        "root": "cb56f687fb18fba34a41a22be187b317ee75e28c169c6cf5fbbb3c6e04538cc1",
-        "from": 7,
-        "to": 9,
-        "tx": "0xfdb49d66ca939bca1b361767f5a6dea98258d5963899510f2350fc46c6932af2"
+        "root": "8ccfd55f0720a262c703cda876154cacff2cfa4378e73b9b59f70294d0bc3dc4",
+        "from": 54,
+        "to": 56,
+        "tx": "0x6bd213343a14a5867dfb3ad4bc0d77d0e58ba81a05cf43820ae690753178c6b6"
       },
       "lines": [
         {
-          "clip": "s10-01",
+          "clip": "s10-01-evident",
           "start": 0.2,
-          "end": 4.881,
-          "en": "Every step, including this approval, is sealed in a tamper-proof audit log.",
-          "zh": "每一步，包括这次批准，都记录在防篡改的审计日志中。",
-          "audio": "audio/s10-01.mp3",
+          "end": 5.186,
+          "en": "Every step, including this approval, is sealed in a tamper-evident audit log.",
+          "zh": "每一步，包括这次批准，都记录在审计日志中，任何篡改都会留下痕迹。",
+          "audio": "audio/pitch/s10-01-evident.mp3",
           "lead": 0
         },
         {
           "clip": "s10-02",
-          "start": 5.33,
-          "end": 7.63,
+          "start": 5.5,
+          "end": 7.8,
           "en": "Its fingerprint is written to a public blockchain.",
           "zh": "日志的指纹被写入公共区块链。",
           "audio": "audio/s10-02.mp3",
@@ -992,8 +1020,8 @@
         },
         {
           "clip": "s10-03-sepolia",
-          "start": 8.08,
-          "end": 12.096,
+          "start": 8.1,
+          "end": 12.116,
           "en": "Here’s that transaction on Sepolia, the Ethereum test network.",
           "zh": "这是该交易在以太坊测试网 Sepolia 上的记录。",
           "audio": "audio/pitch/s10-03-sepolia.mp3",
@@ -1014,7 +1042,7 @@
     {
       "id": "fraud",
       "kind": "shot",
-      "start": 122.517,
+      "start": 140.417,
       "chapter": 5,
       "chips": [
         "SC"
@@ -1035,11 +1063,11 @@
       "dur": 23.45,
       "scene": "s11",
       "join": "dip",
-      "video": "rec/s11.mp4",
+      "video": "rec/pitch/s11.mp4",
       "clip": 24.827,
       "focus": [
         {
-          "t": 1.812,
+          "t": 1.809,
           "dur": 5.6,
           "box": {
             "x": 678,
@@ -1050,7 +1078,7 @@
           "maxScale": 1.6
         },
         {
-          "t": 9.204,
+          "t": 9.209,
           "dur": 4.6,
           "box": {
             "x": 683,
@@ -1062,7 +1090,7 @@
           "spot": true
         },
         {
-          "t": 14.038,
+          "t": 14.035,
           "dur": 4.4,
           "box": {
             "x": 1132,
@@ -1073,7 +1101,7 @@
           "maxScale": 1.5
         },
         {
-          "t": 20.09,
+          "t": 20.089,
           "dur": 5.4,
           "box": {
             "x": 220,
@@ -1107,12 +1135,12 @@
           "lead": 0
         },
         {
-          "clip": "s11-03",
+          "clip": "s11-03-lm",
           "start": 13.48,
-          "end": 17.489,
-          "en": "NanFeng quarantined it before any model could read it, and warned the owner.",
-          "zh": "南风在任何模型读取之前就将其隔离，并提醒了企业主。",
-          "audio": "audio/s11-03.mp3",
+          "end": 17.976,
+          "en": "NanFeng quarantined it before any language model could read it, and warned the owner.",
+          "zh": "南风在任何语言模型读取之前就将其隔离，并提醒了企业主。",
+          "audio": "audio/pitch/s11-03-lm.mp3",
           "lead": 0
         },
         {
@@ -1130,7 +1158,7 @@
     {
       "id": "china",
       "kind": "shot",
-      "start": 145.967,
+      "start": 163.867,
       "chapter": 6,
       "chips": [
         "II",
@@ -1143,38 +1171,38 @@
       "pieces": [
         {
           "from": 1.55,
-          "to": 4.75,
+          "to": 5.2,
           "rate": 1,
           "at": 0,
           "join": "dip"
         },
         {
           "from": 8.95,
-          "to": 18.2,
+          "to": 19.2,
           "rate": 1,
-          "at": 3.2,
+          "at": 3.65,
           "join": "dip"
         }
       ],
-      "dur": 12.45,
+      "dur": 13.9,
       "scene": "s12",
       "join": "dip",
-      "video": "rec/s12.mp4",
+      "video": "rec/pitch/s12.mp4",
       "clip": 18.5,
       "focus": [
         {
-          "t": 4.723,
+          "t": 4.713,
           "dur": 3.4,
           "box": {
             "x": 212,
             "y": 36,
             "w": 1388,
-            "h": 1444.140625
+            "h": 1491.828125
           },
           "maxScale": 1.5
         },
         {
-          "t": 9.344,
+          "t": 9.335,
           "dur": 9.5,
           "box": {
             "x": 615.28125,
@@ -1200,12 +1228,12 @@
           "lead": 0
         },
         {
-          "clip": "s12-02",
-          "start": 3.35,
-          "end": 12.17,
-          "en": "And it writes to the importer on WeCom, China's business chat, labelling every message as AI-generated, as Chinese rules require.",
-          "zh": "并通过企业微信用中文联系进口商，每条消息都按中国规定标注“由AI生成”。",
-          "audio": "audio/s12-02.mp3",
+          "clip": "s12-02-sim",
+          "start": 2.9,
+          "end": 13.607,
+          "en": "And on WeCom, China's business chat, simulated in this demo, every message to the importer is labelled as AI-generated, as Chinese rules require.",
+          "zh": "在企业微信（本演示为模拟）上，发给进口商的每条消息都按中国规定标注“由AI生成”。",
+          "audio": "audio/pitch/s12-02-sim.mp3",
           "lead": 0
         }
       ],
@@ -1214,29 +1242,29 @@
     {
       "id": "results",
       "kind": "mg",
-      "start": 158.417,
+      "start": 177.767,
       "chapter": 7,
       "chips": [
         "TC",
         "II"
       ],
       "caption": null,
-      "dur": 13.857,
+      "dur": 14.867,
       "mg": "Results",
       "lines": [
         {
-          "clip": "s13-01",
+          "clip": "s13-01-25",
           "start": 0.35,
-          "end": 8.864,
-          "en": "Across 50 benchmark cases, NanFeng solved all 50, and cut financing costs by 41% on average.",
-          "zh": "在50个基准案例中，南风全部解决，融资成本平均降低41%。",
-          "audio": "audio/s13-01.mp3",
+          "end": 9.874,
+          "en": "Across 50 benchmark cases, NanFeng solved all 50. On the 25 that needed financing, it cost 41% less than the bank loan, on average.",
+          "zh": "在50个基准案例中，南风全部解决；在需要融资的25个案例中，成本平均比银行贷款低41%。",
+          "audio": "audio/pitch/s13-01-25.mp3",
           "lead": 0
         },
         {
           "clip": "s13-02-tagline-a",
-          "start": 9.414,
-          "end": 10.947,
+          "start": 10.424,
+          "end": 11.957,
           "en": "NanFeng doesn't advise.",
           "zh": "南风不止于建议。",
           "audio": "audio/pitch/s13-02-tagline-a.mp3",
@@ -1244,8 +1272,8 @@
         },
         {
           "clip": "s13-02-tagline-b",
-          "start": 11.367,
-          "end": 12.857,
+          "start": 12.377,
+          "end": 13.867,
           "en": "It acts, with your permission.",
           "zh": "它在您的授权下行动。",
           "audio": "audio/pitch/s13-02-tagline-b.mp3",
@@ -1257,11 +1285,11 @@
     {
       "id": "team",
       "kind": "mg",
-      "start": 172.274,
+      "start": 192.634,
       "chapter": 7,
       "chips": [],
       "caption": null,
-      "dur": 9.164,
+      "dur": 10.203,
       "mg": "Team",
       "lines": [
         {
@@ -1274,12 +1302,12 @@
           "lead": 0
         },
         {
-          "clip": "s14-04",
+          "clip": "s14-04-two",
           "start": 5.47,
-          "end": 8.464,
-          "en": "Try it yourself at www.nanfengcfo.com",
-          "zh": "欢迎访问 www.nanfengcfo.com 亲自体验。",
-          "audio": "audio/s14-04.mp3",
+          "end": 9.503,
+          "en": "Try it yourself in two minutes at www.nanfengcfo.com",
+          "zh": "两分钟亲自体验：www.nanfengcfo.com",
+          "audio": "audio/pitch/s14-04-two.mp3",
           "lead": 0
         }
       ],
@@ -1288,7 +1316,7 @@
     {
       "id": "end",
       "kind": "card",
-      "start": 181.438,
+      "start": 202.837,
       "chapter": -1,
       "chips": [],
       "caption": null,
@@ -1297,7 +1325,7 @@
       "lines": []
     }
   ],
-  "total": 184.038,
+  "total": 205.437,
   "gaps": [
     {
       "at": 7.377,
@@ -1315,170 +1343,182 @@
       "clip": "s01-04"
     },
     {
-      "at": 19.317,
-      "gap": 1.4,
-      "clip": "s02-01"
+      "at": 19.517,
+      "gap": 1.6,
+      "clip": "s02-01-ai"
     },
     {
-      "at": 26.297,
-      "gap": 0.519,
+      "at": 27.767,
+      "gap": 0.572,
       "clip": "s02-04"
     },
     {
-      "at": 34.067,
-      "gap": 0.99,
+      "at": 35.417,
+      "gap": 0.87,
       "clip": "s03-01"
     },
     {
-      "at": 37.577,
-      "gap": 0.449,
-      "clip": "s03-02"
-    },
-    {
-      "at": 41.827,
-      "gap": 0.448,
+      "at": 39.667,
+      "gap": 1.189,
       "clip": "s03-03"
     },
     {
-      "at": 48.117,
-      "gap": 0.433,
+      "at": 46.417,
+      "gap": 0.893,
       "clip": "s03-04"
     },
     {
-      "at": 52.587,
-      "gap": 0.451,
-      "clip": "s03-05a"
-    },
-    {
-      "at": 54.767,
-      "gap": 0.907,
+      "at": 51.267,
+      "gap": 0.831,
       "clip": "s04-01"
     },
     {
-      "at": 61.967,
-      "gap": 0.62,
+      "at": 58.167,
+      "gap": 0.32,
       "clip": "s04-02"
     },
     {
-      "at": 65.167,
+      "at": 61.367,
       "gap": 0.684,
+      "clip": "p04-health-a"
+    },
+    {
+      "at": 64.567,
+      "gap": 0.72,
+      "clip": "p04-health-b"
+    },
+    {
+      "at": 73.667,
+      "gap": 0.942,
       "clip": "s05-01a"
     },
     {
-      "at": 67.637,
+      "at": 76.137,
       "gap": 0.542,
       "clip": "s05-02"
     },
     {
-      "at": 71.907,
+      "at": 80.407,
       "gap": 0.449,
       "clip": "s05-03"
     },
     {
-      "at": 77.097,
+      "at": 85.597,
       "gap": 0.45,
       "clip": "s05-04"
     },
     {
-      "at": 82.067,
-      "gap": 0.499,
+      "at": 90.767,
+      "gap": 0.699,
+      "clip": "p06-whatsapp"
+    },
+    {
+      "at": 95.517,
+      "gap": 1.115,
       "clip": "s07-02b"
     },
     {
-      "at": 87.067,
-      "gap": 0.895,
+      "at": 100.567,
+      "gap": 0.945,
       "clip": "s08-01"
     },
     {
-      "at": 92.917,
+      "at": 106.417,
       "gap": 0.651,
       "clip": "s08-03"
     },
     {
-      "at": 96.717,
+      "at": 110.217,
       "gap": 1.125,
       "clip": "s09-01"
     },
     {
-      "at": 99.727,
+      "at": 113.227,
       "gap": 0.446,
       "clip": "s09-02"
     },
     {
-      "at": 106.067,
-      "gap": 0.513,
-      "clip": "s10-01"
+      "at": 119.817,
+      "gap": 0.763,
+      "clip": "s09-three"
     },
     {
-      "at": 111.197,
-      "gap": 0.449,
+      "at": 123.967,
+      "gap": 0.591,
+      "clip": "s10-01-evident"
+    },
+    {
+      "at": 129.267,
+      "gap": 0.314,
       "clip": "s10-02"
     },
     {
-      "at": 113.947,
-      "gap": 0.45,
+      "at": 131.867,
+      "gap": 0.3,
       "clip": "s10-03-sepolia"
     },
     {
-      "at": 118.477,
-      "gap": 0.514,
+      "at": 136.377,
+      "gap": 0.494,
       "clip": "s10-05"
     },
     {
-      "at": 122.967,
+      "at": 140.867,
       "gap": 0.718,
       "clip": "s11-01"
     },
     {
-      "at": 131.167,
+      "at": 149.067,
       "gap": 0.452,
       "clip": "s11-02"
     },
     {
-      "at": 135.997,
+      "at": 153.897,
       "gap": 0.453,
-      "clip": "s11-03"
+      "clip": "s11-03-lm"
     },
     {
-      "at": 141.177,
-      "gap": 1.171,
+      "at": 159.077,
+      "gap": 0.684,
       "clip": "s11-04"
     },
     {
-      "at": 146.317,
+      "at": 164.217,
       "gap": 0.885,
       "clip": "s12-01a"
     },
     {
-      "at": 149.317,
-      "gap": 0.837,
-      "clip": "s12-02"
+      "at": 166.767,
+      "gap": 0.387,
+      "clip": "s12-02-sim"
     },
     {
-      "at": 158.767,
-      "gap": 0.63,
-      "clip": "s13-01"
+      "at": 178.117,
+      "gap": 0.643,
+      "clip": "s13-01-25"
     },
     {
-      "at": 167.831,
+      "at": 188.191,
       "gap": 0.55,
       "clip": "s13-02-tagline-a"
     },
     {
-      "at": 169.784,
+      "at": 190.144,
       "gap": 0.42,
       "clip": "s13-02-tagline-b"
     },
     {
-      "at": 172.574,
+      "at": 192.934,
       "gap": 1.3,
       "clip": "s14-01"
     },
     {
-      "at": 177.744,
+      "at": 198.104,
       "gap": 0.5,
-      "clip": "s14-04"
+      "clip": "s14-04-two"
     }
   ],
-  "warn": []
+  "warn": [
+    "china: piece 1 runs to 19.2s, the recording ends at 18.5s"
+  ]
 }

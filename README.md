@@ -10,7 +10,7 @@ An agent that acts, not a chatbot that advises: NanFeng sees the cash crunch bef
 
 | | |
 |---|---|
-| **Demo video (3 min)** | [03-demo-video/nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4) · [transcript](03-demo-video/transcript.md) |
+| **Demo video (3:25)** | [03-demo-video/nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4) · [transcript](03-demo-video/transcript.md) |
 | **Deck** | [02-presentation-deck/NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf) |
 | **Live app** | https://www.nanfengcfo.com · [try it in two minutes](https://www.nanfengcfo.com/#try): owner sign-in (the demo password is on the sign-in screen), then send the [importer's notice](04-source-code/web/public/samples/hongxin-payment-notice.pdf) or the [08:47 poisoned invoice](04-source-code/web/public/samples/frio-austral-invoice-4471.pdf) to the live agent |
 | **API** | https://api.nanfengcfo.com/docs |
@@ -73,7 +73,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 |---|---|---|---|
 | 01 | Technical documentation: system architecture, core algorithm, security design | [01-technical-documentation/](01-technical-documentation/) | **[NanFeng-Technical-Documentation.pdf](01-technical-documentation/NanFeng-Technical-Documentation.pdf)** (all four parts in one PDF) · Markdown: [technical-documentation.md](01-technical-documentation/technical-documentation.md) (start here), with the full sections: [core algorithm](01-technical-documentation/core-algorithm.md) · [agent](01-technical-documentation/agent.md) · [security design](01-technical-documentation/security-design.md) |
 | 02 | Presentation deck (≤ 10 min) | [02-presentation-deck/](02-presentation-deck/) | **[NanFeng-Presentation-Deck.pdf](02-presentation-deck/NanFeng-Presentation-Deck.pdf)**: 13 slides, 16:9, about 9 minutes spoken |
-| 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 3:04, 1080p, EN + 中文 subtitles; the app shots are one take on the live app. [Transcript](03-demo-video/transcript.md) with time codes; the pipeline that builds it in `resources/` |
+| 03 | Demo video (≤ 5 min) | [03-demo-video/](03-demo-video/) | [nanfeng-demo.mp4](03-demo-video/nanfeng-demo.mp4): 3:25, 1080p, EN + 中文 subtitles; the app shots are one take on the live app, on the scenario's clock (letter 10:12, approval 10:15). [Transcript](03-demo-video/transcript.md) with time codes; the pipeline that builds it in `resources/` |
 | 04 | Source code: README, repository link, deployment instructions, test cases | [04-source-code/](04-source-code/) | This README · [deployment.md](04-source-code/deployment.md) · tests in `04-source-code/backend/tests`, `04-source-code/agent/tests`, `04-source-code/quant/tests`, `04-source-code/redteam` |
 | 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | **[NanFeng-Security-Self-Assessment-Report.pdf](05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf)** (all four parts in one PDF) · Markdown: [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
 | 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [06-execution-evidence/](06-execution-evidence/) | [out-live/](06-execution-evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · [out/](06-execution-evidence/out/SUMMARY.md) (in-process run) · video as in 03 |
@@ -94,7 +94,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 ├── 02-presentation-deck/                  # Deliverable 02
 │   └── NanFeng-Presentation-Deck.pdf      #   The final deck (13 slides)
 ├── 03-demo-video/                         # Deliverable 03
-│   ├── nanfeng-demo.mp4                   #   The demo video (3:04)
+│   ├── nanfeng-demo.mp4                   #   The demo video (3:25)
 │   ├── transcript.md                      #   Its narration and 中文 subtitles, with time codes
 │   └── resources/                         #   Video script, and the pipeline that records and edits the video
 ├── 04-source-code/                        # Deliverable 04

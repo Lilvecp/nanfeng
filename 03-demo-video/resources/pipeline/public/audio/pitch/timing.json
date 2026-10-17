@@ -1,30 +1,30 @@
 {
   "s10-03-sepolia": {
-    "hash": "0081ac2c5575",
     "dur": 4.016,
     "speech": [
       0,
       4.016
     ],
-    "src": "audio/pitch/s10-03-sepolia.mp3"
+    "src": "audio/pitch/s10-03-sepolia.mp3",
+    "hash": "0c3504de67f7"
   },
   "s13-02-tagline-a": {
-    "hash": "26ba76fae12c",
     "dur": 1.533,
     "speech": [
       0,
       1.533
     ],
-    "src": "audio/pitch/s13-02-tagline-a.mp3"
+    "src": "audio/pitch/s13-02-tagline-a.mp3",
+    "hash": "89796c1a438b"
   },
   "s13-02-tagline-b": {
-    "hash": "60d957923345",
     "dur": 1.49,
     "speech": [
       0,
       1.49
     ],
-    "src": "audio/pitch/s13-02-tagline-b.mp3"
+    "src": "audio/pitch/s13-02-tagline-b.mp3",
+    "hash": "b62315ce1f57"
   },
   "s03-05a": {
     "hash": "b4561b8ccbb4",
@@ -301,5 +301,95 @@
       2.994
     ],
     "src": "audio/s14-04.mp3"
+  },
+  "s02-01-ai": {
+    "hash": "cb182b6f4309",
+    "dur": 7.678,
+    "speech": [
+      0,
+      7.678
+    ],
+    "src": "audio/pitch/s02-01-ai.mp3"
+  },
+  "p04-health-a": {
+    "hash": "02be82391e3a",
+    "dur": 2.904,
+    "speech": [
+      0,
+      2.48
+    ],
+    "src": "audio/pitch/p04-health-a.mp3"
+  },
+  "p04-health-b": {
+    "hash": "5e931b840c83",
+    "dur": 8.158,
+    "speech": [
+      0,
+      8.158
+    ],
+    "src": "audio/pitch/p04-health-b.mp3"
+  },
+  "p06-whatsapp": {
+    "hash": "0eaabbbed717",
+    "dur": 3.635,
+    "speech": [
+      0,
+      3.635
+    ],
+    "src": "audio/pitch/p06-whatsapp.mp3"
+  },
+  "s09-three": {
+    "hash": "40da4fa5098e",
+    "dur": 3.559,
+    "speech": [
+      0,
+      3.559
+    ],
+    "src": "audio/pitch/s09-three.mp3"
+  },
+  "s10-01-evident": {
+    "hash": "28c55758c703",
+    "dur": 4.986,
+    "speech": [
+      0,
+      4.986
+    ],
+    "src": "audio/pitch/s10-01-evident.mp3"
+  },
+  "s11-03-lm": {
+    "hash": "dbc832526bfa",
+    "dur": 4.496,
+    "speech": [
+      0,
+      4.496
+    ],
+    "src": "audio/pitch/s11-03-lm.mp3"
+  },
+  "s12-02-sim": {
+    "hash": "71882a123f89",
+    "dur": 10.707,
+    "speech": [
+      0,
+      10.707
+    ],
+    "src": "audio/pitch/s12-02-sim.mp3"
+  },
+  "s13-01-25": {
+    "hash": "29717e384d83",
+    "dur": 10.195,
+    "speech": [
+      0,
+      9.524
+    ],
+    "src": "audio/pitch/s13-01-25.mp3"
+  },
+  "s14-04-two": {
+    "hash": "85158e46ce48",
+    "dur": 4.033,
+    "speech": [
+      0,
+      4.033
+    ],
+    "src": "audio/pitch/s14-04-two.mp3"
   }
 }

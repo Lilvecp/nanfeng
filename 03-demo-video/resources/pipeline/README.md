@@ -12,7 +12,7 @@ change to the app or to a line only needs another run.
 | Timeline | `plan.mjs`: when each line starts in its scene and how long each scene runs | `src/timeline.json` |
 | Recording | Playwright + Chrome on the GPU (Vulkan), CDP screencast at 60 fps, 1600×900 at 1.5× pixel density, clicks timed to the voice (`record/`) | `public/rec/sNN.mp4` |
 | Edit | Remotion (`src/`): zooms, spotlight, subtitles, chapter rail, chips, callouts, crossfades, title cards | `out/` (work files) |
-| Finish | ffmpeg: loudness −16 LUFS, H.264 1080p, length check ≤ 5:00 | The submitted 3-minute cut, [`03-demo-video/nanfeng-demo.mp4`](../../nanfeng-demo.mp4); the full 5-minute cut in `out/` |
+| Finish | ffmpeg: loudness −16 LUFS, H.264 1080p, length check ≤ 5:00 | The submitted pitch cut (3:25), [`03-demo-video/nanfeng-demo.mp4`](../../nanfeng-demo.mp4); the full 5-minute cut in `out/` |
 
 ## Run it
 
@@ -26,8 +26,9 @@ node tts/tts.mjs                        # voice (node tts/tts.mjs s10-03 voices 
 node tts/polish.mjs                     # every line at the same loudness, silence after its last word
 .venv-tts/bin/python tts/check.py       # optional: what a listener hears, line by line
 node record/make-notice.mjs             # the importer's PDF that scene 3 uploads
-node record/record.mjs                  # the live take (resets the public sandbox once)
-./make.sh pitch                         # the submitted 3-minute cut: ../../nanfeng-demo.mp4 and ../../transcript.md
+node record/record.mjs                  # the live take of the full cut (resets the public sandbox once)
+node record/record.mjs --pitch          # the pitch cut's take on the scenario's clock (resets it again)
+./make.sh pitch                         # the submitted pitch cut: ../../nanfeng-demo.mp4 and ../../transcript.md
 ./make.sh render                        # the full 5-minute cut: out/nanfeng-demo-full.mp4 (SHORT=1 adds a 2:30 cut)
 ```
 
@@ -39,17 +40,29 @@ node record/record.mjs                  # the live take (resets the public sandb
   renders and phone copies in `out/`, `node_modules/`, `.venv-tts/` and `.env`. A fresh clone
   renders again after `node record/record.mjs`; the voice clips in `public/audio/` are committed.
 
-## The 3-minute cut (the submitted video)
+## The pitch cut (the submitted video)
 
 A reviewer's second pass (2026-10-16) asked for a 3-minute version: a jury that watches dozens of
-projects sees 3 minutes through, and stops a 5-minute one halfway. `./make.sh pitch` builds it from
-the same live take, so the sandbox is not reset again and no new Sepolia transaction is sent. It
+projects sees 3 minutes through, and stops a 5-minute one halfway. `./make.sh pitch` builds it and
 writes the video and its [transcript](../../transcript.md) to the top of the deliverable folder.
+
+A third pass (same day) asked for one clock with the deck (the letter at 10:12, the approval at
+10:15), nothing on screen ahead of the letter, the Business health screen and the owner's WhatsApp,
+and the claims as the deck words them. The cut now has its own take, `node record/record.mjs
+--pitch`: one sandbox reset, then only the scenes the cut shows, in its order, plus three of its own
+(`p02` Demo Mode before the notice, `p04` Business health, `p06` the owner's WhatsApp thread). The
+recorder picks the next moment when it is 10:12 in some time zone, sets the browser to that zone,
+and holds the scene clock (nothing is recorded) until the letter goes to the agent at 10:12 and
+again until the owner approves at 10:15. Clips are encoded after the take. Like the full take, it
+resets the public sandbox and sends a Sepolia transaction. During it the browser's own
+`POST /approvals` gets a 403: an owner's desk with no request pending opens the Cherry Crisis
+request itself (`web/src/lib/desk-state.tsx`), so without this the request would be in the audit log
+before the letter. The only request is the one the live agent proposes after reading the letter.
 
 | Piece | What it does |
 |---|---|
 | [`pitch.mjs`](pitch.mjs) | The cut: which pieces of which recorded scene play, which narration line plays where, and the motion-graphics sections. `node pitch.mjs` prints the timeline, its length and every pause between two lines longer than 1.2 s |
-| [`tts/pitch-voice.mjs`](tts/pitch-voice.mjs) | New takes in the team's voice (the deck's tagline, and "Sepolia", respelled because the voice said "Sapolia"), single sentences cut out of approved takes at the pause between sentences, and the speech span of every clip (`public/audio/pitch/`) |
+| [`tts/pitch-voice.mjs`](tts/pitch-voice.mjs) | New takes in the team's voice (the deck's tagline; "Sepolia", respelled because the voice said "Sapolia"; and the lines the third review changed), single sentences cut out of approved takes at the pause between sentences, and the speech span of every clip (`public/audio/pitch/`) |
 | [`src/pitch/`](src/pitch/) | The composition `NanFengPitch`: app shots (`Shot.tsx`, the recorder's zooms and callouts on the scene's own clock), the problem, results and team scenes, the title cards |
 | [`assets/cutouts.py`](assets/cutouts.py) | Team portraits without their backgrounds (MODNet, run locally), so the sign behind Vicente's photo is gone |
 | [`tts/sfx.mjs`](tts/sfx.mjs) | A small synthesised sound kit for the motion graphics (whoosh, pop, tick); `REMOTION_SFX=0` renders without it |
@@ -66,9 +79,16 @@ node stills.mjs NanFengPitch out/check --every 3
 
 Choices in the cut:
 
-- **Story.** Problem → risk spotted → best deal → you approve → on-chain proof → fraud blocked →
-  built for China → results and team. Left out: the stress test, most of "ask why", the code-by-SMS
-  line (the callout on screen says it) and the names in the narration (they are on the team cards).
+- **Story.** Problem (and Demo Mode's first step: the morning before NanFeng acts) → risk spotted
+  (the live run, the verdict, Business health) → best deal (the options, the owner's WhatsApp thread,
+  the live "why") → you approve (10:15, three minutes after the letter) → on-chain proof → fraud
+  blocked → built for China → results and team. Left out: the stress test, the code-by-SMS line (the
+  callout on screen says it) and the names in the narration (they are on the team cards).
+- **Claims as the deck words them.** An AI CFO that acts with the owner's approval; a tamper-evident
+  audit log; quarantined before any language model reads it; WeCom simulated in this demo; −41% on the
+  25 benchmark cases that needed financing; our own red team. The WhatsApp thread is the Messages
+  page's, labelled "Recorded replay · not a live chat" on screen: no real WhatsApp goes out from the
+  public demo.
 - **No dead air.** Lines are packed on their speech, not on the silence a take ends with; app pieces
   cut inside the pauses between sentences, and a page that is still loading is cut out. The two
   pauses over 1.2 s are on purpose: NanFeng taking the empty finance seat, and the tagline landing.

@@ -1,6 +1,6 @@
 # First script of the demo video (5-minute cut)
 
-> The submitted video is the **3-minute cut** of the same live take, reworked after a reviewer's feedback: see [the transcript](../transcript.md). This page is the first script, kept because the full cut is still built from it (`./make.sh render` in [pipeline/](pipeline/)).
+> The submitted video is a **shorter cut** with its own live take, reworked after three reviews: see [the transcript](../transcript.md). This page is the first script, kept because the full cut is still built from it (`./make.sh render` in [pipeline/](pipeline/)).
 
 Recorded from the web on the deployed URL (or `npm run build && npm start` locally if the deploy is not ready), 1920×1080, light theme, browser zoom 100%. Narration in English; burned-in subtitles in **English and 中文**. Every number matches [scope-moscow.md](../../07-team-workspace/valentin-castro/scope-moscow.md).
 

@@ -45,7 +45,8 @@ export function EndCard({ s }: { s: Section }) {
       <Enter at={0} config={T.spring.bouncy}><SailMark size={136} /></Enter>
       <Enter at={4} style={{ marginTop: 22 }}><Wordmark size={88} /></Enter>
       <Enter at={8} style={{ marginTop: 18 }}><div style={{ ...tagline, fontSize: 38 }}>The AI CFO for exporters · it acts, with your permission</div></Enter>
-      <Enter at={13} style={{ marginTop: 40 }}>
+      <Enter at={13} style={{ marginTop: 40, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+        <div style={{ fontFamily: T.fonts.mono, fontSize: 20, letterSpacing: "0.16em", textTransform: "uppercase", color: T.colors.gold }}>Try it yourself in two minutes</div>
         <div style={{ padding: "14px 34px", borderRadius: 999, border: `2px solid ${T.colors.gold}`, boxShadow: `0 0 50px ${T.colors.glow}`, fontFamily: T.fonts.mono, fontWeight: 600, fontSize: 40, color: T.colors.text }}>www.nanfengcfo.com</div>
       </Enter>
       <Enter at={18} style={{ marginTop: 40 }}>

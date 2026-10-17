@@ -8,7 +8,7 @@ import { sectionFrames, type Section } from "./data";
 import { breathe, Counter, Enter, exitK, float, Grade, Grain, ramp, Sfx, Words } from "./fx";
 import { theme as T } from "./theme";
 
-const CUE = { fifty: 0.58, all: 3.7, pct: 6.88 };
+const CUE = { fifty: 0.5, all: 2.92, pct: 6.94 }; // s13-01-25
 const display = (size: number, weight = 700): React.CSSProperties => ({ fontFamily: T.fonts.display, fontWeight: weight, fontSize: size, letterSpacing: "-0.02em", lineHeight: 1.05, color: T.colors.text });
 
 export function Results({ s }: { s: Section }) {
@@ -37,12 +37,12 @@ export function Results({ s }: { s: Section }) {
     <AbsoluteFill>
       {showA ? (
         <AbsoluteFill style={{ alignItems: "center", paddingTop: 150 }}>
-          <Enter at={2} exitAt={outA}><span style={{ fontFamily: T.fonts.mono, fontSize: 22, letterSpacing: "0.2em", textTransform: "uppercase", color: T.colors.gold }}>NanFeng-Bench · 50 synthetic exporters</span></Enter>
+          <Enter at={2} exitAt={outA}><span style={{ fontFamily: T.fonts.mono, fontSize: 22, letterSpacing: "0.2em", textTransform: "uppercase", color: T.colors.gold }}>NanFeng-Bench · 50 synthetic cases</span></Enter>
           <Enter at={5} exitAt={outA} style={{ marginTop: 22 }}><span style={display(88)}>Measured, not promised.</span></Enter>
           <div style={{ display: "flex", gap: 40, marginTop: 70 }}>
             {card(at(CUE.fifty) - 5, glow1, <span style={num(glow1)}><Counter at={at(CUE.fifty)} to={50} /><span style={{ color: T.colors.muted, fontSize: 90 }}>/50</span></span>, "benchmark cases solved")}
-            {card(at(CUE.pct) - 8, glow2, <span style={num(glow2)}><Counter at={at(CUE.pct) - 2} to={41} prefix="−" suffix="%" /></span>, "average financing cost vs. the default bank loan")}
-            {card(at(CUE.pct) + 4, 0, <span style={num(0)}>46<span style={{ color: T.colors.muted, fontSize: 90 }}>/46</span></span>, "red-team attacks stopped")}
+            {card(at(CUE.pct) - 8, glow2, <span style={num(glow2)}><Counter at={at(CUE.pct) - 2} to={41} prefix="−" suffix="%" /></span>, "cheaper than the bank loan, on the 25 cases that needed financing")}
+            {card(at(CUE.pct) + 4, 0, <span style={num(0)}>46<span style={{ color: T.colors.muted, fontSize: 90 }}>/46</span></span>, "of our own red-team attacks stopped")}
           </div>
           <Sfx name="pop" at={at(CUE.all)} />
           <Sfx name="pop" at={at(CUE.pct)} />

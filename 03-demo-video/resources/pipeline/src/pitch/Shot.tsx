@@ -130,7 +130,8 @@ function PieceView({ scene, video, clip, p, carry, frames, dipIn, dipOut }: { sc
           style={{ position: "absolute", left: 0, top: 0, width: FRAME.w, height: FRAME.h, transformOrigin: "0 0", transform: `scale(${cam.s}) translate(${-cam.lx * K}px, ${-cam.ly * K}px)` }} />
       </Freeze>
       <Spotlight scene={spotScene} t={t} cam={cam} />
-      <FastForward scene={scene} t={t} />
+      {/* the badge stays a second past the sped-up run, while the narration is still on it */}
+      <FastForward scene={scene} t={t} hold={1.6} />
       <Callouts scene={scene} t={t} mark={mark} />
       {shade > 0 ? <AbsoluteFill style={{ background: T.colors.night, opacity: shade }} /> : null}
     </AbsoluteFill>

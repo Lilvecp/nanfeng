@@ -97,13 +97,13 @@ export function Spotlight({ scene, t, cam }: { scene: SceneT; t: number; cam: { 
 }
 
 /** "4×" while the recorder ran the scene clock faster than real time (a long agent run). */
-export function FastForward({ scene, t }: { scene: SceneT; t: number }) {
+export function FastForward({ scene, t, hold = 0.6 }: { scene: SceneT; t: number; hold?: number }) {
   const segs = scene.speed ?? [];
   let from: number | undefined, to: number | undefined, rate = 1;
   for (let i = 0; i < segs.length; i++) {
     if (segs[i].rate > 1) { from = segs[i].t; to = segs[i + 1]?.t ?? scene.duration; rate = segs[i].rate; break; }
   }
-  const o = window_(t, from, to === undefined ? undefined : to + 0.6, 0.25);
+  const o = window_(t, from, to === undefined ? undefined : to + hold, 0.25);
   if (o <= 0) return null;
   return (
     <div style={{ position: "absolute", right: 22, top: 22, opacity: o, display: "flex", alignItems: "center", gap: 12, background: "rgba(14,23,38,0.92)", color: C.text, borderRadius: 999, padding: "10px 20px 10px 16px", boxShadow: "0 8px 30px rgba(0,0,0,0.3)" }}>

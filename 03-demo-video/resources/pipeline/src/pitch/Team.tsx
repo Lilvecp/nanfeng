@@ -6,7 +6,7 @@ import { sectionFrames, type Section } from "./data";
 import { Enter, exitK, float, Grade, Grain, Sfx } from "./fx";
 import { theme as T } from "./theme";
 
-const CUE = { five: 1.52, univ: 2.56, url: 1.12 }; // s14-01, s14-01, s14-04
+const CUE = { five: 1.52, univ: 2.56, url: 2.04 }; // s14-01, s14-01, s14-04-two
 
 // cx, cy: centre of the head in the 800×800 cutout; s: scale that gives every head about the same
 // size on its card (Renato's photo is a close-up: a little larger, so his shoulders reach the edge)
@@ -38,8 +38,10 @@ export function Team({ s }: { s: Section }) {
           <span style={{ ...display(76), color: T.colors.mist }}>One agent that acts.</span>
         </div>
       </Enter>
-      <Enter at={L[0].a + F(CUE.univ) - 6} exitAt={exit} style={{ marginTop: 16 }}>
-        <span style={{ fontFamily: T.fonts.mono, fontSize: 21, letterSpacing: "0.16em", textTransform: "uppercase", color: T.colors.gold }}>Universidad del Desarrollo · Chile · FinTechathon 2026</span>
+      <Enter at={L[0].a + F(CUE.univ) - 10} exitAt={exit} style={{ marginTop: 18 }}>
+        <span style={{ fontFamily: T.fonts.mono, fontWeight: 600, fontSize: 25, letterSpacing: "0.14em", textTransform: "uppercase", color: T.colors.text, textShadow: "0 2px 14px rgba(0,0,0,0.45)" }}>
+          Universidad del Desarrollo <span style={{ color: T.colors.gold }}>·</span> Chile <span style={{ color: T.colors.gold }}>·</span> FinTechathon 2026
+        </span>
       </Enter>
       <div style={{ display: "flex", gap: 24, marginTop: 52, opacity: dim }}>
         {PEOPLE.map((p, i) => <Person key={p.file} p={p} at={L[0].a + F(CUE.five) - 8 + i * T.t.stagger + i} exit={exit} />)}
@@ -47,7 +49,7 @@ export function Team({ s }: { s: Section }) {
       <Enter at={urlAt} exitAt={exit} config={T.spring.bouncy} style={{ marginTop: 46 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "16px 34px", borderRadius: 999, background: "rgba(14,23,38,0.9)", border: `2px solid ${T.colors.gold}`,
           boxShadow: `0 0 ${60 * url}px ${T.colors.glow}` }}>
-          <span style={{ fontFamily: T.fonts.mono, fontSize: 19, letterSpacing: "0.16em", textTransform: "uppercase", color: T.colors.gold }}>Try it live</span>
+          <span style={{ fontFamily: T.fonts.mono, fontSize: 19, letterSpacing: "0.16em", textTransform: "uppercase", color: T.colors.gold }}>Try it in two minutes</span>
           <span style={{ fontFamily: T.fonts.mono, fontWeight: 600, fontSize: 40, color: T.colors.text }}>www.nanfengcfo.com</span>
         </div>
       </Enter>

@@ -46,7 +46,12 @@ export function Rail() {
   );
 }
 
-const CUES = SECTIONS.flatMap((s) => s.lines.map((l) => ({ ...l, start: s.start + l.start, end: s.start + l.end })));
+// A section that blinks or rises in: its first subtitle waits 0.3 s for the picture to settle (it
+// landed faint during the blink).
+const CUES = SECTIONS.flatMap((s) => s.lines.map((l, i) => {
+  const entering = i === 0 && s.kind === "shot" && s.join !== "cut" && l.start < 0.9;
+  return { ...l, start: s.start + l.start + (entering ? 0.3 : 0), end: s.start + l.end };
+}));
 
 export function Subtitles() {
   const frame = useCurrentFrame();
