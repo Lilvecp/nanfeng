@@ -240,8 +240,9 @@ export class Recorder {
     if (this.dry) await this.page.screenshot({ path: path.join(this.outDir, `.dry-${this.id}-${++this.shot}-${label}.png`) });
   }
 
-  /** Stop at `duration` (scene clock) and encode the clip. */
-  async finish(duration) {
+  /** Stop at `duration` (scene clock) and encode the clip. With `defer`, return the encoding as a
+   * function to run later (a take on the scenario's clock cannot wait for ffmpeg between scenes). */
+  async finish(duration, { defer = false } = {}) {
     if (this.rate !== 1) this.setRate(1);
     await this.at(duration + 0.4);
     await this.pause();
@@ -259,12 +260,15 @@ export class Recorder {
     const listFile = path.join(this.frameDir, "list.txt");
     fs.writeFileSync(listFile, list.join("\n"));
     const out = path.join(this.outDir, `${this.id}.mp4`);
-    const r = spawnSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", listFile,
-      "-vf", `scale=${W}:${H}:flags=lanczos,fps=${FPS}`, "-t", String(duration + 0.3),
-      "-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out], { stdio: "inherit" });
-    if (r.status !== 0) throw new Error(`ffmpeg failed for ${this.id}`);
-    fs.rmSync(this.frameDir, { recursive: true, force: true });
-    return out;
+    const encode = () => {
+      const r = spawnSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", listFile,
+        "-vf", `scale=${W}:${H}:flags=lanczos,fps=${FPS}`, "-t", String(duration + 0.3),
+        "-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out], { stdio: "inherit" });
+      if (r.status !== 0) throw new Error(`ffmpeg failed for ${this.id}`);
+      fs.rmSync(this.frameDir, { recursive: true, force: true });
+      return out;
+    };
+    return defer ? encode : encode();
   }
 }
 

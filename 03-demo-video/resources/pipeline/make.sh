@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Builds the demo video end to end: voice → recording → timeline → render → loudness → checks.
 # Usage: ./make.sh            full pipeline: voice, one live take on www.nanfengcfo.com, both cuts
-#        ./make.sh pitch      only the submitted 3-minute cut (pitch.mjs), after editing src/pitch/ or pitch.mjs
+#        ./make.sh pitch      only the submitted pitch cut (pitch.mjs), after editing src/pitch/ or pitch.mjs
+#                             (its own take: node record/record.mjs --pitch, clips in public/rec/pitch/)
 #        ./make.sh render     only the full 5-minute cut (after editing src/ or re-recording)
 #        SHORT=1 ./make.sh render   also the 2:30 cut
 # The submitted video is the pitch cut, at the top of the deliverable folder: 03-demo-video/nanfeng-demo.mp4
@@ -14,6 +15,7 @@ if [ "$STEP" = "all" ]; then
   node tts/tts.mjs
   node tts/polish.mjs
   node record/record.mjs
+  node record/record.mjs --pitch
 fi
 
 mkdir -p out

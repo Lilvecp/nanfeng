@@ -69,6 +69,7 @@ function level(file) {
 }
 
 const hashOf = (x) => crypto.createHash("sha1").update(JSON.stringify(x)).digest("hex").slice(0, 12);
+env(); // before any hash: a line's hash includes the voice ID
 
 // 1. new lines
 for (const line of NEW_LINES) {
