@@ -1,5 +1,5 @@
 // The problem, in four beats on the four approved lines of scene 1. Every beat lands on a word of the
-// narration (CUE: seconds into each take, from Whisper word timestamps of public/audio/s01-0N.mp3).
+// narration (CUE: seconds into each take, from Whisper word timestamps of public/audio/pitch/v3/s01-0N.mp3).
 // The last beat ends with NanFeng taking the empty finance seat, which hands over to "Meet NanFeng".
 import type React from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
@@ -9,10 +9,10 @@ import { breathe, Counter, Enter, exitK, float, Grade, Grain, ramp, Sfx } from "
 import { theme as T } from "./theme";
 
 const CUE = {
-  usd: 0.6, cherries: 2.1, almost: 3.1, china: 4.04, // s01-01
-  fruit: 0.24, weeks: 1.12, money: 1.86, months: 2.38, // s01-02
-  family: 0.36, late: 1.5, missing: 2.86, // s01-03
-  no: 1.2, // s01-04
+  usd: 0.78, cherries: 2.78, almost: 4.26, china: 5.52, // s01-01
+  fruit: 0.32, weeks: 1.8, money: 2.94, months: 3.52, // s01-02
+  family: 0.54, late: 2.0, missing: 3.02, // s01-03
+  no: 0.98, // s01-04
 };
 
 const CENTER: React.CSSProperties = { top: 64, bottom: 1080 - 964, alignItems: "center", justifyContent: "center" };

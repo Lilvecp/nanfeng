@@ -10,7 +10,7 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { NEW_LINES, SPLITS, usedClips } from "../pitch.mjs";
+import { NEW_LINES, SPLITS, VOICE_V3, usedClips } from "../pitch.mjs";
 
 const ROOT = new URL("../", import.meta.url).pathname;
 const AUDIO = `${ROOT}public/audio/`;
@@ -33,6 +33,19 @@ function env() {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
   }
+}
+
+/** One ElevenLabs request, trimmed like tts/tts.mjs (the timeline controls every pause). */
+async function request(body, file) {
+  env();
+  const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${process.env.ELEVENLABS_VOICE_ID}?output_format=mp3_44100_128`, {
+    method: "POST", headers: { "xi-api-key": process.env.ELEVENLABS_API_KEY, "content-type": "application/json", accept: "audio/mpeg" }, body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`ElevenLabs ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const raw = `${file}.raw.mp3`;
+  fs.writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
+  ff(["-i", raw, "-af", "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.03,areverse,silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.08,areverse", "-c:a", "libmp3lame", "-b:a", "192k", file]);
+  fs.rmSync(raw);
 }
 
 async function voice(line, file) {
@@ -101,10 +114,29 @@ for (const s of SPLITS) {
   console.log(`cut ${s.id} from ${s.from} ${s.start}–${end.toFixed(2)} s`);
 }
 
-// 3. length and speech span of every clip the cut plays (the pitch timeline packs lines on speech,
+// 3. the v3 takes (pitch.mjs VOICE_V3): every line of the cut again, with its delivery direction, in
+//    public/audio/pitch/v3/; the cut plays them when they exist
+const V3 = `${OUT}v3/`;
+fs.mkdirSync(V3, { recursive: true });
+for (const [id, say] of Object.entries(VOICE_V3.lines)) {
+  const file = `${V3}${id}.mp3`;
+  const seed = VOICE_V3.seeds?.[id] ?? VOICE_V3.seed;
+  const hash = hashOf([process.env.ELEVENLABS_VOICE_ID ?? "", VOICE_V3.model, VOICE_V3.stability, seed, say]);
+  const known = timing[`v3:${id}`]?.hash;
+  if (fs.existsSync(file) && !force.includes(id) && (known === hash || known === undefined)) {
+    timing[`v3:${id}`] = { hash };
+    continue;
+  }
+  await request({ text: say, model_id: VOICE_V3.model, voice_settings: { stability: VOICE_V3.stability }, seed }, file);
+  level(file);
+  timing[`v3:${id}`] = { hash };
+  console.log(`voiced v3 ${id}`);
+}
+
+// 4. length and speech span of every clip the cut plays (the pitch timeline packs lines on speech,
 //    not on the silent tail a clip may keep)
 for (const name of usedClips()) {
-  const file = fs.existsSync(`${OUT}${name}.mp3`) ? `${OUT}${name}.mp3` : `${AUDIO}${name}.mp3`;
+  const file = [`${V3}${name}.mp3`, `${OUT}${name}.mp3`, `${AUDIO}${name}.mp3`].find((f) => fs.existsSync(f));
   if (!fs.existsSync(file)) throw new Error(`missing clip ${name}`);
   const dur = duration(file);
   const sd = sh(`-i '${file}' -af silencedetect=noise=-40dB:d=0.12 -f null -`);

@@ -62,10 +62,11 @@ before the letter. The only request is the one the live agent proposes after rea
 | Piece | What it does |
 |---|---|
 | [`pitch.mjs`](pitch.mjs) | The cut: which pieces of which recorded scene play, which narration line plays where, and the motion-graphics sections. `node pitch.mjs` prints the timeline, its length and every pause between two lines longer than 1.2 s |
-| [`tts/pitch-voice.mjs`](tts/pitch-voice.mjs) | New takes in the team's voice (the deck's tagline; "Sepolia", respelled because the voice said "Sapolia"; and the lines the third review changed), single sentences cut out of approved takes at the pause between sentences, and the speech span of every clip (`public/audio/pitch/`) |
+| [`tts/pitch-voice.mjs`](tts/pitch-voice.mjs) | The narration: every line of the cut in the team's voice on ElevenLabs `eleven_v3`, with a delivery direction per line (`VOICE_V3` in `pitch.mjs`: worried, excited, firm, proud…) in `public/audio/pitch/v3/`, and the speech span of every clip. The earlier `eleven_multilingual_v2` takes stay in `public/audio/` as the fallback |
 | [`src/pitch/`](src/pitch/) | The composition `NanFengPitch`: app shots (`Shot.tsx`, the recorder's zooms and callouts on the scene's own clock), the problem, results and team scenes, the title cards |
 | [`assets/cutouts.py`](assets/cutouts.py) | Team portraits without their backgrounds (MODNet, run locally), so the sign behind Vicente's photo is gone |
 | [`tts/sfx.mjs`](tts/sfx.mjs) | A small synthesised sound kit for the motion graphics (whoosh, pop, tick); `REMOTION_SFX=0` renders without it |
+| [`tts/music.py`](tts/music.py) | The music bed, synthesised for this timeline: a chill lo-fi groove (80 BPM with a swing, rootless jazz chords on a Rhodes-like electric piano, a walking bass, soft muffled drums, a little vinyl crackle). The drums drop out under the tagline and on the end card; the bed is ducked about 16 dB under every narration line and fills every pause. Cached until the timeline or the score changes; `REMOTION_MUSIC=0` renders without it |
 | [`stills.mjs`](stills.mjs) | Single frames or a frame every N seconds, to check the picture before a full render |
 | [`check-render.py`](check-render.py) | Checks a finished render: length, loudness, silences over 1.2 s, frozen picture, and what Whisper hears against the script |
 
@@ -94,6 +95,11 @@ Choices in the cut:
   pauses over 1.2 s are on purpose: NanFeng taking the empty finance seat, and the tagline landing.
 - **Cuts.** A new page opens with a short blink (a crossfade showed two pages at once); a cut on the
   same page carries the camera across and eases into the next zoom.
+- **Voice and music.** After the third review the narration was voiced again on ElevenLabs v3 with a
+  direction per line, for more energy and emotion (it measures 4–9 dB more loudness range than the v2
+  takes), and checked back with Whisper (three lines were voiced again with another seed: an added
+  word, "NanFeng" misread, a dropped "-ed"). A chill lo-fi bed, ducked under the voice, fills every
+  pause between lines.
 - **The tagline** is the deck's: "NanFeng doesn't advise. It acts, with your permission." Its
   Chinese line (南风不止于建议。它在您的授权下行动。) is machine-assisted, like the other subtitles.
 - **The end card** has no repository link while the repository is private.

@@ -40,5 +40,6 @@ if [ "$STEP" = "all" ] || [ "$STEP" = "pitch" ]; then
   node tts/pitch-voice.mjs
   node tts/sfx.mjs >/dev/null
   node pitch.mjs --write
+  .venv-tts/bin/python tts/music.py   # the music bed, written for this timeline (cached)
   render NanFengPitch nanfeng-pitch "${PITCH_OUT:-../../nanfeng-demo.mp4}"
 fi

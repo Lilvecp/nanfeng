@@ -8,7 +8,7 @@ import { sectionFrames, type Section } from "./data";
 import { breathe, Counter, Enter, exitK, float, Grade, Grain, ramp, Sfx, Words } from "./fx";
 import { theme as T } from "./theme";
 
-const CUE = { fifty: 0.5, all: 2.92, pct: 6.94 }; // s13-01-25
+const CUE = { fifty: 0.46, all: 3.22, pct: 7.86 }; // s13-01-25 (v3 take)
 const display = (size: number, weight = 700): React.CSSProperties => ({ fontFamily: T.fonts.display, fontWeight: weight, fontSize: size, letterSpacing: "-0.02em", lineHeight: 1.05, color: T.colors.text });
 
 export function Results({ s }: { s: Section }) {

@@ -11,3 +11,5 @@ public/audio/sample-*
 .tts-test/
 # MODNet for assets/cutouts.py (downloaded, see that script)
 .models/
+public/audio/pitch/music.wav
+public/audio/pitch/music.key

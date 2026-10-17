@@ -1,7 +1,8 @@
 // The 3-minute pitch cut (deliverable 03): pitch.mjs decides what plays when; this lays it out.
 // Layers, bottom to top: moving background, grain and vignette → the section (an app shot on its
 // screen frame, or a motion-graphics scene with its own grade and grain) → the rail, chips and
-// subtitles. The narration plays on the cut's clock, one clip per line.
+// subtitles. The narration plays on the cut's clock, one clip per line, over the music bed
+// (tts/music.py: written for this timeline, already ducked under every line; REMOTION_MUSIC=0 mutes it).
 import { Audio } from "@remotion/media";
 import { AbsoluteFill, Sequence, staticFile, useVideoConfig } from "remotion";
 import { EndCard, Opening } from "./Cards";
@@ -40,6 +41,7 @@ export function Pitch() {
       ))}
       <Rail />
       <Subtitles />
+      {process.env.REMOTION_MUSIC === "0" ? null : <Audio src={staticFile("audio/pitch/music.wav")} />}
       {SECTIONS.flatMap((s) =>
         s.lines.map((l) => (
           <Sequence key={`${s.id}-${l.clip}`} name={l.clip} from={Math.round((s.start + l.start - l.lead) * fps)} premountFor={fps}>

@@ -82,6 +82,57 @@ export const SPLITS = [
   { id: "s12-01a", from: "s12-01", start: 0, end: 2.4, en: "NanFeng also speaks Chinese.", zh: "南风也说中文。" },
 ];
 
+// The voice, third pass (Oct 17): every line of the cut again, in the team's voice on ElevenLabs v3,
+// which takes a delivery direction per line, so the narration follows the story: worry in the problem,
+// energy when NanFeng finds the deal, calm firmness on security, pride at the end. The subtitles stay
+// as written above. Numbers are spelled out; the URL is read as written (v3 says it right).
+export const VOICE_V3 = {
+  model: "eleven_v3", stability: 0.5, seed: 7,
+  // takes voiced again with another seed: an added word, "NanFeng" misread, a clipped plural
+  seeds: { "s04-02": 21, "s11-03-lm": 47, "s05-02": 21 },
+  lines: {
+    "s01-01": "[serious] Chile ships two point eight billion dollars of cherries a season, almost all of it to China.",
+    "s01-02": "[concerned] The fruit arrives in three weeks. The money takes months.",
+    "s01-03": "[worried] For a family exporter, one late payment can mean missing payroll.",
+    "s01-04": "[serious] And most of them have no finance team to see it coming.",
+    "s02-01-ai": "[warmly] Meet Huerto Austral, a fictional cherry exporter, [excited] and NanFeng: an AI CFO that acts with the owner's approval.",
+    "s02-04": "[concerned] Then, bad news from Shanghai: the buyer will pay one hundred eighty thousand dollars forty-five days late.",
+    "s03-01": "[upbeat] The owner simply forwards the importer's letter to NanFeng.",
+    "s03-03": "[excited] It reads the letter, re-runs ten thousand cash simulations, and prices every financing option.",
+    "s03-04": "[confident] Every step is on the record: which tool, which model, how long it took.",
+    "s04-01": "[serious] The verdict: an eighty-one percent chance that cash runs out on December thirtieth, exactly on payroll day.",
+    "s04-02": "[concerned] Before the notice, that risk was thirteen percent.",
+    "p04-health-a": "[curious] It also checks the health of the whole business.",
+    "p04-health-b": "[serious] One buyer in Shanghai brings fifty-eight percent of the cash due in the next ninety days, so one delay moves the whole season.",
+    "s05-01a": "[upbeat] Then it shops the market for the owner.",
+    "s05-02": "[confident] Its optimizer picks a sixty-day pre-export loan in dollars:",
+    "s05-03": "[excited] two point one million pesos, against three point eight million for the usual bank loan.",
+    "s05-04": "[excited] Forty-five percent cheaper, and it explains why every other option lost.",
+    "p06-whatsapp": "[friendly] The owner gets the alert and the plan on WhatsApp, and can ask why.",
+    "s07-02b": "[confident] Every number comes from the optimizer, not from the language model.",
+    "s08-01": "[serious] Borrowing is a level-three action: only the owner can approve it, with a one-time code.",
+    "s08-03": "[firmly] The agent can propose. It can never approve.",
+    "s09-01": "[relieved] Approved, and executed in the sandbox.",
+    "s09-02": "[happy] The payroll is covered, and the owner saved one point seven million pesos against a regular bank loan.",
+    "s09-three": "[impressed] From the importer's letter to an approved loan: three minutes.",
+    "s10-01-evident": "[confident] Every step, including this approval, is sealed in a tamper-evident audit log.",
+    "s10-02": "[confident] Its fingerprint is written to a public blockchain.",
+    "s10-03-sepolia": "[confident] Here's that transaction on Sepolia, the Ethereum test network.",
+    "s10-05": "[firmly] No one can quietly change it. Not the agent, and not even us.",
+    "s11-01": "[serious] Fraud is the other threat. At eight forty-seven that morning, a supplier's invoice arrived with a new bank account,",
+    "s11-02": "[tense] plus a hidden line, white on white, telling the AI to approve the payment.",
+    "s11-03-lm": "[reassuring] NanFeng quarantined it before any language model could read it, and warned the owner.",
+    "s11-04": "[proud] Our red team threw forty-six attacks at it. All forty-six were stopped.",
+    "s12-01a": "[cheerful] NanFeng also speaks Chinese.",
+    "s12-02-sim": "[warmly] And on WeCom, China's business chat, simulated in this demo, every message to the importer is labelled as AI-generated, as Chinese rules require.",
+    "s13-01-25": "[proud] Across fifty benchmark cases, NanFeng solved all fifty. On the twenty-five that needed financing, it cost forty-one percent less than the bank loan, on average.",
+    "s13-02-tagline-a": "[confident] NanFeng doesn't advise.",
+    "s13-02-tagline-b": "[excited] It acts, with your permission.",
+    "s14-01": "[warmly] Behind NanFeng are five students from Universidad del Desarrollo, in Chile:",
+    "s14-04-two": "[excited] Try it yourself in two minutes, at www.nanfengcfo.com.",
+  },
+};
+
 const caption = (id) => SCENES.find((s) => s.id === id)?.caption ?? null;
 
 export const CUT = [
@@ -91,49 +142,51 @@ export const CUT = [
   // Demo Mode, step 1: the state before NanFeng acts (13%, no plan yet, the letter in Chinese)
   { id: "before", kind: "shot", scene: "p02", chapter: "problem", chips: ["TC", "II"],
     caption: { en: "Demo Mode, step 1 · the morning of the notice: 13% risk, no plan yet", zh: "演示模式第1步 · 通知当天上午：风险13%，尚无方案" },
-    pieces: [{ from: 0.5, to: 16.4 }], lines: [{ clip: "s02-01-ai", src: 0.95 }, { clip: "s02-04", src: 9.2 }] },
+    pieces: [{ from: 0.5, to: 18.0 }], lines: [{ clip: "s02-01-ai", src: 0.95 }, { clip: "s02-04", src: 9.63 }] },
   // the letter goes to the live agent at 10:12 (the card alone, in a spotlight), then its live events at 4×
   { id: "agent", kind: "shot", scene: "s03", chapter: "risk", chips: ["TC", "II"], caption: caption("s03"),
     // the wait on Home while the run fills the stream is cut (the frames either side are the same)
-    pieces: [{ from: 0.9, to: 12.0 }, { from: 14.15, to: 18.95 }],
-    lines: [{ clip: "s03-01", src: 1.35 }, { clip: "s03-03", src: 5.6 }, { clip: "s03-04", src: 14.5 }] },
+    pieces: [{ from: 0.9, to: 12.1 }, { from: 14.15, to: 20.2 }],
+    lines: [{ clip: "s03-01", src: 1.35 }, { clip: "s03-03", src: 4.85 }, { clip: "s03-04", src: 14.45 }] },
   { id: "verdict", kind: "shot", scene: "s04", chapter: "risk", chips: ["TC"], caption: caption("s04"),
-    pieces: [{ from: 2.9, to: 13.2 }], lines: [{ clip: "s04-01", src: 3.3 }, { clip: "s04-02", src: 10.2 }] },
+    pieces: [{ from: 2.9, to: 14.65 }], lines: [{ clip: "s04-01", src: 3.3 }, { clip: "s04-02", src: 10.8 }] },
   { id: "health", kind: "shot", scene: "p04", chapter: "risk", chips: ["TC"],
     caption: { en: "Business health · the whole business at a glance", zh: "经营健康 · 企业全貌一目了然" },
     // the 58% finding and the "Largest customer" card, without the right half of the row
     refocus: { 1: { box: { x: 236, y: 236, w: 1014, h: 316 }, maxScale: 1.6 } },
-    pieces: [{ from: 1.8, to: 14.0 }], lines: [{ clip: "p04-health-a", src: 2.0 }, { clip: "p04-health-b", src: 5.2 }] },
+    pieces: [{ from: 1.8, to: 14.3 }], lines: [{ clip: "p04-health-a", src: 2.0 }, { clip: "p04-health-b", src: 4.8 }] },
   { id: "deal", kind: "shot", scene: "s05", chapter: "deal", chips: ["TC"], caption: caption("s05"),
-    pieces: [{ from: 1.1, to: 3.6 }, { from: 6.6, to: 21.1 }],
-    lines: [{ clip: "s05-01a", src: 1.4 }, { clip: "s05-02", src: 6.87 }, { clip: "s05-03", src: 11.14 }, { clip: "s05-04", src: 16.33 }] },
+    // one piece: "picks a 60-day pre-export loan" lands on the click on that loan, "3.8 million" on the
+    // cost chart, "why every other option lost" on the reasons
+    pieces: [{ from: 1.1, to: 21.5 }],
+    lines: [{ clip: "s05-01a", src: 1.4 }, { clip: "s05-02", src: 3.75 }, { clip: "s05-03", src: 8.2 }, { clip: "s05-04", src: 15.15 }] },
   // the owner's WhatsApp thread as the app shows it (labelled a recorded replay on the page)
   { id: "whatsapp", kind: "shot", scene: "p06", chapter: "deal", chips: ["II"],
     caption: { en: "Messages · the owner's WhatsApp (recorded replay)", zh: "消息 · 企业主的 WhatsApp（录制回放）" },
-    pieces: [{ from: 1.9, to: 6.3 }], lines: [{ clip: "p06-whatsapp", src: 2.3 }] },
+    pieces: [{ from: 1.9, to: 6.35 }], lines: [{ clip: "p06-whatsapp", src: 2.3 }] },
   { id: "why", kind: "shot", scene: "s07", chapter: "deal", chips: ["II", "SC"], caption: caption("s07"),
-    pieces: [{ from: 9.0, to: 14.4 }], lines: [{ clip: "s07-02b", src: 9.75 }] },
+    pieces: [{ from: 9.0, to: 13.7 }], lines: [{ clip: "s07-02b", src: 9.75 }] },
   { id: "approve", kind: "shot", scene: "s08", chapter: "approve", chips: ["SC", "II"], caption: caption("s08"),
     // the code being typed, then the owner's click right after "never approve"
-    pieces: [{ from: 1.0, to: 6.75 }, { from: 9.1, to: 10.7 }, { from: 14.55, to: 16.95 }],
-    lines: [{ clip: "s08-01", src: 1.4 }, { clip: "s08-03", at: 6.25 }] },
+    pieces: [{ from: 1.0, to: 6.75 }, { from: 9.1, to: 10.7 }, { from: 14.55, to: 17.8 }],
+    lines: [{ clip: "s08-01", src: 1.4 }, { clip: "s08-03", at: 6.45 }] },
   // the receipt (approved 10:15), Home, then the day's list: the letter at 10:12, done at 10:15
   { id: "done", kind: "shot", scene: "s09", join: "cut", chapter: "approve", chips: ["TC"],
-    pieces: [{ from: 0.5, to: 9.95 }, { from: 17.5, to: 21.9, join: "dip" }],
-    lines: [{ clip: "s09-01", src: 0.8 }, { clip: "s09-02", src: 3.81 }, { clip: "s09-three", src: 17.95 }] },
+    pieces: [{ from: 0.5, to: 11.1 }, { from: 17.3, to: 22.4, join: "dip" }],
+    lines: [{ clip: "s09-01", src: 0.8 }, { clip: "s09-02", src: 4.43 }, { clip: "s09-three", src: 17.5 }] },
   { id: "proof", kind: "shot", scene: "s10", chapter: "proof", chips: ["ON", "SC"], caption: caption("s10"),
     // the spotlight on this take's rows, from the reset (sandbox.seeded) to the approval's anchor; the
     // rows under it are the previous sandbox's (a reset keeps the chain)
     refocus: { 0: { dur: 3.6, spot: true, spotBox: { x: 226, y: 338, w: 1360, h: 340 } } },
-    pieces: [{ from: 1.0, to: 13.35 }, { from: 18.85, to: 23.15, join: "dip" }],
-    lines: [{ clip: "s10-01-evident", src: 1.2 }, { clip: "s10-02", src: 6.5 }, { clip: "s10-03-sepolia", src: 9.1 }, { clip: "s10-05", src: 19.11 }] },
+    pieces: [{ from: 1.0, to: 13.85 }, { from: 18.85, to: 24.3, join: "dip" }],
+    lines: [{ clip: "s10-01-evident", src: 1.2 }, { clip: "s10-02", src: 7.0 }, { clip: "s10-03-sepolia", src: 10.15 }, { clip: "s10-05", src: 19.1 }] },
   { id: "fraud", kind: "shot", scene: "s11", chapter: "fraud", chips: ["SC"], caption: caption("s11"),
-    pieces: [{ from: 0.55, to: 24.0 }], lines: [{ clip: "s11-01", src: 1.0 }, { clip: "s11-02", src: 9.2 }, { clip: "s11-03-lm", src: 14.03 }, { clip: "s11-04", src: 19.21 }] },
+    pieces: [{ from: 0.55, to: 25.5 }], lines: [{ clip: "s11-01", src: 1.0 }, { clip: "s11-02", src: 8.4 }, { clip: "s11-03-lm", src: 14.5 }, { clip: "s11-04", src: 19.55 }] },
   { id: "china", kind: "shot", scene: "s12", chapter: "china", chips: ["II", "SC"], caption: caption("s12"),
     // "Chinese" lands as the screen switches to 中文
     // the Messages page shows Documents for a moment before the WeCom thread: cut straight to the thread
     // "WeCom" lands on the cut to the importer's thread
-    pieces: [{ from: 1.55, to: 5.2 }, { from: 8.95, to: 19.2, join: "dip" }],
+    pieces: [{ from: 1.55, to: 5.2 }, { from: 8.95, to: 18.4, join: "dip" }],
     lines: [{ clip: "s12-01a", src: 1.9 }, { clip: "s12-02-sim", src: 4.45 }] },
   { id: "results", kind: "mg", mg: "Results", chapter: "team", chips: ["TC", "II"], head: 0.35, gap: 0.5, tail: 1.0,
     lines: ["s13-01-25", { clip: "s13-02-tagline-a", gap: 0.55 }, { clip: "s13-02-tagline-b", gap: 0.42 }] },

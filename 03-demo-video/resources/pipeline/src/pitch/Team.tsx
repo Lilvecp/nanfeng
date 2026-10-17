@@ -6,7 +6,7 @@ import { sectionFrames, type Section } from "./data";
 import { Enter, exitK, float, Grade, Grain, Sfx } from "./fx";
 import { theme as T } from "./theme";
 
-const CUE = { five: 1.52, univ: 2.56, url: 2.04 }; // s14-01, s14-01, s14-04-two
+const CUE = { five: 1.48, univ: 2.56, url: 2.5 }; // s14-01, s14-01, s14-04-two (v3 takes)
 
 // cx, cy: centre of the head in the 800×800 cutout; s: scale that gives every head about the same
 // size on its card (Renato's photo is a close-up: a little larger, so his shoulders reach the edge)
