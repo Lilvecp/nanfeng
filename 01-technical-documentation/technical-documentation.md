@@ -278,6 +278,7 @@ The full list with impact and mitigation is in the [self-assessment](../05-secur
 - The document guard is heuristic.
 - Single backend instance: the event history and plan jobs live in memory.
 - Anchoring and the invoice registry run on an EVM testnet, not yet on FISCO BCOS.
+- The public demo does not deliver the owner's notices. Its owner is fictional (a placeholder phone and `owner@huerto-austral.example`, a reserved domain) and the team's Zavu key is a test key, which only reaches WhatsApp numbers of the team within 24 hours of their last message and refuses SMS and email. The agent attempts every channel and the trace records the delivery as failed; the plan still waits for the owner in Approvals. Delivering it needs a live Zavu key, an approved WhatsApp template and the owner's real number ([agent.md](agent.md#zavu-with-a-test-key-zv_test_)).
 
 ## 8. Detailed sections
 

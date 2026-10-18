@@ -1,6 +1,6 @@
 // Builds a deliverable PDF from markdown files: cover, contents, the documents in order,
 // Mermaid diagrams and KaTeX formulas rendered, relative links pointed at GitHub.
-// usage: node build.mjs <repo root> <tech|security> <out.pdf>   (needs Google Chrome installed)
+// usage: node build.mjs <repo root> <tech|security|evidence> <out.pdf>   (needs Google Chrome installed)
 import fs from "node:fs";
 import path from "node:path";
 import { Marked } from "marked";
@@ -24,6 +24,13 @@ const CONFIGS = {
     footer: "NanFeng 南风 · Security self-assessment report",
     lead: "Permission-tier implementation, threat model, anti-injection design, privacy and compliance, and the known-risk list of NanFeng.",
     files: ["security-self-assessment.md", "threat-model.md", "anti-injection-design.md", "privacy-compliance.md"],
+  },
+  evidence: {
+    dir: "06-execution-evidence",
+    title: "Execution evidence",
+    footer: "NanFeng 南风 · Execution evidence",
+    lead: "A real run on the deployed NanFeng (api.nanfengcfo.com) and the same scenario in process: every step, the audit chain re-checked without the backend's code, and the Sepolia anchors.",
+    files: ["README.md", "out-live/SUMMARY.md", "out/SUMMARY.md"],
   },
 };
 const cfg = CONFIGS[which];

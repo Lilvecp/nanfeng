@@ -153,6 +153,8 @@ WhatsApp only lets a business send free text to someone who wrote to it in the l
 
 Check a send with `GET https://api.zavu.dev/v1/messages/{id}`: `status` and `errorCode` / `errorMessage` say whether it reached the phone. A `sent` from `POST /v1/messages` only means Zavu accepted it.
 
+On the public deploy the owner is fictional (no `NANFENG_OWNER_PHONE`: a placeholder number and `owner@huerto-austral.example`), so every notice to the owner is attempted on WhatsApp, SMS and email and refused; the step's detail records the delivery as failed (`email · failed`) and the run goes on, since the plan waits in Approvals either way. The WhatsApp messages in the demo video are a recorded replay, labelled as such.
+
 For the demo and production this means: a live key (`zv_live_…`) with a sender for SMS, which the SMS OTP (`NANFENG_OTP_MODE=sms`) also needs; and an approved WhatsApp template for the agent's first message of a conversation (the cash alert), since the owner will not have written in the last 24 hours. The agent sends free text today.
 
 ## Verified live (Oct 12)

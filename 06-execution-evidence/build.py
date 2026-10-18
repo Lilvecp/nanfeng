@@ -298,9 +298,10 @@ def export(c, out: Path, steps: list[dict] | None, agent: dict | None = None) ->
                   f"The importer's PDF went to the deployed agent service: run **{agent['run_id']}**, status "
                   f"`{agent['status']}`, planner `{agent['planner']}`, approvals {', '.join(a['id'] + ' (L' + str(a['tier']) + ')' for a in agent['approvals'])}. "
                   "Every step with its tool, tier and result is in `agent_run.json`.", "",
-                  "| # | Step | Tool | Status |", "|---|------|------|--------|"]
+                  "| # | Step | Tool | Status | Result |", "|---|------|------|--------|--------|"]
         for i, t in enumerate(agent.get("trace", []), 1):
-            lines.append(f"| {i} | {str(t.get('step') or t.get('name') or '')[:60]} | {t.get('tool') or ''} | {t.get('status') or ''} |")
+            lines.append(f"| {i} | {str(t.get('step') or t.get('name') or '')[:60]} | {t.get('tool') or ''} | {t.get('status') or ''} "
+                         f"| {str(t.get('detail') or '')[:70].replace('|', '/')} |")
     if steps:
         lines += ["", "## Cherry Crisis run", "", "| Time | Step | HTTP | Outcome |", "|------|------|------|---------|"]
         for s in steps:

@@ -54,23 +54,25 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 
 The importer's PDF went to the deployed agent service: run **RUN-0001**, status `awaiting_approval`, planner `llm`, approvals APR-0001 (L3). Every step with its tool, tier and result is in `agent_run.json`.
 
-| # | Step | Tool | Status |
-|---|------|------|--------|
-| 1 | Document guard | security.scan | done |
-| 2 | Quarantined extraction | quarantine.extract | done |
-| 3 | Scenario from notice | quant.scenario | done |
-| 4 | Plan | planner.llm | done |
-| 5 | ledger_query | ledger_query | done |
-| 6 | forecast_run | forecast_run | done |
-| 7 | Owner notified (alert) | channel.email | done |
-| 8 | business_analysis | business_analysis | done |
-| 9 | financing_quote | financing_quote | done |
-| 10 | optimize_plan | optimize_plan | done |
-| 11 | Owner notified (plan) | channel.email | done |
-| 12 | propose_plan | propose_plan | done |
-| 13 | anchor_audit | anchor_audit | done |
-| 14 | send_collection | send_collection | done |
-| 15 | Owner notified (approval) | channel.email | done |
+| # | Step | Tool | Status | Result |
+|---|------|------|--------|--------|
+| 1 | Document guard | security.scan | done | clean [] |
+| 2 | Quarantined extraction | quarantine.extract | done | payment_notice · USD 180000.00 |
+| 3 | Scenario from notice | quant.scenario | done | INV-2026-118 +45 days |
+| 4 | Plan | planner.llm | done | ledger_query → forecast_run → business_analysis → financing_quote → op |
+| 5 | ledger_query | ledger_query | done |  |
+| 6 | forecast_run | forecast_run | done | 81% probability of negative cash in 19 days (2026-12-30) |
+| 7 | Owner notified (alert) | channel.email | done | email · failed · en |
+| 8 | business_analysis | business_analysis | done | 7 findings (3 high) · net 90 days CLP 451.6M · DSO 68 days |
+| 9 | financing_quote | financing_quote | done | 9 options, 7 eligible · need CLP 55.6M on 2026-12-30 |
+| 10 | optimize_plan | optimize_plan | done | Borrow USD 142,400 for 60 days from Pre-export loan in USD (PAE) · CLP |
+| 11 | Owner notified (plan) | channel.email | done | email · failed · en |
+| 12 | propose_plan | propose_plan | done | APR-0001 · L3 · pending · CLP 140.1M |
+| 13 | anchor_audit | anchor_audit | done | Merkle root 79871fe67062… seq 9-13 |
+| 14 | send_collection | send_collection | done | wecom (mock) · zh · INV-2026-118 |
+| 15 | Owner notified (approval) | channel.email | done | email · failed · en |
+
+The three owner notices (rows 7, 11 and 15) were attempted through the real Zavu API and not delivered: the demo's owner is fictional and the team's Zavu key is a test key ([why](../README.md)). Status says the step ran; Result shows the delivery.
 
 ## Cherry Crisis run
 
