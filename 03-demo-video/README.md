@@ -1,6 +1,6 @@
 # 03 · Demo video
 
-**[nanfeng-demo.mp4](nanfeng-demo.mp4)** · 3:45 · 1920×1080, 30 fps · H.264 + AAC, −16 LUFS · English narration over a chill lo-fi music bed, with English and 中文 subtitles (submission checklist item 03, no longer than 5 minutes). **[Transcript](transcript.md)** with time codes.
+**[nanfeng-demo.mp4](nanfeng-demo.mp4)** · 3:45 · 1920×1080, 30 fps · H.264 + AAC, −16 LUFS · English narration over a chill lo-fi music bed, with English and 中文 subtitles (submission checklist item 03, no longer than 5 minutes). **[Transcript](transcript.md)** with time codes. In the submission upload, the video is the separate file 03-NanFeng-Demo-Video.mp4.
 
 The product is recorded in one take on the live app, https://www.nanfengcfo.com, on the scenario's clock: the importer's letter reaches the live agent at 10:12 and the owner approves at 10:15, the times the deck tells. Before the letter the screen shows Demo Mode's first step (13% risk, no plan yet). The live agent reads the letter, forecasts the cash crunch and prices every financing option; it is the agent that proposes the loan, after reading the letter. The owner approves the cheapest plan with a one-time code, the approval is anchored on Sepolia, and a poisoned supplier invoice is blocked. The problem, the results and the team are motion graphics around that take.
 
