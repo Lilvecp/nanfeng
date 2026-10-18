@@ -1,7 +1,6 @@
 # Demo video pipeline (deliverable 03)
 
-Builds the NanFeng demo video from the script in the [FinTechathon kit](../../../07-team-workspace/fintechathon-kit.md) (section 4, "Guion del video
-demo"), reworked after a reviewer's feedback. The product is recorded in one take on the live site,
+Builds the NanFeng demo video from the script in [video-script.md](../video-script.md), reworked after a reviewer's feedback. The product is recorded in one take on the live site,
 www.nanfengcfo.com. The voice, the EN + 中文 subtitles, the zooms, the chapter rail, the rubric
 chips and the title cards are composited in Remotion. Running it again gives the same video, so a
 change to the app or to a line only needs another run.

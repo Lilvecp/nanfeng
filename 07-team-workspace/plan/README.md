@@ -14,7 +14,6 @@ Projection of the NanFeng Battle Plan into the repository. The battle plan page 
 | [deliverables.md](deliverables.md) | What must be in the Oct 18 email |
 | [risks.md](risks.md) | What can knock us out and how we avoid it |
 | [team-rules.md](team-rules.md) | How we work |
-| [jury-questions.md](jury-questions.md) | The jury's likely Q&A questions, with our short answers and where each is proven |
 
 ## Key dates
 

@@ -1,6 +1,6 @@
 # 07 · Team workspace
 
-Everything that is not one of the six deliverables: the team's task cards and notes, planning, the design mockups and the submission kit.
+Everything that is not one of the six deliverables: the team's task cards and notes, planning and the design mockups.
 
 ## Team
 
@@ -22,4 +22,3 @@ Everything that is not one of the six deliverables: the team's task cards and no
 | [plan/](plan/) | Planning: battle plan projection, roles, timeline, deliverables checklist, risks, team rules |
 | [design/private-desk/](design/private-desk/) | Visual direction: the static mockups the web app is built from |
 | [pdf-build/](pdf-build/) | Builds the PDFs of deliverables 01 and 05 from their markdown |
-| [fintechathon-kit.md](fintechathon-kit.md) | Submission kit (Spanish): how we are evaluated, deliverables 01–06, video script, deck, final checklist |

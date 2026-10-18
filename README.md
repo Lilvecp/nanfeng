@@ -77,7 +77,7 @@ The repository follows the submission checklist: one folder per deliverable, num
 | 04 | Source code: README, repository link, deployment instructions, test cases | [04-source-code/](04-source-code/) | This README · [deployment.md](04-source-code/deployment.md) · tests in `04-source-code/backend/tests`, `04-source-code/agent/tests`, `04-source-code/quant/tests`, `04-source-code/redteam` |
 | 05 | Security self-assessment report: permission tiers, known-risk list | [05-security-self-assessment-report/](05-security-self-assessment-report/) | **[NanFeng-Security-Self-Assessment-Report.pdf](05-security-self-assessment-report/NanFeng-Security-Self-Assessment-Report.pdf)** (all four parts in one PDF) · Markdown: [security-self-assessment.md](05-security-self-assessment-report/security-self-assessment.md), with the threat model, the anti-injection design and privacy and compliance |
 | 06 | Execution evidence: sandbox operation logs (+ on-chain hashes) and demo video | [06-execution-evidence/](06-execution-evidence/) | [out-live/](06-execution-evidence/out-live/SUMMARY.md) (live deploy: bank logs, hash chain, Merkle proofs, Sepolia anchor) · [out/](06-execution-evidence/out/SUMMARY.md) (in-process run) · video as in 03 |
-| — | Everything else | [07-team-workspace/](07-team-workspace/) | Team cards and notes, planning, design mockups, the submission kit |
+| — | Everything else | [07-team-workspace/](07-team-workspace/) | Team cards and notes, planning, design mockups |
 
 ## Repository structure
 
@@ -116,8 +116,7 @@ The repository follows the submission checklist: one folder per deliverable, num
     ├── camilo-bufadel/                    #   R3 · Full-Stack & Blockchain Developer: task card
     ├── valentin-castro/                   #   R1 · Lead & Product Strategist: task card, status, scope, business model
     ├── plan/                              #   Planning: battle plan projection, roles, timeline, deliverables checklist
-    ├── design/private-desk/               #   Visual direction: static mockups the web app is built from
-    └── fintechathon-kit.md                #   Submission kit (Spanish): rubric, deliverables, video script, checklist
+    └── design/private-desk/               #   Visual direction: static mockups the web app is built from
 ```
 
 The task cards of R2 (Renato Lenis) and R5 (Vicente Rodríguez) are the READMEs of their code, [04-source-code/agent/](04-source-code/agent/README.md) and [04-source-code/quant/](04-source-code/quant/README.md).
