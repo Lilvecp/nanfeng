@@ -1,4 +1,4 @@
-# Execution evidence (deliverable 06)
+# Run A · Live deploy (api.nanfengcfo.com, anchors on Sepolia)
 
 Synthetic data in the NanFeng sandbox bank. Every line below is reproducible with `build.py`.
 

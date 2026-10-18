@@ -1,4 +1,4 @@
-# Execution evidence (deliverable 06)
+# Run B · In-process run (SMS OTP mode, local anchors)
 
 Synthetic data in the NanFeng sandbox bank. Every line below is reproducible with `build.py`.
 
@@ -13,7 +13,7 @@ Synthetic data in the NanFeng sandbox bank. Every line below is reproducible wit
 
 - Hash chain recomputed from the published formula: **26/26** entries match
 - Merkle proofs recomputed from leaf to anchored root: **7/7** valid
-- Anchors read back from the chain: **0/0** match (local anchoring in this run: no transactions)
+- Anchors read back from the chain: not applicable. This run anchors locally, with no transactions; the on-chain anchors are in Run A.
 - Tamper test: add CLP 1 to the loan in entry 10 and the recomputed chain breaks at seq **10**
 - Invoice registry (local): **1** invoices registered against double financing: `registry.json`
 

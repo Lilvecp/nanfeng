@@ -215,7 +215,7 @@ def all_entries(c) -> list[dict]:
             return entries
 
 
-def export(c, out: Path, steps: list[dict] | None, agent: dict | None = None) -> None:
+def export(c, out: Path, steps: list[dict] | None, agent: dict | None = None, live: bool = False) -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "bank_logs.jsonl").write_text(c.get("/bank/logs").text)
     chain = all_entries(c)
@@ -257,7 +257,9 @@ def export(c, out: Path, steps: list[dict] | None, agent: dict | None = None) ->
     kinds: dict[str, int] = {}
     for e in entries:
         kinds[e["kind"]] = kinds.get(e["kind"], 0) + 1
-    lines = ["# Execution evidence (deliverable 06)", "",
+    title = ("Run A · Live deploy (api.nanfengcfo.com, anchors on Sepolia)" if live
+             else "Run B · In-process run (SMS OTP mode, local anchors)")
+    lines = [f"# {title}", "",
              "Synthetic data in the NanFeng sandbox bank. Every line below is reproducible with `build.py`.", "",
              f"- Audit entries: **{len(chain)}** in the whole chain ({len(entries)} in this run's sandbox, from seq {start}), "
              f"hash chain valid: **{verify['valid']}**",
@@ -269,9 +271,11 @@ def export(c, out: Path, steps: list[dict] | None, agent: dict | None = None) ->
              f"- Hash chain recomputed from the published formula: **{checked}/{len(chain)}** entries match"
              + (f" (first mismatch at seq {broken})" if broken else ""),
              f"- Merkle proofs recomputed from leaf to anchored root: **{sum(proofs_ok)}/{len(proofs_ok)}** valid",
-             f"- Anchors read back from the chain: **{sum(1 for x in on_chain if x.get('valid'))}/{len(on_chain)}** match"
-             + ("" if on_chain else (" (no anchors yet)" if not anchors else " (local anchoring in this run: no transactions)"))
-             + "".join(f"\n  - anchor {x['anchor_id']}: valid={x.get('valid')} {x.get('explorer_url', '')}" for x in on_chain),
+             ("- Anchors read back from the chain: not applicable. This run anchors locally, with no transactions; "
+              "the on-chain anchors are in Run A." if anchors and not on_chain else
+              f"- Anchors read back from the chain: **{sum(1 for x in on_chain if x.get('valid'))}/{len(on_chain)}** match"
+              + ("" if on_chain else " (no anchors yet)")
+              + "".join(f"\n  - anchor {x['anchor_id']}: valid={x.get('valid')} {x.get('explorer_url', '')}" for x in on_chain)),
              (f"- Tamper test: add CLP 1 to the loan in entry {tamper[0]} and the recomputed chain breaks at "
               f"seq **{tamper[1]}**" if tamper else "- Tamper test: no loan in this export"),
              f"- Invoice registry ({(registry['backend'] or {}).get('backend', 'n/a')}): "
@@ -335,7 +339,7 @@ def main() -> None:
 
         with httpx.Client(base_url=args.url.rstrip("/"), timeout=120) as c:
             steps, agent = live_run(c, args.run_otp, args.agent_url) if args.run_otp else (None, None)
-            export(c, out, steps, agent)
+            export(c, out, steps, agent, live=True)
         return
 
     backend = Path(args.backend or HERE.parent / "04-source-code" / "backend").resolve()

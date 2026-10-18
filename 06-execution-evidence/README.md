@@ -5,8 +5,8 @@ Sandbox operation logs and the demo video (submission checklist item 06, for a t
 | Folder or file | What |
 |---|---|
 | **[NanFeng-Execution-Evidence.pdf](NanFeng-Execution-Evidence.pdf)** | This README and both run summaries in one PDF (built with `07-team-workspace/pdf-build`) |
-| [out-live/](out-live/SUMMARY.md) | **A real run on the deploy** (https://api.nanfengcfo.com, Oct 16): the importer's PDF handed to the deployed agent and its step-by-step trace (`agent_run.json`), the owner approving the plan it proposed, one invoice registered on Sepolia and refused the second time, then the export: sandbox bank logs, audit entries with the hash-chain check, Merkle proofs and the Sepolia anchors read back. Start with `SUMMARY.md` |
-| [out/](out/SUMMARY.md) | The Cherry Crisis run end to end against the backend in process (SMS OTP mode): the same files, plus `run.json` with every step |
+| [out-live/](out-live/SUMMARY.md) | **Run A (live deploy)**: a real run on the deploy (https://api.nanfengcfo.com, Oct 16): the importer's PDF handed to the deployed agent and its step-by-step trace (`agent_run.json`), the owner approving the plan it proposed, one invoice registered on Sepolia and refused the second time, then the export: sandbox bank logs, audit entries with the hash-chain check, Merkle proofs and the Sepolia anchors read back. Start with `SUMMARY.md` |
+| [out/](out/SUMMARY.md) | **Run B (in-process)**: the Cherry Crisis run end to end against the backend in process (SMS OTP mode): the same files, plus `run.json` with every step |
 | [build.py](build.py) | The exporter that writes both folders and re-checks the chain without the backend's code |
 | [Demo video](../03-demo-video/nanfeng-demo.mp4) | The live run on video, 3:45 (deliverable 03) |
 
