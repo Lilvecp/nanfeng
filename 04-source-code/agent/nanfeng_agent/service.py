@@ -193,6 +193,33 @@ class ReportIn(BaseModel):
     send: bool = True
 
 
+SECURITY_HEADERS = [
+    (b"x-content-type-options", b"nosniff"),
+    (b"x-frame-options", b"DENY"),
+    (b"content-security-policy", b"frame-ancestors 'none'"),
+    (b"referrer-policy", b"no-referrer"),
+    (b"strict-transport-security", b"max-age=63072000"),
+]
+
+
+class SecurityHeaders:
+    """Plain ASGI middleware: adds the security headers without buffering any response."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                message["headers"] = list(message.get("headers", [])) + SECURITY_HEADERS
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
 def create_app(service: AgentService | None = None, listen: bool | None = None) -> FastAPI:
     svc = service or AgentService(Agent(Settings.from_env()))
     settings = svc.agent.settings
@@ -202,6 +229,7 @@ def create_app(service: AgentService | None = None, listen: bool | None = None) 
     app.add_middleware(CORSMiddleware, allow_origins=json.loads(os.environ.get(
         "NANFENG_CORS_ORIGINS", '["http://localhost:3000","http://localhost:3100"]')),
         allow_methods=["GET", "POST"], allow_headers=["Authorization", "Content-Type"])
+    app.add_middleware(SecurityHeaders)
 
     if listen if listen is not None else os.environ.get("NANFENG_AGENT_LISTEN", "true") == "true":
         app.router.on_startup.append(svc.start_listener)

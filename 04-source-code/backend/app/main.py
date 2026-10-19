@@ -15,6 +15,33 @@ from .routers import agent, approvals, audit as audit_router, auth as auth_route
 VERSION = "0.1.0"
 
 
+SECURITY_HEADERS = [
+    (b"x-content-type-options", b"nosniff"),
+    (b"x-frame-options", b"DENY"),
+    (b"content-security-policy", b"frame-ancestors 'none'"),
+    (b"referrer-policy", b"no-referrer"),
+    (b"strict-transport-security", b"max-age=63072000"),
+]
+
+
+class SecurityHeaders:
+    """Plain ASGI middleware, so the SSE streams pass through unbuffered."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def send_with_headers(message):
+            if message["type"] == "http.response.start":
+                message["headers"] = list(message.get("headers", [])) + SECURITY_HEADERS
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     s = get_settings()
@@ -50,6 +77,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(SecurityHeaders)
 
 
 @app.exception_handler(BankError)
